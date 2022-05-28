@@ -1,0 +1,68 @@
+flame.png
+size: 30, 476
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+flame
+  rotate: false
+  xy: 1, 110
+  size: 26, 52
+  orig: 32, 57
+  offset: 3, 0
+  index: 0
+flame
+  rotate: false
+  xy: 1, 375
+  size: 26, 48
+  orig: 32, 57
+  offset: 3, 0
+  index: 1
+flame
+  rotate: false
+  xy: 1, 271
+  size: 26, 50
+  orig: 32, 57
+  offset: 4, 0
+  index: 2
+flame
+  rotate: false
+  xy: 1, 1
+  size: 28, 48
+  orig: 32, 57
+  offset: 1, 0
+  index: 3
+flame
+  rotate: false
+  xy: 1, 218
+  size: 26, 51
+  orig: 32, 57
+  offset: 4, 0
+  index: 4
+flame
+  rotate: false
+  xy: 1, 51
+  size: 26, 57
+  orig: 32, 57
+  offset: 3, 0
+  index: 5
+flame
+  rotate: false
+  xy: 1, 164
+  size: 26, 52
+  orig: 32, 57
+  offset: 3, 0
+  index: 6
+flame
+  rotate: false
+  xy: 1, 425
+  size: 24, 50
+  orig: 32, 57
+  offset: 4, 0
+  index: 7
+flame
+  rotate: false
+  xy: 1, 323
+  size: 26, 50
+  orig: 32, 57
+  offset: 3, 0
+  index: 8
