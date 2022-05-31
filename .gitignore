@@ -119,3 +119,4 @@ Thumbs.db
 /gradlew.bat
 /gradlew
 /gradle/wrapper/gradle-wrapper.jar
+*.fbx
