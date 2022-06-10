@@ -37,7 +37,9 @@ import com.gadarts.industrial.shared.model.characters.attributes.Agility;
 import com.gadarts.industrial.shared.model.characters.attributes.Strength;
 import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
 import com.gadarts.industrial.shared.model.characters.enemies.EnemyWeaponsDefinitions;
-import com.gadarts.industrial.shared.model.env.EnvironmentDefinitions;
+import com.gadarts.industrial.shared.model.env.EnvironmentObjectDefinition;
+import com.gadarts.industrial.shared.model.env.EnvironmentObjectType;
+import com.gadarts.industrial.shared.model.env.ThingsDefinitions;
 import com.gadarts.industrial.shared.model.map.MapNodeData;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.shared.model.map.NodeWalls;
@@ -82,6 +84,7 @@ import static com.gadarts.industrial.shared.assets.Assets.Sounds;
 import static com.gadarts.industrial.shared.assets.Assets.SurfaceTextures;
 import static com.gadarts.industrial.shared.assets.Assets.SurfaceTextures.MISSING;
 import static com.gadarts.industrial.shared.assets.Assets.UiTextures;
+import static com.gadarts.industrial.shared.assets.MapJsonKeys.*;
 import static com.gadarts.industrial.shared.assets.MapJsonKeys.CHARACTERS;
 import static com.gadarts.industrial.shared.assets.MapJsonKeys.COL;
 import static com.gadarts.industrial.shared.assets.MapJsonKeys.DEPTH;
@@ -145,7 +148,7 @@ public class MapBuilder implements Disposable {
 		floorModel = createFloorModel();
 	}
 
-	private Model createFloorModel() {
+	private Model createFloorModel( ) {
 		ModelBuilder modelBuilder = new ModelBuilder();
 		modelBuilder.begin();
 		MeshPartBuilder meshPartBuilder = modelBuilder.part("floor",
@@ -251,7 +254,7 @@ public class MapBuilder implements Disposable {
 		JsonElement east = tileJsonObject.get(EAST);
 		if (height != mapGraph.getNode(eastCol, node.getRow()).getHeight() && east != null) {
 			JsonObject asJsonObject = east.getAsJsonObject();
-			SurfaceTextures definition = SurfaceTextures.valueOf(asJsonObject.get(MapJsonKeys.TEXTURE).getAsString());
+			SurfaceTextures definition = SurfaceTextures.valueOf(asJsonObject.get(TEXTURE).getAsString());
 			if (definition != MISSING) {
 				MapNodeData nodeData = new MapNodeData(row, col, MapNodesTypes.OBSTACLE_KEY_DIAGONAL_FORBIDDEN);
 				NodeWalls walls = nodeData.getWalls();
@@ -259,7 +262,7 @@ public class MapBuilder implements Disposable {
 				MapNodeData eastNode = new MapNodeData(row, eastCol, MapNodesTypes.OBSTACLE_KEY_DIAGONAL_FORBIDDEN);
 				nodeData.lift(height);
 				eastNode.setHeight(mapGraph.getNode(eastNode.getCoords()).getHeight());
-				float vScale = asJsonObject.has(MapJsonKeys.V_SCALE) ? asJsonObject.get(MapJsonKeys.V_SCALE).getAsFloat() : 0;
+				float vScale = asJsonObject.has(V_SCALE) ? asJsonObject.get(V_SCALE).getAsFloat() : 0;
 				float hOffset = asJsonObject.has(H_OFFSET) ? asJsonObject.get(H_OFFSET).getAsFloat() : 0;
 				float vOffset = asJsonObject.has(V_OFFSET) ? asJsonObject.get(V_OFFSET).getAsFloat() : 0;
 				WallCreator.adjustWallBetweenEastAndWest(eastNode, nodeData, vScale, hOffset, vOffset);
@@ -280,14 +283,14 @@ public class MapBuilder implements Disposable {
 		JsonElement north = tileJsonObject.get(MapJsonKeys.NORTH);
 		if (height != mapGraph.getNode(col, northNodeRow).getHeight() && north != null) {
 			JsonObject asJsonObject = north.getAsJsonObject();
-			SurfaceTextures definition = SurfaceTextures.valueOf(asJsonObject.get(MapJsonKeys.TEXTURE).getAsString());
+			SurfaceTextures definition = SurfaceTextures.valueOf(asJsonObject.get(TEXTURE).getAsString());
 			if (definition != MISSING) {
 				MapNodeData n = new MapNodeData(row, col, MapNodesTypes.OBSTACLE_KEY_DIAGONAL_FORBIDDEN);
 				n.getWalls().setNorthWall(WallCreator.createNorthWall(n, wallCreator.getWallModel(), assetsManager, definition));
 				MapNodeData northNode = new MapNodeData(northNodeRow, n.getCoords().getCol(), MapNodesTypes.OBSTACLE_KEY_DIAGONAL_FORBIDDEN);
 				n.lift(height);
 				northNode.setHeight(mapGraph.getNode(northNode.getCoords()).getHeight());
-				float vScale = asJsonObject.has(MapJsonKeys.V_SCALE) ? asJsonObject.get(MapJsonKeys.V_SCALE).getAsFloat() : 0;
+				float vScale = asJsonObject.has(V_SCALE) ? asJsonObject.get(V_SCALE).getAsFloat() : 0;
 				float hOffset = asJsonObject.has(H_OFFSET) ? asJsonObject.get(H_OFFSET).getAsFloat() : 0;
 				float vOffset = asJsonObject.has(V_OFFSET) ? asJsonObject.get(V_OFFSET).getAsFloat() : 0;
 				WallCreator.adjustWallBetweenNorthAndSouth(n, northNode, vScale, hOffset, vOffset);
@@ -342,7 +345,7 @@ public class MapBuilder implements Disposable {
 		JsonElement west = tileJsonObject.get(WEST);
 		if (westNodeCol >= 0 && height != mapGraph.getNode(westNodeCol, row).getHeight() && west != null) {
 			JsonObject asJsonObject = west.getAsJsonObject();
-			SurfaceTextures definition = SurfaceTextures.valueOf(asJsonObject.get(MapJsonKeys.TEXTURE).getAsString());
+			SurfaceTextures definition = SurfaceTextures.valueOf(asJsonObject.get(TEXTURE).getAsString());
 			if (definition != MISSING) {
 				MapNodeData nodeData = new MapNodeData(row, col, MapNodesTypes.OBSTACLE_KEY_DIAGONAL_FORBIDDEN);
 				NodeWalls walls = nodeData.getWalls();
@@ -350,7 +353,7 @@ public class MapBuilder implements Disposable {
 				MapNodeData westNodeData = new MapNodeData(nodeData.getCoords().getRow(), westNodeCol, MapNodesTypes.OBSTACLE_KEY_DIAGONAL_FORBIDDEN);
 				nodeData.lift(height);
 				westNodeData.setHeight(mapGraph.getNode(westNodeData.getCoords()).getHeight());
-				float vScale = asJsonObject.has(MapJsonKeys.V_SCALE) ? asJsonObject.get(MapJsonKeys.V_SCALE).getAsFloat() : 0;
+				float vScale = asJsonObject.has(V_SCALE) ? asJsonObject.get(V_SCALE).getAsFloat() : 0;
 				float hOffset = asJsonObject.has(H_OFFSET) ? asJsonObject.get(H_OFFSET).getAsFloat() : 0;
 				float vOffset = asJsonObject.has(V_OFFSET) ? asJsonObject.get(V_OFFSET).getAsFloat() : 0;
 				WallCreator.adjustWallBetweenEastAndWest(nodeData, westNodeData, vScale, hOffset, vOffset);
@@ -371,7 +374,7 @@ public class MapBuilder implements Disposable {
 		JsonElement south = tileJsonObject.get(MapJsonKeys.SOUTH);
 		if (height != mapGraph.getNode(col, southNodeRow).getHeight() && south != null) {
 			JsonObject asJsonObject = south.getAsJsonObject();
-			SurfaceTextures definition = SurfaceTextures.valueOf(asJsonObject.get(MapJsonKeys.TEXTURE).getAsString());
+			SurfaceTextures definition = SurfaceTextures.valueOf(asJsonObject.get(TEXTURE).getAsString());
 			if (definition != MISSING) {
 				MapNodeData nodeData = new MapNodeData(row, col, MapNodesTypes.OBSTACLE_KEY_DIAGONAL_FORBIDDEN);
 				NodeWalls walls = nodeData.getWalls();
@@ -379,7 +382,7 @@ public class MapBuilder implements Disposable {
 				MapNodeData southNode = new MapNodeData(southNodeRow, nodeData.getCoords().getCol(), MapNodesTypes.OBSTACLE_KEY_DIAGONAL_FORBIDDEN);
 				nodeData.lift(height);
 				southNode.setHeight(mapGraph.getNode(southNode.getCoords()).getHeight());
-				float vScale = asJsonObject.has(MapJsonKeys.V_SCALE) ? asJsonObject.get(MapJsonKeys.V_SCALE).getAsFloat() : 0;
+				float vScale = asJsonObject.has(V_SCALE) ? asJsonObject.get(V_SCALE).getAsFloat() : 0;
 				float hOffset = asJsonObject.has(H_OFFSET) ? asJsonObject.get(H_OFFSET).getAsFloat() : 0;
 				float vOffset = asJsonObject.has(V_OFFSET) ? asJsonObject.get(V_OFFSET).getAsFloat() : 0;
 				WallCreator.adjustWallBetweenNorthAndSouth(southNode, nodeData, vScale, hOffset, vOffset);
@@ -397,7 +400,7 @@ public class MapBuilder implements Disposable {
 	}
 
 	private void inflateEnvSpecifiedComponent(final Coords coord,
-											  final EnvironmentDefinitions type,
+											  final EnvironmentObjectDefinition type,
 											  final EntityBuilder builder,
 											  final Direction facingDirection) {
 		int col = coord.getCol();
@@ -416,7 +419,7 @@ public class MapBuilder implements Disposable {
 
 	private GameModelInstance inflateEnvironmentModelInstance(final MapGraphNode node,
 															  final int directionIndex,
-															  final EnvironmentDefinitions type,
+															  final EnvironmentObjectDefinition type,
 															  final float height) {
 		Models def = type.getModelDefinition();
 		String fileName = BOUNDING_BOX_PREFIX + def.getFilePath();
@@ -426,14 +429,16 @@ public class MapBuilder implements Disposable {
 		modelInstance.transform.setTranslation(auxVector3_1.set(node.getCol() + 0.5f, 0, node.getRow() + 0.5f));
 		modelInstance.transform.rotate(Vector3.Y, -1 * direction.getDirection(auxVector2_1).angleDeg());
 		modelInstance.transform.translate(type.getOffset(auxVector3_1));
-		EnvironmentDefinitions.handleEvenSize(type, modelInstance, direction);
+		if (type instanceof ThingsDefinitions) {
+			ThingsDefinitions.handleEvenSize((ThingsDefinitions) type, modelInstance, direction);
+		}
 		modelInstance.transform.translate(0, node.getHeight() + height, 0);
 		return modelInstance;
 	}
 
 	private GameModelInstance inflateEnvModelInstanceComponent(final MapGraphNode node,
 															   final JsonObject envJsonObject,
-															   final EnvironmentDefinitions type,
+															   final EnvironmentObjectDefinition type,
 															   final EntityBuilder builder) {
 		int dirIndex = envJsonObject.get(DIRECTION).getAsInt();
 		float height = envJsonObject.get(HEIGHT).getAsFloat();
@@ -444,7 +449,7 @@ public class MapBuilder implements Disposable {
 	}
 
 	private void inflateEnvLightComponent(final EntityBuilder builder,
-										  final EnvironmentDefinitions type,
+										  final EnvironmentObjectDefinition type,
 										  final GameModelInstance mi,
 										  final int dirIndex) {
 		Optional.ofNullable(type.getLightEmission()).ifPresent(l -> {
@@ -455,35 +460,44 @@ public class MapBuilder implements Disposable {
 		});
 	}
 
-	private void inflateEnvComponents(final MapGraph mapGraph,
+	private void inflateEnvComponents(EnvironmentObjectDefinition type, final MapGraph mapGraph,
 									  final EntityBuilder builder,
-									  final JsonObject envJsonObject,
+									  final JsonObject jsonObject,
 									  final Coords coord) {
-		int dirIndex = envJsonObject.get(DIRECTION).getAsInt();
-		EnvironmentDefinitions type = EnvironmentDefinitions.valueOf(envJsonObject.get(TYPE).getAsString());
+		int dirIndex = jsonObject.get(DIRECTION).getAsInt();
 		inflateEnvSpecifiedComponent(coord, type, builder, Direction.values()[dirIndex]);
 		MapGraphNode node = mapGraph.getNode(coord.getCol(), coord.getRow());
-		GameModelInstance mi = inflateEnvModelInstanceComponent(node, envJsonObject, type, builder);
+		GameModelInstance mi = inflateEnvModelInstanceComponent(node, jsonObject, type, builder);
 		inflateEnvLightComponent(builder, type, mi, dirIndex);
 		builder.addCollisionComponent();
+	}
+
+	private EnvironmentObjectDefinition inflateEnvType(String name, EnvironmentObjectType environmentType) {
+		EnvironmentObjectDefinition type = Arrays.stream(environmentType.getDefinitions())
+				.filter(d -> d.name().equalsIgnoreCase(name))
+				.findFirst()
+				.get();
+		return type;
 	}
 
 	private void inflateEnvironment(final JsonObject mapJsonObject, final MapGraph mapGraph) {
 		JsonArray envs = mapJsonObject.getAsJsonArray(KEY_ENVIRONMENT);
 		envs.forEach(element -> {
 			EntityBuilder builder = EntityBuilder.beginBuildingEntity(engine);
-			JsonObject envJsonObject = element.getAsJsonObject();
-			Coords coord = new Coords(envJsonObject.get(ROW).getAsInt(), envJsonObject.get(COL).getAsInt());
-			inflateEnvComponents(mapGraph, builder, envJsonObject, coord);
+			JsonObject jsonObj = element.getAsJsonObject();
+			Coords coord = new Coords(jsonObj.get(ROW).getAsInt(), jsonObj.get(COL).getAsInt());
+			String envTypeName = jsonObj.get(ENV_TYPE).getAsString().toUpperCase();
+			EnvironmentObjectType envType = EnvironmentObjectType.valueOf(envTypeName);
+			EnvironmentObjectDefinition type = inflateEnvType(jsonObj.get(TYPE).getAsString(), envType);
+			inflateEnvComponents(type, mapGraph, builder, jsonObj, coord);
 			Entity entity = builder.finishAndAddToEngine();
 			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(entity).getModelInstance();
 			Vector3 position = modelInstance.transform.getTranslation(auxVector3_1);
-			EnvironmentDefinitions type = EnvironmentDefinitions.valueOf(envJsonObject.get(TYPE).getAsString());
 			RelativeBillboard relativeBillboard = type.getRelativeBillboard();
 			Optional.ofNullable(relativeBillboard).ifPresent(r -> {
 				TextureAtlas atlas = assetsManager.getAtlas(r.getBillboard());
 				Array<TextureAtlas.AtlasRegion> f = atlas.findRegions(r.getBillboard().getName().toLowerCase());
-				Direction dir = Direction.values()[envJsonObject.get(DIRECTION).getAsInt()];
+				Direction dir = Direction.values()[jsonObj.get(DIRECTION).getAsInt()];
 				float degrees = dir.getDirection(auxVector2_1).angleDeg() + ((dir == NORTH || dir == SOUTH) ? 180 : 0);
 				Vector3 relativePosition = r.getRelativePosition(auxVector3_2).rotate(Vector3.Y, degrees);
 				addRelativeBillboardEntity(position, r, f, relativePosition);
@@ -706,7 +720,7 @@ public class MapBuilder implements Disposable {
 	private MapGraph createMapGraph(final JsonObject mapJsonObj) {
 		JsonObject tilesJsonObject = mapJsonObj.get(TILES).getAsJsonObject();
 		Dimension mapSize = new Dimension(tilesJsonObject.get(WIDTH).getAsInt(), tilesJsonObject.get(DEPTH).getAsInt());
-		float ambient = GeneralUtils.getFloatFromJsonOrDefault(mapJsonObj, MapJsonKeys.AMBIENT, 0);
+		float ambient = GeneralUtils.getFloatFromJsonOrDefault(mapJsonObj, AMBIENT, 0);
 		return new MapGraph(mapSize, engine, ambient);
 	}
 
@@ -728,7 +742,7 @@ public class MapBuilder implements Disposable {
 		mi.getAdditionalRenderData().setColorWhenOutside(Color.WHITE);
 	}
 
-	private Material createFloorMaterial() {
+	private Material createFloorMaterial( ) {
 		Material material = new Material();
 		material.id = "floor_test";
 		return material;
@@ -746,7 +760,7 @@ public class MapBuilder implements Disposable {
 	}
 
 	@Override
-	public void dispose() {
+	public void dispose( ) {
 		floorModel.dispose();
 		wallCreator.dispose();
 	}

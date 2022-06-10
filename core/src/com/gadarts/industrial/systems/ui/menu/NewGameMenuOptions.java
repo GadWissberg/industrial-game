@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum NewGameMenuOptions implements MenuOptionDefinition {
-	MASTABA(
-			"Mastaba - Test Map",
+	OFFICE(
+			"Office - Test Map",
 			(menuHandler, uiSystemEventsSubscribers) -> uiSystemEventsSubscribers.forEach(UserInterfaceSystemEventsSubscriber::onNewGameSelectedInMenu));
 	private final String label;
 	private final MenuOptionAction action;

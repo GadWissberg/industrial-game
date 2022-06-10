@@ -16,7 +16,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
-import com.gadarts.industrial.shared.model.env.EnvironmentDefinitions;
+import com.gadarts.industrial.shared.model.env.EnvironmentObjectDefinition;
 import com.gadarts.industrial.shared.model.pickups.ItemDefinition;
 import com.gadarts.industrial.shared.model.pickups.WeaponsDefinitions;
 import com.gadarts.industrial.components.*;
@@ -121,7 +121,7 @@ public class EntityBuilder {
 
 	public EntityBuilder addObstacleComponent(final Vector2 topLeft,
 											  final Vector2 bottomRight,
-											  final EnvironmentDefinitions type) {
+											  final EnvironmentObjectDefinition type) {
 		if (engine == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		ObstacleComponent obstacleComponent = engine.createComponent(ObstacleComponent.class);
 		obstacleComponent.init(topLeft, bottomRight, type);

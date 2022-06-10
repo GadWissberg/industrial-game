@@ -63,9 +63,9 @@ public class ItemDisplay extends Image {
 		if (!isVisible() || (touchable && getTouchable() != Touchable.enabled) || x < 0 || y < 0) return null;
 		ItemDefinition def = item.getDefinition();
 		int col = (int) MathUtils.map(0, getPrefWidth(), 0, def.getWidth(), x);
-		int row = ((int) MathUtils.map(0, getPrefHeight(), 0, def.getHeight(), y));
+		int row = ((int) MathUtils.map(0, getPrefHeight(), 0, def.getSymbolHeight(), y));
 		float cellIndex = def.getWidth() * row + col;
-		if (cellIndex < 0 || cellIndex >= def.getWidth() * def.getHeight()) return null;
+		if (cellIndex < 0 || cellIndex >= def.getWidth() * def.getSymbolHeight()) return null;
 		return def.getMask()[(int) cellIndex] == 1 ? this : null;
 	}
 

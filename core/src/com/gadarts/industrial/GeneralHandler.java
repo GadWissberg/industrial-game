@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.gadarts.industrial.systems.ui.menu.NewGameMenuOptions.OFFICE;
+
 
 @RequiredArgsConstructor
 public class GeneralHandler implements
@@ -183,14 +185,14 @@ public class GeneralHandler implements
 
 	@Override
 	public void onNewGameSelectedInMenu( ) {
-		startNewGame("test");
+		startNewGame(OFFICE.name());
 	}
 
 	public void init( ) {
 		initializeAssets();
 		soundPlayer = new SoundPlayer(assetsManager);
 		createAndSetEngine();
-		initializeSystemsCommonData("mastaba");
+		initializeSystemsCommonData("office");
 		initializeSystems();
 		createConsole();
 	}

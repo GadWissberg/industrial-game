@@ -192,7 +192,7 @@ public class StorageGrid extends ItemsTable {
 				ItemDisplay selection = itemSelectionHandler.getSelection();
 				ItemDefinition definition = selection.getItem().getDefinition();
 				int col = ((int) (MathUtils.map(selectedItemRectangle.x, selectedItemRectangle.x + selection.getPrefWidth(), 0, definition.getWidth(), cellRectangle.x)));
-				int row = ((int) (MathUtils.map(selectedItemRectangle.y, selectedItemRectangle.y + selection.getPrefHeight(), 0, definition.getHeight(), cellRectangle.y)));
+				int row = ((int) (MathUtils.map(selectedItemRectangle.y, selectedItemRectangle.y + selection.getPrefHeight(), 0, definition.getSymbolHeight(), cellRectangle.y)));
 				int mask = definition.getMask()[(row * definition.getWidth() + col)];
 				result = mask == 1;
 			}

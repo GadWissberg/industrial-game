@@ -56,7 +56,7 @@ public class PlayerStorage {
 	}
 
 	private boolean tryToFillItemArea(final int index, final ItemDefinition definition) {
-		for (int row = 0; row < definition.getHeight(); row++) {
+		for (int row = 0; row < definition.getSymbolHeight(); row++) {
 			if (index % (WIDTH) + definition.getWidth() < WIDTH) {
 				if (!tryToFillRow(index, definition, row)) {
 					initializeStorageArray(storageMap, storageMapSketch);
