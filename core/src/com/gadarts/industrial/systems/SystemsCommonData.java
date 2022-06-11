@@ -17,7 +17,7 @@ import lombok.Setter;
 @Setter
 @Getter
 public class SystemsCommonData implements Disposable {
-	public static final int CAMERA_LIGHT_FAR = 10;
+	public static final int CAMERA_LIGHT_FAR = 30;
 	public static final String TABLE_NAME_HUD = "hud";
 
 	@Setter(AccessLevel.NONE)
