@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -84,7 +85,7 @@ public class AttackNodesHandler implements Disposable {
 		Material material = new Material(ColorAttribute.createDiffuse(CursorHandler.CURSOR_ATTACK));
 		MeshPartBuilder meshPartBuilder = builder.part(
 				"attack_node_1",
-				GL20.GL_LINES,
+				GL30.GL_LINES,
 				VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal,
 				material);
 

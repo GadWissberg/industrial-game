@@ -2,8 +2,10 @@ package com.gadarts.industrial.systems.render.shaders;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.g3d.Attributes;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
@@ -48,8 +50,8 @@ public class ShadowMapShader extends BaseShader {
 	@Override
 	public void begin(final Camera camera, final RenderContext context) {
 		super.begin(camera, context);
-		context.setDepthTest(GL20.GL_LEQUAL);
-		context.setCullFace(GL20.GL_BACK);
+		context.setDepthTest(GL30.GL_LEQUAL);
+		context.setCullFace(GL30.GL_BACK);
 	}
 
 	@Override
@@ -76,8 +78,10 @@ public class ShadowMapShader extends BaseShader {
 			StaticLightComponent lightComponent = ComponentsMapper.staticLight.get(lights.get(i));
 			lightComponent.getShadowFrameBuffer().getColorBufferTexture().bind(CUBE_MAP_TEXTURE_NUMBER);
 			setUniforms(lightComponent);
-			context.setBlending(true, GL20.GL_ONE, GL20.GL_ONE);
+			Gdx.gl30.glBlendEquation(GL30.GL_MAX);
+			context.setBlending(true, GL30.GL_ONE, GL30.GL_ONE);
 			super.render(renderable, combinedAttributes);
+			Gdx.gl30.glBlendEquation(GL30.GL_FUNC_ADD);
 		}
 	}
 

@@ -37,6 +37,7 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4);
 		config.setResizable(false);
+		config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL30, 4, 2);
 		return config;
 	}
 }

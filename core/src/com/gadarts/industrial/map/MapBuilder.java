@@ -7,6 +7,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -152,7 +153,7 @@ public class MapBuilder implements Disposable {
 		ModelBuilder modelBuilder = new ModelBuilder();
 		modelBuilder.begin();
 		MeshPartBuilder meshPartBuilder = modelBuilder.part("floor",
-				GL20.GL_TRIANGLES,
+				GL30.GL_TRIANGLES,
 				Usage.Position | Usage.Normal | Usage.TextureCoordinates,
 				createFloorMaterial());
 		createRect(meshPartBuilder);
