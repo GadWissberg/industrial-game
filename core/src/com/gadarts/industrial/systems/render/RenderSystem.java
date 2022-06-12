@@ -229,9 +229,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private void resetDisplay(@SuppressWarnings("SameParameterValue") final Color color) {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		int sam = Gdx.graphics.getBufferFormat().coverageSampling ? GL30.GL_COVERAGE_BUFFER_BIT_NV : 0;
+		int sam = Gdx.graphics.getBufferFormat().coverageSampling ? GL20.GL_COVERAGE_BUFFER_BIT_NV : 0;
 		Gdx.gl.glClearColor(color.r, color.g, color.b, 1);
-		Gdx.gl.glClear(GL30.GL_COLOR_BUFFER_BIT | GL30.GL_DEPTH_BUFFER_BIT | sam);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | sam);
 	}
 
 	private void renderModels(final ModelBatch modelBatch) {
@@ -380,7 +380,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		if (!DefaultGameSettings.ALLOW_STATIC_SHADOWS) return;
 		shadowFrameBuffer.begin();
 		Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
-		Gdx.gl.glClear(GL30.GL_COLOR_BUFFER_BIT | GL30.GL_DEPTH_BUFFER_BIT);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		renderModels(modelBatchShadows, true, getSystemsCommonData().getCamera());
 		handleScreenshot(shadowFrameBuffer);
 		shadowFrameBuffer.end();
@@ -395,7 +395,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private void render(float deltaTime) {
 		getSystemsCommonData().setNumberOfVisible(0);
-		renderShadows();
+//		if (Gdx.gl30.glCheckFramebufferStatus(shadowFrameBuffer.getFramebufferHandle()) == 0) {
+			renderShadows();
+//		}
 		resetDisplay(Color.BLACK);
 		renderModels(modelBatch);
 		renderDecals(deltaTime);
@@ -622,7 +624,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		cameraLight.update();
 		StaticLightComponent lightComponent = ComponentsMapper.staticLight.get(light);
 		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL30.GL_COLOR_BUFFER_BIT | GL30.GL_DEPTH_BUFFER_BIT);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		depthShaderProgram.bind();
 		depthShaderProgram.setUniformf("u_cameraFar", cameraLight.far);
 		depthShaderProgram.setUniformf("u_lightPosition", cameraLight.position);
@@ -631,7 +633,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 			frameBuffer.begin();
 			frameBuffer.bindSide(side, cameraLight);
 			Gdx.gl.glClearColor(0, 0, 0, 1);
-			Gdx.gl.glClear(GL30.GL_COLOR_BUFFER_BIT | GL30.GL_DEPTH_BUFFER_BIT);
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 			renderModels(
 					depthModelBatch,
 					light,

@@ -74,7 +74,7 @@ public class GameCameraGroupStrategy implements GroupStrategy, Disposable {
 	@Override
 	public void beforeGroup(final int group, final Array<Decal> contents) {
 		if (group == GROUP_BLEND) {
-			Gdx.gl.glEnable(GL30.GL_BLEND);
+			Gdx.gl.glEnable(GL20.GL_BLEND);
 			contents.sort(cameraSorter);
 		} else {
 
@@ -104,13 +104,13 @@ public class GameCameraGroupStrategy implements GroupStrategy, Disposable {
 	@Override
 	public void afterGroup(final int group) {
 		if (group == GROUP_BLEND) {
-			Gdx.gl.glDisable(GL30.GL_BLEND);
+			Gdx.gl.glDisable(GL20.GL_BLEND);
 		}
 	}
 
 	@Override
 	public void beforeGroups() {
-		Gdx.gl.glEnable(GL30.GL_DEPTH_TEST);
+		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 		shader.bind();
 		shader.setUniformMatrix("u_projectionViewMatrix", camera.combined);
 		shader.setUniformi("u_texture", 0);
@@ -124,7 +124,7 @@ public class GameCameraGroupStrategy implements GroupStrategy, Disposable {
 
 	@Override
 	public void afterGroups() {
-		Gdx.gl.glDisable(GL30.GL_DEPTH_TEST);
+		Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
 	}
 
 	private void createDefaultShader(final GameAssetsManager assetsManager) {

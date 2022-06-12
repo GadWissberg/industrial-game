@@ -153,7 +153,7 @@ public class MapBuilder implements Disposable {
 		ModelBuilder modelBuilder = new ModelBuilder();
 		modelBuilder.begin();
 		MeshPartBuilder meshPartBuilder = modelBuilder.part("floor",
-				GL30.GL_TRIANGLES,
+				GL20.GL_TRIANGLES,
 				Usage.Position | Usage.Normal | Usage.TextureCoordinates,
 				createFloorMaterial());
 		createRect(meshPartBuilder);

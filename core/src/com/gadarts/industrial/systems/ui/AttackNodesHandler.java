@@ -85,7 +85,7 @@ public class AttackNodesHandler implements Disposable {
 		Material material = new Material(ColorAttribute.createDiffuse(CursorHandler.CURSOR_ATTACK));
 		MeshPartBuilder meshPartBuilder = builder.part(
 				"attack_node_1",
-				GL30.GL_LINES,
+				GL20.GL_LINES,
 				VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal,
 				material);
 
