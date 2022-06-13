@@ -52,7 +52,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		UserInterfaceSystemEventsSubscriber,
 		CharacterSystemEventsSubscriber,
 		RenderSystemEventsSubscriber {
-	public static final float LOS_MAX = 12F;
+	public static final float LOS_MAX = 24F;
 	public static final int LOS_CHECK_DELTA = 5;
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
@@ -80,10 +80,28 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		MapGraph map = getSystemsCommonData().getMap();
 		Vector3 playerPos = characterDecal.get(getSystemsCommonData().getPlayer()).getNodePosition(auxVector3);
 		MapGraphNode playerNode = map.getNode(playerPos);
+		clearFlatColorForRegionOfNodes(playerNode);
 		for (int dir = 0; dir < 360; dir += LOS_CHECK_DELTA) {
 			revealNodes(map, playerPos, playerNode, dir);
 		}
 		calculateFogOfWarEdgesForFloor(playerNode, map);
+	}
+
+	private void clearFlatColorForRegionOfNodes(MapGraphNode playerNode) {
+		MapGraph map = getSystemsCommonData().getMap();
+		int playerRow = playerNode.getRow();
+		int playerCol = playerNode.getCol();
+		int depth = map.getDepth();
+		int width = map.getWidth();
+
+		for (int row = (int) Math.max(playerRow - LOS_MAX, 0); row < Math.min(playerRow + LOS_MAX, depth); row++) {
+			for (int col = (int) Math.max(playerCol - LOS_MAX, 0); col < Math.min(playerCol + LOS_MAX, width); col++) {
+				Entity floorEntity = map.getNode(col, row).getEntity();
+				if (floorEntity != null) {
+					floor.get(floorEntity).setRevealCalculated(false);
+				}
+			}
+		}
 	}
 
 	private void calculateFogOfWarEdgesForFloor(MapGraphNode node, MapGraph map) {
@@ -138,12 +156,14 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private boolean applyLineOfSightOnNode(MapGraph map, MapGraphNode playerNode, boolean blocked, GridPoint2 nodeCoord) {
 		MapGraphNode currentNode = map.getNode(nodeCoord.x, nodeCoord.y);
 		if (currentNode != null && currentNode.getEntity() != null) {
+			FloorComponent floorComponent = floor.get(currentNode.getEntity());
 			ModelInstanceComponent modelInstanceComponent = modelInstance.get(currentNode.getEntity());
-			modelInstanceComponent.setFlatColor(blocked ? Color.BLACK : null);
-			if (!blocked) {
-				if (playerNode.getHeight() + PlayerComponent.PLAYER_HEIGHT < currentNode.getHeight()) {
-					blocked = true;
-				}
+			if (!floorComponent.isRevealCalculated() || modelInstanceComponent.getFlatColor() != null) {
+				modelInstanceComponent.setFlatColor(blocked ? Color.BLACK : null);
+				floorComponent.setRevealCalculated(true);
+			}
+			if (!blocked && playerNode.getHeight() + PlayerComponent.PLAYER_HEIGHT < currentNode.getHeight()) {
+				blocked = true;
 			}
 		}
 		return blocked;

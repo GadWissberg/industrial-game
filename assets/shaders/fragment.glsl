@@ -248,7 +248,7 @@ void main() {
                 }
             }
             if (u_fowSignature > 0){
-                const float AO_STRENGTH = 1.0;
+                const float AO_STRENGTH = 2.0;
                 const float FLOOR_DIAG_AO_STRENGTH = AO_STRENGTH*2.0;
                 if ((u_fowSignature & 1) == 1){ // South-East
                     gl_FragColor.rgb *= 1.0 - max(v_frag_pos.x - u_modelX, 0.0)*max(v_frag_pos.z - u_modelZ, 0.0)*FLOOR_DIAG_AO_STRENGTH;

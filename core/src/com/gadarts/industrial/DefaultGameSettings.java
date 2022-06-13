@@ -18,7 +18,7 @@ public final class DefaultGameSettings {
 	public static final boolean DISPLAY_HUD_OUTLINES = false;
 	public static final boolean MELODY_ENABLED = false;
 	public static final boolean SFX_ENABLED = false;
-	public static final boolean FULL_SCREEN = false;
+	public static final boolean FULL_SCREEN = true;
 	public static final boolean DEBUG_INPUT = false;
 	public static final boolean DISABLE_FRUSTUM_CULLING = false;
 	public static final int LOG_LEVEL = LOG_DEBUG;

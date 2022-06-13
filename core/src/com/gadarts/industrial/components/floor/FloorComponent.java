@@ -19,6 +19,8 @@ public class FloorComponent implements GameComponent {
 	private int fogOfWarSignature;
 	private MapGraphNode node;
 
+	@Setter
+	private boolean revealCalculated;
 	@Override
 	public void reset() {
 
