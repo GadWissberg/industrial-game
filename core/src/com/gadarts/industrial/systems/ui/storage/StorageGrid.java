@@ -20,7 +20,7 @@ import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.player.PlayerStorage;
 import com.gadarts.industrial.systems.ui.window.GameWindowEvent;
 import com.gadarts.industrial.systems.ui.window.GameWindowEventType;
-import com.gadarts.industrial.utils.GeneralUtils;
+import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -136,7 +136,7 @@ public class StorageGrid extends ItemsTable {
 		if (itemSelectionHandler.getSelection() != null) {
 			calculateSelectedItemRectangle();
 			Rectangle rect = auxRectangle_1.set(getX(), getY(), getPrefWidth(), getPrefHeight());
-			invalidLocation = !GeneralUtils.rectangleContainedInRectangleWithBoundaries(rect, selectedItemRectangle);
+			invalidLocation = !GameUtils.rectangleContainedInRectangleWithBoundaries(rect, selectedItemRectangle);
 		}
 	}
 

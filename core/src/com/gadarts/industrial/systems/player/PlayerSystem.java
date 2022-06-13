@@ -39,14 +39,14 @@ import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.AttackNodesHandler;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
-import com.gadarts.industrial.utils.GeneralUtils;
+import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.List;
 
 import static com.gadarts.industrial.components.ComponentsMapper.*;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.systems.character.CharacterCommands.*;
-import static com.gadarts.industrial.utils.GeneralUtils.calculatePath;
+import static com.gadarts.industrial.utils.GameUtils.calculatePath;
 
 public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> implements
 		UserInterfaceSystemEventsSubscriber,
@@ -128,7 +128,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				.add(auxVector2_3.set(1, 0)
 						.setAngleDeg(dir).nor()
 						.scl(LOS_MAX));
-		Array<GridPoint2> nodes = GeneralUtils.findAllNodesBetweenNodes(auxVector2_1.set(src.x, src.z), maxSight);
+		Array<GridPoint2> nodes = GameUtils.findAllNodesBetweenNodes(auxVector2_1.set(src.x, src.z), maxSight);
 		boolean blocked = false;
 		for (GridPoint2 nodeCoord : nodes) {
 			blocked = applyLineOfSightOnNode(map, playerNode, blocked, nodeCoord);

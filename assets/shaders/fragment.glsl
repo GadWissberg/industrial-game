@@ -248,7 +248,7 @@ void main() {
                 }
             }
             if (u_fowSignature > 0){
-                const float AO_STRENGTH = 2.0;
+                const float AO_STRENGTH = 1.0;
                 const float FLOOR_DIAG_AO_STRENGTH = AO_STRENGTH*2.0;
                 if ((u_fowSignature & 1) == 1){ // South-East
                     gl_FragColor.rgb *= 1.0 - max(v_frag_pos.x - u_modelX, 0.0)*max(v_frag_pos.z - u_modelZ, 0.0)*FLOOR_DIAG_AO_STRENGTH;
@@ -275,10 +275,15 @@ void main() {
                     gl_FragColor.rgb *= 1.0 - max(u_modelX - v_frag_pos.x, 0.0)*max(u_modelZ - v_frag_pos.z, 0.0)*FLOOR_DIAG_AO_STRENGTH;
                 }
             } else if (u_isWall == 1){
-                const float WALL_AO_MAX_HEIGHT = 0.5;
-                const float WALL_AO_STRENGTH = 0.55;
-                gl_FragColor.rgb *= 1.0 - max(WALL_AO_MAX_HEIGHT - v_frag_pos.y - u_modelY, 0.0)*WALL_AO_STRENGTH;
-                gl_FragColor.rgb *= 1.0 - max(WALL_AO_MAX_HEIGHT - (u_modelHeight - v_frag_pos.y), 0.0)*WALL_AO_STRENGTH;
+                const float WALL_BOTTOM_AO_MAX_HEIGHT = u_modelY + 0.5;
+                const float WALL_TOP_AO_MIN_HEIGHT = u_modelY + u_modelHeight - 0.5;
+                const float WALL_AO_STRENGTH = 0.65;
+
+                // Bottom AO.
+                gl_FragColor.rgb *= 1.0 - max(WALL_BOTTOM_AO_MAX_HEIGHT - v_frag_pos.y, 0.0)*WALL_AO_STRENGTH;
+
+                // Top AO.
+                gl_FragColor.rgb *= 1.0 - max(0.5 - (u_modelY + u_modelHeight - v_frag_pos.y), 0.0)*WALL_AO_STRENGTH;
             }
         } else {
             gl_FragColor.rgb = diffuse.rgb;

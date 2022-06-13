@@ -9,7 +9,7 @@ import com.gadarts.industrial.console.commands.ConsoleCommandParameter;
 import com.gadarts.industrial.console.commands.ConsoleCommandResult;
 import com.gadarts.industrial.console.commands.ConsoleCommands;
 import com.gadarts.industrial.console.commands.ConsoleCommandsList;
-import com.gadarts.industrial.utils.GeneralUtils;
+import com.gadarts.industrial.utils.GameUtils;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -79,7 +79,7 @@ public class SoundPlayer implements ConsoleEventsSubscriber {
 	private String getRandomSound(final Assets.Sounds soundDef) {
 		String filePath = soundDef.getFilePath();
 		if (soundDef.getFiles().length > 0) {
-			filePath = GeneralUtils.getRandomRoadSound(soundDef);
+			filePath = GameUtils.getRandomRoadSound(soundDef);
 		}
 		return filePath;
 	}

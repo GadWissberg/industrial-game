@@ -36,7 +36,7 @@ import com.gadarts.industrial.systems.player.PathPlanHandler;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
 import com.gadarts.industrial.utils.EntityBuilder;
-import com.gadarts.industrial.utils.GeneralUtils;
+import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -242,7 +242,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private boolean checkIfWayIsClearToTarget(final Entity enemy) {
-		Array<GridPoint2> nodes = GeneralUtils.findAllNodesToTarget(enemy);
+		Array<GridPoint2> nodes = GameUtils.findAllNodesToTarget(enemy);
 		boolean blocked = checkIfFloorNodesBlockSightToTarget(enemy, nodes);
 		if (!blocked) {
 			blocked = checkIfFloorNodesContainsEnemy(nodes, enemy);
@@ -252,7 +252,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	private void addAsPossibleNodeToLookIn(final MapGraphNode enemyNode, final MapGraphNode node, Entity enemy) {
 		initializePathPlanRequest(enemyNode, node, CLEAN, true, enemy);
-		if (GeneralUtils.calculatePath(request, enemyPathPlanner.getPathFinder(), enemyPathPlanner.getHeuristic())) {
+		if (GameUtils.calculatePath(request, enemyPathPlanner.getPathFinder(), enemyPathPlanner.getHeuristic())) {
 			if (!auxNodesList.contains(node)) {
 				auxNodesList.add(node);
 			}
@@ -372,7 +372,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			applySearchingModeOnEnemy(enemy);
 		}
 		initializePathPlanRequest(targetLastVisibleNode, characterDecalComp, CLEAN, enemy);
-		if (GeneralUtils.calculatePath(request, enemyPathPlanner.getPathFinder(), enemyPathPlanner.getHeuristic())) {
+		if (GameUtils.calculatePath(request, enemyPathPlanner.getPathFinder(), enemyPathPlanner.getHeuristic())) {
 			applyCommand(enemy, CharacterCommands.GO_TO_MELEE);
 		} else {
 			tryToPlanThroughHeightDiff(enemy, characterDecalComp, targetLastVisibleNode);
@@ -384,7 +384,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 											MapGraphNode targetLastVisibleNode) {
 		boolean foundPath;
 		initializePathPlanRequest(targetLastVisibleNode, characterDecalComp, HEIGHT_DIFF, enemy);
-		foundPath = GeneralUtils.calculatePath(request, enemyPathPlanner.getPathFinder(), enemyPathPlanner.getHeuristic());
+		foundPath = GameUtils.calculatePath(request, enemyPathPlanner.getPathFinder(), enemyPathPlanner.getHeuristic());
 		if (foundPath) {
 			applyCommand(enemy, CharacterCommands.GO_TO_MELEE);
 		}
@@ -415,7 +415,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 
 	private boolean checkIfFloorNodesBlockSightToTarget(final Entity enemy) {
-		return checkIfFloorNodesBlockSightToTarget(enemy, GeneralUtils.findAllNodesToTarget(enemy));
+		return checkIfFloorNodesBlockSightToTarget(enemy, GameUtils.findAllNodesToTarget(enemy));
 	}
 
 	private boolean checkIfFloorNodesBlockSightToTarget(final Entity enemy, final Array<GridPoint2> nodes) {

@@ -47,7 +47,7 @@ import static com.gadarts.industrial.shared.model.characters.SpriteType.*;
 import static com.gadarts.industrial.components.ComponentsMapper.*;
 import static com.gadarts.industrial.components.character.CharacterMotivation.*;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
-import static com.gadarts.industrial.utils.GeneralUtils.EPSILON;
+import static com.gadarts.industrial.utils.GameUtils.EPSILON;
 
 public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber> implements
 		PlayerSystemEventsSubscriber,

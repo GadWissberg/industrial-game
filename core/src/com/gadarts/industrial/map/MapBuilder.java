@@ -7,7 +7,6 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -29,6 +28,7 @@ import com.gadarts.industrial.shared.WallCreator;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.assets.MapJsonKeys;
 import com.gadarts.industrial.shared.model.Coords;
+import com.gadarts.industrial.shared.model.GeneralUtils;
 import com.gadarts.industrial.shared.model.RelativeBillboard;
 import com.gadarts.industrial.shared.model.characters.CharacterDefinition;
 import com.gadarts.industrial.shared.model.characters.CharacterTypes;
@@ -60,7 +60,7 @@ import com.gadarts.industrial.components.sd.RelatedDecal;
 import com.gadarts.industrial.components.sd.SimpleDecalComponent;
 import com.gadarts.industrial.systems.enemy.EnemySystem;
 import com.gadarts.industrial.utils.EntityBuilder;
-import com.gadarts.industrial.utils.GeneralUtils;
+import com.gadarts.industrial.utils.GameUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -445,6 +445,7 @@ public class MapBuilder implements Disposable {
 		float height = envJsonObject.get(HEIGHT).getAsFloat();
 		GameModelInstance mi = inflateEnvironmentModelInstance(node, dirIndex, type, height);
 		mi.getAdditionalRenderData().setColorWhenOutside(Color.WHITE);
+		GeneralUtils.applyExplicitModelTexture(type.getModelDefinition(), mi, assetsManager);
 		builder.addModelInstanceComponent(mi, true, type.isCastShadow());
 		return mi;
 	}
@@ -721,7 +722,7 @@ public class MapBuilder implements Disposable {
 	private MapGraph createMapGraph(final JsonObject mapJsonObj) {
 		JsonObject tilesJsonObject = mapJsonObj.get(TILES).getAsJsonObject();
 		Dimension mapSize = new Dimension(tilesJsonObject.get(WIDTH).getAsInt(), tilesJsonObject.get(DEPTH).getAsInt());
-		float ambient = GeneralUtils.getFloatFromJsonOrDefault(mapJsonObj, AMBIENT, 0);
+		float ambient = GameUtils.getFloatFromJsonOrDefault(mapJsonObj, AMBIENT, 0);
 		return new MapGraph(mapSize, engine, ambient);
 	}
 

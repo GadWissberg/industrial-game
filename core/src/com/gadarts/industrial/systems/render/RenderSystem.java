@@ -322,12 +322,16 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		if (ComponentsMapper.floor.has(entity)) {
 			renderCharactersShadowsOnFloor(entity);
 		} else if (wall.has(entity)) {
-			ModelInstanceComponent modelInstanceComponent = modelInstance.get(entity);
-			if (modelInstance.get(wall.get(entity).getParentNode().getEntity()).getFlatColor() != null) {
-				modelInstanceComponent.setFlatColor(Color.BLACK);
-			} else {
-				modelInstanceComponent.setFlatColor(null);
-			}
+			applySpecificRenderingForWall(entity);
+		}
+	}
+
+	private void applySpecificRenderingForWall(Entity entity) {
+		ModelInstanceComponent modelInstanceComp = modelInstance.get(entity);
+		Entity nodeEntity = wall.get(entity).getParentNode().getEntity();
+		modelInstanceComp.setFlatColor(null);
+		if (nodeEntity == null || modelInstance.get(nodeEntity).getFlatColor() != null) {
+			modelInstanceComp.setFlatColor(Color.BLACK);
 		}
 	}
 
@@ -396,7 +400,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private void render(float deltaTime) {
 		getSystemsCommonData().setNumberOfVisible(0);
 //		if (Gdx.gl30.glCheckFramebufferStatus(shadowFrameBuffer.getFramebufferHandle()) == 0) {
-			renderShadows();
+		renderShadows();
 //		}
 		resetDisplay(Color.BLACK);
 		renderModels(modelBatch);

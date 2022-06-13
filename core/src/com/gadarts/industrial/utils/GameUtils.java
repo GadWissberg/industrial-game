@@ -15,7 +15,7 @@ import com.google.gson.JsonObject;
 import static com.gadarts.industrial.components.ComponentsMapper.character;
 import static com.gadarts.industrial.components.ComponentsMapper.characterDecal;
 
-public class GeneralUtils {
+public class GameUtils {
 	public static final float EPSILON = 0.025f;
 	private static final Plane floorPlane = new Plane(new Vector3(0, 1, 0), 0);
 	private static final Vector2 auxVector2_1 = new Vector2();

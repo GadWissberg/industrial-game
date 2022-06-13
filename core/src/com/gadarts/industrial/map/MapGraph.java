@@ -18,7 +18,7 @@ import com.gadarts.industrial.components.ObstacleComponent;
 import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
-import com.gadarts.industrial.utils.GeneralUtils;
+import com.gadarts.industrial.utils.GameUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -136,7 +136,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 	}
 
 	public MapGraphNode getRayNode(final int screenX, final int screenY, final Camera camera) {
-		Vector3 output = GeneralUtils.calculateGridPositionFromMouse(camera, screenX, screenY, auxVector3);
+		Vector3 output = GameUtils.calculateGridPositionFromMouse(camera, screenX, screenY, auxVector3);
 		output.set(Math.max(output.x, 0), Math.max(output.y, 0), Math.max(output.z, 0));
 		return getNode(output);
 	}
