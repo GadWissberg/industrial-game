@@ -462,15 +462,17 @@ public class MapBuilder implements Disposable {
 		});
 	}
 
-	private void inflateEnvComponents(EnvironmentObjectDefinition type, final MapGraph mapGraph,
-									  final EntityBuilder builder,
-									  final JsonObject jsonObject,
-									  final Coords coord) {
+	private void inflateEnvComponents(EnvironmentObjectDefinition type,
+									  MapGraph mapGraph,
+									  EntityBuilder builder,
+									  JsonObject jsonObject,
+									  Coords coord) {
 		int dirIndex = jsonObject.get(DIRECTION).getAsInt();
 		inflateEnvSpecifiedComponent(coord, type, builder, Direction.values()[dirIndex]);
 		MapGraphNode node = mapGraph.getNode(coord.getCol(), coord.getRow());
 		GameModelInstance mi = inflateEnvModelInstanceComponent(node, jsonObject, type, builder);
 		inflateEnvLightComponent(builder, type, mi, dirIndex);
+		mapGraph.getNode(coord).setType(type.getNodeType());
 		builder.addCollisionComponent();
 	}
 
