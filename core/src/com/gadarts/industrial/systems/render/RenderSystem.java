@@ -327,6 +327,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private void applySpecificRenderingForWall(Entity entity) {
+		if (entity == null) return;
+
 		ModelInstanceComponent modelInstanceComp = modelInstance.get(entity);
 		Entity nodeEntity = wall.get(entity).getParentNode().getEntity();
 		modelInstanceComp.setFlatColor(null);

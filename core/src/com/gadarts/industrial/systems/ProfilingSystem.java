@@ -41,7 +41,6 @@ public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 	private final GLProfiler glProfiler;
 	private final StringBuilder stringBuilder;
 	private Label label;
-	private String versionName;
 	private ImmutableArray<Entity> modelInstanceEntities;
 
 	public ProfilingSystem(SystemsCommonData systemsCommonData,
@@ -152,7 +151,7 @@ public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 		displayLine(LABEL_FPS, Gdx.graphics.getFramesPerSecond());
 		displayMemoryLabels();
 		displayGlProfiling();
-		stringBuilder.append("\n").append(LABEL_VERSION).append(versionName);
+		stringBuilder.append("\n").append(LABEL_VERSION).append(getSystemsCommonData().getVersionName());
 		label.setText(stringBuilder);
 	}
 

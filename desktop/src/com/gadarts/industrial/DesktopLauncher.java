@@ -27,6 +27,8 @@ public class DesktopLauncher {
 			}
 			versionName = lines.get(0);
 			versionNumber = Integer.parseInt(lines.get(1));
+			res.close();
+			versionFile.close();
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
