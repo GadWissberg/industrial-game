@@ -45,6 +45,7 @@ import java.util.List;
 
 import static com.gadarts.industrial.components.ComponentsMapper.*;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
+import static com.gadarts.industrial.shared.model.characters.Direction.*;
 import static com.gadarts.industrial.systems.character.CharacterCommands.*;
 import static com.gadarts.industrial.utils.GameUtils.calculatePath;
 
@@ -108,11 +109,18 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		int nodeRow = node.getRow();
 		int nodeCol = node.getCol();
 		float half = LOS_MAX / 2;
+
 		for (int row = (int) (nodeRow - half); row < nodeRow + half; row++) {
 			for (int col = (int) (nodeCol - half); col < nodeCol + half; col++) {
 				MapGraphNode nearbyNode = map.getNode(col, row);
-				if ((row != 0 || col != 0) && nearbyNode != null) {
-					calculateFogOfWarEdges(nearbyNode.getEntity());
+				if (nearbyNode != null) {
+					Entity entity = nearbyNode.getEntity();
+					if ((row != 0 || col != 0)) {
+						calculateFogOfWarEdges(entity);
+					} else {
+						int northWest = NORTH.getMask() | WEST.getMask() | NORTH_EAST.getMask() | SOUTH_WEST.getMask();
+						floor.get(entity).setFogOfWarSignature(northWest);
+					}
 				}
 			}
 		}

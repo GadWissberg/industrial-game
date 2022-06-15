@@ -169,6 +169,9 @@ void main() {
     gl_FragColor.rgb = (diffuse.rgb * (v_ambientLight + v_lightDiffuse)) + emissive.rgb;
     #else
     gl_FragColor.rgb = vec3(0.0);
+    if (!gl_FrontFacing){
+        return;
+    }
     if (u_flatColor.x < 0.0){
         if (u_affectedByLight != 0.0){
             if (u_numberOfShadowlessLights > 0) {

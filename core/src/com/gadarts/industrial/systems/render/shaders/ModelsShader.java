@@ -3,6 +3,7 @@ package com.gadarts.industrial.systems.render.shaders;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
@@ -16,6 +17,7 @@ import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 
 import java.util.List;
 
+import static com.badlogic.gdx.graphics.GL20.GL_BACK;
 import static com.gadarts.industrial.components.ComponentsMapper.*;
 
 public class ModelsShader extends DefaultShader {
@@ -164,14 +166,27 @@ public class ModelsShader extends DefaultShader {
 
 	@Override
 	public void render(Renderable renderable) {
-		ModelInstanceComponent modelInstanceComponent = modelInstance.get((Entity) renderable.userData);
+		Entity entity = (Entity) renderable.userData;
+		insertAdditionalRenderData(renderable, entity);
+		boolean isWall = wall.has(entity);
+		if (isWall) {
+			Gdx.gl.glDisable(GL20.GL_CULL_FACE);
+		}
+		super.render(renderable);
+		if (isWall) {
+			Gdx.gl.glEnable(GL20.GL_CULL_FACE);
+		}
+	}
+
+	private void insertAdditionalRenderData(Renderable renderable,
+											Entity entity) {
+		ModelInstanceComponent modelInstanceComponent = modelInstance.get(entity);
 		AdditionalRenderData additionalRenderData = modelInstanceComponent.getModelInstance().getAdditionalRenderData();
 		applyLights(additionalRenderData);
 		program.setUniformf(uniformLocAffectedByLight, additionalRenderData.isAffectedByLight() ? 1F : 0F);
-		insertModelDimensions(additionalRenderData, (Entity) renderable.userData);
+		insertModelDimensions(additionalRenderData, entity);
 		insertDataForSpecificModels(renderable);
 		insertFlatColor(modelInstanceComponent);
-		super.render(renderable);
 	}
 
 	private void insertFlatColor(ModelInstanceComponent modelInstanceComponent) {
