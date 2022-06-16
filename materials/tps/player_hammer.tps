@@ -34,7 +34,7 @@
         <key>dataFormat</key>
         <string>libgdx</string>
         <key>textureFileName</key>
-        <filename>../../assets/atlases/player_knife.png</filename>
+        <filename>../../assets/atlases/player_hammer.png</filename>
         <key>flipPVR</key>
         <false/>
         <key>pvrCompressionQuality</key>
@@ -132,7 +132,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../../assets/atlases/player_knife.txt</filename>
+                <filename>../../assets/atlases/player_hammer.txt</filename>
             </struct>
         </map>
         <key>multiPack</key>

@@ -1,4 +1,4 @@
-player_knife.png
+player_hammer.png
 size: 1690, 1690
 format: RGBA8888
 filter: Linear,Linear
