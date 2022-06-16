@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
@@ -16,8 +17,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.SoundPlayer;
@@ -29,6 +28,8 @@ import com.gadarts.industrial.console.commands.ConsoleCommands;
 import com.gadarts.industrial.console.commands.ConsoleCommandsList;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
+import com.gadarts.industrial.shared.assets.Assets;
+import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
@@ -38,15 +39,16 @@ import com.gadarts.industrial.systems.ui.menu.MenuHandler;
 import com.gadarts.industrial.systems.ui.menu.MenuHandlerImpl;
 import com.gadarts.industrial.utils.EntityBuilder;
 import lombok.Getter;
+import squidpony.squidmath.Bresenham;
+import squidpony.squidmath.Coord3D;
 
+import java.util.ArrayDeque;
 import java.util.List;
+import java.util.Queue;
 
 import static com.badlogic.gdx.Application.LOG_DEBUG;
 import static com.gadarts.industrial.DefaultGameSettings.FULL_SCREEN;
-import static com.gadarts.industrial.Industrial.FULL_SCREEN_RESOLUTION_HEIGHT;
-import static com.gadarts.industrial.Industrial.FULL_SCREEN_RESOLUTION_WIDTH;
-import static com.gadarts.industrial.Industrial.WINDOWED_RESOLUTION_HEIGHT;
-import static com.gadarts.industrial.Industrial.WINDOWED_RESOLUTION_WIDTH;
+import static com.gadarts.industrial.Industrial.*;
 import static com.gadarts.industrial.systems.SystemsCommonData.TABLE_NAME_HUD;
 
 public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSubscriber> implements
@@ -162,13 +164,41 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	public void mouseMoved(final int screenX, final int screenY) {
 		if (getSystemsCommonData().getMenuTable().isVisible()) return;
 		MapGraph map = getSystemsCommonData().getMap();
-		MapGraphNode newNode = map.getRayNode(screenX, screenY, getSystemsCommonData().getCamera());
+		MapGraphNode newNode = calculateNewNode(screenX, screenY);
 		ModelInstance cursorModelInstance = cursorHandler.getCursorModelInstance();
 		MapGraphNode oldNode = map.getNode(cursorModelInstance.transform.getTranslation(auxVector3_2));
 		if (newNode != null && !newNode.equals(oldNode)) {
 			cursorHandler.onMouseEnteredNewNode(newNode);
 			toolTipHandler.onMouseEnteredNewNode();
 		}
+	}
+
+	private MapGraphNode calculateNewNode(int screenX, int screenY) {
+		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		MapGraph map = systemsCommonData.getMap();
+		Camera camera = systemsCommonData.getCamera();
+
+		MapGraphNode lowestNode = map.getRayNode(screenX, screenY, camera);
+		ArrayDeque<Coord3D> nodes = (ArrayDeque<Coord3D>) Bresenham.line3D(
+				(int) camera.position.x, (int) camera.position.y, (int) camera.position.z,
+				lowestNode.getCol(), (int) 0, lowestNode.getRow());
+		Coord3D lastCoord = nodes.getLast();
+		MapGraphNode result = map.getNode(lastCoord.getX(), lastCoord.z);
+		result = findNearestNodeOnCameraLineOfSight(map, nodes, result);
+		return result;
+	}
+
+	private MapGraphNode findNearestNodeOnCameraLineOfSight(MapGraph map,
+															ArrayDeque<Coord3D> nodes,
+															MapGraphNode result) {
+		for (Coord3D coord : nodes) {
+			MapGraphNode node = map.getNode(coord.x, coord.z);
+			if (node != null && coord.getY() <= node.getHeight()) {
+				result = node;
+				break;
+			}
+		}
+		return result;
 	}
 
 	@Override
