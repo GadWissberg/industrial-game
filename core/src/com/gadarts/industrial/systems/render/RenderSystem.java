@@ -238,9 +238,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		renderModels(modelBatch, null, true, getSystemsCommonData().getCamera());
 	}
 
-	private boolean isVisible(final Camera camera, final Entity entity) {
+	private boolean isVisible(final Camera camera, ModelInstanceComponent modelInstanceComponent) {
 		if (!DefaultGameSettings.DISABLE_FRUSTUM_CULLING) return true;
-		ModelInstanceComponent modelInstanceComponent = modelInstance.get(entity);
 		Vector3 position = modelInstanceComponent.getModelInstance().transform.getTranslation(auxVector3_1);
 		AdditionalRenderData additionalRenderData = modelInstanceComponent.getModelInstance().getAdditionalRenderData();
 		BoundingBox boundingBox = additionalRenderData.getBoundingBox(auxBoundingBox);
@@ -262,9 +261,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private void renderModels(ModelBatch modelBatch,
-							  boolean renderLight,
 							  Camera camera) {
-		renderModels(modelBatch, null, renderLight, camera);
+		renderModels(modelBatch, null, true, camera);
 	}
 
 	private void renderModels(ModelBatch modelBatch,
@@ -273,7 +271,12 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 							  Camera camera) {
 		modelBatch.begin(camera);
 		for (Entity entity : modelInstanceEntities) {
-			renderModel(modelBatch, exclude, camera, entity, renderLight);
+			if (exclude != entity) {
+				renderModel(modelBatch, camera, entity, renderLight, modelInstance.get(entity));
+				if (appendixModelInstance.has(entity)) {
+					renderModel(modelBatch, camera, entity, true, appendixModelInstance.get(entity));
+				}
+			}
 		}
 		modelBatch.end();
 	}
@@ -303,12 +306,11 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private void renderModel(ModelBatch modelBatch,
-							 Entity exclude,
 							 Camera camera,
 							 Entity entity,
-							 boolean renderLight) {
-		ModelInstanceComponent modelInstanceComponent = modelInstance.get(entity);
-		if (!shouldSkipRenderModel(exclude, camera, entity, modelInstanceComponent)) {
+							 boolean renderLight,
+							 ModelInstanceComponent modelInstanceComponent) {
+		if (!shouldSkipRenderModel(camera, entity, modelInstanceComponent)) {
 			modelBatch.render(modelInstanceComponent.getModelInstance(), environment);
 			getSystemsCommonData().setNumberOfVisible(getSystemsCommonData().getNumberOfVisible() + 1);
 			applySpecificRendering(entity);
@@ -354,18 +356,16 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		}
 	}
 
-	private boolean shouldSkipRenderModel(Entity exclude,
-										  Camera camera,
+	private boolean shouldSkipRenderModel(Camera camera,
 										  Entity entity,
-										  ModelInstanceComponent modelInstanceComponent) {
+										  ModelInstanceComponent miComp) {
 		DrawFlags drawFlags = getSystemsCommonData().getDrawFlags();
-		return entity == exclude
-				|| (!modelInstanceComponent.isVisible())
-				|| !isVisible(camera, entity)
+		return (!miComp.isVisible())
+				|| !isVisible(camera, miComp)
 				|| floor.has(entity) && !drawFlags.isDrawGround()
 				|| obstacle.has(entity) && !drawFlags.isDrawEnv()
 				|| getSystemsCommonData().getCursor() == entity && !drawFlags.isDrawCursor()
-				|| isInFow(entity, modelInstance.get(entity).getModelInstance().transform.getTranslation(auxVector3_1));
+				|| isInFow(entity, miComp.getModelInstance().transform.getTranslation(auxVector3_1));
 	}
 
 	private boolean isInFow(Entity entity, Vector3 position) {
@@ -387,7 +387,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		shadowFrameBuffer.begin();
 		Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		renderModels(modelBatchShadows, true, getSystemsCommonData().getCamera());
+		renderModels(modelBatchShadows, getSystemsCommonData().getCamera());
 		handleScreenshot(shadowFrameBuffer);
 		shadowFrameBuffer.end();
 	}
@@ -401,9 +401,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private void render(float deltaTime) {
 		getSystemsCommonData().setNumberOfVisible(0);
-//		if (Gdx.gl30.glCheckFramebufferStatus(shadowFrameBuffer.getFramebufferHandle()) == 0) {
 		renderShadows();
-//		}
 		resetDisplay(Color.BLACK);
 		renderModels(modelBatch);
 		renderDecals(deltaTime);

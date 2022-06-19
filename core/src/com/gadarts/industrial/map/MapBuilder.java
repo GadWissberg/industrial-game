@@ -497,10 +497,10 @@ public class MapBuilder implements Disposable {
 		inflatePickups(mapJsonObject, mapGraph);
 	}
 
-	private void inflateEnvSpecifiedComponent(final Coords coord,
-											  final EnvironmentObjectDefinition type,
-											  final EntityBuilder builder,
-											  final Direction facingDirection) {
+	private void inflateEnvObstacleComponent(final Coords coord,
+											 final EnvironmentObjectDefinition type,
+											 final EntityBuilder builder,
+											 final Direction facingDirection) {
 		int col = coord.getCol();
 		int row = coord.getRow();
 		int halfWidth = type.getWidth() / 2;
@@ -535,15 +535,20 @@ public class MapBuilder implements Disposable {
 	}
 
 	private GameModelInstance inflateEnvModelInstanceComponent(final MapGraphNode node,
-															   final JsonObject envJsonObject,
+															   final JsonObject envJsonObj,
 															   final EnvironmentObjectDefinition type,
 															   final EntityBuilder builder) {
-		int dirIndex = envJsonObject.get(DIRECTION).getAsInt();
-		float height = envJsonObject.get(HEIGHT).getAsFloat();
-		GameModelInstance mi = inflateEnvironmentModelInstance(node, dirIndex, type, height);
+		float height = envJsonObj.get(HEIGHT).getAsFloat();
+		GameModelInstance mi = inflateEnvironmentModelInstance(node, envJsonObj.get(DIRECTION).getAsInt(), type, height);
 		mi.getAdditionalRenderData().setColorWhenOutside(Color.WHITE);
 		GeneralUtils.applyExplicitModelTexture(type.getModelDefinition(), mi, assetsManager);
 		builder.addModelInstanceComponent(mi, true, type.isCastShadow());
+		Optional.ofNullable(type.getAppendixModelDefinition())
+				.ifPresent(a -> {
+					GameModelInstance appendixModelInstance = new GameModelInstance(assetsManager.getModel(a));
+					appendixModelInstance.transform.set(mi.transform);
+					builder.addAppendixModelInstanceComponent(appendixModelInstance);
+				});
 		return mi;
 	}
 
@@ -565,12 +570,23 @@ public class MapBuilder implements Disposable {
 									  JsonObject jsonObject,
 									  Coords coord) {
 		int dirIndex = jsonObject.get(DIRECTION).getAsInt();
-		inflateEnvSpecifiedComponent(coord, type, builder, Direction.values()[dirIndex]);
+		inflateEnvObstacleComponent(coord, type, builder, Direction.values()[dirIndex]);
 		MapGraphNode node = mapGraph.getNode(coord.getCol(), coord.getRow());
 		GameModelInstance mi = inflateEnvModelInstanceComponent(node, jsonObject, type, builder);
 		inflateEnvLightComponent(builder, type, mi, dirIndex);
-		mapGraph.getNode(coord).setType(type.getNodeType());
+		node.setType(type.getNodeType());
+		inflateDoor(type, builder, mapGraph, node);
 		builder.addCollisionComponent();
+	}
+
+	private void inflateDoor(EnvironmentObjectDefinition type,
+							 EntityBuilder builder,
+							 MapGraph mapGraph,
+							 MapGraphNode node) {
+		if (type.getEnvironmentObjectType() == EnvironmentObjectType.DOOR) {
+			builder.addDoorComponent();
+			node.setDoor(EntityBuilder.getInstance().getCurrentEntity());
+		}
 	}
 
 	private EnvironmentObjectDefinition inflateEnvType(String name, EnvironmentObjectType environmentType) {

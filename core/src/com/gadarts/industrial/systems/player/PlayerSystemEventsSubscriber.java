@@ -8,7 +8,7 @@ import com.gadarts.industrial.systems.character.CharacterCommand;
 import java.util.List;
 
 public interface PlayerSystemEventsSubscriber extends SystemEventsSubscriber {
-	default void onPlayerPathCreated( ) {
+	default void onPlayerPathCreated(MapGraphNode destination) {
 
 	}
 

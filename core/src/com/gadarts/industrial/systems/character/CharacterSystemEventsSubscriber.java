@@ -26,15 +26,19 @@ public interface CharacterSystemEventsSubscriber extends SystemEventsSubscriber 
 
 	}
 
-	default void onCharacterDies(Entity character){
+	default void onCharacterDies(Entity character) {
 
 	}
 
-	default void onCharacterGotDamage(Entity character){
+	default void onCharacterGotDamage(Entity character) {
 
 	}
 
-	default void onCharacterEngagesPrimaryAttack(Entity character, Vector3 direction, Vector3 positionNodeCenterPosition){
+	default void onCharacterEngagesPrimaryAttack(Entity character, Vector3 direction, Vector3 positionNodeCenterPosition) {
+
+	}
+
+	default void onCharacterOpenedDoor(MapGraphNode doorNode) {
 
 	}
 }

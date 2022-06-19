@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
+import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.SoundPlayer;
@@ -44,7 +45,7 @@ public class PickupSystem extends GameSystem<SystemEventsSubscriber> implements 
 	}
 
 	@Override
-	public void onPlayerPathCreated( ) {
+	public void onPlayerPathCreated(MapGraphNode destination) {
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		Entity currentHighLightedPickup = systemsCommonData.getCurrentHighLightedPickup();
 		if (currentHighLightedPickup != null) {

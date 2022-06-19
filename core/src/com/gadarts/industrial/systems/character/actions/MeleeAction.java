@@ -8,6 +8,7 @@ import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.character.CharacterMotivation;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
+import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ public class MeleeAction implements ToDoAfterDestinationReached {
 	public void run(final Entity character,
 					final MapGraph map,
 					final SoundPlayer soundPlayer,
-					final Object additionalData) {
+					final Object additionalData, MapGraphNode pathFinalNode, List<CharacterSystemEventsSubscriber> subscribers) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		Entity target = characterComponent.getTarget();
 		if (target != null) {

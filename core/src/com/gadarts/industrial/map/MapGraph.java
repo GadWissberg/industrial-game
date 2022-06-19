@@ -45,7 +45,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 	private final ImmutableArray<Entity> obstacleEntities;
 	@Setter(AccessLevel.PACKAGE)
 	@Getter(AccessLevel.PACKAGE)
-	MapGraphNode currentDestination;
+	MapGraphNode currentPathFinalDestination;
 	@Setter
 	private MapGraphConnectionCosts maxConnectionCostInSearch;
 	@Setter(AccessLevel.PACKAGE)
@@ -190,14 +190,16 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		for (Entity c : characterEntities) {
 			MapGraphNode node = getNode(ComponentsMapper.characterDecal.get(c).getNodePosition(auxVector2));
 			int hp = ComponentsMapper.character.get(c).getSkills().getHealthData().getHp();
-			if (currentDestination == node || hp <= 0) {
+			if (currentPathFinalDestination == node || hp <= 0) {
 				continue;
 			}
 			if (node.equals(destinationNode)) {
 				return false;
 			}
 		}
-		return true;
+		return (currentPathFinalDestination.equals(destinationNode)
+				|| destinationNode.getDoor() == null
+				|| ComponentsMapper.door.get(destinationNode.getDoor()).isOpen());
 	}
 
 	private boolean isNodeRevealed(MapGraphNode node) {

@@ -30,7 +30,7 @@ import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterCommand;
-import com.gadarts.industrial.systems.character.CharacterCommands;
+import com.gadarts.industrial.systems.character.CharacterCommandsTypes;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
@@ -165,7 +165,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		if (ComponentsMapper.enemy.has(character)) {
 			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(character);
 			long currentTurnId = getSystemsCommonData().getCurrentTurnId();
-			if (executedCommand != null && executedCommand.getType() == CharacterCommands.ATTACK_PRIMARY) {
+			if (executedCommand != null && executedCommand.getType() == CharacterCommandsTypes.ATTACK_PRIMARY) {
 				enemyComponent.getTimeStamps().setLastPrimaryAttack(currentTurnId);
 			}
 			enemyComponent.getTimeStamps().setLastTurn(currentTurnId);
@@ -194,7 +194,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private void applyGoToMelee(final Entity enemy) {
 		MapGraphPath currentPath = enemyPathPlanner.getCurrentPath();
 		currentPath.nodes.removeIndex(currentPath.getCount() - 1);
-		applyCommand(enemy, CharacterCommands.GO_TO_MELEE);
+		applyCommand(enemy, CharacterCommandsTypes.GO_TO_MELEE);
 	}
 
 	private float calculateDistanceToTarget(final Entity enemy) {
@@ -220,7 +220,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			if (disToTarget <= def.getRange().get(skillIndex).getMaxDistance() && disToTarget > RANGE_ATTACK_MIN_RADIUS) {
 				int turnsDiff = def.getReloadTime().get(skillIndex).getNumberOfTurns();
 				if (checkIfPrimaryAttackIsReady(enemyCom, turnsDiff) && !checkIfWayIsClearToTarget(enemy)) {
-					applyCommand(enemy, CharacterCommands.ATTACK_PRIMARY);
+					applyCommand(enemy, CharacterCommandsTypes.ATTACK_PRIMARY);
 					return true;
 				}
 			}
@@ -346,7 +346,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		request.setRequester(character);
 	}
 
-	private void applyCommand(final Entity enemy, final CharacterCommands attackPrimary) {
+	private void applyCommand(final Entity enemy, final CharacterCommandsTypes attackPrimary) {
 		auxCommand.init(attackPrimary, enemyPathPlanner.getCurrentPath(), enemy);
 		subscribers.forEach(sub -> sub.onEnemyAppliedCommand(auxCommand, enemy));
 	}
@@ -373,7 +373,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		}
 		initializePathPlanRequest(targetLastVisibleNode, characterDecalComp, CLEAN, enemy);
 		if (GameUtils.calculatePath(request, enemyPathPlanner.getPathFinder(), enemyPathPlanner.getHeuristic())) {
-			applyCommand(enemy, CharacterCommands.GO_TO_MELEE);
+			applyCommand(enemy, CharacterCommandsTypes.GO_TO_MELEE);
 		} else {
 			tryToPlanThroughHeightDiff(enemy, characterDecalComp, targetLastVisibleNode);
 		}
@@ -386,7 +386,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		initializePathPlanRequest(targetLastVisibleNode, characterDecalComp, HEIGHT_DIFF, enemy);
 		foundPath = GameUtils.calculatePath(request, enemyPathPlanner.getPathFinder(), enemyPathPlanner.getHeuristic());
 		if (foundPath) {
-			applyCommand(enemy, CharacterCommands.GO_TO_MELEE);
+			applyCommand(enemy, CharacterCommandsTypes.GO_TO_MELEE);
 		}
 	}
 

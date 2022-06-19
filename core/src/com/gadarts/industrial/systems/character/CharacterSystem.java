@@ -125,26 +125,31 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (currentPath.nodes.size > 1) {
 			commandSet(character);
 		} else {
-			destinationReached(character);
+			destinationReached(character, currentPath.nodes.get(currentPath.nodes.size - 1));
 		}
 	}
 
-	public void destinationReached(final Entity character) {
+	public void destinationReached(final Entity character, MapGraphNode pathFinalNode) {
 		if (getSystemsCommonData().getCurrentCommand().getType().getToDoAfterDestinationReached() != null) {
-			executeActionsAfterDestinationReached(character);
+			executeActionsAfterDestinationReached(character, pathFinalNode);
 		} else {
 			commandDone(character);
 		}
 	}
 
-	private void executeActionsAfterDestinationReached(final Entity character) {
+	private void executeActionsAfterDestinationReached(final Entity character, MapGraphNode pathFinalNode) {
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onDestinationReached(character);
 		}
-		CharacterCommand currentCommand = getSystemsCommonData().getCurrentCommand();
-		currentCommand.getType()
+
+		getSystemsCommonData().getCurrentCommand().getType()
 				.getToDoAfterDestinationReached()
-				.run(character, getSystemsCommonData().getMap(), getSoundPlayer(), currentCommand.getAdditionalData());
+				.run(character,
+						getSystemsCommonData().getMap(),
+						getSoundPlayer(),
+						getSystemsCommonData().getCurrentCommand().getAdditionalData(),
+						pathFinalNode,
+						subscribers);
 	}
 
 	private void commandSet(final Entity character) {
@@ -325,6 +330,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	private void handleRotation(final Entity character, final CharacterComponent charComponent) {
 		if (charComponent.getCharacterSpriteData().getSpriteType() == PAIN) return;
+
 		CharacterRotationData rotationData = charComponent.getRotationData();
 		if (rotationData.isRotating() && TimeUtils.timeSinceMillis(rotationData.getLastRotation()) > ROT_INTERVAL) {
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
@@ -400,7 +406,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	@Override
-	public void onPlayerPathCreated( ) {
+	public void onPlayerPathCreated(MapGraphNode destination) {
 
 	}
 
@@ -548,12 +554,25 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 								   final MapGraphNode oldDest) {
 		MapGraphNode newDest = currentPath.getNextOf(oldDest);
 		MapGraphConnection connection = getSystemsCommonData().getMap().findConnection(oldDest, newDest);
-		if (newDest != null && connection != null && connection.getCost() == CLEAN.getCostValue()) {
+		if (isReachedEndOfPath(newDest, connection, character, oldDest)) {
+			destinationReached(character, currentPath.nodes.get(currentPath.nodes.size - 1));
+		} else {
 			initDestinationNode(ComponentsMapper.character.get(character), newDest);
 			takeStep(character);
-		} else {
-			destinationReached(character);
 		}
+	}
+
+	private boolean isReachedEndOfPath(MapGraphNode newDest,
+									   MapGraphConnection connection,
+									   Entity character,
+									   MapGraphNode oldDest) {
+		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
+		CharacterMotivation motivation = characterComponent.getMotivationData().getMotivation();
+		CharacterCommandsTypes type = getSystemsCommonData().getCurrentCommand().getType();
+		return newDest == null
+				|| connection == null
+				|| connection.getCost() != CLEAN.getCostValue()
+				|| type == CharacterCommandsTypes.GO_TO_OPEN_DOOR && currentPath.nodes.get(currentPath.nodes.size - 2).equals(oldDest);
 	}
 
 	private interface OnFrameChangedEvent {

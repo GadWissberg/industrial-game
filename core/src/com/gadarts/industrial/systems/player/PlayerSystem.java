@@ -11,10 +11,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pools;
-import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
-import com.gadarts.industrial.shared.model.characters.Direction;
-import com.gadarts.industrial.shared.model.pickups.WeaponsDefinitions;
 import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.SoundPlayer;
@@ -31,10 +27,14 @@ import com.gadarts.industrial.components.player.Item;
 import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.map.*;
+import com.gadarts.industrial.shared.assets.Assets;
+import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.model.characters.Direction;
+import com.gadarts.industrial.shared.model.pickups.WeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterCommand;
-import com.gadarts.industrial.systems.character.CharacterCommands;
+import com.gadarts.industrial.systems.character.CharacterCommandsTypes;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.AttackNodesHandler;
@@ -46,7 +46,7 @@ import java.util.List;
 import static com.gadarts.industrial.components.ComponentsMapper.*;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.shared.model.characters.Direction.*;
-import static com.gadarts.industrial.systems.character.CharacterCommands.*;
+import static com.gadarts.industrial.systems.character.CharacterCommandsTypes.*;
 import static com.gadarts.industrial.utils.GameUtils.calculatePath;
 
 public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> implements
@@ -170,11 +170,17 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				modelInstanceComponent.setFlatColor(blocked ? Color.BLACK : null);
 				floorComponent.setRevealCalculated(true);
 			}
-			if (!blocked && playerNode.getHeight() + PlayerComponent.PLAYER_HEIGHT < currentNode.getHeight()) {
+			if (!blocked && checkIfNodeBlocks(playerNode, currentNode)) {
 				blocked = true;
 			}
 		}
 		return blocked;
+	}
+
+	private boolean checkIfNodeBlocks(MapGraphNode playerNode, MapGraphNode currentNode) {
+		Entity door = currentNode.getDoor();
+		return playerNode.getHeight() + PlayerComponent.PLAYER_HEIGHT < currentNode.getHeight()
+				|| (door != null && !ComponentsMapper.door.get(door).isOpen());
 	}
 
 
@@ -278,12 +284,12 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		}
 	}
 
-	private void pathHasCreated(MapGraphNode cursorNode, Entity enemyAtNode, AttackNodesHandler attackNodesHandler) {
+	private void pathHasCreated(MapGraphNode destination, Entity enemyAtNode, AttackNodesHandler attackNodesHandler) {
 		if (enemyAtNode != null) {
-			enemySelected(cursorNode, enemyAtNode, attackNodesHandler);
+			enemySelected(destination, enemyAtNode, attackNodesHandler);
 		}
 		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onPlayerPathCreated();
+			subscriber.onPlayerPathCreated(destination);
 		}
 		Entity player = getSystemsCommonData().getPlayer();
 		playerPathPlanner.displayPathPlan(character.get(player).getSkills().getAgility());
@@ -341,21 +347,25 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				plannedPath);
 	}
 
-	private void applyPlayerCommandAccordingToPlan(MapGraphNode cursorNode, AttackNodesHandler attackNodesHandler) {
+	private void applyPlayerCommandAccordingToPlan(MapGraphNode destination, AttackNodesHandler attackNodesHandler) {
 		playerPathPlanner.hideAllArrows();
 		SystemsCommonData commonData = getSystemsCommonData();
 		CharacterDecalComponent charDecalComp = characterDecal.get(commonData.getPlayer());
 		MapGraphNode playerNode = commonData.getMap().getNode(charDecalComp.getNodePosition(auxVector2_1));
 		if (attackNodesHandler.getSelectedAttackNode() == null) {
-			applyCommandWhenNoAttackNodeSelected(commonData, playerNode);
+			applyCommandWhenNoAttackNodeSelected(commonData, playerNode, destination);
 		} else {
-			applyPlayerMeleeCommand(cursorNode, playerNode, attackNodesHandler);
+			applyPlayerMeleeCommand(destination, playerNode, attackNodesHandler);
 		}
 	}
 
-	private void applyCommandWhenNoAttackNodeSelected(SystemsCommonData commonData, MapGraphNode playerNode) {
+	private void applyCommandWhenNoAttackNodeSelected(SystemsCommonData commonData,
+													  MapGraphNode playerNode,
+													  MapGraphNode destination) {
 		if (commonData.getItemToPickup() != null || isPickupAndPlayerOnSameNode(commonData.getMap(), playerNode)) {
 			applyPlayerCommand(GO_TO_PICKUP, commonData.getItemToPickup());
+		} else if (destination.getDoor() != null) {
+			applyPlayerCommand(GO_TO_OPEN_DOOR);
 		} else {
 			applyGoToCommand(playerPathPlanner.getCurrentPath());
 		}
@@ -409,11 +419,11 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		return map.getNode(pickupPosition).equals(playerNode);
 	}
 
-	private void applyPlayerCommand(CharacterCommands commandDefinition) {
+	private void applyPlayerCommand(CharacterCommandsTypes commandDefinition) {
 		applyPlayerCommand(commandDefinition, null);
 	}
 
-	private void applyPlayerCommand(CharacterCommands CommandDefinition, Object additionalData) {
+	private void applyPlayerCommand(CharacterCommandsTypes CommandDefinition, Object additionalData) {
 		Entity player = getSystemsCommonData().getPlayer();
 		auxCommand.init(CommandDefinition, playerPathPlanner.getCurrentPath(), player, additionalData);
 		subscribers.forEach(sub -> sub.onPlayerAppliedCommand(auxCommand));

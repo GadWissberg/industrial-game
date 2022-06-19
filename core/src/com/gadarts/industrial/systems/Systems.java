@@ -24,7 +24,8 @@ public enum Systems {
 	ENEMY(EnemySystem.class),
 	PROJECTILE(BulletSystem.class),
 	PARTICLE_EFFECTS(ParticleEffectsSystem.class),
-	CHARACTER(CharacterSystem.class);
+	CHARACTER(CharacterSystem.class),
+	AMB(AmbSystem.class);
 
 	private final Class<? extends GameSystem<? extends SystemEventsSubscriber>> systemClass;
 

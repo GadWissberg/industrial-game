@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 public class CharacterCommand {
-	private CharacterCommands type;
+	private CharacterCommandsTypes type;
 	private Entity character;
 	private Object additionalData;
 
@@ -16,13 +16,13 @@ public class CharacterCommand {
 
 	private final MapGraphPath path = new MapGraphPath();
 
-	public CharacterCommand init(final CharacterCommands type,
+	public CharacterCommand init(final CharacterCommandsTypes type,
 								 final MapGraphPath path,
 								 final Entity character) {
 		return init(type, path, character, null);
 	}
 
-	public CharacterCommand init(final CharacterCommands type,
+	public CharacterCommand init(final CharacterCommandsTypes type,
 								 final MapGraphPath path,
 								 final Entity character,
 								 final Object additionalData) {
