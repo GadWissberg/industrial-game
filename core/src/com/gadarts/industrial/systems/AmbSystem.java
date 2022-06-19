@@ -15,10 +15,11 @@ import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
+import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
 
 import static com.gadarts.industrial.utils.GameUtils.EPSILON;
 
-public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements CharacterSystemEventsSubscriber {
+public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements CharacterSystemEventsSubscriber, TurnsSystemEventsSubscriber {
 	private static final Vector3 auxVector1 = new Vector3();
 	private static final Vector3 auxVector2 = new Vector3();
 	private static final Vector3 auxVector3 = new Vector3();
@@ -52,8 +53,11 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements 
 	public void update(float deltaTime) {
 		for (Entity doorEntity : doorEntities) {
 			DoorComponent doorComponent = ComponentsMapper.door.get(doorEntity);
-			if (doorComponent.getState() == DoorComponent.DoorStates.OPENING) {
+			DoorComponent.DoorStates state = doorComponent.getState();
+			if (state == DoorComponent.DoorStates.OPENING) {
 				handleDoorOpening(doorEntity, doorComponent);
+			} else if (state == DoorComponent.DoorStates.OPEN) {
+
 			}
 		}
 	}

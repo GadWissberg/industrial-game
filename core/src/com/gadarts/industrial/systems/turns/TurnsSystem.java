@@ -1,20 +1,28 @@
 package com.gadarts.industrial.systems.turns;
 
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.badlogic.ashley.core.Entity;
 import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.SoundPlayer;
+import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
+import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> implements
 		PlayerSystemEventsSubscriber,
-		EnemySystemEventsSubscriber {
+		EnemySystemEventsSubscriber,
+		AmbSystemEventsSubscriber {
 	private boolean playerTurnDone;
 	private Turns currentTurn;
 	private boolean enemyTurnDone;
+	private List<Entity> openDoors = new ArrayList<>();
+	private com.badlogic.gdx.utils.Queue<Entity> turnsQueue = new com.badlogic.gdx.utils.Queue<>();
 
 	public TurnsSystem(SystemsCommonData systemsCommonData,
 					   SoundPlayer soundPlayer,
@@ -22,6 +30,12 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 					   GameLifeCycleHandler lifeCycleHandler) {
 		super(systemsCommonData, soundPlayer, assetsManager, lifeCycleHandler);
 		currentTurn = Turns.PLAYER;
+	}
+
+	@Override
+	public void onDoorOpened(Entity doorEntity) {
+		if (openDoors.contains(doorEntity)) return;
+		openDoors.add(doorEntity);
 	}
 
 	@Override
@@ -61,6 +75,9 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		systemsCommonData.setCurrentTurnId(systemsCommonData.getCurrentTurnId() + 1);
 		currentTurn = Turns.PLAYER;
+		for (TurnsSystemEventsSubscriber subscriber : subscribers) {
+			subscriber.onPlayerTurn(getSystemsCommonData().getCurrentTurnId());
+		}
 		for (TurnsSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onPlayerTurn(getSystemsCommonData().getCurrentTurnId());
 		}
