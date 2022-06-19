@@ -12,22 +12,43 @@ import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
-import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
+import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 
-public class AmbSystem extends GameSystem<SystemEventsSubscriber> implements PlayerSystemEventsSubscriber {
-	private static final Vector3 auxVector = new Vector3();
-	private ImmutableArray<Entity> doorsEntities;
+public class AmbSystem extends GameSystem<SystemEventsSubscriber> implements CharacterSystemEventsSubscriber {
+	private static final Vector3 auxVector1 = new Vector3();
+	private static final Vector3 auxVector2 = new Vector3();
+	private ImmutableArray<Entity> doorEntities;
 
 	public AmbSystem(SystemsCommonData systemsCommonData,
-						SoundPlayer soundPlayer,
-						GameAssetsManager assetsManager,
-						GameLifeCycleHandler lifeCycleHandler) {
+					 SoundPlayer soundPlayer,
+					 GameAssetsManager assetsManager,
+					 GameLifeCycleHandler lifeCycleHandler) {
 		super(systemsCommonData, soundPlayer, assetsManager, lifeCycleHandler);
 	}
 
 	@Override
+	public void onCharacterOpenedDoor(MapGraphNode doorNode) {
+	}
+
+	@Override
 	public void addedToEngine(Engine engine) {
-		doorsEntities = engine.getEntitiesFor(Family.all(DoorComponent.class).get());
+		doorEntities = engine.getEntitiesFor(Family.all(DoorComponent.class).get());
+	}
+
+	@Override
+	public void update(float deltaTime) {
+		for (Entity doorEntity : doorEntities) {
+			DoorComponent doorComponent = ComponentsMapper.door.get(doorEntity);
+			if (doorComponent.getState() == DoorComponent.DoorStates.OPENING) {
+				GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(doorEntity).getModelInstance();
+				Vector3 position = modelInstance.transform.getTranslation(auxVector1);
+				if (doorComponent.getNode().getCenterPosition(auxVector2).dst2(position) > 0.5F) {
+					doorComponent.setState(DoorComponent.DoorStates.OPEN);
+				} else {
+					modelInstance.transform.translate(0F, 0F, 0.4F * deltaTime);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -40,17 +61,6 @@ public class AmbSystem extends GameSystem<SystemEventsSubscriber> implements Pla
 
 	}
 
-	@Override
-	public void onPlayerPathCreated(MapGraphNode destination) {
-		for (Entity doorEntity : doorsEntities) {
-			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(doorEntity).getModelInstance();
-			Vector3 position = modelInstance.transform.getTranslation(auxVector);
-			MapGraphNode doorNode = getSystemsCommonData().getMap().getNode(position);
-			if (doorNode.equals(destination)) {
-
-			}
-		}
-	}
 
 	@Override
 	public void dispose( ) {

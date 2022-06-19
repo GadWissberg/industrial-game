@@ -363,9 +363,10 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addDoorComponent( ) {
+	public EntityBuilder addDoorComponent(MapGraphNode node) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		DoorComponent doorComponent = engine.createComponent(DoorComponent.class);
+		doorComponent.init(node);
 		currentEntity.add(doorComponent);
 		return instance;
 	}

@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.shared.model.Coords;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -199,7 +200,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		}
 		return (currentPathFinalDestination.equals(destinationNode)
 				|| destinationNode.getDoor() == null
-				|| ComponentsMapper.door.get(destinationNode.getDoor()).isOpen());
+				|| ComponentsMapper.door.get(destinationNode.getDoor()).getState() == DoorComponent.DoorStates.OPEN);
 	}
 
 	private boolean isNodeRevealed(MapGraphNode node) {

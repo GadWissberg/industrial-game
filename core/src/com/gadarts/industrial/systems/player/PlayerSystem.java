@@ -15,6 +15,7 @@ import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterAnimation;
 import com.gadarts.industrial.components.character.CharacterAnimations;
@@ -180,7 +181,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private boolean checkIfNodeBlocks(MapGraphNode playerNode, MapGraphNode currentNode) {
 		Entity door = currentNode.getDoor();
 		return playerNode.getHeight() + PlayerComponent.PLAYER_HEIGHT < currentNode.getHeight()
-				|| (door != null && !ComponentsMapper.door.get(door).isOpen());
+				|| (door != null && ComponentsMapper.door.get(door).getState() != DoorComponent.DoorStates.OPEN);
 	}
 
 

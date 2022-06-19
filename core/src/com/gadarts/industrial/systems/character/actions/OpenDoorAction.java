@@ -3,6 +3,7 @@ package com.gadarts.industrial.systems.character.actions;
 import com.badlogic.ashley.core.Entity;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.character.CharacterMotivation;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
@@ -18,7 +19,9 @@ public class OpenDoorAction implements ToDoAfterDestinationReached {
 					Object additionalData,
 					MapGraphNode pathFinalNode,
 					List<CharacterSystemEventsSubscriber> subscribers) {
+		ComponentsMapper.door.get(pathFinalNode.getDoor()).setState(DoorComponent.DoorStates.OPENING);
 		subscribers.forEach(s -> s.onCharacterOpenedDoor(pathFinalNode));
 		ComponentsMapper.character.get(character).setMotivation(CharacterMotivation.END_MY_TURN, CharacterMotivation.USE_PRIMARY);
+
 	}
 }

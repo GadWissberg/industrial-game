@@ -584,8 +584,9 @@ public class MapBuilder implements Disposable {
 							 MapGraph mapGraph,
 							 MapGraphNode node) {
 		if (type.getEnvironmentObjectType() == EnvironmentObjectType.DOOR) {
-			builder.addDoorComponent();
+			builder.addDoorComponent(node);
 			node.setDoor(EntityBuilder.getInstance().getCurrentEntity());
+
 		}
 	}
 
