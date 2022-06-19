@@ -9,8 +9,8 @@ public class Industrial extends Game {
 
 	public static final int FULL_SCREEN_RESOLUTION_WIDTH = 1920;
 	public static final int FULL_SCREEN_RESOLUTION_HEIGHT = 1080;
-	public static final int WINDOWED_RESOLUTION_WIDTH = 800;
-	public static final int WINDOWED_RESOLUTION_HEIGHT = 600;
+	public static final int WINDOWED_RESOLUTION_WIDTH = 1280;
+	public static final int WINDOWED_RESOLUTION_HEIGHT = 960;
 	private final String versionName;
 	private final int versionNumber;
 	private final GeneralHandler generalHandler;

@@ -34,6 +34,7 @@ import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.pickups.WeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
+import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.CharacterCommand;
 import com.gadarts.industrial.systems.character.CharacterCommandsTypes;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
@@ -53,7 +54,8 @@ import static com.gadarts.industrial.utils.GameUtils.calculatePath;
 public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> implements
 		UserInterfaceSystemEventsSubscriber,
 		CharacterSystemEventsSubscriber,
-		RenderSystemEventsSubscriber {
+		RenderSystemEventsSubscriber,
+		AmbSystemEventsSubscriber {
 	public static final float LOS_MAX = 24F;
 	public static final int LOS_CHECK_DELTA = 5;
 	private static final Vector2 auxVector2_1 = new Vector2();
@@ -63,6 +65,11 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private static final CharacterCommand auxCommand = new CharacterCommand();
 	private static final Vector3 auxVector3 = new Vector3();
 	private PathPlanHandler playerPathPlanner;
+
+	@Override
+	public void onDoorOpened(Entity doorEntity) {
+		refreshFogOfWar();
+	}
 
 	public PlayerSystem(SystemsCommonData systemsCommonData,
 						SoundPlayer soundPlayer,
