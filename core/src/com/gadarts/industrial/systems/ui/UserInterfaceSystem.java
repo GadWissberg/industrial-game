@@ -44,7 +44,6 @@ import squidpony.squidmath.Coord3D;
 
 import java.util.ArrayDeque;
 import java.util.List;
-import java.util.Queue;
 
 import static com.badlogic.gdx.Application.LOG_DEBUG;
 import static com.gadarts.industrial.DefaultGameSettings.FULL_SCREEN;
@@ -108,10 +107,11 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	}
 
 	@Override
-	public void onPlayerTurn(long currentTurnId) {
+	public void onNewTurn(Entity entity) {
 		Button button = getSystemsCommonData().getUiStage().getRoot().findActor(BUTTON_NAME_STORAGE);
-		button.setTouchable(Touchable.enabled);
+		button.setTouchable(ComponentsMapper.player.has(entity) ? Touchable.enabled : Touchable.disabled);
 	}
+
 
 	private void addStorageButton(final Table table) {
 		Button.ButtonStyle buttonStyle = new Button.ButtonStyle();
@@ -181,7 +181,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		MapGraphNode lowestNode = map.getRayNode(screenX, screenY, camera);
 		ArrayDeque<Coord3D> nodes = (ArrayDeque<Coord3D>) Bresenham.line3D(
 				(int) camera.position.x, (int) camera.position.y, (int) camera.position.z,
-				lowestNode.getCol(), (int) 0, lowestNode.getRow());
+				lowestNode.getCol(), 0, lowestNode.getRow());
 		Coord3D lastCoord = nodes.getLast();
 		MapGraphNode result = map.getNode(lastCoord.getX(), lastCoord.z);
 		result = findNearestNodeOnCameraLineOfSight(map, nodes, result);
@@ -258,6 +258,8 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	}
 
 	private void onUserSelectedNodeToApplyTurn( ) {
+		if (!ComponentsMapper.player.has(getSystemsCommonData().getTurnsQueue().first())) return;
+
 		MapGraphNode cursorNode = cursorHandler.getCursorNode();
 		for (UserInterfaceSystemEventsSubscriber sub : subscribers) {
 			sub.onUserSelectedNodeToApplyTurn(cursorNode, attackNodesHandler);

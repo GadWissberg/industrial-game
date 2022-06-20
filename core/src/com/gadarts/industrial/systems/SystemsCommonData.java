@@ -24,6 +24,7 @@ public class SystemsCommonData implements Disposable {
 	private final String versionName;
 	private final int versionNumber;
 	private final PlayerStorage storage = new PlayerStorage();
+	private final com.badlogic.gdx.utils.Queue<Entity> turnsQueue = new com.badlogic.gdx.utils.Queue<>();
 	private DrawFlags drawFlags;
 	private ParticleSystem particleSystem;
 	private Entity cursor;

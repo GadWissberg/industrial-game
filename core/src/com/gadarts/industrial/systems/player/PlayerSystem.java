@@ -39,6 +39,7 @@ import com.gadarts.industrial.systems.character.CharacterCommand;
 import com.gadarts.industrial.systems.character.CharacterCommandsTypes;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
+import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.AttackNodesHandler;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
 import com.gadarts.industrial.utils.GameUtils;
@@ -55,7 +56,8 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		UserInterfaceSystemEventsSubscriber,
 		CharacterSystemEventsSubscriber,
 		RenderSystemEventsSubscriber,
-		AmbSystemEventsSubscriber {
+		AmbSystemEventsSubscriber,
+		TurnsSystemEventsSubscriber {
 	public static final float LOS_MAX = 24F;
 	public static final int LOS_CHECK_DELTA = 5;
 	private static final Vector2 auxVector2_1 = new Vector2();
@@ -69,6 +71,11 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	@Override
 	public void onDoorOpened(Entity doorEntity) {
 		refreshFogOfWar();
+	}
+
+	@Override
+	public void onNewTurn(Entity entity) {
+
 	}
 
 	public PlayerSystem(SystemsCommonData systemsCommonData,

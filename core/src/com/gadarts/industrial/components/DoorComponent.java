@@ -1,14 +1,17 @@
 package com.gadarts.industrial.components;
 
 import com.gadarts.industrial.map.MapGraphNode;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
+@Setter
 public class DoorComponent implements GameComponent {
 
-	@Setter
+	private int openCounter;
 	private DoorStates state;
+	@Setter(AccessLevel.NONE)
 	private MapGraphNode node;
 
 	@Override

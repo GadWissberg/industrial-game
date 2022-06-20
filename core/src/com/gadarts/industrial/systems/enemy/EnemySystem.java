@@ -123,20 +123,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		}
 	}
 
-	private boolean invokeTurnForUnplayedEnemy(final long currentTurnId) {
-		for (Entity enemy : enemies) {
-			int hp = character.get(enemy).getSkills().getHealthData().getHp();
-			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
-			if (enemyComponent.getTimeStamps().getLastTurn() < currentTurnId) {
-				if (hp > 0 && enemyComponent.getAiStatus() != IDLE) {
-					invokeEnemyTurn(enemy);
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	private void invokeEnemyAttackBehaviour(final Entity enemy) {
 		Vector2 enemyPosition = characterDecal.get(enemy).getNodePosition(auxVector2_1);
 		Entity target = character.get(enemy).getTarget();
@@ -169,7 +155,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 				enemyComponent.getTimeStamps().setLastPrimaryAttack(currentTurnId);
 			}
 			enemyComponent.getTimeStamps().setLastTurn(currentTurnId);
-			onEnemyTurn(currentTurnId);
+			enemiesFinishedTurn();
 		}
 	}
 
@@ -391,9 +377,10 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	@Override
-	public void onEnemyTurn(final long currentTurnId) {
-		if (invokeTurnForUnplayedEnemy(currentTurnId)) return;
-		enemiesFinishedTurn();
+	public void onNewTurn(Entity entity) {
+		if (enemy.has(entity)) {
+			invokeEnemyTurn(entity);
+		}
 	}
 
 	private void enemiesFinishedTurn( ) {
