@@ -122,7 +122,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (command.getType().isRequiresMovement()) {
 			applyMovementOfCommandWithAgility(command, character);
 		}
-		if (currentPath.nodes.size > 1) {
+		if (currentPath.nodes.size > 0) {
 			commandSet(character);
 		} else {
 			destinationReached(character, currentPath.nodes.get(currentPath.nodes.size - 1));
@@ -153,7 +153,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	private void commandSet(final Entity character) {
-		MapGraphNode destNode = currentPath.get(1);
+		MapGraphNode destNode = currentPath.get(0);
 		initDestinationNode(ComponentsMapper.character.get(character), destNode);
 	}
 
@@ -166,6 +166,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private void applyMovementOfCommandWithAgility(final CharacterCommand command, final Entity character) {
 		Agility agility = ComponentsMapper.character.get(character).getSkills().getAgility();
 		Array<MapGraphNode> nodes = command.getPath().nodes;
+		nodes.removeIndex(0);
 		int agilityValue = agility.getValue();
 		if (nodes.size > agilityValue) {
 			nodes.removeRange(agilityValue, nodes.size - 1);
@@ -337,11 +338,14 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 				subscriber.onCharacterRotated(character);
 			}
 			Direction directionToDest = initializeRotation(character, charComponent, rotationData);
-			rotate(charComponent, rotationData, directionToDest);
+			rotate(charComponent, rotationData, directionToDest, character);
 		}
 	}
 
-	private void rotate(CharacterComponent charComponent, CharacterRotationData rotationData, Direction directionToDest) {
+	private void rotate(CharacterComponent charComponent,
+						CharacterRotationData rotationData,
+						Direction directionToDest,
+						Entity character) {
 		if (charComponent.getCharacterSpriteData().getFacingDirection() != directionToDest) {
 			CharacterSpriteData characterSpriteData = charComponent.getCharacterSpriteData();
 			Vector2 currentDirVector = characterSpriteData.getFacingDirection().getDirection(auxVector2_1);
@@ -566,8 +570,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 									   MapGraphConnection connection,
 									   Entity character,
 									   MapGraphNode oldDest) {
-		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		CharacterMotivation motivation = characterComponent.getMotivationData().getMotivation();
 		CharacterCommandsTypes type = getSystemsCommonData().getCurrentCommand().getType();
 		return newDest == null
 				|| connection == null
