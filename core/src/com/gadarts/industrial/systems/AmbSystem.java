@@ -12,6 +12,7 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.DoorComponent.DoorStates;
 import com.gadarts.industrial.components.mi.GameModelInstance;
+import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
@@ -103,13 +104,23 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements 
 	public void onNewTurn(Entity entity) {
 		if (ComponentsMapper.door.has(entity)) {
 			DoorComponent doorComponent = ComponentsMapper.door.get(entity);
-			if (doorComponent.getOpenCounter() >= DOOR_OPEN_DURATION) {
-				doorComponent.setOpenCounter(0);
-				doorComponent.setState(CLOSING);
+			MapGraph map = getSystemsCommonData().getMap();
+			if (shouldCloseDoor(doorComponent, map)) {
+				closeDoor(doorComponent);
 			} else {
 				doorComponent.setOpenCounter(doorComponent.getOpenCounter() + 1);
 				subscribers.forEach(s -> s.onDoorStayedOpenInTurn(entity));
 			}
 		}
+	}
+
+	private boolean shouldCloseDoor(DoorComponent doorComponent, MapGraph map) {
+		return doorComponent.getOpenCounter() >= DOOR_OPEN_DURATION
+				&& map.checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(doorComponent.getNode());
+	}
+
+	private void closeDoor(DoorComponent doorComponent) {
+		doorComponent.setOpenCounter(0);
+		doorComponent.setState(CLOSING);
 	}
 }

@@ -74,6 +74,11 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	@Override
+	public void onDoorClosed(Entity doorEntity) {
+		refreshFogOfWar();
+	}
+
+	@Override
 	public void onNewTurn(Entity entity) {
 
 	}

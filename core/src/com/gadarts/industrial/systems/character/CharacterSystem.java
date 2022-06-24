@@ -129,6 +129,12 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		}
 	}
 
+	private void commandSet(Entity character) {
+		Vector2 nodePosition = characterDecal.get(character).getNodePosition(auxVector2_1);
+		MapGraphNode characterNode = getSystemsCommonData().getMap().getNode(nodePosition);
+		reachedNodeOfPath(character, characterNode);
+	}
+
 	public void destinationReached(final Entity character, MapGraphNode pathFinalNode) {
 		if (getSystemsCommonData().getCurrentCommand().getType().getToDoAfterDestinationReached() != null) {
 			executeActionsAfterDestinationReached(character, pathFinalNode);
@@ -152,15 +158,10 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 						subscribers);
 	}
 
-	private void commandSet(final Entity character) {
-		MapGraphNode destNode = currentPath.get(0);
-		initDestinationNode(ComponentsMapper.character.get(character), destNode);
-	}
-
-	public void initDestinationNode(final CharacterComponent characterComponent,
-									final MapGraphNode destNode) {
+	public void initNextNode(final CharacterComponent characterComponent,
+							 final MapGraphNode nextNode) {
 		characterComponent.getRotationData().setRotating(true);
-		characterComponent.setDestinationNode(destNode);
+		characterComponent.setNextNode(nextNode);
 	}
 
 	private void applyMovementOfCommandWithAgility(final CharacterCommand command, final Entity character) {
@@ -322,7 +323,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private Direction calculateDirectionToDestination(final Entity character) {
 		Vector3 characterPos = auxVector3_1.set(characterDecal.get(character).getDecal().getPosition());
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		MapGraphNode destinationNode = characterComponent.getDestinationNode();
+		MapGraphNode destinationNode = characterComponent.getNextNode();
 		Vector2 destPos = destinationNode.getCenterPosition(auxVector2_2);
 		Vector2 directionToDest = destPos.sub(characterPos.x, characterPos.z).nor();
 		return Direction.findDirection(directionToDest);
@@ -338,14 +339,13 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 				subscriber.onCharacterRotated(character);
 			}
 			Direction directionToDest = initializeRotation(character, charComponent, rotationData);
-			rotate(charComponent, rotationData, directionToDest, character);
+			rotate(charComponent, rotationData, directionToDest);
 		}
 	}
 
 	private void rotate(CharacterComponent charComponent,
 						CharacterRotationData rotationData,
-						Direction directionToDest,
-						Entity character) {
+						Direction directionToDest) {
 		if (charComponent.getCharacterSpriteData().getFacingDirection() != directionToDest) {
 			CharacterSpriteData characterSpriteData = charComponent.getCharacterSpriteData();
 			Vector2 currentDirVector = characterSpriteData.getFacingDirection().getDirection(auxVector2_1);
@@ -512,10 +512,10 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (newFrame.index == 0 || newFrame.index == 5) {
 			getSoundPlayer().playSound(ComponentsMapper.character.get(character).getSoundData().getStepSound());
 		}
-		MapGraphNode dest = ComponentsMapper.character.get(character).getDestinationNode();
+		MapGraphNode nextNode = ComponentsMapper.character.get(character).getNextNode();
 		Decal decal = characterDecal.get(character).getDecal();
-		if (auxVector2_1.set(decal.getX(), decal.getZ()).dst2(dest.getCenterPosition(auxVector2_2)) < EPSILON) {
-			reachedNodeOfPath(character, dest);
+		if (auxVector2_1.set(decal.getX(), decal.getZ()).dst2(nextNode.getCenterPosition(auxVector2_2)) < EPSILON) {
+			reachedNodeOfPath(character, nextNode);
 		} else {
 			takeStep(character);
 		}
@@ -548,33 +548,32 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	private void translateCharacter(final Entity entity, final CharacterDecalComponent characterDecalComponent) {
-		character.get(entity).getDestinationNode().getCenterPosition(auxVector2_2);
+		character.get(entity).getNextNode().getCenterPosition(auxVector2_2);
 		Decal decal = characterDecalComponent.getDecal();
 		Vector2 velocity = auxVector2_2.sub(auxVector2_1.set(decal.getX(), decal.getZ())).nor().scl(CHARACTER_STEP_SIZE);
 		decal.translate(auxVector3_1.set(velocity.x, 0, velocity.y));
 	}
 
 	private void reachedNodeOfPath(final Entity character,
-								   final MapGraphNode oldDest) {
-		MapGraphNode newDest = currentPath.getNextOf(oldDest);
-		MapGraphConnection connection = getSystemsCommonData().getMap().findConnection(oldDest, newDest);
-		if (isReachedEndOfPath(newDest, connection, character, oldDest)) {
+								   final MapGraphNode node) {
+		MapGraphNode next = currentPath.getNextOf(node);
+		MapGraphConnection connection = getSystemsCommonData().getMap().findConnection(node, next);
+		if (isReachedEndOfPath(next, connection)) {
 			destinationReached(character, currentPath.nodes.get(currentPath.nodes.size - 1));
 		} else {
-			initDestinationNode(ComponentsMapper.character.get(character), newDest);
+			initNextNode(ComponentsMapper.character.get(character), next);
 			takeStep(character);
 		}
 	}
 
-	private boolean isReachedEndOfPath(MapGraphNode newDest,
-									   MapGraphConnection connection,
-									   Entity character,
-									   MapGraphNode oldDest) {
-		CharacterCommandsTypes type = getSystemsCommonData().getCurrentCommand().getType();
-		return newDest == null
+	private boolean isReachedEndOfPath(MapGraphNode nextNode,
+									   MapGraphConnection connection) {
+		MapGraph map = getSystemsCommonData().getMap();
+
+		return nextNode == null
 				|| connection == null
 				|| connection.getCost() != CLEAN.getCostValue()
-				|| type == CharacterCommandsTypes.GO_TO_OPEN_DOOR && currentPath.nodes.get(currentPath.nodes.size - 2).equals(oldDest);
+				|| !map.checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(nextNode, null);
 	}
 
 	private interface OnFrameChangedEvent {

@@ -17,7 +17,7 @@ public class CharacterComponent implements GameComponent {
 
 	@Getter(AccessLevel.NONE)
 	@Setter(AccessLevel.NONE)
-	private MapGraphNode destinationNode;
+	private MapGraphNode nextNode;
 
 	private CharacterMotivationData motivationData = new CharacterMotivationData();
 	private Entity target;
@@ -26,12 +26,12 @@ public class CharacterComponent implements GameComponent {
 	private CharacterSoundData soundData = new CharacterSoundData();
 	private CharacterSkills skills = new CharacterSkills();
 
-	public MapGraphNode getDestinationNode( ) {
-		return destinationNode;
+	public MapGraphNode getNextNode( ) {
+		return nextNode;
 	}
 
-	public void setDestinationNode(final MapGraphNode newValue) {
-		this.destinationNode = newValue;
+	public void setNextNode(final MapGraphNode newValue) {
+		this.nextNode = newValue;
 	}
 
 	public void setMotivation(final CharacterMotivation characterMotivation) {
@@ -45,7 +45,7 @@ public class CharacterComponent implements GameComponent {
 
 	@Override
 	public void reset( ) {
-		destinationNode = null;
+		nextNode = null;
 		motivationData.reset();
 		target = null;
 		rotationData.reset();

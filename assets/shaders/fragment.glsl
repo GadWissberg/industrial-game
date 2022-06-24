@@ -278,8 +278,8 @@ void main() {
                     gl_FragColor.rgb *= 1.0 - max(u_modelX - v_frag_pos.x, 0.0)*max(u_modelZ - v_frag_pos.z, 0.0)*FLOOR_DIAG_AO_STRENGTH;
                 }
             } else if (u_isWall == 1){
-                const float WALL_BOTTOM_AO_MAX_HEIGHT = u_modelY + 0.5;
-                const float WALL_TOP_AO_MIN_HEIGHT = u_modelY + u_modelHeight - 0.5;
+                float WALL_BOTTOM_AO_MAX_HEIGHT = u_modelY + 0.5;
+                float WALL_TOP_AO_MIN_HEIGHT = u_modelY + u_modelHeight - 0.5;
                 const float WALL_AO_STRENGTH = 0.65;
 
                 // Bottom AO.

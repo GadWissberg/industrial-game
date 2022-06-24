@@ -187,20 +187,26 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		return auxConnectionsList;
 	}
 
-	public boolean checkIfNodeIsAvailable(final MapGraphNode destinationNode) {
+	public boolean checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(MapGraphNode destinationNode) {
+		return checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(destinationNode, null);
+	}
+
+	public boolean checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(MapGraphNode destinationNode,
+																	MapGraphNode pathFinalNode) {
+		Entity door = destinationNode.getDoor();
+
+		if (pathFinalNode != null && pathFinalNode.equals(destinationNode)) return true;
+		if (door != null && ComponentsMapper.door.get(door).getState() != DoorComponent.DoorStates.OPEN) return false;
+
 		for (Entity c : characterEntities) {
 			MapGraphNode node = getNode(ComponentsMapper.characterDecal.get(c).getNodePosition(auxVector2));
 			int hp = ComponentsMapper.character.get(c).getSkills().getHealthData().getHp();
-			if (currentPathFinalDestination == node || hp <= 0) {
-				continue;
-			}
-			if (node.equals(destinationNode)) {
+			if (hp > 0 && node.equals(destinationNode)) {
 				return false;
 			}
 		}
-		return (currentPathFinalDestination.equals(destinationNode)
-				|| destinationNode.getDoor() == null
-				|| ComponentsMapper.door.get(destinationNode.getDoor()).getState() == DoorComponent.DoorStates.OPEN);
+
+		return true;
 	}
 
 	private boolean isNodeRevealed(MapGraphNode node) {
@@ -210,7 +216,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 	private void checkIfConnectionIsAvailable(final Connection<MapGraphNode> connection) {
 		boolean available = true;
 		if (includeEnemiesInGetConnections) {
-			available = checkIfNodeIsAvailable(connection.getToNode());
+			available = checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(connection.getToNode(), currentPathFinalDestination);
 		}
 		boolean validCost = connection.getCost() <= maxConnectionCostInSearch.getCostValue();
 		if (available && validCost && checkIfConnectionPassable(connection)) {

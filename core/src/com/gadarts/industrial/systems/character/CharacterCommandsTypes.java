@@ -7,7 +7,7 @@ import com.gadarts.industrial.systems.character.actions.ToDoAfterDestinationReac
 import lombok.Getter;
 
 public enum CharacterCommandsTypes {
-	GO_TO,
+	GO_TO(),
 	GO_TO_OPEN_DOOR(new OpenDoorAction()),
 	GO_TO_PICKUP(new PickUpAction()),
 	GO_TO_MELEE(new MeleeAction()),
@@ -18,17 +18,19 @@ public enum CharacterCommandsTypes {
 	@Getter
 	private final boolean requiresMovement;
 
-	CharacterCommandsTypes( ) {
-		this(null);
-	}
 
 	CharacterCommandsTypes(final ToDoAfterDestinationReached toDoAfterDestinationReached) {
 		this(toDoAfterDestinationReached, true);
 	}
 
-	CharacterCommandsTypes(final ToDoAfterDestinationReached toDoAfterDestinationReached, final boolean requiresMovement) {
+	CharacterCommandsTypes(ToDoAfterDestinationReached toDoAfterDestinationReached,
+						   boolean requiresMovement) {
 		this.toDoAfterDestinationReached = toDoAfterDestinationReached;
 		this.requiresMovement = requiresMovement;
+	}
+
+	CharacterCommandsTypes( ) {
+		this(null, true);
 	}
 
 	public ToDoAfterDestinationReached getToDoAfterDestinationReached( ) {
