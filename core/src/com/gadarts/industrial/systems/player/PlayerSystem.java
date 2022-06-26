@@ -133,13 +133,12 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		for (int row = (int) (nodeRow - half); row < nodeRow + half; row++) {
 			for (int col = (int) (nodeCol - half); col < nodeCol + half; col++) {
 				MapGraphNode nearbyNode = map.getNode(col, row);
-				if (nearbyNode != null) {
-					Entity entity = nearbyNode.getEntity();
+				if (nearbyNode != null && nearbyNode.getEntity() != null) {
 					if ((row != 0 || col != 0)) {
-						calculateFogOfWarEdges(entity);
+						calculateFogOfWarEdges(nearbyNode.getEntity());
 					} else {
 						int northWest = NORTH.getMask() | WEST.getMask() | NORTH_EAST.getMask() | SOUTH_WEST.getMask();
-						floor.get(entity).setFogOfWarSignature(northWest);
+						floor.get(nearbyNode.getEntity()).setFogOfWarSignature(northWest);
 					}
 				}
 			}
@@ -147,7 +146,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	private void calculateFogOfWarEdges(Entity entity) {
-		if (entity == null) return;
 		int total = 0;
 		FloorComponent floorComponent = floor.get(entity);
 		for (Direction direction : Direction.values()) {

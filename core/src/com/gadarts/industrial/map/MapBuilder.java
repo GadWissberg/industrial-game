@@ -25,6 +25,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.shared.WallCreator;
+import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.assets.MapJsonKeys;
 import com.gadarts.industrial.shared.model.Coords;
@@ -42,6 +43,7 @@ import com.gadarts.industrial.shared.model.env.EnvironmentObjectDefinition;
 import com.gadarts.industrial.shared.model.env.EnvironmentObjectType;
 import com.gadarts.industrial.shared.model.env.ThingsDefinitions;
 import com.gadarts.industrial.shared.model.map.MapNodeData;
+import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.shared.model.map.NodeWalls;
 import com.gadarts.industrial.shared.model.map.Wall;
 import com.gadarts.industrial.shared.model.pickups.WeaponsDefinitions;
@@ -845,14 +847,24 @@ public class MapBuilder implements Disposable {
 		SurfaceTextures definition = SurfaceTextures.values()[chr - 1];
 		if (definition != MISSING) {
 			GameModelInstance mi = new GameModelInstance(floorModel);
-			defineNode(row, col, definition, mi);
-			beginBuildingEntity(engine).addModelInstanceComponent(mi, true)
-					.addFloorComponent(node)
-					.finishAndAddToEngine();
+			defineNodeModelInstance(row, col, definition, mi);
+			if (definition == Assets.SurfaceTextures.BLANK) {
+				node.setType(OBSTACLE_KEY_DIAGONAL_FORBIDDEN);
+			}
+			inflateNodeEntity(node, definition, mi);
 		}
 	}
 
-	private void defineNode(final int row, final int col, final SurfaceTextures definition, final GameModelInstance mi) {
+	private void inflateNodeEntity(MapGraphNode node, SurfaceTextures definition, GameModelInstance mi) {
+		beginBuildingEntity(engine).addModelInstanceComponent(mi, true)
+				.addFloorComponent(node, definition)
+				.finishAndAddToEngine();
+	}
+
+	private void defineNodeModelInstance(int row,
+										 int col,
+										 SurfaceTextures definition,
+										 GameModelInstance mi) {
 		mi.materials.get(0).set(TextureAttribute.createDiffuse(assetsManager.getTexture(definition)));
 		mi.transform.setTranslation(auxVector3_1.set(col + 0.5f, 0, row + 0.5f));
 		mi.getAdditionalRenderData().setBoundingBox(mi.calculateBoundingBox(auxBoundingBox));

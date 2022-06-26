@@ -30,6 +30,7 @@ import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
@@ -185,6 +186,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		Coord3D lastCoord = nodes.getLast();
 		MapGraphNode result = map.getNode(lastCoord.getX(), lastCoord.z);
 		result = findNearestNodeOnCameraLineOfSight(map, nodes, result);
+
 		return result;
 	}
 
@@ -193,9 +195,12 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 															MapGraphNode result) {
 		for (Coord3D coord : nodes) {
 			MapGraphNode node = map.getNode(coord.x, coord.z);
-			if (node != null && coord.getY() <= node.getHeight()) {
-				result = node;
-				break;
+			if (node != null && coord.getY() + 1 <= node.getHeight() && node.getEntity() != null) {
+				MapNodesTypes nodeType = ComponentsMapper.floor.get(node.getEntity()).getNode().getType();
+				if (nodeType == MapNodesTypes.PASSABLE_NODE) {
+					result = node;
+					break;
+				}
 			}
 		}
 		return result;

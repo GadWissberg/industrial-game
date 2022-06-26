@@ -11,7 +11,7 @@ import java.util.List;
 
 @Getter
 public class FloorComponent implements GameComponent {
-	
+
 	@Getter
 	private final List<Entity> nearbyCharacters = new ArrayList<>();
 
@@ -21,8 +21,9 @@ public class FloorComponent implements GameComponent {
 
 	@Setter
 	private boolean revealCalculated;
+
 	@Override
-	public void reset() {
+	public void reset( ) {
 
 	}
 
