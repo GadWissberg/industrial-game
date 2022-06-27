@@ -39,6 +39,7 @@ import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.menu.MenuHandler;
 import com.gadarts.industrial.systems.ui.menu.MenuHandlerImpl;
 import com.gadarts.industrial.utils.EntityBuilder;
+import com.gadarts.industrial.utils.GameUtils;
 import lombok.Getter;
 import squidpony.squidmath.Bresenham;
 import squidpony.squidmath.Coord3D;
@@ -179,31 +180,27 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		MapGraph map = systemsCommonData.getMap();
 		Camera camera = systemsCommonData.getCamera();
 
-		MapGraphNode lowestNode = map.getRayNode(screenX, screenY, camera);
+		Vector3 ray = GameUtils.calculateGridPositionFromMouse(camera, screenX, screenY, auxVector3_2);
 		ArrayDeque<Coord3D> nodes = (ArrayDeque<Coord3D>) Bresenham.line3D(
-				(int) camera.position.x, (int) camera.position.y, (int) camera.position.z,
-				lowestNode.getCol(), 0, lowestNode.getRow());
-		Coord3D lastCoord = nodes.getLast();
-		MapGraphNode result = map.getNode(lastCoord.getX(), lastCoord.z);
-		result = findNearestNodeOnCameraLineOfSight(map, nodes, result);
+				(int) camera.position.x, (int) (camera.position.y), (int) camera.position.z,
+				(int) ray.x, 0, (int) ray.z);
+		MapGraphNode result = findNearestNodeOnCameraLineOfSight(map, nodes);
 
 		return result;
 	}
 
 	private MapGraphNode findNearestNodeOnCameraLineOfSight(MapGraph map,
-															ArrayDeque<Coord3D> nodes,
-															MapGraphNode result) {
+															ArrayDeque<Coord3D> nodes) {
 		for (Coord3D coord : nodes) {
 			MapGraphNode node = map.getNode(coord.x, coord.z);
-			if (node != null && coord.getY() + 1 <= node.getHeight() && node.getEntity() != null) {
+			if (node != null && coord.getY() < node.getHeight() && node.getEntity() != null) {
 				MapNodesTypes nodeType = ComponentsMapper.floor.get(node.getEntity()).getNode().getType();
 				if (nodeType == MapNodesTypes.PASSABLE_NODE) {
-					result = node;
-					break;
+					return node;
 				}
 			}
 		}
-		return result;
+		return null;
 	}
 
 	@Override
