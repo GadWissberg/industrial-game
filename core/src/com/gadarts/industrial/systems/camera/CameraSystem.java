@@ -89,9 +89,10 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 		Entity player = getSystemsCommonData().getPlayer();
 		Vector3 playerPos = ComponentsMapper.characterDecal.get(player).getDecal().getPosition();
 		Camera camera = getSystemsCommonData().getCamera();
-		Vector3 rotationPoint = GeneralUtils.defineRotationPoint(auxVector3_1, camera);
+		Vector3 rotationPoint = GeneralUtils.defineRotationPoint(auxVector3_1, camera, -playerPos.y);
 		Vector3 diff = auxVector3_2.set(playerPos).sub(rotationPoint);
-		Vector3 cameraPosDest = auxVector3_3.set(camera.position).add(diff.x, 0, diff.z);
+		Vector3 cameraPosDest = auxVector3_3.set(camera.position).add(diff.x, 0F, diff.z);
+		cameraPosDest.y = playerPos.y + CAMERA_HEIGHT;
 		camera.position.interpolate(cameraPosDest, 0.1F, Interpolation.bounce);
 	}
 
