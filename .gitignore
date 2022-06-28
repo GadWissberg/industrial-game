@@ -120,3 +120,7 @@ Thumbs.db
 /gradlew
 /gradle/wrapper/gradle-wrapper.jar
 *.fbx
+/core.20220623.171658.487.0001.dmp
+/javacore.20220623.171658.487.0002.txt
+*.dmp
+*.trc
