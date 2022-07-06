@@ -10,7 +10,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -95,11 +94,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private static final Circle auxCircle = new Circle();
 	private static final Rectangle auxRect = new Rectangle();
 	private final Texture iconFlowerLookingFor;
-	private final StringBuilder stringBuilder = new StringBuilder();
 	private final Environment environment;
 	private final MainShaderProvider shaderProvider;
 	private final GameFrameBuffer shadowFrameBuffer;
-	private GlyphLayout skillFlowerGlyph;
 	private BitmapFont skillFlowerFont;
 	private ModelBatch depthModelBatch;
 	private ModelBatch modelBatchShadows;
@@ -134,7 +131,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		final Texture iconFlowerLookingFor;
 		iconFlowerLookingFor = assetsManager.getTexture(Assets.UiTextures.ICON_LOOKING_FOR);
 		skillFlowerFont = new BitmapFont();
-		skillFlowerGlyph = new GlyphLayout();
 		return iconFlowerLookingFor;
 	}
 
@@ -446,8 +442,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		Vector3 screenPos = camera.project(auxVector3_1.set(simpleDecalComponent.getDecal().getPosition()));
 		if (enemyComponent.getAiStatus() == EnemyAiStatus.SEARCHING && enemyComponent.isDisplayIconInFlower()) {
 			renderSkillFlowerIcon(spriteBatch, screenPos);
-		} else {
-			renderSkillFlowerText(spriteBatch, enemyComponent, screenPos);
 		}
 	}
 
@@ -455,17 +449,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		float x = screenPos.x - iconFlowerLookingFor.getWidth() / 2F;
 		float y = screenPos.y - iconFlowerLookingFor.getHeight() / 2F;
 		spriteBatch.draw(iconFlowerLookingFor, x, y);
-	}
-
-	private void renderSkillFlowerText(final SpriteBatch spriteBatch,
-									   final EnemyComponent enemyComponent,
-									   final Vector3 screenPos) {
-		stringBuilder.setLength(0);
-		String text = stringBuilder.append(enemyComponent.getSkill()).toString();
-		skillFlowerGlyph.setText(skillFlowerFont, text);
-		float x = screenPos.x - skillFlowerGlyph.width / 2F;
-		float y = screenPos.y + skillFlowerGlyph.height / 2F;
-		skillFlowerFont.draw(spriteBatch, text, x, y);
 	}
 
 	private void renderDecals(final float deltaTime) {

@@ -311,11 +311,10 @@ public class EntityBuilder {
 	}
 
 	public EntityBuilder addEnemyComponent(final Enemies enemyDefinition,
-										   final int skill,
 										   final Animation<TextureAtlas.AtlasRegion> bulletRegions) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		EnemyComponent component = engine.createComponent(EnemyComponent.class);
-		component.init(enemyDefinition, skill, bulletRegions);
+		component.init(enemyDefinition, bulletRegions);
 		currentEntity.add(component);
 		return instance;
 	}

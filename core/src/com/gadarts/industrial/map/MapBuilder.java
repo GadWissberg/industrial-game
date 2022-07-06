@@ -36,7 +36,6 @@ import com.gadarts.industrial.shared.model.characters.CharacterTypes;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
 import com.gadarts.industrial.shared.model.characters.attributes.Agility;
-import com.gadarts.industrial.shared.model.characters.attributes.Strength;
 import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
 import com.gadarts.industrial.shared.model.characters.enemies.EnemyWeaponsDefinitions;
 import com.gadarts.industrial.shared.model.env.EnvironmentObjectDefinition;
@@ -78,9 +77,7 @@ import java.util.stream.IntStream;
 
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
 import static com.gadarts.industrial.shared.assets.Assets.Atlases;
-import static com.gadarts.industrial.shared.assets.Assets.Atlases.ANUBIS;
-import static com.gadarts.industrial.shared.assets.Assets.Atlases.PLAYER_GENERIC;
-import static com.gadarts.industrial.shared.assets.Assets.Atlases.findByRelatedWeapon;
+import static com.gadarts.industrial.shared.assets.Assets.Atlases.*;
 import static com.gadarts.industrial.shared.assets.Assets.Models;
 import static com.gadarts.industrial.shared.assets.Assets.Sounds;
 import static com.gadarts.industrial.shared.assets.Assets.SurfaceTextures;
@@ -702,7 +699,6 @@ public class MapBuilder implements Disposable {
 		CharacterSkillsParameters skills = new CharacterSkillsParameters(
 				PLAYER_HEALTH,
 				Agility.HIGH,
-				new Strength(1, 3),
 				Accuracy.LOW);
 		CharacterData data = new CharacterData(
 				position,
@@ -718,7 +714,6 @@ public class MapBuilder implements Disposable {
 		CharacterSpriteData characterSpriteData = Pools.obtain(CharacterSpriteData.class);
 		characterSpriteData.init(data.getDirection(),
 				IDLE,
-				def.getMeleeHitFrameIndex(),
 				def.getPrimaryAttackHitFrameIndex(),
 				def.isSingleDeathAnimation());
 		return characterSpriteData;
@@ -739,10 +734,9 @@ public class MapBuilder implements Disposable {
 	@SuppressWarnings("ConstantConditions")
 	private void inflateEnemy(final JsonObject charJsonObject, final MapGraph mapGraph) {
 		Enemies type = inflateEnemyType(charJsonObject);
-		int skill = Optional.ofNullable(DefaultGameSettings.ENEMIES_SKILL).orElse(1);
-		EntityBuilder b = beginBuildingEntity(engine).addEnemyComponent(type, skill, inflateEnemyBulletFrames(type));
+		EntityBuilder b = beginBuildingEntity(engine).addEnemyComponent(type, inflateEnemyBulletFrames(type));
 		Vector3 position = inflateCharacterPosition(charJsonObject, mapGraph);
-		addCharBaseComponents(b, inflateCharData(charJsonObject, type, skill, position), type, type.getAtlasDefinition());
+		addCharBaseComponents(b, inflateCharData(charJsonObject, type, position), type, type.getAtlasDefinition());
 		addEnemySkillFlower(type, b, position);
 		Entity enemy = b.finishAndAddToEngine();
 		initializeEnemy(position, enemy);
@@ -781,13 +775,12 @@ public class MapBuilder implements Disposable {
 		simpleDecalComponent.addRelatedDecal(skillFlowerDecal);
 	}
 
-	private CharacterData inflateCharData(JsonObject characterJsonObject, Enemies type, int skill, Vector3 pos) {
+	private CharacterData inflateCharData(JsonObject characterJsonObject, Enemies type, Vector3 pos) {
 		auxCharacterSoundData.set(type.getPainSound(), type.getDeathSound(), type.getStepSound());
 		CharacterSkillsParameters skills = new CharacterSkillsParameters(
-				type.getHealth().get(skill - 1),
-				type.getAgility().get(skill - 1),
-				type.getStrength().get(skill - 1),
-				type.getAccuracy() != null ? type.getAccuracy()[skill - 1] : null);
+				type.getHealth(),
+				type.getAgility(),
+				type.getAccuracy() != null ? type.getAccuracy() : null);
 		Direction direction = Direction.values()[characterJsonObject.get(DIRECTION).getAsInt()];
 		return new CharacterData(pos, direction, skills, auxCharacterSoundData);
 	}
@@ -795,8 +788,8 @@ public class MapBuilder implements Disposable {
 	private Animation<TextureAtlas.AtlasRegion> inflateEnemyBulletFrames(Enemies type) {
 		Animation<TextureAtlas.AtlasRegion> bulletAnimation = enemyBulletsTextureRegions.get(type);
 		if (type.getPrimaryAttack() != null && !enemyBulletsTextureRegions.containsKey(type)) {
-			String name = EnemyWeaponsDefinitions.ENERGY_BALL.name().toLowerCase();
-			Array<TextureAtlas.AtlasRegion> regions = assetsManager.getAtlas(ANUBIS).findRegions(name);
+			String name = EnemyWeaponsDefinitions.RAPID_LASER_CANNON.name().toLowerCase();
+			Array<TextureAtlas.AtlasRegion> regions = assetsManager.getAtlas(GUARD_BOT).findRegions(name);
 			bulletAnimation = new Animation<>(type.getPrimaryAttack().getFrameDuration(), regions);
 			enemyBulletsTextureRegions.put(type, bulletAnimation);
 		}

@@ -20,7 +20,6 @@ import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterAnimation;
 import com.gadarts.industrial.components.character.CharacterAnimations;
 import com.gadarts.industrial.components.character.CharacterComponent;
-import com.gadarts.industrial.components.character.CharacterSpriteData;
 import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
@@ -285,9 +284,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private void enemySelectedWithRangeWeapon(final MapGraphNode node) {
 		Entity player = getSystemsCommonData().getPlayer();
 		CharacterComponent charComp = character.get(player);
-		Weapon w = getSystemsCommonData().getStorage().getSelectedWeapon();
-		CharacterSpriteData characterSpriteData = charComp.getCharacterSpriteData();
-		characterSpriteData.setMeleeHitFrameIndex(((WeaponsDefinitions) w.getDefinition()).getHitFrameIndex());
 		Entity targetNode = getSystemsCommonData().getMap().getAliveEnemyFromNode(node);
 		charComp.setTarget(targetNode);
 		for (PlayerSystemEventsSubscriber subscriber : subscribers) {

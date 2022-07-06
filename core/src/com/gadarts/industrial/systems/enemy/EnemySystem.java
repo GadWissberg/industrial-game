@@ -9,13 +9,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
-import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
-import com.gadarts.industrial.shared.model.characters.SpriteType;
-import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
-import com.gadarts.industrial.shared.model.characters.attributes.Range;
-import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -27,6 +25,11 @@ import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.components.sd.RelatedDecal;
 import com.gadarts.industrial.components.sd.SimpleDecalComponent;
 import com.gadarts.industrial.map.*;
+import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.model.characters.SpriteType;
+import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
+import com.gadarts.industrial.shared.model.characters.attributes.Range;
+import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterCommand;
@@ -43,14 +46,11 @@ import java.util.List;
 
 import static com.badlogic.gdx.utils.TimeUtils.millis;
 import static com.badlogic.gdx.utils.TimeUtils.timeSinceMillis;
-import static com.gadarts.industrial.shared.assets.Assets.Sounds;
-import static com.gadarts.industrial.shared.assets.Assets.UiTextures;
-import static com.gadarts.industrial.shared.model.characters.attributes.Accuracy.NONE;
 import static com.gadarts.industrial.components.ComponentsMapper.*;
-import static com.gadarts.industrial.components.ComponentsMapper.flowerSkillIcon;
-import static com.gadarts.industrial.components.ComponentsMapper.simpleDecal;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.HEIGHT_DIFF;
+import static com.gadarts.industrial.shared.assets.Assets.Sounds;
+import static com.gadarts.industrial.shared.assets.Assets.UiTextures;
 import static com.gadarts.industrial.systems.enemy.EnemyAiStatus.*;
 
 public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> implements
@@ -92,12 +92,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		iconLookingForTexture = assetsManager.getTexture(UiTextures.ICON_LOOKING_FOR);
 	}
 
-	private void onFrameChangedOfAttack(final Entity entity, final TextureAtlas.AtlasRegion newFrame) {
-		if (newFrame.index == ComponentsMapper.character.get(entity).getCharacterSpriteData().getMeleeHitFrameIndex()) {
-			getSoundPlayer().playSound(ComponentsMapper.enemy.get(entity).getEnemyDefinition().getAttackSound());
-		}
-	}
-
 	private void onFrameChangedOfRun(final Entity entity) {
 		Vector3 position = ComponentsMapper.characterDecal.get(entity).getDecal().getPosition();
 		SimpleDecalComponent simpleDecalComponent = ComponentsMapper.simpleDecal.get(entity);
@@ -115,9 +109,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	public void onFrameChanged(final Entity entity, final float deltaTime, final TextureAtlas.AtlasRegion newFrame) {
 		SpriteType spriteType = ComponentsMapper.character.get(entity).getCharacterSpriteData().getSpriteType();
 		if (ComponentsMapper.enemy.has(entity)) {
-			if (spriteType == SpriteType.ATTACK) {
-				onFrameChangedOfAttack(entity, newFrame);
-			} else if (spriteType == SpriteType.RUN) {
+			if (spriteType == SpriteType.RUN) {
 				onFrameChangedOfRun(entity);
 			}
 		}
@@ -129,7 +121,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		MapGraphNode enemyNode = getSystemsCommonData().getMap().getNode(enemyPosition);
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		Enemies enemyDefinition = enemyComponent.getEnemyDefinition();
-		if (!considerPrimaryAttack(enemy, enemyComponent, enemyDefinition, enemyComponent.getSkill() - 1)) {
+		if (!considerPrimaryAttack(enemy, enemyComponent, enemyDefinition)) {
 			calculatePathAndApplyGoToMelee(enemy, enemyNode, target);
 		}
 	}
@@ -198,17 +190,16 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	private boolean considerPrimaryAttack(final Entity enemy,
 										  final EnemyComponent enemyCom,
-										  final Enemies def,
-										  final int skillIndex) {
-		Accuracy[] accuracy = def.getAccuracy();
-		if (accuracy != null && accuracy[skillIndex] != NONE && def.getRange().get(skillIndex) != Range.NONE) {
+										  final Enemies def) {
+		Accuracy accuracy = def.getAccuracy();
+		if (accuracy != null && def.getRange() != Range.NONE) {
 			float disToTarget = calculateDistanceToTarget(enemy);
-			if (disToTarget <= def.getRange().get(skillIndex).getMaxDistance() && disToTarget > RANGE_ATTACK_MIN_RADIUS) {
-				int turnsDiff = def.getReloadTime().get(skillIndex).getNumberOfTurns();
-				if (checkIfPrimaryAttackIsReady(enemyCom, turnsDiff) && !checkIfWayIsClearToTarget(enemy)) {
-					applyCommand(enemy, CharacterCommandsTypes.ATTACK_PRIMARY);
-					return true;
-				}
+			if (disToTarget <= def.getRange().getMaxDistance() && disToTarget > RANGE_ATTACK_MIN_RADIUS) {
+//				int turnsDiff = def.getReloadTime().get(skillIndex).getNumberOfTurns();
+//				if (checkIfPrimaryAttackIsReady(enemyCom, turnsDiff) && !checkIfWayIsClearToTarget(enemy)) {
+//					applyCommand(enemy, CharacterCommandsTypes.ATTACK_PRIMARY);
+//					return true;
+//				}
 			}
 		}
 		return false;

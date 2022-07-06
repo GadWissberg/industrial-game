@@ -12,7 +12,6 @@ public class CharacterSpriteData implements Pool.Poolable {
 	private Direction facingDirection;
 	private int frameIndexNotAffectedByLight;
 	private SpriteType spriteType;
-	private int meleeHitFrameIndex;
 	private int primaryAttackHitFrameIndex;
 	private boolean singleDeathAnimation;
 
@@ -27,12 +26,10 @@ public class CharacterSpriteData implements Pool.Poolable {
 
 	public void init(final Direction direction,
 					 final SpriteType spriteType,
-					 final int hitFrameIndex,
 					 final int primaryAttackHitFrameIndex,
 					 final boolean singleDeathAnimation) {
 		this.facingDirection = direction;
 		this.spriteType = spriteType;
-		this.meleeHitFrameIndex = hitFrameIndex;
 		this.primaryAttackHitFrameIndex = primaryAttackHitFrameIndex;
 		this.singleDeathAnimation = singleDeathAnimation;
 	}

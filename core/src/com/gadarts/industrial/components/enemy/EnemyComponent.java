@@ -22,17 +22,14 @@ public class EnemyComponent implements GameComponent {
 	private Enemies enemyDefinition;
 	private EnemyAiStatus aiStatus;
 	private EnemyTimeStamps timeStamps = new EnemyTimeStamps();
-	private int skill = 1;
 	private Animation<TextureAtlas.AtlasRegion> bulletAnimation;
 	private long iconDisplayInFlowerTimeStamp;
 	private boolean displayIconInFlower;
 
 	public void init(final Enemies enemyDefinition,
-					 final int skill,
 					 final Animation<TextureAtlas.AtlasRegion> bulletAnimation) {
 		calculateNextRoamSound();
 		this.enemyDefinition = enemyDefinition;
-		this.skill = skill;
 		this.bulletAnimation = bulletAnimation;
 		timeStamps.reset();
 		targetLastVisibleNode = null;

@@ -199,7 +199,7 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 
 	private void enemyEngagesPrimaryAttack(final Entity character, final Vector3 direction, final Vector3 charPos) {
 		EnemyComponent enemyComponent = enemy.get(character);
-		Accuracy accuracy = enemyComponent.getEnemyDefinition().getAccuracy()[enemyComponent.getSkill() - 1];
+		Accuracy accuracy = enemyComponent.getEnemyDefinition().getAccuracy();
 		direction.rotate(Vector3.Y, MathUtils.random(-accuracy.getMaxAngle(), accuracy.getMaxAngle()));
 		direction.rotate(Vector3.X, MathUtils.random(-accuracy.getMaxAngle(), accuracy.getMaxAngle()));
 		EnemyComponent enemyComp = enemy.get(character);
@@ -214,10 +214,10 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 								   final EnemyComponent enemyComp,
 								   final Animation<TextureAtlas.AtlasRegion> bulletAnim) {
 		charPos.y += enemy.get(character).getEnemyDefinition().getHeight() / 2F;
-		Integer[] damagePoints = enemyComp.getEnemyDefinition().getPrimaryAttack().getDamagePoints();
+		Integer damagePoints = enemyComp.getEnemyDefinition().getPrimaryAttack().getDamagePoints();
 		ParticleEffect effect = getAssetsManager().getParticleEffect(Assets.ParticleEffects.ENERGY_BALL_TRAIL);
 		Entity bullet = EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-				.addBulletComponent(charPos, direction, character, damagePoints[enemyComp.getSkill() - 1])
+				.addBulletComponent(charPos, direction, character, damagePoints)
 				.addAnimationComponent(enemyComp.getEnemyDefinition().getPrimaryAttack().getFrameDuration(), bulletAnim)
 				.addSimpleDecalComponent(charPos, bulletAnim.getKeyFrames()[0], Zero.setZero(), true, true)
 				.addShadowlessLightComponent(charPos, PROJ_LIGHT_INTENSITY, PROJ_LIGHT_RADIUS, PROJ_LIGHT_COLOR)

@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -20,7 +19,6 @@ import com.gadarts.industrial.shared.model.characters.CharacterTypes;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.characters.attributes.Agility;
-import com.gadarts.industrial.shared.model.characters.attributes.Strength;
 import com.gadarts.industrial.shared.model.pickups.WeaponsDefinitions;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.SoundPlayer;
@@ -68,7 +66,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private final Map<SpriteType, OnFrameChangedEvent> onFrameChangedEvents = Map.of(
 			RUN, this::applyRunning,
 			PICKUP, this::handlePickup,
-			ATTACK, this::applyMeleeAttack,
 			ATTACK_PRIMARY, this::applyPrimaryAttack
 	);
 	private ParticleEffect bloodSplatterEffect;
@@ -311,7 +308,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private void handleCurrentCommand(final CharacterCommand currentCommand) {
 		CharacterComponent characterComponent = character.get(currentCommand.getCharacter());
 		SpriteType spriteType = characterComponent.getCharacterSpriteData().getSpriteType();
-		if (spriteType == ATTACK || spriteType == PICKUP || spriteType == ATTACK_PRIMARY) {
+		if (spriteType == PICKUP || spriteType == ATTACK_PRIMARY) {
 			handleModeWithNonLoopingAnimation(currentCommand.getCharacter());
 		} else if (characterComponent.getMotivationData().getMotivation() == END_MY_TURN) {
 			commandDone(currentCommand.getCharacter());
@@ -394,12 +391,10 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	private SpriteType decideAttackSpriteType(CharacterMotivationData motivationData) {
-		SpriteType spriteType;
+		SpriteType spriteType = null;
 		Integer motivationAdditionalData = (Integer) motivationData.getMotivationAdditionalData();
 		if (motivationAdditionalData != null && motivationAdditionalData == USE_PRIMARY) {
 			spriteType = ATTACK_PRIMARY;
-		} else {
-			spriteType = ATTACK;
 		}
 		return spriteType;
 	}
@@ -449,11 +444,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		}
 	}
 
-	private void applyMeleeDamageToCharacter(final Entity attacker, final Entity attacked) {
-		Strength strength = character.get(attacker).getSkills().getStrength();
-		applyDamageToCharacter(attacked, MathUtils.random(strength.getMinDamage(), strength.getMaxDamage()));
-	}
-
 	@Override
 	public void onProjectileCollisionWithAnotherEntity(final Entity bullet, final Entity collidable) {
 		if (ComponentsMapper.character.has(collidable)) {
@@ -491,20 +481,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		Vector3 targetNodeCenterPosition = targetNode.getCenterPosition(auxVector3_3);
 		targetNodeCenterPosition.y += 0.5f;
 		return targetNodeCenterPosition.sub(positionNodeCenterPosition);
-	}
-
-	private void applyMeleeAttack(Entity character,
-								  TextureAtlas.AtlasRegion newFrame) {
-		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		if (newFrame.index != characterComponent.getCharacterSpriteData().getMeleeHitFrameIndex()) return;
-		Entity target = characterComponent.getTarget();
-		if (player.has(character)) {
-			if (((WeaponsDefinitions) getSystemsCommonData().getStorage().getSelectedWeapon().getDefinition()).isMelee()) {
-				applyMeleeDamageToCharacter(character, target);
-			}
-		} else {
-			applyMeleeDamageToCharacter(character, target);
-		}
 	}
 
 	private void applyRunning(final Entity character,
