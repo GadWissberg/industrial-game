@@ -24,7 +24,6 @@ public class EnemyComponent implements GameComponent {
 	private EnemyTimeStamps timeStamps = new EnemyTimeStamps();
 	private Animation<TextureAtlas.AtlasRegion> bulletAnimation;
 	private long iconDisplayInFlowerTimeStamp;
-	private boolean displayIconInFlower;
 
 	public void init(final Enemies enemyDefinition,
 					 final Animation<TextureAtlas.AtlasRegion> bulletAnimation) {

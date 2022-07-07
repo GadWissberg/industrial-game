@@ -3,7 +3,7 @@ package com.gadarts.industrial.components;
 import lombok.Getter;
 
 @Getter
-public class FlowerSkillIconComponent implements GameComponent {
+public class FlowerIconComponent implements GameComponent {
 	private long timeOfCreation;
 
 	@Override

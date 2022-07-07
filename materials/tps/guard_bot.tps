@@ -181,32 +181,6 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">../sprites/guard_bot/death_1_0.png</key>
-            <key type="filename">../sprites/guard_bot/death_1_1.png</key>
-            <key type="filename">../sprites/guard_bot/death_1_10.png</key>
-            <key type="filename">../sprites/guard_bot/death_1_2.png</key>
-            <key type="filename">../sprites/guard_bot/death_1_3.png</key>
-            <key type="filename">../sprites/guard_bot/death_1_4.png</key>
-            <key type="filename">../sprites/guard_bot/death_1_5.png</key>
-            <key type="filename">../sprites/guard_bot/death_1_6.png</key>
-            <key type="filename">../sprites/guard_bot/death_1_7.png</key>
-            <key type="filename">../sprites/guard_bot/death_1_8.png</key>
-            <key type="filename">../sprites/guard_bot/death_1_9.png</key>
-            <key type="filename">../sprites/guard_bot/death_2_0.png</key>
-            <key type="filename">../sprites/guard_bot/death_2_1.png</key>
-            <key type="filename">../sprites/guard_bot/death_2_2.png</key>
-            <key type="filename">../sprites/guard_bot/death_2_3.png</key>
-            <key type="filename">../sprites/guard_bot/death_2_4.png</key>
-            <key type="filename">../sprites/guard_bot/death_2_5.png</key>
-            <key type="filename">../sprites/guard_bot/death_2_6.png</key>
-            <key type="filename">../sprites/guard_bot/death_2_7.png</key>
-            <key type="filename">../sprites/guard_bot/death_3_0.png</key>
-            <key type="filename">../sprites/guard_bot/death_3_1.png</key>
-            <key type="filename">../sprites/guard_bot/death_3_2.png</key>
-            <key type="filename">../sprites/guard_bot/death_3_3.png</key>
-            <key type="filename">../sprites/guard_bot/death_3_4.png</key>
-            <key type="filename">../sprites/guard_bot/death_3_5.png</key>
-            <key type="filename">../sprites/guard_bot/death_3_6.png</key>
             <key type="filename">../sprites/guard_bot/guard/attack_east_0.png</key>
             <key type="filename">../sprites/guard_bot/guard/attack_east_1.png</key>
             <key type="filename">../sprites/guard_bot/guard/attack_east_2.png</key>
@@ -343,6 +317,32 @@
             <key type="filename">../sprites/guard_bot/guard/run_west_5.png</key>
             <key type="filename">../sprites/guard_bot/guard/run_west_6.png</key>
             <key type="filename">../sprites/guard_bot/guard/run_west_7.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_1_0.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_1_1.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_1_10.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_1_2.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_1_3.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_1_4.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_1_5.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_1_6.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_1_7.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_1_8.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_1_9.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_2_0.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_2_1.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_2_2.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_2_3.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_2_4.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_2_5.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_2_6.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_2_7.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_3_0.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_3_1.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_3_2.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_3_3.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_3_4.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_3_5.png</key>
+            <key type="filename">../sprites/guard_bot/light_death_3_6.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -496,32 +496,32 @@
             <filename>../sprites/guard_bot/guard/run_west_5.png</filename>
             <filename>../sprites/guard_bot/guard/run_west_6.png</filename>
             <filename>../sprites/guard_bot/guard/run_west_7.png</filename>
-            <filename>../sprites/guard_bot/death_1_0.png</filename>
-            <filename>../sprites/guard_bot/death_1_1.png</filename>
-            <filename>../sprites/guard_bot/death_1_10.png</filename>
-            <filename>../sprites/guard_bot/death_1_2.png</filename>
-            <filename>../sprites/guard_bot/death_1_3.png</filename>
-            <filename>../sprites/guard_bot/death_1_4.png</filename>
-            <filename>../sprites/guard_bot/death_1_5.png</filename>
-            <filename>../sprites/guard_bot/death_1_6.png</filename>
-            <filename>../sprites/guard_bot/death_1_7.png</filename>
-            <filename>../sprites/guard_bot/death_1_8.png</filename>
-            <filename>../sprites/guard_bot/death_1_9.png</filename>
-            <filename>../sprites/guard_bot/death_2_0.png</filename>
-            <filename>../sprites/guard_bot/death_2_1.png</filename>
-            <filename>../sprites/guard_bot/death_2_2.png</filename>
-            <filename>../sprites/guard_bot/death_2_3.png</filename>
-            <filename>../sprites/guard_bot/death_2_4.png</filename>
-            <filename>../sprites/guard_bot/death_2_5.png</filename>
-            <filename>../sprites/guard_bot/death_2_6.png</filename>
-            <filename>../sprites/guard_bot/death_2_7.png</filename>
-            <filename>../sprites/guard_bot/death_3_0.png</filename>
-            <filename>../sprites/guard_bot/death_3_1.png</filename>
-            <filename>../sprites/guard_bot/death_3_2.png</filename>
-            <filename>../sprites/guard_bot/death_3_3.png</filename>
-            <filename>../sprites/guard_bot/death_3_4.png</filename>
-            <filename>../sprites/guard_bot/death_3_5.png</filename>
-            <filename>../sprites/guard_bot/death_3_6.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_0.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_1.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_10.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_2.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_3.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_4.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_5.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_6.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_7.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_8.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_9.png</filename>
+            <filename>../sprites/guard_bot/light_death_2_0.png</filename>
+            <filename>../sprites/guard_bot/light_death_2_1.png</filename>
+            <filename>../sprites/guard_bot/light_death_2_2.png</filename>
+            <filename>../sprites/guard_bot/light_death_2_3.png</filename>
+            <filename>../sprites/guard_bot/light_death_2_4.png</filename>
+            <filename>../sprites/guard_bot/light_death_2_5.png</filename>
+            <filename>../sprites/guard_bot/light_death_2_6.png</filename>
+            <filename>../sprites/guard_bot/light_death_2_7.png</filename>
+            <filename>../sprites/guard_bot/light_death_3_0.png</filename>
+            <filename>../sprites/guard_bot/light_death_3_1.png</filename>
+            <filename>../sprites/guard_bot/light_death_3_2.png</filename>
+            <filename>../sprites/guard_bot/light_death_3_3.png</filename>
+            <filename>../sprites/guard_bot/light_death_3_4.png</filename>
+            <filename>../sprites/guard_bot/light_death_3_5.png</filename>
+            <filename>../sprites/guard_bot/light_death_3_6.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

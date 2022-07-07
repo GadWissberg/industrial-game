@@ -9,7 +9,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Pixmap.Format;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -39,7 +38,6 @@ import com.gadarts.industrial.components.character.CharacterAnimation;
 import com.gadarts.industrial.components.character.CharacterAnimations;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.character.CharacterSpriteData;
-import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.components.mi.AdditionalRenderData;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
@@ -51,14 +49,12 @@ import com.gadarts.industrial.console.commands.ConsoleCommands;
 import com.gadarts.industrial.console.commands.ConsoleCommandsList;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
-import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.characters.CharacterUtils;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
-import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.shaders.DepthMapShader;
 import com.gadarts.industrial.systems.render.shaders.MainShaderProvider;
@@ -85,7 +81,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private static final Vector3 auxVector3_3 = new Vector3();
 	private static final BoundingBox auxBoundingBox = new BoundingBox();
 	private static final int DECALS_POOL_SIZE = 200;
-	private static final int ICON_FLOWER_APPEARANCE_DURATION = 1000;
 	private static final float DECAL_DARKEST_COLOR = 0.2f;
 	private static final Color auxColor = new Color();
 	private static final float DECAL_LIGHT_OFFSET = 1.5f;
@@ -93,11 +88,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private static final int FLICKER_MAX_INTERVAL = 150;
 	private static final Circle auxCircle = new Circle();
 	private static final Rectangle auxRect = new Rectangle();
-	private final Texture iconFlowerLookingFor;
 	private final Environment environment;
 	private final MainShaderProvider shaderProvider;
 	private final GameFrameBuffer shadowFrameBuffer;
-	private BitmapFont skillFlowerFont;
 	private ModelBatch depthModelBatch;
 	private ModelBatch modelBatchShadows;
 	private ImmutableArray<Entity> shadowlessLightsEntities;
@@ -107,7 +100,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private ImmutableArray<Entity> modelInstanceEntities;
 	private ImmutableArray<Entity> characterDecalsEntities;
 	private ImmutableArray<Entity> simpleDecalsEntities;
-	private ImmutableArray<Entity> enemyEntities;
 	private ImmutableArray<Entity> staticLightsEntities;
 	private ShaderProgram depthShaderProgram;
 	private ShaderProgram shadowsShaderProgram;
@@ -122,16 +114,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		shadowFrameBuffer = new GameFrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 		shaderProvider = new MainShaderProvider(getAssetsManager(), shadowFrameBuffer);
 		createBatches();
-		iconFlowerLookingFor = initializeSkillFlowerData(assetsManager);
 		environment = createEnvironment();
 		getSystemsCommonData().setDrawFlags(new DrawFlags());
-	}
-
-	private Texture initializeSkillFlowerData(GameAssetsManager assetsManager) {
-		final Texture iconFlowerLookingFor;
-		iconFlowerLookingFor = assetsManager.getTexture(Assets.UiTextures.ICON_LOOKING_FOR);
-		skillFlowerFont = new BitmapFont();
-		return iconFlowerLookingFor;
 	}
 
 	private void handleFrustumCullingCommand(final ConsoleCommandResult consoleCommandResult) {
@@ -191,7 +175,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		super.addedToEngine(engine);
 		characterDecalsEntities = engine.getEntitiesFor(Family.all(CharacterDecalComponent.class).get());
 		simpleDecalsEntities = engine.getEntitiesFor(Family.all(SimpleDecalComponent.class).get());
-		enemyEntities = engine.getEntitiesFor(Family.all(EnemyComponent.class).get());
 		shadowlessLightsEntities = getEngine().getEntitiesFor(Family.all(ShadowlessLightComponent.class).get());
 		staticLightsEntities = getEngine().getEntitiesFor(Family.all(StaticLightComponent.class).get());
 	}
@@ -403,52 +386,12 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		renderDecals(deltaTime);
 		renderParticleEffects();
 		getSystemsCommonData().getUiStage().draw();
-		renderSkillFlowersText();
 	}
 
 	private void renderParticleEffects( ) {
 		modelBatch.begin(getSystemsCommonData().getCamera());
 		modelBatch.render(getSystemsCommonData().getParticleSystem(), environment);
 		modelBatch.end();
-	}
-
-	private void renderSkillFlowersText( ) {
-		if (enemyEntities.size() > 0) {
-			spriteBatch.begin();
-			for (Entity enemy : enemyEntities) {
-				if (simpleDecal.has(enemy) && !isInFow(enemy, simpleDecal.get(enemy).getDecal().getPosition())) {
-					renderSkillFlowerInsideContent(enemy);
-				}
-			}
-			spriteBatch.end();
-		}
-	}
-
-	private void flipIconDisplayInFlower(final EnemyComponent enemyComponent) {
-		if (enemyComponent.getAiStatus() == EnemyAiStatus.SEARCHING) {
-			long lastIconDisplayInFlower = enemyComponent.getIconDisplayInFlowerTimeStamp();
-			if (TimeUtils.timeSinceMillis(lastIconDisplayInFlower) >= ICON_FLOWER_APPEARANCE_DURATION) {
-				enemyComponent.setDisplayIconInFlower(!enemyComponent.isDisplayIconInFlower());
-				enemyComponent.setIconDisplayInFlowerTimeStamp(TimeUtils.millis());
-			}
-		}
-	}
-
-	private void renderSkillFlowerInsideContent(final Entity enemy) {
-		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
-		flipIconDisplayInFlower(enemyComponent);
-		SimpleDecalComponent simpleDecalComponent = simpleDecal.get(enemy);
-		Camera camera = getSystemsCommonData().getCamera();
-		Vector3 screenPos = camera.project(auxVector3_1.set(simpleDecalComponent.getDecal().getPosition()));
-		if (enemyComponent.getAiStatus() == EnemyAiStatus.SEARCHING && enemyComponent.isDisplayIconInFlower()) {
-			renderSkillFlowerIcon(spriteBatch, screenPos);
-		}
-	}
-
-	private void renderSkillFlowerIcon(final SpriteBatch spriteBatch, final Vector3 screenPos) {
-		float x = screenPos.x - iconFlowerLookingFor.getWidth() / 2F;
-		float y = screenPos.y - iconFlowerLookingFor.getHeight() / 2F;
-		spriteBatch.draw(iconFlowerLookingFor, x, y);
 	}
 
 	private void renderDecals(final float deltaTime) {
@@ -797,7 +740,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	@Override
 	public void dispose( ) {
-		skillFlowerFont.dispose();
 		depthShaderProgram.dispose();
 		decalBatch.dispose();
 		spriteBatch.dispose();

@@ -3,9 +3,7 @@ package com.gadarts.industrial.systems.enemy;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
@@ -17,7 +15,7 @@ import com.badlogic.gdx.utils.Array;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.FlowerSkillIconComponent;
+import com.gadarts.industrial.components.FlowerIconComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.character.CharacterHealthData;
@@ -38,7 +36,6 @@ import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
-import com.gadarts.industrial.utils.EntityBuilder;
 import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.ArrayList;
@@ -74,8 +71,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private final List<Entity> iconsToRemove = new ArrayList<>();
 	private final List<Sounds> ambSounds = List.of(Sounds.AMB_CHAINS, Sounds.AMB_SIGH, Sounds.AMB_LAUGH);
 	private final TextureRegion skillFlowerTexture;
-	private final Texture iconSpottedTexture;
-	private final Texture iconLookingForTexture;
 	private final PathPlanHandler enemyPathPlanner;
 	private ImmutableArray<Entity> enemies;
 	private ImmutableArray<Entity> icons;
@@ -87,9 +82,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 					   GameLifeCycleHandler lifeCycleHandler) {
 		super(systemsCommonData, soundPlayer, assetsManager, lifeCycleHandler);
 		skillFlowerTexture = new TextureRegion(assetsManager.getTexture(UiTextures.SKILL_FLOWER_CENTER));
-		iconSpottedTexture = assetsManager.getTexture(UiTextures.ICON_SPOTTED);
 		enemyPathPlanner = new PathPlanHandler(getAssetsManager(), getSystemsCommonData().getMap());
-		iconLookingForTexture = assetsManager.getTexture(UiTextures.ICON_LOOKING_FOR);
 	}
 
 	private void onFrameChangedOfRun(final Entity entity) {
@@ -239,9 +232,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private void applySearchingModeOnEnemy(final Entity enemy) {
 		MapGraph map = getSystemsCommonData().getMap();
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
-		if (enemyComponent.getAiStatus() == RUNNING_TO_LAST_SEEN_POSITION) {
-			createSkillFlowerIcon(simpleDecal.get(enemy).getDecal(), iconLookingForTexture);
-		}
 		enemyComponent.setAiStatus(SEARCHING);
 		addPossibleNodesToLookIn(map, map.getNode(characterDecal.get(enemy).getNodePosition(auxVector2_1)), enemy);
 		if (!auxNodesList.isEmpty()) {
@@ -277,9 +267,9 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		}
 	}
 
-	private void refreshSkillFlower(final Entity entity) {
-		List<RelatedDecal> relatedDecals = ComponentsMapper.simpleDecal.get(entity).getRelatedDecals();
-		CharacterHealthData healthData = ComponentsMapper.character.get(entity).getSkills().getHealthData();
+	private void refreshSkillFlower(Entity enemy) {
+		List<RelatedDecal> relatedDecals = ComponentsMapper.simpleDecal.get(enemy).getRelatedDecals();
+		CharacterHealthData healthData = ComponentsMapper.character.get(enemy).getSkills().getHealthData();
 		float div = (((float) healthData.getHp()) / ((float) healthData.getInitialHp()));
 		int numberOfVisibleLeaf = (int) (div * NUMBER_OF_SKILL_FLOWER_LEAF);
 		for (int i = 0; i < relatedDecals.size(); i++) {
@@ -424,17 +414,9 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		getSoundPlayer().playSound(ComponentsMapper.enemy.get(enemy).getEnemyDefinition().getAwakeSound());
 		Decal flowerDecal = simpleDecal.get(enemy).getDecal();
 		flowerDecal.setTextureRegion(skillFlowerTexture);
-		createSkillFlowerIcon(flowerDecal, iconSpottedTexture);
 		for (EnemySystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onEnemyAwaken(enemy);
 		}
-	}
-
-	private void createSkillFlowerIcon(final Decal flowerDecal, final Texture iconTexture) {
-		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-				.addSimpleDecalComponent(flowerDecal.getPosition(), iconTexture, true, true)
-				.addFlowerSkillIconComponent()
-				.finishAndAddToEngine();
 	}
 
 	@Override
@@ -456,7 +438,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	public void addedToEngine(Engine engine) {
 		super.addedToEngine(engine);
 		enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class).get());
-		icons = engine.getEntitiesFor(Family.all(FlowerSkillIconComponent.class).get());
+		icons = engine.getEntitiesFor(Family.all(FlowerIconComponent.class).get());
 	}
 
 	@Override
