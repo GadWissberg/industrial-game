@@ -52,6 +52,12 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 		startNewTurn(true);
 	}
 
+	@Override
+	public void onEnemyAwaken(Entity enemy) {
+		Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
+		turnsQueue.addLast(enemy);
+	}
+
 	private void startNewTurn(boolean pushToLast) {
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		systemsCommonData.setCurrentTurnId(systemsCommonData.getCurrentTurnId() + 1);

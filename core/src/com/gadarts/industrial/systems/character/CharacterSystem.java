@@ -111,10 +111,10 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		}
 	}
 
-	private void beginProcessingCommand(final CharacterCommand command,
-										final Entity character,
-										SystemsCommonData systemsCommonData) {
-		systemsCommonData.getCurrentCommand().setStarted(true);
+	private void beginProcessingCommand(CharacterCommand command,
+										Entity character,
+										SystemsCommonData commonData) {
+		commonData.getCurrentCommand().setStarted(true);
 		currentPath.clear();
 		if (command.getType().isRequiresMovement()) {
 			applyMovementOfCommandWithAgility(command, character);
@@ -122,8 +122,20 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (currentPath.nodes.size > 0) {
 			commandSet(character);
 		} else {
-			destinationReached(character, currentPath.nodes.get(currentPath.nodes.size - 1));
+			onDestinationReachedAtBeginningOfCommand(command, character, commonData);
 		}
+	}
+
+	private void onDestinationReachedAtBeginningOfCommand(CharacterCommand command,
+														  Entity character,
+														  SystemsCommonData commonData) {
+		MapGraphNode finalNode;
+		if (command.getType().isRequiresMovement()) {
+			finalNode = currentPath.nodes.get(currentPath.nodes.size - 1);
+		} else {
+			finalNode = commonData.getMap().getNode(characterDecal.get(character).getNodePosition(auxVector2_1));
+		}
+		destinationReached(character, finalNode);
 	}
 
 	private void commandSet(Entity character) {

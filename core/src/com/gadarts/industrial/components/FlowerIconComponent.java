@@ -7,7 +7,7 @@ public class FlowerIconComponent implements GameComponent {
 	private long timeOfCreation;
 
 	@Override
-	public void reset() {
+	public void reset( ) {
 
 	}
 

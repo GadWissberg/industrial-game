@@ -23,7 +23,7 @@ public class ComponentsMapper {
 	public static final ComponentMapper<SimpleDecalComponent> simpleDecal = ComponentMapper.getFor(SimpleDecalComponent.class);
 	public static final ComponentMapper<PickUpComponent> pickup = ComponentMapper.getFor(PickUpComponent.class);
 	public static final ComponentMapper<EnemyComponent> enemy = ComponentMapper.getFor(EnemyComponent.class);
-	public static final ComponentMapper<FlowerIconComponent> flowerSkillIcon = ComponentMapper.getFor(FlowerIconComponent.class);
+	public static final ComponentMapper<FlowerIconComponent> flowerIcon = ComponentMapper.getFor(FlowerIconComponent.class);
 	public static final ComponentMapper<BulletComponent> bullet = ComponentMapper.getFor(BulletComponent.class);
 	public static final ComponentMapper<ParticleComponent> particle = ComponentMapper.getFor(ParticleComponent.class);
 	public static final ComponentMapper<ParticleEffectParentComponent> particleParent = ComponentMapper.getFor(ParticleEffectParentComponent.class);

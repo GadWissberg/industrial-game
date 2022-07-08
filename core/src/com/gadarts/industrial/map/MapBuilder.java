@@ -42,7 +42,6 @@ import com.gadarts.industrial.shared.model.env.EnvironmentObjectDefinition;
 import com.gadarts.industrial.shared.model.env.EnvironmentObjectType;
 import com.gadarts.industrial.shared.model.env.ThingsDefinitions;
 import com.gadarts.industrial.shared.model.map.MapNodeData;
-import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.shared.model.map.NodeWalls;
 import com.gadarts.industrial.shared.model.map.Wall;
 import com.gadarts.industrial.shared.model.pickups.WeaponsDefinitions;
@@ -84,6 +83,7 @@ import static com.gadarts.industrial.shared.assets.Assets.SurfaceTextures;
 import static com.gadarts.industrial.shared.assets.Assets.SurfaceTextures.BLANK;
 import static com.gadarts.industrial.shared.assets.Assets.SurfaceTextures.MISSING;
 import static com.gadarts.industrial.shared.assets.Assets.UiTextures;
+import static com.gadarts.industrial.shared.assets.Assets.UiTextures.*;
 import static com.gadarts.industrial.shared.assets.MapJsonKeys.*;
 import static com.gadarts.industrial.shared.assets.MapJsonKeys.CHARACTERS;
 import static com.gadarts.industrial.shared.assets.MapJsonKeys.COL;
@@ -744,30 +744,32 @@ public class MapBuilder implements Disposable {
 
 	private void initializeEnemy(Vector3 position, Entity enemy) {
 		character.get(enemy).setTarget(engine.getEntitiesFor(Family.all(PlayerComponent.class).get()).first());
-		initializeEnemyFlowerSkill(position, enemy);
+		initializeEnemyFlower(position, enemy);
 	}
 
 	private void addEnemySkillFlower(Enemies type, EntityBuilder builder, Vector3 position) {
-		Texture skillFlowerTexture = assetsManager.getTexture(UiTextures.SKILL_FLOWER_CENTER_IDLE);
+		Texture skillFlowerTexture = assetsManager.getTexture(SKILL_FLOWER_CENTER_IDLE);
 		position.y += type.getHeight() + EnemySystem.SKILL_FLOWER_HEIGHT_RELATIVE;
 		builder.addSimpleDecalComponent(position, skillFlowerTexture, true, true);
+		builder.addFlowerIconComponent();
 	}
 
-	private void initializeEnemyFlowerSkill(Vector3 position, Entity enemy) {
+	private void initializeEnemyFlower(Vector3 position, Entity enemy) {
 		SimpleDecalComponent simpleDecalComponent = enemy.getComponent(SimpleDecalComponent.class);
-		List.of(UiTextures.SKILL_FLOWER_1,
-				UiTextures.SKILL_FLOWER_2,
-				UiTextures.SKILL_FLOWER_3,
-				UiTextures.SKILL_FLOWER_4,
-				UiTextures.SKILL_FLOWER_5,
-				UiTextures.SKILL_FLOWER_6,
-				UiTextures.SKILL_FLOWER_7,
-				UiTextures.SKILL_FLOWER_8).forEach(flower -> addSkillFlowerDecal(simpleDecalComponent, flower, position));
+		List.of(SKILL_FLOWER_1,
+				SKILL_FLOWER_2,
+				SKILL_FLOWER_3,
+				SKILL_FLOWER_4,
+				SKILL_FLOWER_5,
+				SKILL_FLOWER_6,
+				SKILL_FLOWER_7,
+				SKILL_FLOWER_8,
+				ICON_IDLE).forEach(flower -> addFlowerRelatedDecal(simpleDecalComponent, flower, position));
 	}
 
-	private void addSkillFlowerDecal(final SimpleDecalComponent simpleDecalComponent,
-									 final UiTextures skillFlower,
-									 final Vector3 position) {
+	private void addFlowerRelatedDecal(final SimpleDecalComponent simpleDecalComponent,
+									   final UiTextures skillFlower,
+									   final Vector3 position) {
 		TextureRegion textureRegion = new TextureRegion(assetsManager.getTexture(skillFlower));
 		RelatedDecal skillFlowerDecal = RelatedDecal.newDecal(textureRegion, true);
 		skillFlowerDecal.setScale(BILLBOARD_SCALE);

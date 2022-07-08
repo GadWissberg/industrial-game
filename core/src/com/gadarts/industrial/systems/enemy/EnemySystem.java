@@ -15,7 +15,6 @@ import com.badlogic.gdx.utils.Array;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.FlowerIconComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.character.CharacterHealthData;
@@ -55,8 +54,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		TurnsSystemEventsSubscriber,
 		RenderSystemEventsSubscriber {
 	public static final float SKILL_FLOWER_HEIGHT_RELATIVE = 1F;
-	private static final int ICON_DURATION = 2;
-	private static final float ICON_SPEED = 0.5F;
 	private static final long AMB_SOUND_INTERVAL_MIN = 10L;
 	private static final long AMB_SOUND_INTERVAL_MAX = 50L;
 	private final static Vector2 auxVector2_1 = new Vector2();
@@ -68,12 +65,10 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private static final List<MapGraphNode> auxNodesList = new ArrayList<>();
 	private static final CharacterCommand auxCommand = new CharacterCommand();
 	private static final int NUMBER_OF_SKILL_FLOWER_LEAF = 8;
-	private final List<Entity> iconsToRemove = new ArrayList<>();
 	private final List<Sounds> ambSounds = List.of(Sounds.AMB_CHAINS, Sounds.AMB_SIGH, Sounds.AMB_LAUGH);
 	private final TextureRegion skillFlowerTexture;
 	private final PathPlanHandler enemyPathPlanner;
 	private ImmutableArray<Entity> enemies;
-	private ImmutableArray<Entity> icons;
 	private long nextAmbSoundTime;
 
 	public EnemySystem(SystemsCommonData systemsCommonData,
@@ -109,13 +104,13 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private void invokeEnemyAttackBehaviour(final Entity enemy) {
-		Vector2 enemyPosition = characterDecal.get(enemy).getNodePosition(auxVector2_1);
-		Entity target = character.get(enemy).getTarget();
-		MapGraphNode enemyNode = getSystemsCommonData().getMap().getNode(enemyPosition);
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		Enemies enemyDefinition = enemyComponent.getEnemyDefinition();
-		if (!considerPrimaryAttack(enemy, enemyComponent, enemyDefinition)) {
-			calculatePathAndApplyGoToMelee(enemy, enemyNode, target);
+		if (checkIfWayIsClearToTarget(enemy)) {
+			engagePrimaryAttack(enemy, enemyComponent, enemyDefinition);
+		} else {
+			enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
+			enemyFinishedTurn();
 		}
 	}
 
@@ -140,26 +135,13 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 				enemyComponent.getTimeStamps().setLastPrimaryAttack(currentTurnId);
 			}
 			enemyComponent.getTimeStamps().setLastTurn(currentTurnId);
-			enemiesFinishedTurn();
+			enemyFinishedTurn();
 		}
 	}
 
 	@Override
 	public void onDestinationReached(Entity character) {
 		CharacterSystemEventsSubscriber.super.onDestinationReached(character);
-	}
-
-	private void calculatePathAndApplyGoToMelee(final Entity enemy,
-												final MapGraphNode enemyNode,
-												final Entity target) {
-		boolean pathCalculated = calculatePathToCharacter(enemyNode, target, true, CLEAN)
-				|| calculatePathToCharacter(enemyNode, target, false, CLEAN)
-				|| calculatePathToCharacter(enemyNode, target, false, HEIGHT_DIFF);
-		if (pathCalculated) {
-			applyGoToMelee(enemy);
-		} else {
-			onCharacterCommandDone(enemy, null);
-		}
 	}
 
 	private void applyGoToMelee(final Entity enemy) {
@@ -181,21 +163,23 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		return lastPrimaryAttack < 0 || currentTurnId - lastPrimaryAttack > turnsDiff;
 	}
 
-	private boolean considerPrimaryAttack(final Entity enemy,
-										  final EnemyComponent enemyCom,
-										  final Enemies def) {
+	private void engagePrimaryAttack(final Entity enemy,
+									 final EnemyComponent enemyCom,
+									 final Enemies def) {
 		Accuracy accuracy = def.getAccuracy();
 		if (accuracy != null && def.getRange() != Range.NONE) {
 			float disToTarget = calculateDistanceToTarget(enemy);
 			if (disToTarget <= def.getRange().getMaxDistance() && disToTarget > RANGE_ATTACK_MIN_RADIUS) {
 //				int turnsDiff = def.getReloadTime().get(skillIndex).getNumberOfTurns();
 //				if (checkIfPrimaryAttackIsReady(enemyCom, turnsDiff) && !checkIfWayIsClearToTarget(enemy)) {
-//					applyCommand(enemy, CharacterCommandsTypes.ATTACK_PRIMARY);
-//					return true;
+				enemyPathPlanner.getCurrentPath().clear();
+				MapGraph map = getSystemsCommonData().getMap();
+				MapGraphNode currentNode = map.getNode(characterDecal.get(enemy).getNodePosition(auxVector2_1));
+				enemyPathPlanner.getCurrentPath().add(currentNode);
+				applyCommand(enemy, CharacterCommandsTypes.ATTACK_PRIMARY);
 //				}
 			}
 		}
-		return false;
 	}
 
 	private boolean checkIfFloorNodesContainsEnemy(final Array<GridPoint2> nodes, Entity enemyToCheckFor) {
@@ -217,7 +201,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		if (!blocked) {
 			blocked = checkIfFloorNodesContainsEnemy(nodes, enemy);
 		}
-		return blocked;
+		return !blocked;
 	}
 
 	private void addAsPossibleNodeToLookIn(final MapGraphNode enemyNode, final MapGraphNode node, Entity enemy) {
@@ -364,7 +348,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		}
 	}
 
-	private void enemiesFinishedTurn( ) {
+	private void enemyFinishedTurn( ) {
 		for (EnemySystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onEnemyFinishedTurn();
 		}
@@ -438,31 +422,15 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	public void addedToEngine(Engine engine) {
 		super.addedToEngine(engine);
 		enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class).get());
-		icons = engine.getEntitiesFor(Family.all(FlowerIconComponent.class).get());
 	}
 
 	@Override
 	public void update(final float deltaTime) {
 		super.update(deltaTime);
 		handleRoamSounds();
-		handleFlowerSkills(deltaTime);
 		if (millis() > nextAmbSoundTime) {
 			getSoundPlayer().playSound(ambSounds.get(MathUtils.random(0, ambSounds.size() - 1)));
 			resetNextAmbSound();
-		}
-	}
-
-	private void handleFlowerSkills(float deltaTime) {
-		iconsToRemove.clear();
-		for (Entity flowerIcon : icons) {
-			if (timeSinceMillis(flowerSkillIcon.get(flowerIcon).getTimeOfCreation()) >= ICON_DURATION * 1000F) {
-				iconsToRemove.add(flowerIcon);
-			} else {
-				simpleDecal.get(flowerIcon).getDecal().getPosition().add(0, deltaTime * ICON_SPEED, 0);
-			}
-		}
-		for (Entity icon : iconsToRemove) {
-			getEngine().removeEntity(icon);
 		}
 	}
 

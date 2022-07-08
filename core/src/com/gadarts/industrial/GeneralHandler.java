@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
@@ -96,9 +97,9 @@ public class GeneralHandler implements
 						createCharacterAnimations(atlas)));
 	}
 
-	private CharacterAnimations createCharacterAnimations(final Assets.Atlases zealot) {
+	private CharacterAnimations createCharacterAnimations(final Assets.Atlases character) {
 		CharacterAnimations animations = new CharacterAnimations();
-		TextureAtlas atlas = assetsManager.getAtlas(zealot);
+		TextureAtlas atlas = assetsManager.getAtlas(character);
 		Arrays.stream(SpriteType.values()).forEach(spriteType -> {
 			if (spriteType.isSingleAnimation()) {
 				inflateCharacterAnimation(animations, atlas, spriteType, Direction.SOUTH);
@@ -234,7 +235,7 @@ public class GeneralHandler implements
 		String spriteTypeName = spriteType.name().toLowerCase();
 		String name = (spriteType.isSingleAnimation()) ? spriteTypeName : spriteTypeName + "_" + dir.name().toLowerCase();
 		CharacterAnimation a = createAnimation(atlas, spriteType, name, dir);
-		if (a.getKeyFrames().length > 0) {
+		if (a != null && a.getKeyFrames().length > 0) {
 			animations.put(spriteType, dir, a);
 		}
 	}
@@ -243,11 +244,16 @@ public class GeneralHandler implements
 											   final SpriteType spriteType,
 											   final String name,
 											   final Direction dir) {
-		return new CharacterAnimation(
-				spriteType.getAnimationDuration(),
-				atlas.findRegions(name),
-				spriteType.getPlayMode(),
-				dir);
+		Array<TextureAtlas.AtlasRegion> regions = atlas.findRegions(name);
+		CharacterAnimation animation = null;
+		if (!regions.isEmpty()) {
+			animation = new CharacterAnimation(
+					spriteType.getAnimationDuration(),
+					regions,
+					spriteType.getPlayMode(),
+					dir);
+		}
+		return animation;
 	}
 
 	public void update(float delta) {
