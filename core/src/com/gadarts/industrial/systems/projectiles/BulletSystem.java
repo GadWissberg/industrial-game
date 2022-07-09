@@ -6,17 +6,10 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
-import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
-import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
-import com.gadarts.industrial.shared.model.map.MapNodesTypes;
-import com.gadarts.industrial.shared.model.pickups.WeaponsDefinitions;
+import com.badlogic.gdx.utils.Pool;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.BulletComponent;
@@ -24,16 +17,22 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.collision.CollisionComponent;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
+import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
+import com.gadarts.industrial.shared.assets.Assets;
+import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
+import com.gadarts.industrial.shared.model.map.MapNodesTypes;
+import com.gadarts.industrial.shared.model.pickups.WeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.utils.EntityBuilder;
 
-import static com.badlogic.gdx.math.Vector3.Zero;
-import static com.gadarts.industrial.components.ComponentsMapper.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> implements CharacterSystemEventsSubscriber {
 	private static final float BULLET_SPEED = 0.2f;
@@ -54,9 +53,12 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 	private final static float HITSCAN_COL_LIGHT_RADIUS = 1.2F;
 	private final static Color HITSCAN_COL_LIGHT_COLOR = Color.YELLOW;
 	private final static float HITSCAN_COL_LIGHT_DURATION = 0.1F;
-	private final static float PROJ_LIGHT_INTENSITY = 0.2F;
-	private final static float PROJ_LIGHT_RADIUS = 2F;
+	private final static float PROJ_LIGHT_INTENSITY = 0.05F;
+	private final static float PROJ_LIGHT_RADIUS = 1F;
 	private final static Color PROJ_LIGHT_COLOR = Color.valueOf("#8396FF");
+	private static final Quaternion auxQuat = new Quaternion();
+	private static final Matrix4 auxMatrix = new Matrix4();
+	private final Map<Assets.Models, Pool<GameModelInstance>> pooledBulletModels = new HashMap<>();
 	private ParticleEffect bulletRicochetEffect;
 	private ImmutableArray<Entity> bullets;
 	private ImmutableArray<Entity> collidables;
@@ -73,7 +75,7 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 												final Vector3 direction,
 												final Vector3 charPos) {
 
-		if (enemy.has(character)) {
+		if (ComponentsMapper.enemy.has(character)) {
 			enemyEngagesPrimaryAttack(character, direction, charPos);
 		} else {
 			playerEngagesPrimaryAttack(character, direction);
@@ -89,7 +91,7 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 
 	private void playerEngagesHitScanAttack(final Entity character, final Vector3 direction, final Weapon selectedWeapon) {
 		MapGraph map = getSystemsCommonData().getMap();
-		MapGraphNode posNode = map.getNode(characterDecal.get(character).getNodePosition(auxVector3_1));
+		MapGraphNode posNode = map.getNode(ComponentsMapper.characterDecal.get(character).getNodePosition(auxVector3_1));
 		Vector3 posNodeCenterPos = posNode.getCenterPosition(auxVector3_4);
 		affectAimByAccuracy(character, direction);
 		Vector3 maxRangePos = calculateHitScanMaxPosition(direction, posNodeCenterPos);
@@ -198,28 +200,38 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 	}
 
 	private void enemyEngagesPrimaryAttack(final Entity character, final Vector3 direction, final Vector3 charPos) {
-		EnemyComponent enemyComponent = enemy.get(character);
+		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(character);
 		Accuracy accuracy = enemyComponent.getEnemyDefinition().getAccuracy();
-		direction.rotate(Vector3.Y, MathUtils.random(-accuracy.getMaxAngle(), accuracy.getMaxAngle()));
-		direction.rotate(Vector3.X, MathUtils.random(-accuracy.getMaxAngle(), accuracy.getMaxAngle()));
-		EnemyComponent enemyComp = enemy.get(character);
-		Animation<TextureAtlas.AtlasRegion> bulletAnim = enemyComp.getBulletAnimation();
+//		direction.rotate(Vector3.Y, MathUtils.random(-accuracy.getMaxAngle(), accuracy.getMaxAngle()));
+//		direction.rotate(Vector3.X, MathUtils.random(-accuracy.getMaxAngle(), accuracy.getMaxAngle()));
+		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
 		getSoundPlayer().playSound(Assets.Sounds.ATTACK_ENERGY_BALL);
-		createEnemyBullet(character, direction, charPos, enemyComp, bulletAnim);
+		createEnemyBullet(character, direction, charPos, enemyComp);
 	}
 
-	private void createEnemyBullet(final Entity character,
-								   final Vector3 direction,
-								   final Vector3 charPos,
-								   final EnemyComponent enemyComp,
-								   final Animation<TextureAtlas.AtlasRegion> bulletAnim) {
-		charPos.y += enemy.get(character).getEnemyDefinition().getHeight() / 2F;
+	private void createEnemyBullet(Entity character,
+								   Vector3 direction,
+								   Vector3 charPos,
+								   EnemyComponent enemyComp) {
+		charPos.y += ComponentsMapper.enemy.get(character).getEnemyDefinition().getHeight() / 2F;
 		Integer damagePoints = enemyComp.getEnemyDefinition().getPrimaryAttack().getDamagePoints();
-		ParticleEffect effect = getAssetsManager().getParticleEffect(Assets.ParticleEffects.ENERGY_BALL_TRAIL);
+		GameAssetsManager assetsManager = getAssetsManager();
+		ParticleEffect effect = assetsManager.getParticleEffect(Assets.ParticleEffects.ENERGY_BALL_TRAIL);
+		if (!pooledBulletModels.containsKey(Assets.Models.LASER_BULLET)) {
+			pooledBulletModels.put(Assets.Models.LASER_BULLET, new Pool<>() {
+				@Override
+				protected GameModelInstance newObject( ) {
+					return new GameModelInstance(assetsManager.getModel(Assets.Models.LASER_BULLET));
+				}
+			});
+		}
+
+		GameModelInstance modelInstance = pooledBulletModels.get(Assets.Models.LASER_BULLET).obtain();
+		modelInstance.transform.setToTranslation(charPos);
+		modelInstance.transform.rotate(Vector3.Y, -auxVector2_1.set(direction.x, direction.z).nor().angleDeg());
 		Entity bullet = EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
 				.addBulletComponent(charPos, direction, character, damagePoints)
-				.addAnimationComponent(enemyComp.getEnemyDefinition().getPrimaryAttack().getFrameDuration(), bulletAnim)
-				.addSimpleDecalComponent(charPos, bulletAnim.getKeyFrames()[0], Zero.setZero(), true, true)
+				.addModelInstanceComponent(modelInstance, true, false)
 				.addShadowlessLightComponent(charPos, PROJ_LIGHT_INTENSITY, PROJ_LIGHT_RADIUS, PROJ_LIGHT_COLOR)
 				.finishAndAddToEngine();
 		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
@@ -234,7 +246,8 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 	}
 
 	private boolean handleCollisionsWithWalls(final Entity bullet) {
-		Vector3 position = simpleDecal.get(bullet).getDecal().getPosition();
+		GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(bullet).getModelInstance();
+		Vector3 position = modelInstance.transform.getTranslation(auxVector3_1);
 		MapGraphNode node = getSystemsCommonData().getMap().getNode(position);
 		MapNodesTypes nodeType = node.getType();
 		if (nodeType != MapNodesTypes.PASSABLE_NODE || node.getHeight() >= position.y) {
@@ -255,7 +268,8 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 		bullet.remove(BulletComponent.class);
 		getEngine().removeEntity(bullet);
 		ParticleEffect effect = getAssetsManager().getParticleEffect(Assets.ParticleEffects.ENERGY_BALL_EXPLOSION);
-		Vector3 pos = auxVector3_1.set(ComponentsMapper.simpleDecal.get(bullet).getDecal().getPosition());
+		GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(bullet).getModelInstance();
+		Vector3 pos = auxVector3_1.set(modelInstance.transform.getTranslation(auxVector3_1));
 		createExplosion(effect, pos);
 	}
 
@@ -266,24 +280,25 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 		getSoundPlayer().playSound(Assets.Sounds.SMALL_EXP);
 	}
 
-	private boolean checkCollisionWithCharacter(final Decal decal, final Entity collidable) {
-		Vector3 colPos = characterDecal.get(collidable).getDecal().getPosition();
-		boolean alive = character.get(collidable).getSkills().getHealthData().getHp() > 0;
-		float distance = auxVector2_1.set(colPos.x, colPos.z).dst(decal.getPosition().x, decal.getPosition().z);
+	private boolean checkCollisionWithCharacter(GameModelInstance gameModelInstance, Entity collidable) {
+		Vector3 colPos = ComponentsMapper.characterDecal.get(collidable).getDecal().getPosition();
+		boolean alive = ComponentsMapper.character.get(collidable).getSkills().getHealthData().getHp() > 0;
+		Vector3 position = gameModelInstance.transform.getTranslation(auxVector3_1);
+		float distance = auxVector2_1.set(colPos.x, colPos.z).dst(position.x, position.z);
 		return alive && distance < CharacterComponent.CHAR_RAD;
 	}
 
-	private boolean checkCollision(final Decal decal, final Entity collidable) {
-		if (characterDecal.has(collidable)) {
-			return checkCollisionWithCharacter(decal, collidable);
+	private boolean checkCollision(GameModelInstance gameModelInstance, Entity collidable) {
+		if (ComponentsMapper.characterDecal.has(collidable)) {
+			return checkCollisionWithCharacter(gameModelInstance, collidable);
 		}
 		return false;
 	}
 
-	private void handleCollisionsWithOtherEntities(final Decal decal, final Entity bullet) {
+	private void handleCollisionsWithOtherEntities(GameModelInstance gameModelInstance, Entity bullet) {
 		for (Entity collidable : collidables) {
 			if (ComponentsMapper.bullet.get(bullet).getOwner() != collidable) {
-				if (checkCollision(decal, collidable)) {
+				if (checkCollision(gameModelInstance, collidable)) {
 					onProjectileCollisionWithAnotherEntity(bullet, collidable);
 					break;
 				}
@@ -298,9 +313,9 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 		destroyBullet(bullet);
 	}
 
-	private void handleCollisions(final Decal decal, final Entity bullet) {
+	private void handleCollisions(GameModelInstance gameModelInstance, Entity bullet) {
 		if (!handleCollisionsWithWalls(bullet)) {
-			handleCollisionsWithOtherEntities(decal, bullet);
+			handleCollisionsWithOtherEntities(gameModelInstance, bullet);
 		}
 	}
 
@@ -308,25 +323,27 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 	public void update(final float deltaTime) {
 		super.update(deltaTime);
 		for (Entity bullet : bullets) {
-			Decal decal = simpleDecal.get(bullet).getDecal();
+			GameModelInstance gameModelInstance = ComponentsMapper.modelInstance.get(bullet).getModelInstance();
 			BulletComponent bulletComponent = ComponentsMapper.bullet.get(bullet);
-			handleCollisions(decal, bullet);
-			handleBulletMovement(decal, bulletComponent);
-			handleBulletMaxDistance(bullet, decal, bulletComponent);
+			handleCollisions(gameModelInstance, bullet);
+			handleBulletMovement(gameModelInstance, bulletComponent);
+			handleBulletMaxDistance(bullet, gameModelInstance, bulletComponent);
 		}
 	}
 
-	private void handleBulletMaxDistance(final Entity bullet, final Decal decal, final BulletComponent bulletComponent) {
-		Vector3 position = decal.getPosition();
+	private void handleBulletMaxDistance(Entity bullet,
+										 GameModelInstance gameModelInstance,
+										 BulletComponent bulletComponent) {
+		Vector3 position = gameModelInstance.transform.getTranslation(auxVector3_1);
 		float dst = bulletComponent.getInitialPosition(auxVector2_1).dst(position.x, position.z);
 		if (dst >= BULLET_MAX_DISTANCE) {
 			destroyBullet(bullet);
 		}
 	}
 
-	private void handleBulletMovement(final Decal decal, final BulletComponent bulletComponent) {
+	private void handleBulletMovement(GameModelInstance gameModelInstance, BulletComponent bulletComponent) {
 		Vector3 velocity = bulletComponent.getDirection(auxVector3_1).nor().scl(BULLET_SPEED);
-		decal.translate(velocity.x, 0, velocity.z);
+		gameModelInstance.transform.trn(velocity);
 	}
 
 	@Override

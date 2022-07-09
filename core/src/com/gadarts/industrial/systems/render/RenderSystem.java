@@ -630,8 +630,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		ShadowlessLightComponent lc = shadowlessLight.get(light);
 		long now = TimeUtils.millis();
 		updateFlicker(lc, now);
-		if (ComponentsMapper.simpleDecal.has(light)) {
-			lc.setPosition(ComponentsMapper.simpleDecal.get(lc.getParent()).getDecal().getPosition());
+		if (modelInstance.has(light)) {
+			lc.setPosition(modelInstance.get(lc.getParent()).getModelInstance().transform.getTranslation(auxVector3_1));
 		}
 		float duration = lc.getDuration();
 		if (duration > 0 && TimeUtils.timeSinceMillis(lc.getBeginTime()) >= (duration * 1000F)) {
