@@ -1,7 +1,7 @@
 package com.gadarts.industrial.systems.ui.storage;
 
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.model.pickups.WeaponsDefinitions;
+import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.window.GameWindowEventType;
 import com.gadarts.industrial.systems.ui.window.OnEvent;
@@ -45,7 +45,7 @@ enum StorageWindowOnEvents {
 		if (parameters.getWindowEvent().getTarget() == storageWindow) {
 			if (storageWindow.getPlayerLayout().getWeaponChoice() == null) {
 				StorageGrid storageGrid = storageWindow.getStorageGrid();
-				ItemDisplay itemDisplay = storageGrid.findItemDisplay(WeaponsDefinitions.HAMMER.getId());
+				ItemDisplay itemDisplay = storageGrid.findItemDisplay(PlayerWeaponsDefinitions.HAMMER.getId());
 				List<UserInterfaceSystemEventsSubscriber> subscribers = parameters.getSubscribers();
 				storageWindow.getPlayerLayout().applySelectionToSelectedWeapon(storageGrid, itemDisplay, subscribers);
 			}

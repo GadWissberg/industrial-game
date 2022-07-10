@@ -30,7 +30,7 @@ import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.characters.Direction;
-import com.gadarts.industrial.shared.model.pickups.WeaponsDefinitions;
+import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
@@ -203,7 +203,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	@Override
 	public void onSelectedWeaponChanged(Weapon selectedWeapon) {
-		WeaponsDefinitions definition = (WeaponsDefinitions) selectedWeapon.getDefinition();
+		PlayerWeaponsDefinitions definition = (PlayerWeaponsDefinitions) selectedWeapon.getDefinition();
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		Entity player = systemsCommonData.getPlayer();
 		CharacterDecalComponent cdc = characterDecal.get(player);
@@ -484,7 +484,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	private Weapon initializeStartingWeapon( ) {
 		Weapon weapon = Pools.obtain(Weapon.class);
-		Texture image = getAssetsManager().getTexture(DefaultGameSettings.STARTING_WEAPON.getImage());
+		Texture image = getAssetsManager().getTexture(DefaultGameSettings.STARTING_WEAPON.getSymbol());
 		weapon.init(DefaultGameSettings.STARTING_WEAPON, 0, 0, image);
 		return weapon;
 	}

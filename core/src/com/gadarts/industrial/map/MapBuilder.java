@@ -24,6 +24,15 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Pools;
+import com.gadarts.industrial.DefaultGameSettings;
+import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.character.CharacterData;
+import com.gadarts.industrial.components.character.*;
+import com.gadarts.industrial.components.floor.FloorComponent;
+import com.gadarts.industrial.components.mi.GameModelInstance;
+import com.gadarts.industrial.components.player.PlayerComponent;
+import com.gadarts.industrial.components.sd.RelatedDecal;
+import com.gadarts.industrial.components.sd.SimpleDecalComponent;
 import com.gadarts.industrial.shared.WallCreator;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
@@ -37,26 +46,14 @@ import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
 import com.gadarts.industrial.shared.model.characters.attributes.Agility;
 import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
-import com.gadarts.industrial.shared.model.characters.enemies.EnemyWeaponsDefinitions;
+import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.shared.model.env.EnvironmentObjectDefinition;
 import com.gadarts.industrial.shared.model.env.EnvironmentObjectType;
 import com.gadarts.industrial.shared.model.env.ThingsDefinitions;
 import com.gadarts.industrial.shared.model.map.MapNodeData;
 import com.gadarts.industrial.shared.model.map.NodeWalls;
 import com.gadarts.industrial.shared.model.map.Wall;
-import com.gadarts.industrial.shared.model.pickups.WeaponsDefinitions;
-import com.gadarts.industrial.DefaultGameSettings;
-import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.floor.FloorComponent;
-import com.gadarts.industrial.components.character.CharacterAnimations;
-import com.gadarts.industrial.components.character.CharacterData;
-import com.gadarts.industrial.components.character.CharacterSkillsParameters;
-import com.gadarts.industrial.components.character.CharacterSoundData;
-import com.gadarts.industrial.components.character.CharacterSpriteData;
-import com.gadarts.industrial.components.mi.GameModelInstance;
-import com.gadarts.industrial.components.player.PlayerComponent;
-import com.gadarts.industrial.components.sd.RelatedDecal;
-import com.gadarts.industrial.components.sd.SimpleDecalComponent;
+import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.enemy.EnemySystem;
 import com.gadarts.industrial.utils.EntityBuilder;
 import com.gadarts.industrial.utils.GameUtils;
@@ -66,50 +63,24 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.awt.*;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
-import static com.gadarts.industrial.shared.assets.Assets.Atlases;
+import static com.gadarts.industrial.components.ComponentsMapper.character;
+import static com.gadarts.industrial.components.ComponentsMapper.modelInstance;
+import static com.gadarts.industrial.shared.assets.Assets.*;
 import static com.gadarts.industrial.shared.assets.Assets.Atlases.*;
-import static com.gadarts.industrial.shared.assets.Assets.Models;
-import static com.gadarts.industrial.shared.assets.Assets.Sounds;
-import static com.gadarts.industrial.shared.assets.Assets.SurfaceTextures;
 import static com.gadarts.industrial.shared.assets.Assets.SurfaceTextures.BLANK;
 import static com.gadarts.industrial.shared.assets.Assets.SurfaceTextures.MISSING;
-import static com.gadarts.industrial.shared.assets.Assets.UiTextures;
 import static com.gadarts.industrial.shared.assets.Assets.UiTextures.*;
 import static com.gadarts.industrial.shared.assets.MapJsonKeys.*;
-import static com.gadarts.industrial.shared.assets.MapJsonKeys.CHARACTERS;
-import static com.gadarts.industrial.shared.assets.MapJsonKeys.COL;
-import static com.gadarts.industrial.shared.assets.MapJsonKeys.DEPTH;
-import static com.gadarts.industrial.shared.assets.MapJsonKeys.DIRECTION;
-import static com.gadarts.industrial.shared.assets.MapJsonKeys.EAST;
-import static com.gadarts.industrial.shared.assets.MapJsonKeys.HEIGHT;
-import static com.gadarts.industrial.shared.assets.MapJsonKeys.HEIGHTS;
-import static com.gadarts.industrial.shared.assets.MapJsonKeys.H_OFFSET;
-import static com.gadarts.industrial.shared.assets.MapJsonKeys.MATRIX;
-import static com.gadarts.industrial.shared.assets.MapJsonKeys.ROW;
-import static com.gadarts.industrial.shared.assets.MapJsonKeys.TILES;
-import static com.gadarts.industrial.shared.assets.MapJsonKeys.TYPE;
-import static com.gadarts.industrial.shared.assets.MapJsonKeys.V_OFFSET;
-import static com.gadarts.industrial.shared.assets.MapJsonKeys.WEST;
-import static com.gadarts.industrial.shared.assets.MapJsonKeys.WIDTH;
-import static com.gadarts.industrial.shared.model.characters.CharacterTypes.BILLBOARD_SCALE;
-import static com.gadarts.industrial.shared.model.characters.CharacterTypes.BILLBOARD_Y;
-import static com.gadarts.industrial.shared.model.characters.CharacterTypes.ENEMY;
-import static com.gadarts.industrial.shared.model.characters.CharacterTypes.PLAYER;
+import static com.gadarts.industrial.shared.model.characters.CharacterTypes.*;
 import static com.gadarts.industrial.shared.model.characters.Direction.NORTH;
 import static com.gadarts.industrial.shared.model.characters.Direction.SOUTH;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.IDLE;
-import static com.gadarts.industrial.components.ComponentsMapper.character;
-import static com.gadarts.industrial.components.ComponentsMapper.modelInstance;
-import static com.gadarts.industrial.shared.model.map.MapNodesTypes.*;
+import static com.gadarts.industrial.shared.model.map.MapNodesTypes.OBSTACLE_KEY_DIAGONAL_FORBIDDEN;
 import static com.gadarts.industrial.utils.EntityBuilder.beginBuildingEntity;
 import static java.lang.String.format;
 
@@ -651,7 +622,7 @@ public class MapBuilder implements Disposable {
 		JsonArray pickups = mapJsonObject.getAsJsonArray(KEY_PICKUPS);
 		pickups.forEach(element -> {
 			JsonObject pickJsonObject = element.getAsJsonObject();
-			WeaponsDefinitions type = WeaponsDefinitions.valueOf(pickJsonObject.get(TYPE).getAsString());
+			PlayerWeaponsDefinitions type = PlayerWeaponsDefinitions.valueOf(pickJsonObject.get(TYPE).getAsString());
 			TextureAtlas.AtlasRegion bulletRegion = null;
 			if (!type.isMelee()) {
 				bulletRegion = assetsManager.getAtlas(findByRelatedWeapon(type)).findRegion(REGION_NAME_BULLET);
@@ -661,18 +632,19 @@ public class MapBuilder implements Disposable {
 	}
 
 	private void inflatePickupEntity(final JsonObject pickJsonObject,
-									 final WeaponsDefinitions type,
+									 final PlayerWeaponsDefinitions type,
 									 final TextureAtlas.AtlasRegion bulletRegion,
 									 final MapGraph mapGraph) {
 		EntityBuilder builder = beginBuildingEntity(engine);
 		inflatePickupModel(builder, pickJsonObject, type, mapGraph);
-		builder.addPickUpComponentAsWeapon(type, assetsManager.getTexture(type.getImage()), bulletRegion)
+		builder.addPickUpComponentAsWeapon(type, assetsManager.getTexture(type.getSymbol()), bulletRegion)
 				.finishAndAddToEngine();
 	}
 
-	private void inflatePickupModel(final EntityBuilder builder,
-									final JsonObject pickJsonObject,
-									final WeaponsDefinitions type, final MapGraph mapGraph) {
+	private void inflatePickupModel(EntityBuilder builder,
+									JsonObject pickJsonObject,
+									PlayerWeaponsDefinitions type,
+									MapGraph mapGraph) {
 		Coords coord = new Coords(pickJsonObject.get(ROW).getAsInt(), pickJsonObject.get(COL).getAsInt());
 		Models modelDefinition = type.getModelDefinition();
 		String fileName = BOUNDING_BOX_PREFIX + modelDefinition.getFilePath();
@@ -706,7 +678,14 @@ public class MapBuilder implements Disposable {
 				skills,
 				auxCharacterSoundData);
 		Atlases atlas = findByRelatedWeapon(DefaultGameSettings.STARTING_WEAPON);
-		addCharBaseComponents(builder, data, CharacterTypes.PLAYER.getDefinitions()[0], atlas);
+
+		addCharBaseComponents(
+				builder,
+				data,
+				CharacterTypes.PLAYER.getDefinitions()[0],
+				atlas,
+				DefaultGameSettings.STARTING_WEAPON.getWeaponsDefinition());
+
 		builder.finishAndAddToEngine();
 	}
 
@@ -722,10 +701,11 @@ public class MapBuilder implements Disposable {
 	private void addCharBaseComponents(final EntityBuilder entityBuilder,
 									   final CharacterData data,
 									   final CharacterDefinition def,
-									   final Atlases atlasDefinition) {
+									   final Atlases atlasDefinition,
+									   WeaponsDefinitions primaryAttack) {
 		CharacterSpriteData characterSpriteData = createCharacterSpriteData(data, def);
 		Direction direction = data.getDirection();
-		entityBuilder.addCharacterComponent(characterSpriteData, data.getSoundData(), data.getSkills())
+		entityBuilder.addCharacterComponent(characterSpriteData, data.getSoundData(), data.getSkills(), primaryAttack)
 				.addCharacterDecalComponent(assetsManager.get(atlasDefinition.name()), IDLE, direction, data.getPosition())
 				.addCollisionComponent()
 				.addAnimationComponent();
@@ -736,10 +716,10 @@ public class MapBuilder implements Disposable {
 		Enemies type = inflateEnemyType(charJsonObject);
 		EntityBuilder b = beginBuildingEntity(engine).addEnemyComponent(type, inflateEnemyBulletFrames(type));
 		Vector3 position = inflateCharacterPosition(charJsonObject, mapGraph);
-		addCharBaseComponents(b, inflateCharData(charJsonObject, type, position), type, type.getAtlasDefinition());
+		CharacterData data = inflateCharData(charJsonObject, type, position);
+		addCharBaseComponents(b, data, type, type.getAtlasDefinition(), type.getPrimaryAttack());
 		addEnemySkillFlower(type, b, position);
-		Entity enemy = b.finishAndAddToEngine();
-		initializeEnemy(position, enemy);
+		initializeEnemy(position, b.finishAndAddToEngine());
 	}
 
 	private void initializeEnemy(Vector3 position, Entity enemy) {
@@ -790,7 +770,7 @@ public class MapBuilder implements Disposable {
 	private Animation<TextureAtlas.AtlasRegion> inflateEnemyBulletFrames(Enemies type) {
 		Animation<TextureAtlas.AtlasRegion> bulletAnimation = enemyBulletsTextureRegions.get(type);
 		if (type.getPrimaryAttack() != null && !enemyBulletsTextureRegions.containsKey(type)) {
-			String name = EnemyWeaponsDefinitions.RAPID_LASER_CANNON.name().toLowerCase();
+			String name = WeaponsDefinitions.RAPID_LASER_CANNON.name().toLowerCase();
 			Array<TextureAtlas.AtlasRegion> regions = assetsManager.getAtlas(GUARD_BOT).findRegions(name);
 			bulletAnimation = new Animation<>(type.getPrimaryAttack().getFrameDuration(), regions);
 			enemyBulletsTextureRegions.put(type, bulletAnimation);

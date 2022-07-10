@@ -31,9 +31,10 @@ import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
+import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.shared.model.env.EnvironmentObjectDefinition;
 import com.gadarts.industrial.shared.model.pickups.ItemDefinition;
-import com.gadarts.industrial.shared.model.pickups.WeaponsDefinitions;
+import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -70,7 +71,7 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addFlowerIconComponent() {
+	public EntityBuilder addFlowerIconComponent( ) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		FlowerIconComponent component = engine.createComponent(FlowerIconComponent.class);
 		component.init(TimeUtils.millis());
@@ -170,9 +171,9 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addPickUpComponentAsWeapon(final WeaponsDefinitions definition,
-													final Texture displayImage,
-													final TextureAtlas.AtlasRegion bulletRegion) {
+	public EntityBuilder addPickUpComponentAsWeapon(PlayerWeaponsDefinitions definition,
+													Texture displayImage,
+													TextureAtlas.AtlasRegion bulletRegion) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		Weapon weapon = (Weapon) addPickUpComponent(Weapon.class, definition, displayImage);
 		weapon.setBulletTextureRegion(bulletRegion);
@@ -319,12 +320,13 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addCharacterComponent(final CharacterSpriteData characterSpriteData,
-											   final CharacterSoundData characterSoundData,
-											   final CharacterSkillsParameters skills) {
+	public EntityBuilder addCharacterComponent(CharacterSpriteData characterSpriteData,
+											   CharacterSoundData characterSoundData,
+											   CharacterSkillsParameters skills,
+											   WeaponsDefinitions primaryAttack) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		CharacterComponent charComponent = engine.createComponent(CharacterComponent.class);
-		charComponent.init(characterSpriteData, characterSoundData, skills);
+		charComponent.init(characterSpriteData, characterSoundData, skills, primaryAttack);
 		currentEntity.add(charComponent);
 		return instance;
 	}

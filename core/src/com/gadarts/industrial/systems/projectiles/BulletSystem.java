@@ -8,7 +8,6 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.SoundPlayer;
@@ -18,14 +17,10 @@ import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.collision.CollisionComponent;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
-import com.gadarts.industrial.components.player.Weapon;
-import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
-import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
-import com.gadarts.industrial.shared.model.pickups.WeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
@@ -37,29 +32,12 @@ import java.util.Map;
 public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> implements CharacterSystemEventsSubscriber {
 	private static final float BULLET_SPEED = 0.2f;
 	private static final Vector2 auxVector2_1 = new Vector2();
-	private static final Vector2 auxVector2_2 = new Vector2();
-	private static final Vector2 auxVector2_3 = new Vector2();
-	private static final Vector2 auxVector2_4 = new Vector2();
-	private static final Vector2 auxVector2_5 = new Vector2();
-	private static final Vector2 auxVector2_6 = new Vector2();
 	private static final float BULLET_MAX_DISTANCE = 14;
 	private static final Vector3 auxVector3_1 = new Vector3();
-	private static final Vector3 auxVector3_2 = new Vector3();
-	private static final Vector3 auxVector3_3 = new Vector3();
-	private static final Vector3 auxVector3_4 = new Vector3();
-	private static final Bresenham2 bresenham = new Bresenham2();
-	private static final float HIT_SCAN_MAX_DISTANCE = 10F;
-	private final static float HITSCAN_COL_LIGHT_INTENSITY = 0.1F;
-	private final static float HITSCAN_COL_LIGHT_RADIUS = 1.2F;
-	private final static Color HITSCAN_COL_LIGHT_COLOR = Color.YELLOW;
-	private final static float HITSCAN_COL_LIGHT_DURATION = 0.1F;
 	private final static float PROJ_LIGHT_INTENSITY = 0.05F;
 	private final static float PROJ_LIGHT_RADIUS = 1F;
 	private final static Color PROJ_LIGHT_COLOR = Color.valueOf("#8396FF");
-	private static final Quaternion auxQuat = new Quaternion();
-	private static final Matrix4 auxMatrix = new Matrix4();
 	private final Map<Assets.Models, Pool<GameModelInstance>> pooledBulletModels = new HashMap<>();
-	private ParticleEffect bulletRicochetEffect;
 	private ImmutableArray<Entity> bullets;
 	private ImmutableArray<Entity> collidables;
 
@@ -77,133 +55,10 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 
 		if (ComponentsMapper.enemy.has(character)) {
 			enemyEngagesPrimaryAttack(character, direction, charPos);
-		} else {
-			playerEngagesPrimaryAttack(character, direction);
 		}
-	}
-
-	private void playerEngagesPrimaryAttack(final Entity character, final Vector3 direction) {
-		Weapon selectedWeapon = getSystemsCommonData().getStorage().getSelectedWeapon();
-		if (selectedWeapon.isHitScan()) {
-			playerEngagesHitScanAttack(character, direction, selectedWeapon);
-		}
-	}
-
-	private void playerEngagesHitScanAttack(final Entity character, final Vector3 direction, final Weapon selectedWeapon) {
-		MapGraph map = getSystemsCommonData().getMap();
-		MapGraphNode posNode = map.getNode(ComponentsMapper.characterDecal.get(character).getNodePosition(auxVector3_1));
-		Vector3 posNodeCenterPos = posNode.getCenterPosition(auxVector3_4);
-		affectAimByAccuracy(character, direction);
-		Vector3 maxRangePos = calculateHitScanMaxPosition(direction, posNodeCenterPos);
-		Array<GridPoint2> nodes = findAllNodesOnTheWayOfTheHitScan(posNodeCenterPos, maxRangePos);
-		for (GridPoint2 node : nodes) {
-			if (applyHitScanThroughNodes(selectedWeapon, map, posNodeCenterPos, node, maxRangePos)) {
-				return;
-			}
-		}
-	}
-
-	private Vector2 findNodeSegmentIntersection(final Vector3 posNodeCenterPos,
-												final Vector3 maxRangePos,
-												final GridPoint2 node) {
-		Vector2 src = auxVector2_1.set(posNodeCenterPos.x, posNodeCenterPos.z);
-		Vector2 dst = auxVector2_2.set(maxRangePos.x, maxRangePos.z);
-		Vector2 closest = auxVector2_5.setZero();
-		float min = Integer.MAX_VALUE;
-		min = intersectSegments(posNodeCenterPos, src, dst, closest, min, auxVector2_3.set(node.x, node.y), auxVector2_4.set(node.x + 1F, node.y));
-		min = intersectSegments(posNodeCenterPos, src, dst, closest, min, auxVector2_3.set(auxVector2_4), auxVector2_4.set(node.x + 1F, node.y + 1F));
-		min = intersectSegments(posNodeCenterPos, src, dst, closest, min, auxVector2_3.set(auxVector2_4), auxVector2_4.set(node.x, node.y + 1F));
-		intersectSegments(posNodeCenterPos, src, dst, closest, min, auxVector2_3.set(auxVector2_4), auxVector2_4.set(node.x, node.y));
-		return closest;
-	}
-
-	private float intersectSegments(final Vector3 posNodeCenterPos,
-									final Vector2 src,
-									final Vector2 dst,
-									final Vector2 closest,
-									final float min,
-									final Vector2 lineVertex1, final Vector2 lineVertex2) {
-		Vector2 candidate = auxVector2_6;
-		Intersector.intersectSegments(src, dst, lineVertex1, lineVertex2, candidate.set(closest));
-		if (!candidate.isZero()) {
-			float distance = posNodeCenterPos.dst(candidate.x, posNodeCenterPos.y, candidate.y);
-			if (distance < min) {
-				closest.set(candidate);
-				return distance;
-			}
-		}
-		return min;
-	}
-
-	private boolean applyHitScanThroughNodes(final Weapon selectedWeapon,
-											 final MapGraph map,
-											 final Vector3 posNodeCenterPos,
-											 final GridPoint2 n,
-											 final Vector3 maxRangePos) {
-		MapGraphNode node = map.getNode(n.x, n.y);
-		if (node.getHeight() > map.getNode((int) posNodeCenterPos.x, (int) posNodeCenterPos.z).getHeight() + 1) {
-			Vector2 intersectionPos = findNodeSegmentIntersection(posNodeCenterPos, maxRangePos, n);
-			if (!intersectionPos.equals(Vector2.Zero)) {
-				auxVector3_1.set(intersectionPos.x, posNodeCenterPos.y + 1F, intersectionPos.y);
-				Vector3 position = auxVector3_1.set(intersectionPos.x, posNodeCenterPos.y + 1F, intersectionPos.y);
-				EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-						.addParticleEffectComponent((PooledEngine) getEngine(), bulletRicochetEffect, position)
-						.addShadowlessLightComponent(position,
-								HITSCAN_COL_LIGHT_INTENSITY,
-								HITSCAN_COL_LIGHT_RADIUS,
-								HITSCAN_COL_LIGHT_COLOR,
-								HITSCAN_COL_LIGHT_DURATION)
-						.finishAndAddToEngine();
-				return true;
-			} else {
-				return false;
-			}
-		}
-		Entity enemy = map.getAliveEnemyFromNode(node);
-		if (enemy != null) {
-			onHitScanCollisionWithAnotherEntity((WeaponsDefinitions) selectedWeapon.getDefinition(), enemy);
-			Vector3 position = auxVector3_1.set(ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition());
-			EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-					.addParticleEffectComponent((PooledEngine) getEngine(), bulletRicochetEffect, position)
-					.addShadowlessLightComponent(position,
-							HITSCAN_COL_LIGHT_INTENSITY,
-							HITSCAN_COL_LIGHT_RADIUS,
-							HITSCAN_COL_LIGHT_COLOR,
-							HITSCAN_COL_LIGHT_DURATION)
-					.finishAndAddToEngine();
-			return true;
-		}
-		return false;
-	}
-
-	private void onHitScanCollisionWithAnotherEntity(final WeaponsDefinitions definition, final Entity collidable) {
-		for (BulletSystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onHitScanCollisionWithAnotherEntity(definition, collidable);
-		}
-	}
-
-	private Array<GridPoint2> findAllNodesOnTheWayOfTheHitScan(final Vector3 posNodeCenterPos,
-															   final Vector3 maxRangePos) {
-		return bresenham.line(
-				(int) posNodeCenterPos.x, (int) posNodeCenterPos.z,
-				(int) maxRangePos.x, (int) maxRangePos.z);
-	}
-
-	private Vector3 calculateHitScanMaxPosition(final Vector3 direction, final Vector3 posNodeCenterPosition) {
-		Vector3 step = auxVector3_3.setZero().add(direction.setLength(HIT_SCAN_MAX_DISTANCE));
-		return auxVector3_2.set(posNodeCenterPosition).add(step);
-	}
-
-	private void affectAimByAccuracy(final Entity character, final Vector3 direction) {
-		int maxAngle = ComponentsMapper.character.get(character).getSkills().getAccuracy().getMaxAngle();
-		direction.rotate(Vector3.Y, MathUtils.random(-maxAngle, maxAngle));
 	}
 
 	private void enemyEngagesPrimaryAttack(final Entity character, final Vector3 direction, final Vector3 charPos) {
-		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(character);
-		Accuracy accuracy = enemyComponent.getEnemyDefinition().getAccuracy();
-//		direction.rotate(Vector3.Y, MathUtils.random(-accuracy.getMaxAngle(), accuracy.getMaxAngle()));
-//		direction.rotate(Vector3.X, MathUtils.random(-accuracy.getMaxAngle(), accuracy.getMaxAngle()));
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
 		getSoundPlayer().playSound(Assets.Sounds.ATTACK_ENERGY_BALL);
 		createEnemyBullet(character, direction, charPos, enemyComp);
@@ -214,7 +69,7 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 								   Vector3 charPos,
 								   EnemyComponent enemyComp) {
 		charPos.y += ComponentsMapper.enemy.get(character).getEnemyDefinition().getHeight() / 2F;
-		Integer damagePoints = enemyComp.getEnemyDefinition().getPrimaryAttack().getDamagePoints();
+		Integer damagePoints = enemyComp.getEnemyDefinition().getPrimaryAttack().getDamage();
 		GameAssetsManager assetsManager = getAssetsManager();
 		ParticleEffect effect = assetsManager.getParticleEffect(Assets.ParticleEffects.ENERGY_BALL_TRAIL);
 		if (!pooledBulletModels.containsKey(Assets.Models.LASER_BULLET)) {
@@ -353,7 +208,7 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 
 	@Override
 	public void initializeData( ) {
-		bulletRicochetEffect = getAssetsManager().getParticleEffect(Assets.ParticleEffects.BULLET_RICOCHET);
+
 	}
 
 	@Override

@@ -15,6 +15,8 @@ public class AnimationComponent implements GameComponent {
 	private boolean doingReverse;
 
 	private Animation<TextureAtlas.AtlasRegion> animation;
+
+	@Setter
 	private float stateTime;
 	private long lastFrameChange;
 

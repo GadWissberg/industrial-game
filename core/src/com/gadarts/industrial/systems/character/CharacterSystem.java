@@ -9,17 +9,11 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
-import com.gadarts.industrial.shared.model.characters.CharacterTypes;
-import com.gadarts.industrial.shared.model.characters.Direction;
-import com.gadarts.industrial.shared.model.characters.SpriteType;
-import com.gadarts.industrial.shared.model.characters.attributes.Agility;
-import com.gadarts.industrial.shared.model.pickups.WeaponsDefinitions;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -31,6 +25,13 @@ import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphConnection;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.map.MapGraphPath;
+import com.gadarts.industrial.shared.assets.Assets;
+import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.model.characters.CharacterTypes;
+import com.gadarts.industrial.shared.model.characters.Direction;
+import com.gadarts.industrial.shared.model.characters.SpriteType;
+import com.gadarts.industrial.shared.model.characters.attributes.Agility;
+import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
@@ -41,10 +42,10 @@ import com.gadarts.industrial.utils.EntityBuilder;
 
 import java.util.Map;
 
-import static com.gadarts.industrial.shared.model.characters.SpriteType.*;
 import static com.gadarts.industrial.components.ComponentsMapper.*;
 import static com.gadarts.industrial.components.character.CharacterMotivation.*;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
+import static com.gadarts.industrial.shared.model.characters.SpriteType.*;
 import static com.gadarts.industrial.utils.GameUtils.EPSILON;
 
 public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber> implements
@@ -293,12 +294,22 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		AnimationComponent animationComponent = animation.get(character);
 		Animation<TextureAtlas.AtlasRegion> animation = animationComponent.getAnimation();
 		if (animation.isAnimationFinished(animationComponent.getStateTime())) {
-			SpriteType spriteType = ComponentsMapper.character.get(character).getCharacterSpriteData().getSpriteType();
-			if (spriteType.isAddReverse()) {
-				handleAnimationReverse(character, animationComponent, animation, spriteType);
-			} else {
-				commandDone(character);
-			}
+			animationEnded(character, animationComponent, animation);
+		}
+	}
+
+	private void animationEnded(Entity character,
+								AnimationComponent animationComponent,
+								Animation<TextureAtlas.AtlasRegion> animation) {
+		CharacterComponent characterComp = ComponentsMapper.character.get(character);
+		SpriteType spriteType = characterComp.getCharacterSpriteData().getSpriteType();
+		if (spriteType.isAddReverse()) {
+			handleAnimationReverse(character, animationComponent, animation, spriteType);
+		} else if (characterComp.getOnGoingAttack().getBulletsToShoot() > 0) {
+			int primaryAttackHitFrameIndex = characterComp.getCharacterSpriteData().getPrimaryAttackHitFrameIndex();
+			animationComponent.setStateTime((primaryAttackHitFrameIndex - 1) * animation.getFrameDuration());
+		} else {
+			commandDone(character);
 		}
 	}
 
@@ -390,24 +401,35 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		}
 	}
 
-	private void rotationDone(CharacterRotationData rotationData, CharacterSpriteData characterSpriteData) {
+	private void rotationDone(CharacterRotationData rotationData,
+							  CharacterSpriteData charSpriteData) {
 		rotationData.setRotating(false);
 		CharacterCommand currentCommand = getSystemsCommonData().getCurrentCommand();
 		CharacterComponent characterComponent = character.get(currentCommand.getCharacter());
-		characterSpriteData.setSpriteType(RUN);
+		charSpriteData.setSpriteType(RUN);
 		if (characterComponent.getMotivationData().getMotivation() == CharacterMotivation.TO_ATTACK) {
-			characterSpriteData.setSpriteType(decideAttackSpriteType(characterComponent.getMotivationData()));
+			charSpriteData.setSpriteType(decideAttackSpriteType(characterComponent.getMotivationData(), currentCommand));
 		} else if (characterComponent.getMotivationData().getMotivation() == CharacterMotivation.TO_PICK_UP) {
-			characterSpriteData.setSpriteType(PICKUP);
+			charSpriteData.setSpriteType(PICKUP);
 		}
 	}
 
-	private SpriteType decideAttackSpriteType(CharacterMotivationData motivationData) {
+	private SpriteType decideAttackSpriteType(CharacterMotivationData motivationData, CharacterCommand currentCommand) {
 		SpriteType spriteType = null;
 		Integer motivationAdditionalData = (Integer) motivationData.getMotivationAdditionalData();
 		if (motivationAdditionalData != null && motivationAdditionalData == USE_PRIMARY) {
-			spriteType = ATTACK_PRIMARY;
+			spriteType = applyPrimaryAttackForCharacter(currentCommand);
 		}
+		return spriteType;
+	}
+
+	private SpriteType applyPrimaryAttackForCharacter(CharacterCommand currentCommand) {
+		SpriteType spriteType;
+		spriteType = ATTACK_PRIMARY;
+		CharacterComponent charComp = character.get(currentCommand.getCharacter());
+		WeaponsDefinitions primary = charComp.getPrimaryAttack();
+		int bulletsToShoot = MathUtils.random(primary.getMinNumberOfBullets(), primary.getMaxNumberOfBullets());
+		charComp.getOnGoingAttack().initialize(CharacterComponent.AttackType.PRIMARY, bulletsToShoot);
 		return spriteType;
 	}
 
@@ -483,6 +505,11 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			Vector3 direction = calculateDirectionToTarget(characterComponent, positionNodeCenterPosition);
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onCharacterEngagesPrimaryAttack(character, direction, positionNodeCenterPosition);
+			}
+			OnGoingAttack onGoingAttack = characterComponent.getOnGoingAttack();
+			onGoingAttack.bulletShot();
+			if (onGoingAttack.isDone()) {
+
 			}
 		}
 	}
