@@ -320,12 +320,17 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (animationComponent.isDoingReverse()) {
 			commandDone(character);
 			animation.setPlayMode(Animation.PlayMode.NORMAL);
+			animationComponent.setDoingReverse(false);
 		} else {
-			animation.setPlayMode(Animation.PlayMode.REVERSED);
 			animation.setFrameDuration(spriteType.getAnimationDuration());
-			animationComponent.resetStateTime();
+			applyAnimationToReverse(animationComponent);
 		}
-		animationComponent.setDoingReverse(!animationComponent.isDoingReverse());
+	}
+
+	private void applyAnimationToReverse(AnimationComponent animationComponent) {
+		animationComponent.getAnimation().setPlayMode(Animation.PlayMode.REVERSED);
+		animationComponent.resetStateTime();
+		animationComponent.setDoingReverse(animationComponent.isDoingReverse());
 	}
 
 	private void handleCurrentCommand(final CharacterCommand currentCommand) {
@@ -509,7 +514,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			OnGoingAttack onGoingAttack = characterComponent.getOnGoingAttack();
 			onGoingAttack.bulletShot();
 			if (onGoingAttack.isDone()) {
-
+				applyAnimationToReverse(animation.get(character));
 			}
 		}
 	}
