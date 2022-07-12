@@ -192,8 +192,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (currentCommand != null) {
 			handleCurrentCommand(currentCommand);
 		}
-		for (Entity character : characters) {
-			handlePain(character);
+		for (int i = 0; i < characters.size(); i++) {
+			handlePain(characters.get(i));
 		}
 	}
 
@@ -303,12 +303,20 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 								Animation<TextureAtlas.AtlasRegion> animation) {
 		CharacterComponent characterComp = ComponentsMapper.character.get(character);
 		SpriteType spriteType = characterComp.getCharacterSpriteData().getSpriteType();
+		OnGoingAttack onGoingAttack = characterComp.getOnGoingAttack();
 		if (spriteType.isAddReverse()) {
 			handleAnimationReverse(character, animationComponent, animation, spriteType);
-		} else if (characterComp.getOnGoingAttack().getBulletsToShoot() > 0) {
+		} else if (onGoingAttack.getType() != null) {
 			int primaryAttackHitFrameIndex = characterComp.getCharacterSpriteData().getPrimaryAttackHitFrameIndex();
-			animationComponent.setStateTime((primaryAttackHitFrameIndex - 1) * animation.getFrameDuration());
+			if (onGoingAttack.isDone()) {
+				onGoingAttack.setType(null);
+				animationComponent.setStateTime((primaryAttackHitFrameIndex - 1) * animation.getFrameDuration());
+				animation.setPlayMode(Animation.PlayMode.REVERSED);
+			} else {
+				animationComponent.setStateTime((primaryAttackHitFrameIndex) * animation.getFrameDuration());
+			}
 		} else {
+			animation.setPlayMode(Animation.PlayMode.NORMAL);
 			commandDone(character);
 		}
 	}
@@ -330,7 +338,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private void applyAnimationToReverse(AnimationComponent animationComponent) {
 		animationComponent.getAnimation().setPlayMode(Animation.PlayMode.REVERSED);
 		animationComponent.resetStateTime();
-		animationComponent.setDoingReverse(animationComponent.isDoingReverse());
+		animationComponent.setDoingReverse(true);
 	}
 
 	private void handleCurrentCommand(final CharacterCommand currentCommand) {
@@ -503,6 +511,9 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private void applyPrimaryAttack(Entity character,
 									TextureAtlas.AtlasRegion newFrame) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
+		OnGoingAttack onGoingAttack = characterComponent.getOnGoingAttack();
+		if (onGoingAttack.isDone()) return;
+
 		if (newFrame.index == characterComponent.getCharacterSpriteData().getPrimaryAttackHitFrameIndex()) {
 			CharacterDecalComponent charDecalComp = characterDecal.get(character);
 			MapGraphNode positionNode = getSystemsCommonData().getMap().getNode(charDecalComp.getDecal().getPosition());
@@ -511,11 +522,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onCharacterEngagesPrimaryAttack(character, direction, positionNodeCenterPosition);
 			}
-			OnGoingAttack onGoingAttack = characterComponent.getOnGoingAttack();
 			onGoingAttack.bulletShot();
-			if (onGoingAttack.isDone()) {
-				applyAnimationToReverse(animation.get(character));
-			}
 		}
 	}
 

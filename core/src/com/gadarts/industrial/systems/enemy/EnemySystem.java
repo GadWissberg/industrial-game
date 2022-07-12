@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
@@ -22,6 +23,7 @@ import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.components.sd.RelatedDecal;
 import com.gadarts.industrial.components.sd.SimpleDecalComponent;
 import com.gadarts.industrial.map.*;
+import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
@@ -70,6 +72,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private final PathPlanHandler enemyPathPlanner;
 	private ImmutableArray<Entity> enemies;
 	private long nextAmbSoundTime;
+	private TextureRegion iconAttack;
 
 	public EnemySystem(SystemsCommonData systemsCommonData,
 					   SoundPlayer soundPlayer,
@@ -396,11 +399,18 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		if (character.get(enemy).getSkills().getHealthData().getHp() <= 0) return;
 		ComponentsMapper.enemy.get(enemy).setAiStatus(ATTACKING);
 		getSoundPlayer().playSound(ComponentsMapper.enemy.get(enemy).getEnemyDefinition().getAwakeSound());
-		Decal flowerDecal = simpleDecal.get(enemy).getDecal();
-		flowerDecal.setTextureRegion(skillFlowerTexture);
+		updateFlowerOnAwakening(enemy);
 		for (EnemySystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onEnemyAwaken(enemy);
 		}
+	}
+
+	private void updateFlowerOnAwakening(Entity enemy) {
+		SimpleDecalComponent simpleDecalComponent = simpleDecal.get(enemy);
+		Decal flowerDecal = simpleDecalComponent.getDecal();
+		flowerDecal.setTextureRegion(skillFlowerTexture);
+		List<RelatedDecal> relatedDecals = simpleDecalComponent.getRelatedDecals();
+		relatedDecals.get(relatedDecals.size() - 1).setTextureRegion(iconAttack);
 	}
 
 	@Override
@@ -457,7 +467,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	@Override
 	public void initializeData( ) {
-
+		iconAttack = new TextureRegion(getAssetsManager().getTexture(UiTextures.ICON_ATTACK));
 	}
 
 	@Override
