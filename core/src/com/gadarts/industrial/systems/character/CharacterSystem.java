@@ -43,7 +43,6 @@ import com.gadarts.industrial.utils.EntityBuilder;
 import java.util.Map;
 
 import static com.gadarts.industrial.components.ComponentsMapper.*;
-import static com.gadarts.industrial.components.character.CharacterMotivation.*;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.*;
 import static com.gadarts.industrial.utils.GameUtils.EPSILON;
@@ -168,12 +167,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 						subscribers);
 	}
 
-	public void initNextNode(final CharacterComponent characterComponent,
-							 final MapGraphNode nextNode) {
-		characterComponent.getRotationData().setRotating(true);
-		characterComponent.setNextNode(nextNode);
-	}
-
 	private void applyMovementOfCommandWithAgility(final CharacterCommand command, final Entity character) {
 		Agility agility = ComponentsMapper.character.get(character).getSkills().getAgility();
 		Array<MapGraphNode> nodes = command.getPath().nodes;
@@ -202,7 +195,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		long lastDamage = characterComponent.getSkills().getHealthData().getLastDamage();
 		CharacterSpriteData spriteData = characterComponent.getCharacterSpriteData();
 		if (spriteData.getSpriteType() == PAIN && TimeUtils.timeSinceMillis(lastDamage) > CHARACTER_PAIN_DURATION) {
-			painDone(character, characterComponent, spriteData);
+			painDone(character, spriteData);
 		}
 	}
 
@@ -238,21 +231,17 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (healthData.getHp() <= 0) {
 			characterDies(character, characterComponent, soundData);
 		} else {
-			characterInPain(character, characterComponent, healthData, soundData);
+			characterInPain(character, characterComponent, soundData);
 		}
 	}
 
 	private void characterInPain(Entity character,
 								 CharacterComponent characterComponent,
-								 CharacterHealthData healthData,
 								 CharacterSoundData soundData) {
 		getSoundPlayer().playSound(soundData.getPainSound());
 		characterComponent.getCharacterSpriteData().setSpriteType(PAIN);
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onCharacterGotDamage(character);
-		}
-		if (healthData.getHp() > 0) {
-			characterComponent.setMotivation(null);
 		}
 	}
 
@@ -262,15 +251,13 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (animation.has(character)) {
 			animation.get(character).resetStateTime();
 		}
-		characterComponent.setMotivation(null);
 		getSoundPlayer().playSound(soundData.getDeathSound());
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onCharacterDies(character);
 		}
 	}
 
-	private void painDone(Entity character, CharacterComponent characterComponent, CharacterSpriteData spriteData) {
-		characterComponent.setMotivation(null);
+	private void painDone(Entity character, CharacterSpriteData spriteData) {
 		spriteData.setSpriteType(IDLE);
 		CharacterCommand currentCommand = getSystemsCommonData().getCurrentCommand();
 		if (currentCommand != null && !currentCommand.isStarted()) {
@@ -281,10 +268,10 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	public void commandDone(final Entity character) {
 		currentPath.clear();
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		characterComponent.setMotivation(null);
 		characterComponent.getCharacterSpriteData().setSpriteType(SpriteType.IDLE);
 		CharacterCommand lastCommand = getSystemsCommonData().getCurrentCommand();
 		getSystemsCommonData().setCurrentCommand(null);
+		characterComponent.getRotationData().setRotating(false);
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onCharacterCommandDone(character, lastCommand);
 		}
@@ -346,8 +333,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		SpriteType spriteType = characterComponent.getCharacterSpriteData().getSpriteType();
 		if (spriteType == PICKUP || spriteType == ATTACK_PRIMARY) {
 			handleModeWithNonLoopingAnimation(currentCommand.getCharacter());
-		} else if (characterComponent.getMotivationData().getMotivation() == END_MY_TURN) {
-			commandDone(currentCommand.getCharacter());
 		} else {
 			handleRotation(currentCommand.getCharacter(), characterComponent);
 		}
@@ -355,11 +340,16 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	private Direction calculateDirectionToDestination(final Entity character) {
 		Vector3 characterPos = auxVector3_1.set(characterDecal.get(character).getDecal().getPosition());
-		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		MapGraphNode destinationNode = characterComponent.getNextNode();
-		Vector2 destPos = destinationNode.getCenterPosition(auxVector2_2);
+		MapGraphNode nextNode = getNextNodeInPath(character);
+		Vector2 destPos = nextNode.getCenterPosition(auxVector2_2);
 		Vector2 directionToDest = destPos.sub(characterPos.x, characterPos.z).nor();
 		return Direction.findDirection(directionToDest);
+	}
+
+	private MapGraphNode getNextNodeInPath(Entity character) {
+		Vector2 nodePosition = characterDecal.get(character).getNodePosition(auxVector2_1);
+		MapGraphNode node = getSystemsCommonData().getMap().getNode(nodePosition);
+		return currentPath.getNextOf(node);
 	}
 
 
@@ -371,7 +361,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onCharacterRotated(character);
 			}
-			Direction directionToDest = initializeRotation(character, charComponent, rotationData);
+			Direction directionToDest = initializeRotation(character, rotationData);
 			rotate(charComponent, rotationData, directionToDest);
 		}
 	}
@@ -402,38 +392,15 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	private Direction initializeRotation(Entity character,
-										 CharacterComponent charComponent,
 										 CharacterRotationData rotationData) {
 		rotationData.setLastRotation(TimeUtils.millis());
-		if (charComponent.getMotivationData().getMotivation() == CharacterMotivation.TO_ATTACK) {
-			return calculateDirectionToTarget(character);
-		} else if (charComponent.getMotivationData().getMotivation() == TO_PICK_UP) {
-			return charComponent.getCharacterSpriteData().getFacingDirection();
-		} else {
-			return calculateDirectionToDestination(character);
-		}
+		return calculateDirectionToDestination(character);
 	}
 
 	private void rotationDone(CharacterRotationData rotationData,
 							  CharacterSpriteData charSpriteData) {
 		rotationData.setRotating(false);
-		CharacterCommand currentCommand = getSystemsCommonData().getCurrentCommand();
-		CharacterComponent characterComponent = character.get(currentCommand.getCharacter());
 		charSpriteData.setSpriteType(RUN);
-		if (characterComponent.getMotivationData().getMotivation() == CharacterMotivation.TO_ATTACK) {
-			charSpriteData.setSpriteType(decideAttackSpriteType(characterComponent.getMotivationData(), currentCommand));
-		} else if (characterComponent.getMotivationData().getMotivation() == CharacterMotivation.TO_PICK_UP) {
-			charSpriteData.setSpriteType(PICKUP);
-		}
-	}
-
-	private SpriteType decideAttackSpriteType(CharacterMotivationData motivationData, CharacterCommand currentCommand) {
-		SpriteType spriteType = null;
-		Integer motivationAdditionalData = (Integer) motivationData.getMotivationAdditionalData();
-		if (motivationAdditionalData != null && motivationAdditionalData == USE_PRIMARY) {
-			spriteType = applyPrimaryAttackForCharacter(currentCommand);
-		}
-		return spriteType;
 	}
 
 	private SpriteType applyPrimaryAttackForCharacter(CharacterCommand currentCommand) {
@@ -480,13 +447,10 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	private void handlePickup(Entity character, TextureAtlas.AtlasRegion newFrame) {
 		if (newFrame.index == 1 && animation.get(character).isDoingReverse()) {
-			CharacterMotivation mode = ComponentsMapper.character.get(character).getMotivationData().getMotivation();
 			CharacterCommand currentCommand = getSystemsCommonData().getCurrentCommand();
-			if (mode == TO_PICK_UP && currentCommand.getAdditionalData() != null) {
-				Entity itemPickedUp = (Entity) currentCommand.getAdditionalData();
-				for (CharacterSystemEventsSubscriber subscriber : subscribers) {
-					subscriber.onItemPickedUp(itemPickedUp);
-				}
+			Entity itemPickedUp = (Entity) currentCommand.getAdditionalData();
+			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
+				subscriber.onItemPickedUp(itemPickedUp);
 			}
 		}
 	}
@@ -539,8 +503,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (newFrame.index == 0 || newFrame.index == 5) {
 			getSoundPlayer().playSound(ComponentsMapper.character.get(character).getSoundData().getStepSound());
 		}
-		MapGraphNode nextNode = ComponentsMapper.character.get(character).getNextNode();
 		Decal decal = characterDecal.get(character).getDecal();
+		MapGraphNode nextNode = getNextNodeInPath(character);
 		if (auxVector2_1.set(decal.getX(), decal.getZ()).dst2(nextNode.getCenterPosition(auxVector2_2)) < EPSILON) {
 			reachedNodeOfPath(character, nextNode);
 		} else {
@@ -574,8 +538,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		}
 	}
 
-	private void translateCharacter(final Entity entity, final CharacterDecalComponent characterDecalComponent) {
-		character.get(entity).getNextNode().getCenterPosition(auxVector2_2);
+	private void translateCharacter(final Entity character, final CharacterDecalComponent characterDecalComponent) {
+		getNextNodeInPath(character).getCenterPosition(auxVector2_2);
 		Decal decal = characterDecalComponent.getDecal();
 		Vector2 velocity = auxVector2_2.sub(auxVector2_1.set(decal.getX(), decal.getZ())).nor().scl(CHARACTER_STEP_SIZE);
 		decal.translate(auxVector3_1.set(velocity.x, 0, velocity.y));
@@ -588,7 +552,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (isReachedEndOfPath(next, connection)) {
 			destinationReached(character, currentPath.nodes.get(currentPath.nodes.size - 1));
 		} else {
-			initNextNode(ComponentsMapper.character.get(character), next);
+			ComponentsMapper.character.get(character).getRotationData().setRotating(true);
 			takeStep(character);
 		}
 	}

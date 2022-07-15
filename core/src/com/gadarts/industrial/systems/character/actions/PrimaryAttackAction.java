@@ -4,7 +4,6 @@ import com.badlogic.ashley.core.Entity;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.character.CharacterComponent;
-import com.gadarts.industrial.components.character.CharacterMotivation;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
@@ -22,7 +21,6 @@ public class PrimaryAttackAction implements ToDoAfterDestinationReached {
 		Entity target = characterComponent.getTarget();
 		if (target != null) {
 			characterComponent.getRotationData().setRotating(true);
-			characterComponent.setMotivation(CharacterMotivation.TO_ATTACK, CharacterMotivation.USE_PRIMARY);
 		}
 	}
 }

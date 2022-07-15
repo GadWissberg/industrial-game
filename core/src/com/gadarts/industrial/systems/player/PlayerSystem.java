@@ -406,7 +406,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		result |= targetNode.equals(attackNode) && playerNode.isConnectedNeighbour(attackNode);
 		if (result) {
 			calculatePathToMelee(targetNode, map);
-			applyPlayerCommand(GO_TO_MELEE);
 		}
 		deactivateAttackMode(attackNodesHandler);
 	}

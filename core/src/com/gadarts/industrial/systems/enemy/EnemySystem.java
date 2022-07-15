@@ -172,10 +172,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			return true;
 		}
 		Entity obstacle = getSystemsCommonData().getMap().fetchObstacleFromNode(node);
-		if (obstacle != null) {
-			return true;
-		}
-		return false;
+		return obstacle != null;
 	}
 
 	private boolean checkIfWayIsClearToTarget(final Entity enemy) {
@@ -306,22 +303,14 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			applySearchingModeOnEnemy(enemy);
 		}
 		initializePathPlanRequest(targetLastVisibleNode, characterDecalComp, CLEAN, enemy);
-		if (GameUtils.calculatePath(request, enemyPathPlanner.getPathFinder(), enemyPathPlanner.getHeuristic())) {
-			applyCommand(enemy, CharacterCommandsTypes.GO_TO_MELEE);
-		} else {
-			tryToPlanThroughHeightDiff(enemy, characterDecalComp, targetLastVisibleNode);
-		}
+		tryToPlanThroughHeightDiff(enemy, characterDecalComp, targetLastVisibleNode);
 	}
 
 	private void tryToPlanThroughHeightDiff(Entity enemy,
 											CharacterDecalComponent characterDecalComp,
 											MapGraphNode targetLastVisibleNode) {
-		boolean foundPath;
 		initializePathPlanRequest(targetLastVisibleNode, characterDecalComp, HEIGHT_DIFF, enemy);
-		foundPath = GameUtils.calculatePath(request, enemyPathPlanner.getPathFinder(), enemyPathPlanner.getHeuristic());
-		if (foundPath) {
-			applyCommand(enemy, CharacterCommandsTypes.GO_TO_MELEE);
-		}
+		GameUtils.calculatePath(request, enemyPathPlanner.getPathFinder(), enemyPathPlanner.getHeuristic());
 	}
 
 	@Override

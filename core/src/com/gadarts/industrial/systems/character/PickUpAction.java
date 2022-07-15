@@ -5,7 +5,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.character.CharacterComponent;
-import com.gadarts.industrial.components.character.CharacterMotivation;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.systems.character.actions.ToDoAfterDestinationReached;
@@ -26,9 +25,6 @@ public class PickUpAction implements ToDoAfterDestinationReached {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		if (pickup != null) {
 			characterComponent.getRotationData().setRotating(true);
-			characterComponent.setMotivation(CharacterMotivation.TO_PICK_UP, itemToPickup);
-		} else {
-			characterComponent.setMotivation(CharacterMotivation.END_MY_TURN, itemToPickup);
 		}
 	}
 }
