@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.gadarts.industrial.components.DoorComponent;
+import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.shared.model.Coords;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -70,7 +71,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		this.pickupEntities = engine.getEntitiesFor(Family.all(PickUpComponent.class).get());
 	}
 
-	public Entity getAliveEnemyFromNode(final MapGraphNode node) {
+	public Entity fetchAliveEnemyFromNode(final MapGraphNode node) {
 		Entity result = null;
 		for (Entity enemy : enemiesEntities) {
 			MapGraphNode enemyNode = getNode(ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition());
@@ -239,7 +240,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		List<MapGraphNode> nodesAround = getNodesAround(node, auxNodesList_1);
 		List<MapGraphNode> availableNodes = auxNodesList_2;
 		for (MapGraphNode nearbyNode : nodesAround) {
-			if (nearbyNode.getType() == MapNodesTypes.PASSABLE_NODE && getAliveEnemyFromNode(nearbyNode) == null) {
+			if (nearbyNode.getType() == MapNodesTypes.PASSABLE_NODE && fetchAliveEnemyFromNode(nearbyNode) == null) {
 				availableNodes.add(nearbyNode);
 			}
 		}
@@ -343,6 +344,19 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 			ModelInstance modelInstance = ComponentsMapper.modelInstance.get(obstacle).getModelInstance();
 			MapGraphNode pickupNode = getNode(modelInstance.transform.getTranslation(auxVector3));
 			if (pickupNode.equals(node)) {
+				result = obstacle;
+				break;
+			}
+		}
+		return result;
+	}
+
+	public Entity fetchObstacleFromNode(MapGraphNode node) {
+		Entity result = null;
+		for (Entity obstacle : obstacleEntities) {
+			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(obstacle).getModelInstance();
+			MapGraphNode obstacleNode = getNode(modelInstance.transform.getTranslation(auxVector3));
+			if (obstacleNode.equals(node)) {
 				result = obstacle;
 				break;
 			}

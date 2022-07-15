@@ -252,7 +252,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	private void planPath(final MapGraphNode cursorNode, AttackNodesHandler attackNodesHandler) {
-		Entity enemyAtNode = getSystemsCommonData().getMap().getAliveEnemyFromNode(cursorNode);
+		Entity enemyAtNode = getSystemsCommonData().getMap().fetchAliveEnemyFromNode(cursorNode);
 		if (!calculatePathAccordingToSelection(cursorNode, enemyAtNode)) return;
 		MapGraphNode selectedAttackNode = attackNodesHandler.getSelectedAttackNode();
 		SystemsCommonData commonData = getSystemsCommonData();
@@ -284,7 +284,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private void enemySelectedWithRangeWeapon(final MapGraphNode node) {
 		Entity player = getSystemsCommonData().getPlayer();
 		CharacterComponent charComp = character.get(player);
-		Entity targetNode = getSystemsCommonData().getMap().getAliveEnemyFromNode(node);
+		Entity targetNode = getSystemsCommonData().getMap().fetchAliveEnemyFromNode(node);
 		charComp.setTarget(targetNode);
 		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onPlayerAppliedCommand(auxCommand.init(ATTACK_PRIMARY, null, player, targetNode));
@@ -412,7 +412,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	private void calculatePathToMelee(MapGraphNode targetNode, MapGraph map) {
-		if (map.getAliveEnemyFromNode(targetNode) != null) {
+		if (map.fetchAliveEnemyFromNode(targetNode) != null) {
 			Array<MapGraphNode> nodes = playerPathPlanner.getCurrentPath().nodes;
 			nodes.removeIndex(nodes.size - 1);
 		}

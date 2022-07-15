@@ -4,7 +4,6 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
@@ -23,7 +22,6 @@ import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.components.sd.RelatedDecal;
 import com.gadarts.industrial.components.sd.SimpleDecalComponent;
 import com.gadarts.industrial.map.*;
-import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
@@ -63,7 +61,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private static final float ENEMY_HALF_FOV_ANGLE = 75F;
 	private static final float MAX_SIGHT = 11;
 	private static final CalculatePathRequest request = new CalculatePathRequest();
-	private static final float RANGE_ATTACK_MIN_RADIUS = 1.7F;
 	private static final List<MapGraphNode> auxNodesList = new ArrayList<>();
 	private static final CharacterCommand auxCommand = new CharacterCommand();
 	private static final int NUMBER_OF_SKILL_FLOWER_LEAF = 8;
@@ -110,23 +107,11 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		Enemies enemyDefinition = enemyComponent.getEnemyDefinition();
 		if (checkIfWayIsClearToTarget(enemy)) {
-			engagePrimaryAttack(enemy, enemyComponent, enemyDefinition);
+			engagePrimaryAttack(enemy, enemyDefinition);
 		} else {
 			enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
 			enemyFinishedTurn();
 		}
-	}
-
-	public boolean calculatePathToCharacter(MapGraphNode sourceNode,
-											Entity character,
-											boolean avoidCharactersInCalculation,
-											MapGraphConnectionCosts maxCostPerNodeConn) {
-		enemyPathPlanner.getCurrentPath().clear();
-		CharacterDecalComponent characterDecalComponent = characterDecal.get(character);
-		Vector2 cellPosition = characterDecalComponent.getNodePosition(auxVector2_1);
-		MapGraphNode destNode = getSystemsCommonData().getMap().getNode((int) cellPosition.x, (int) cellPosition.y);
-		initializePathPlanRequest(sourceNode, destNode, maxCostPerNodeConn, avoidCharactersInCalculation, character);
-		return enemyPathPlanner.getPathFinder().searchNodePathBeforeCommand(enemyPathPlanner.getHeuristic(), request);
 	}
 
 	@Override
@@ -147,12 +132,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		CharacterSystemEventsSubscriber.super.onDestinationReached(character);
 	}
 
-	private void applyGoToMelee(final Entity enemy) {
-		MapGraphPath currentPath = enemyPathPlanner.getCurrentPath();
-		currentPath.nodes.removeIndex(currentPath.getCount() - 1);
-		applyCommand(enemy, CharacterCommandsTypes.GO_TO_MELEE);
-	}
-
 	private float calculateDistanceToTarget(final Entity enemy) {
 		Entity target = character.get(enemy).getTarget();
 		Vector3 targetPosition = characterDecal.get(target).getDecal().getPosition();
@@ -160,37 +139,25 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		return position.dst(targetPosition);
 	}
 
-	private boolean checkIfPrimaryAttackIsReady(final EnemyComponent enemyComponent, final int turnsDiff) {
-		long currentTurnId = getSystemsCommonData().getCurrentTurnId();
-		long lastPrimaryAttack = enemyComponent.getTimeStamps().getLastPrimaryAttack();
-		return lastPrimaryAttack < 0 || currentTurnId - lastPrimaryAttack > turnsDiff;
-	}
-
 	private void engagePrimaryAttack(final Entity enemy,
-									 final EnemyComponent enemyCom,
 									 final Enemies def) {
 		Accuracy accuracy = def.getAccuracy();
 		if (accuracy != null && def.getRange() != Range.NONE) {
 			float disToTarget = calculateDistanceToTarget(enemy);
-			if (disToTarget <= def.getRange().getMaxDistance() && disToTarget > RANGE_ATTACK_MIN_RADIUS) {
-//				int turnsDiff = def.getReloadTime().get(skillIndex).getNumberOfTurns();
-//				if (checkIfPrimaryAttackIsReady(enemyCom, turnsDiff) && !checkIfWayIsClearToTarget(enemy)) {
+			if (disToTarget <= def.getRange().getMaxDistance()) {
 				enemyPathPlanner.getCurrentPath().clear();
 				MapGraph map = getSystemsCommonData().getMap();
 				MapGraphNode currentNode = map.getNode(characterDecal.get(enemy).getNodePosition(auxVector2_1));
 				enemyPathPlanner.getCurrentPath().add(currentNode);
 				applyCommand(enemy, CharacterCommandsTypes.ATTACK_PRIMARY);
-//				}
 			}
 		}
 	}
 
-	private boolean checkIfFloorNodesContainsEnemy(final Array<GridPoint2> nodes, Entity enemyToCheckFor) {
+	private boolean checkIfFloorNodesContainObjects(final Array<GridPoint2> nodes, Entity enemyToCheckFor) {
 		boolean result = false;
 		for (GridPoint2 point : nodes) {
-			MapGraph map = getSystemsCommonData().getMap();
-			Entity enemy = map.getAliveEnemyFromNode(map.getNode(point.x, point.y));
-			if (enemy != null && enemy != enemyToCheckFor) {
+			if (checkIfNodeContainsObject(enemyToCheckFor, point)) {
 				result = true;
 				break;
 			}
@@ -198,11 +165,24 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		return result;
 	}
 
+	private boolean checkIfNodeContainsObject(Entity enemyToCheckFor, GridPoint2 point) {
+		MapGraphNode node = getSystemsCommonData().getMap().getNode(point.x, point.y);
+		Entity enemy = getSystemsCommonData().getMap().fetchAliveEnemyFromNode(node);
+		if (enemy != null && enemy != enemyToCheckFor) {
+			return true;
+		}
+		Entity obstacle = getSystemsCommonData().getMap().fetchObstacleFromNode(node);
+		if (obstacle != null) {
+			return true;
+		}
+		return false;
+	}
+
 	private boolean checkIfWayIsClearToTarget(final Entity enemy) {
 		Array<GridPoint2> nodes = GameUtils.findAllNodesToTarget(enemy);
 		boolean blocked = checkIfFloorNodesBlockSightToTarget(enemy, nodes);
 		if (!blocked) {
-			blocked = checkIfFloorNodesContainsEnemy(nodes, enemy);
+			blocked = checkIfFloorNodesContainObjects(nodes, enemy);
 		}
 		return !blocked;
 	}
@@ -416,15 +396,21 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	@Override
 	public void onCharacterNodeChanged(final Entity entity, final MapGraphNode oldNode, final MapGraphNode newNode) {
 		if (player.has(entity)) {
-			for (Entity enemy : enemies) {
-				EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
-				if (enemyComponent.getAiStatus() != ATTACKING) {
-					awakeEnemyIfTargetSpotted(enemy);
-				} else if (!isTargetInFov(enemy) || checkIfFloorNodesBlockSightToTarget(enemy)) {
-					enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
-					enemyComponent.setTargetLastVisibleNode(oldNode);
-				}
+			for (int i = 0; i < enemies.size(); i++) {
+				updateEnemyStatusAccordingToPlayerNewNode(oldNode, enemies.get(i));
 			}
+		}
+	}
+
+	private void updateEnemyStatusAccordingToPlayerNewNode(MapGraphNode oldNode, Entity enemy) {
+		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
+		if (enemyComponent.getAiStatus() != ATTACKING) {
+			awakeEnemyIfTargetSpotted(enemy);
+		} else if (!isTargetInFov(enemy)
+				|| checkIfFloorNodesBlockSightToTarget(enemy)
+				|| checkIfFloorNodesContainObjects(GameUtils.findAllNodesToTarget(enemy), enemy)) {
+			enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
+			enemyComponent.setTargetLastVisibleNode(oldNode);
 		}
 	}
 

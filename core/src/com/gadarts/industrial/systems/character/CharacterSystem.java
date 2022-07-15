@@ -67,7 +67,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private final Map<SpriteType, OnFrameChangedEvent> onFrameChangedEvents = Map.of(
 			RUN, this::applyRunning,
 			PICKUP, this::handlePickup,
-			ATTACK_PRIMARY, this::applyPrimaryAttack
+			ATTACK_PRIMARY, this::engagePrimaryAttack
 	);
 	private ParticleEffect bloodSplatterEffect;
 	private ImmutableArray<Entity> characters;
@@ -508,8 +508,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		}
 	}
 
-	private void applyPrimaryAttack(Entity character,
-									TextureAtlas.AtlasRegion newFrame) {
+	private void engagePrimaryAttack(Entity character,
+									 TextureAtlas.AtlasRegion newFrame) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		OnGoingAttack onGoingAttack = characterComponent.getOnGoingAttack();
 		if (onGoingAttack.isDone()) return;
