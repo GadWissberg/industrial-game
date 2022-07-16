@@ -13,7 +13,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
-import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
@@ -34,8 +33,8 @@ import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
-import com.gadarts.industrial.systems.character.CharacterCommand;
-import com.gadarts.industrial.systems.character.CharacterCommandsTypes;
+import com.gadarts.industrial.systems.character.CharacterCommandContext;
+import com.gadarts.industrial.systems.character.CharacterCommandsDefinitions;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
@@ -48,7 +47,7 @@ import java.util.List;
 import static com.gadarts.industrial.components.ComponentsMapper.*;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.shared.model.characters.Direction.*;
-import static com.gadarts.industrial.systems.character.CharacterCommandsTypes.*;
+import static com.gadarts.industrial.systems.character.CharacterCommandsDefinitions.*;
 import static com.gadarts.industrial.utils.GameUtils.calculatePath;
 
 public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> implements
@@ -63,7 +62,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Vector2 auxVector2_3 = new Vector2();
 	private static final CalculatePathRequest request = new CalculatePathRequest();
-	private static final CharacterCommand auxCommand = new CharacterCommand();
+	private static final CharacterCommandContext auxCommand = new CharacterCommandContext();
 	private static final Vector3 auxVector3 = new Vector3();
 	private PathPlanHandler playerPathPlanner;
 
@@ -83,10 +82,9 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	public PlayerSystem(SystemsCommonData systemsCommonData,
-						SoundPlayer soundPlayer,
 						GameAssetsManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, soundPlayer, assetsManager, lifeCycleHandler);
+		super(systemsCommonData, assetsManager, lifeCycleHandler);
 	}
 
 	@Override
@@ -217,7 +215,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	@Override
-	public void onCharacterCommandDone(final Entity character, final CharacterCommand executedCommand) {
+	public void onCharacterCommandDone(final Entity character, final CharacterCommandContext executedCommand) {
 		if (player.has(character)) {
 			for (PlayerSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onPlayerFinishedTurn();
@@ -233,7 +231,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				subscriber.onItemAddedToStorage(item);
 			}
 		}
-		getSoundPlayer().playSound(Assets.Sounds.PICKUP);
+		getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.PICKUP);
 	}
 
 	@Override
@@ -287,7 +285,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		Entity targetNode = getSystemsCommonData().getMap().fetchAliveEnemyFromNode(node);
 		charComp.setTarget(targetNode);
 		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onPlayerAppliedCommand(auxCommand.init(ATTACK_PRIMARY, null, player, targetNode));
+			subscriber.onPlayerAppliedCommand(auxCommand.init(ATTACK_PRIMARY, player, targetNode, node));
 		}
 	}
 
@@ -377,9 +375,9 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 													  MapGraphNode playerNode,
 													  MapGraphNode destination) {
 		if (commonData.getItemToPickup() != null || isPickupAndPlayerOnSameNode(commonData.getMap(), playerNode)) {
-			applyPlayerCommand(GO_TO_PICKUP, commonData.getItemToPickup());
+			applyPlayerCommand(PICKUP, commonData.getItemToPickup(), destination);
 		} else if (destination.getDoor() != null) {
-			applyPlayerCommand(GO_TO_OPEN_DOOR);
+			applyPlayerCommand(OPEN_DOOR, null, destination);
 		} else {
 			applyGoToCommand(playerPathPlanner.getCurrentPath());
 		}
@@ -432,13 +430,11 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		return map.getNode(pickupPosition).equals(playerNode);
 	}
 
-	private void applyPlayerCommand(CharacterCommandsTypes commandDefinition) {
-		applyPlayerCommand(commandDefinition, null);
-	}
-
-	private void applyPlayerCommand(CharacterCommandsTypes CommandDefinition, Object additionalData) {
+	private void applyPlayerCommand(CharacterCommandsDefinitions CommandDefinition,
+									Object additionalData,
+									MapGraphNode destinationNode) {
 		Entity player = getSystemsCommonData().getPlayer();
-		auxCommand.init(CommandDefinition, playerPathPlanner.getCurrentPath(), player, additionalData);
+		auxCommand.init(CommandDefinition, player, additionalData, destinationNode);
 		subscribers.forEach(sub -> sub.onPlayerAppliedCommand(auxCommand));
 	}
 
@@ -448,7 +444,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		Entity player = systemsCommonData.getPlayer();
 		MapGraphNode playerNode = map.getNode(characterDecal.get(player).getDecal().getPosition());
 		if (path.getCount() > 0 && !playerNode.equals(path.get(path.getCount() - 1))) {
-			applyPlayerCommand(GO_TO);
+			applyPlayerCommand(RUN, playerPathPlanner.getCurrentPath(), path.get(path.getCount() - 1));
 		}
 	}
 

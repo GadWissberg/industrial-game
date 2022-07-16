@@ -27,7 +27,6 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
-import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.LightComponent;
 import com.gadarts.industrial.components.ShadowlessLightComponent;
@@ -107,10 +106,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private boolean frustumCull = !DefaultGameSettings.DISABLE_FRUSTUM_CULLING;
 
 	public RenderSystem(SystemsCommonData systemsCommonData,
-						SoundPlayer soundPlayer,
 						GameAssetsManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, soundPlayer, assetsManager, lifeCycleHandler);
+		super(systemsCommonData, assetsManager, lifeCycleHandler);
 		shadowFrameBuffer = new GameFrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 		shaderProvider = new MainShaderProvider(getAssetsManager(), shadowFrameBuffer);
 		createBatches();

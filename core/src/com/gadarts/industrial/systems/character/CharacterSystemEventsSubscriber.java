@@ -6,7 +6,7 @@ import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.systems.SystemEventsSubscriber;
 
 public interface CharacterSystemEventsSubscriber extends SystemEventsSubscriber {
-	default void onCharacterCommandDone(final Entity character, final CharacterCommand lastCommand) {
+	default void onCharacterCommandDone(final Entity character, final CharacterCommandContext lastCommand) {
 
 	}
 

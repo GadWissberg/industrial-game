@@ -60,7 +60,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final String BUTTON_NAME_STORAGE = "button_storage";
 	private static final float BUTTON_PADDING = 40;
-	private final SoundPlayer soundPlayer;
 	private final AttackNodesHandler attackNodesHandler = new AttackNodesHandler();
 	private boolean showBorders = DefaultGameSettings.DISPLAY_HUD_OUTLINES;
 	@Getter
@@ -69,11 +68,9 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private ToolTipHandler toolTipHandler;
 
 	public UserInterfaceSystem(SystemsCommonData systemsCommonData,
-							   SoundPlayer soundPlayer,
 							   GameAssetsManager assetsManager,
 							   GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, soundPlayer, assetsManager, lifeCycleHandler);
-		this.soundPlayer = soundPlayer;
+		super(systemsCommonData, assetsManager, lifeCycleHandler);
 		addUiStage();
 		Table hudTable = addTable();
 		hudTable.setName(TABLE_NAME_HUD);
@@ -126,7 +123,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 				super.clicked(event, x, y);
 				SystemsCommonData commonData = getSystemsCommonData();
 				commonData.getUiStage().openStorageWindow(assetsManager, commonData, subscribers);
-				getSoundPlayer().playSound(Assets.Sounds.UI_CLICK);
+				getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.UI_CLICK);
 			}
 		});
 		table.add(button).expand().left().bottom().pad(BUTTON_PADDING);
@@ -157,7 +154,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		int width = FULL_SCREEN ? FULL_SCREEN_RESOLUTION_WIDTH : WINDOWED_RESOLUTION_WIDTH;
 		int height = FULL_SCREEN ? FULL_SCREEN_RESOLUTION_HEIGHT : WINDOWED_RESOLUTION_HEIGHT;
 		GameStage stage;
-		stage = new GameStage(new FitViewport(width, height), soundPlayer);
+		stage = new GameStage(new FitViewport(width, height), getSystemsCommonData().getSoundPlayer());
 		getSystemsCommonData().setUiStage(stage);
 		stage.setDebugAll(DefaultGameSettings.DISPLAY_HUD_OUTLINES);
 	}
@@ -223,8 +220,8 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		cursorHandler = new CursorHandler(getSystemsCommonData());
 		cursorHandler.init();
 		attackNodesHandler.init(getEngine());
-		menuHandler = new MenuHandlerImpl(getSystemsCommonData(), getSubscribers(), getAssetsManager(), getSoundPlayer());
-		menuHandler.init(addTable(), getAssetsManager(), getSystemsCommonData(), getSoundPlayer());
+		menuHandler = new MenuHandlerImpl(getSystemsCommonData(), getSubscribers(), getAssetsManager());
+		menuHandler.init(addTable(), getAssetsManager(), getSystemsCommonData());
 		toolTipHandler = new ToolTipHandler(getSystemsCommonData().getUiStage());
 		toolTipHandler.addToolTipTable();
 	}

@@ -59,7 +59,6 @@ public class GeneralHandler implements
 			try {
 				Object system = systemDefinition.getSystemClass().getConstructors()[0].newInstance(
 						systemsCommonData,
-						soundPlayer,
 						assetsManager,
 						this);
 				engine.addSystem((GameSystem<? extends SystemEventsSubscriber>) system);
@@ -137,7 +136,7 @@ public class GeneralHandler implements
 
 	private void initializeSystemsCommonData(String mapName) {
 		Optional.ofNullable(systemsCommonData).ifPresent(SystemsCommonData::dispose);
-		systemsCommonData = new SystemsCommonData(versionName, versionNumber);
+		systemsCommonData = new SystemsCommonData(versionName, versionNumber, soundPlayer);
 		createAndSetMap(mapName);
 	}
 

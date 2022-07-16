@@ -13,7 +13,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.gadarts.industrial.GameLifeCycleHandler;
-import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
@@ -21,7 +20,10 @@ import com.gadarts.industrial.components.character.CharacterHealthData;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.components.sd.RelatedDecal;
 import com.gadarts.industrial.components.sd.SimpleDecalComponent;
-import com.gadarts.industrial.map.*;
+import com.gadarts.industrial.map.CalculatePathRequest;
+import com.gadarts.industrial.map.MapGraph;
+import com.gadarts.industrial.map.MapGraphConnectionCosts;
+import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
@@ -29,8 +31,8 @@ import com.gadarts.industrial.shared.model.characters.attributes.Range;
 import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
-import com.gadarts.industrial.systems.character.CharacterCommand;
-import com.gadarts.industrial.systems.character.CharacterCommandsTypes;
+import com.gadarts.industrial.systems.character.CharacterCommandContext;
+import com.gadarts.industrial.systems.character.CharacterCommandsDefinitions;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
@@ -62,7 +64,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private static final float MAX_SIGHT = 11;
 	private static final CalculatePathRequest request = new CalculatePathRequest();
 	private static final List<MapGraphNode> auxNodesList = new ArrayList<>();
-	private static final CharacterCommand auxCommand = new CharacterCommand();
+	private static final CharacterCommandContext auxCommand = new CharacterCommandContext();
 	private static final int NUMBER_OF_SKILL_FLOWER_LEAF = 8;
 	private final List<Sounds> ambSounds = List.of(Sounds.AMB_CHAINS, Sounds.AMB_SIGH, Sounds.AMB_LAUGH);
 	private final TextureRegion skillFlowerTexture;
@@ -72,10 +74,9 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private TextureRegion iconAttack;
 
 	public EnemySystem(SystemsCommonData systemsCommonData,
-					   SoundPlayer soundPlayer,
 					   GameAssetsManager assetsManager,
 					   GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, soundPlayer, assetsManager, lifeCycleHandler);
+		super(systemsCommonData, assetsManager, lifeCycleHandler);
 		skillFlowerTexture = new TextureRegion(assetsManager.getTexture(UiTextures.SKILL_FLOWER_CENTER));
 		enemyPathPlanner = new PathPlanHandler(getAssetsManager(), getSystemsCommonData().getMap());
 	}
@@ -115,11 +116,11 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	@Override
-	public void onCharacterCommandDone(final Entity character, final CharacterCommand executedCommand) {
+	public void onCharacterCommandDone(final Entity character, final CharacterCommandContext executedCommand) {
 		if (ComponentsMapper.enemy.has(character)) {
 			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(character);
 			long currentTurnId = getSystemsCommonData().getCurrentTurnId();
-			if (executedCommand != null && executedCommand.getType() == CharacterCommandsTypes.ATTACK_PRIMARY) {
+			if (executedCommand != null && executedCommand.getDefinition() == CharacterCommandsDefinitions.ATTACK_PRIMARY) {
 				enemyComponent.getTimeStamps().setLastPrimaryAttack(currentTurnId);
 			}
 			enemyComponent.getTimeStamps().setLastTurn(currentTurnId);
@@ -149,7 +150,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 				MapGraph map = getSystemsCommonData().getMap();
 				MapGraphNode currentNode = map.getNode(characterDecal.get(enemy).getNodePosition(auxVector2_1));
 				enemyPathPlanner.getCurrentPath().add(currentNode);
-				applyCommand(enemy, CharacterCommandsTypes.ATTACK_PRIMARY);
+				applyCommand(enemy, CharacterCommandsDefinitions.ATTACK_PRIMARY);
 			}
 		}
 	}
@@ -277,8 +278,8 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		request.setRequester(character);
 	}
 
-	private void applyCommand(final Entity enemy, final CharacterCommandsTypes attackPrimary) {
-		auxCommand.init(attackPrimary, enemyPathPlanner.getCurrentPath(), enemy);
+	private void applyCommand(final Entity enemy, final CharacterCommandsDefinitions attackPrimary) {
+		auxCommand.init(attackPrimary, enemy, enemyPathPlanner.getCurrentPath(), enemyPathPlanner.getCurrentPath().get(0));
 		subscribers.forEach(sub -> sub.onEnemyAppliedCommand(auxCommand, enemy));
 	}
 
@@ -367,7 +368,8 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private void awakeEnemy(final Entity enemy) {
 		if (character.get(enemy).getSkills().getHealthData().getHp() <= 0) return;
 		ComponentsMapper.enemy.get(enemy).setAiStatus(ATTACKING);
-		getSoundPlayer().playSound(ComponentsMapper.enemy.get(enemy).getEnemyDefinition().getAwakeSound());
+		Sounds awakeSound = ComponentsMapper.enemy.get(enemy).getEnemyDefinition().getAwakeSound();
+		getSystemsCommonData().getSoundPlayer().playSound(awakeSound);
 		updateFlowerOnAwakening(enemy);
 		for (EnemySystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onEnemyAwaken(enemy);
@@ -414,7 +416,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		super.update(deltaTime);
 		handleRoamSounds();
 		if (millis() > nextAmbSoundTime) {
-			getSoundPlayer().playSound(ambSounds.get(MathUtils.random(0, ambSounds.size() - 1)));
+			getSystemsCommonData().getSoundPlayer().playSound(ambSounds.get(MathUtils.random(0, ambSounds.size() - 1)));
 			resetNextAmbSound();
 		}
 	}
@@ -424,7 +426,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			EnemyComponent enemyComp = ComponentsMapper.enemy.get(enemy);
 			if (enemyComp.getAiStatus() != IDLE && timeSinceMillis(enemyComp.getNextRoamSound()) >= 0) {
 				if (enemyComp.getNextRoamSound() != 0) {
-					getSoundPlayer().playSound(enemyComp.getEnemyDefinition().getRoamSound());
+					getSystemsCommonData().getSoundPlayer().playSound(enemyComp.getEnemyDefinition().getRoamSound());
 				}
 				enemyComp.calculateNextRoamSound();
 			}

@@ -11,14 +11,13 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
-import com.gadarts.industrial.map.MapGraphNode;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.GameLifeCycleHandler;
-import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
-import com.gadarts.industrial.systems.character.CharacterCommand;
+import com.gadarts.industrial.map.MapGraphNode;
+import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.systems.character.CharacterCommandContext;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
@@ -31,10 +30,9 @@ public class PickupSystem extends GameSystem<SystemEventsSubscriber> implements 
 	private ImmutableArray<Entity> pickupEntities;
 
 	public PickupSystem(SystemsCommonData systemsCommonData,
-						SoundPlayer soundPlayer,
 						GameAssetsManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, soundPlayer, assetsManager, lifeCycleHandler);
+		super(systemsCommonData, assetsManager, lifeCycleHandler);
 	}
 
 	@Override
@@ -54,7 +52,7 @@ public class PickupSystem extends GameSystem<SystemEventsSubscriber> implements 
 	}
 
 	@Override
-	public void onPlayerAppliedCommand(CharacterCommand command) {
+	public void onPlayerAppliedCommand(CharacterCommandContext command) {
 
 	}
 

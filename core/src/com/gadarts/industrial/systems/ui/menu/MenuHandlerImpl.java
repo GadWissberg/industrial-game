@@ -26,15 +26,13 @@ public class MenuHandlerImpl implements MenuHandler {
 
 	private final List<UserInterfaceSystemEventsSubscriber> subscribers;
 	private final GameAssetsManager assetsManager;
-	private final SoundPlayer soundPlayer;
 
 	public MenuHandlerImpl(SystemsCommonData systemsCommonData,
 						   List<UserInterfaceSystemEventsSubscriber> subscribers,
-						   GameAssetsManager assetsManager, SoundPlayer soundPlayer) {
+						   GameAssetsManager assetsManager) {
 		this.systemsCommonData = systemsCommonData;
 		this.subscribers = subscribers;
 		this.assetsManager = assetsManager;
-		this.soundPlayer = soundPlayer;
 	}
 
 	public void toggleMenu(final boolean active) {
@@ -50,6 +48,7 @@ public class MenuHandlerImpl implements MenuHandler {
 		Label.LabelStyle style = new Label.LabelStyle(smallFont, MenuOption.FONT_COLOR_REGULAR);
 		Arrays.stream(options).forEach(o -> {
 			if (o.getValidation().validate(systemsCommonData.getPlayer())) {
+				SoundPlayer soundPlayer = systemsCommonData.getSoundPlayer();
 				menuTable.add(new MenuOption(o, style, soundPlayer, this, subscribers)).row();
 			}
 		});
@@ -58,9 +57,8 @@ public class MenuHandlerImpl implements MenuHandler {
 	@Override
 	public void init(Table table,
 					 GameAssetsManager assetsManager,
-					 SystemsCommonData systemsCommonData,
-					 SoundPlayer soundPlayer) {
-		addMenuTable(table, assetsManager, systemsCommonData, soundPlayer);
+					 SystemsCommonData systemsCommonData) {
+		addMenuTable(table, assetsManager, systemsCommonData);
 	}
 
 	private Label createLogo(GameAssetsManager assetsManager) {
@@ -71,25 +69,24 @@ public class MenuHandlerImpl implements MenuHandler {
 
 	private void addMenuTable(Table table,
 							  GameAssetsManager assetsManager,
-							  SystemsCommonData systemsCommonData,
-							  SoundPlayer soundPlayer) {
+							  SystemsCommonData systemsCommonData) {
 		systemsCommonData.setMenuTable(table);
 		table.setName(TABLE_NAME_MENU);
 		table.add(createLogo(assetsManager)).row();
-		applyMenuOptions(MainMenuOptions.values(), assetsManager, systemsCommonData, soundPlayer);
+		applyMenuOptions(MainMenuOptions.values(), assetsManager, systemsCommonData);
 		table.toFront();
 		toggleMenu(DefaultGameSettings.MENU_ON_STARTUP);
 	}
 
 	public void applyMenuOptions(MenuOptionDefinition[] options,
 								 GameAssetsManager assetsManager,
-								 SystemsCommonData commonData,
-								 SoundPlayer soundPlayer) {
+								 SystemsCommonData commonData) {
 		commonData.getMenuTable().clear();
 		BitmapFont smallFont = assetsManager.getFont(Assets.Fonts.CHUBGOTHIC_SMALL);
 		Label.LabelStyle style = new Label.LabelStyle(smallFont, MenuOption.FONT_COLOR_REGULAR);
 		Arrays.stream(options).forEach(o -> {
 			if (o.getValidation().validate(commonData.getPlayer())) {
+				SoundPlayer soundPlayer = systemsCommonData.getSoundPlayer();
 				commonData.getMenuTable().add(new MenuOption(o, style, soundPlayer, this, subscribers)).row();
 			}
 		});

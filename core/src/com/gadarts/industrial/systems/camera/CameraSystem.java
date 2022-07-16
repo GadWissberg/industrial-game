@@ -10,12 +10,11 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
-import com.gadarts.industrial.shared.model.GeneralUtils;
 import com.gadarts.industrial.GameLifeCycleHandler;
-import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.map.MapGraph;
+import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.model.GeneralUtils;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
@@ -40,10 +39,9 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 	private final Vector2 lastRightPressMousePosition = new Vector2();
 
 	public CameraSystem(SystemsCommonData systemsCommonData,
-						SoundPlayer soundPlayer,
 						GameAssetsManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, soundPlayer, assetsManager, lifeCycleHandler);
+		super(systemsCommonData, assetsManager, lifeCycleHandler);
 	}
 
 	@Override

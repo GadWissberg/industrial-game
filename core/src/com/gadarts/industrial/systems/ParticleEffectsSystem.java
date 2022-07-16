@@ -12,11 +12,10 @@ import com.badlogic.gdx.graphics.g3d.particles.batches.PointSpriteParticleBatch;
 import com.badlogic.gdx.graphics.g3d.particles.emitters.RegularEmitter;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.GameLifeCycleHandler;
-import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.ParticleComponent;
+import com.gadarts.industrial.shared.assets.GameAssetsManager;
 
 import java.util.ArrayList;
 
@@ -29,10 +28,9 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 	private ImmutableArray<Entity> particleEntities;
 
 	public ParticleEffectsSystem(SystemsCommonData systemsCommonData,
-								 SoundPlayer soundPlayer,
 								 GameAssetsManager assetsManager,
 								 GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, soundPlayer, assetsManager, lifeCycleHandler);
+		super(systemsCommonData, assetsManager, lifeCycleHandler);
 		if (pointSpriteBatch == null) {
 			pointSpriteBatch = new PointSpriteParticleBatch();
 		}

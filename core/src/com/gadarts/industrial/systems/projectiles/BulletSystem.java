@@ -7,10 +7,10 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
-import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pool;
 import com.gadarts.industrial.GameLifeCycleHandler;
-import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.BulletComponent;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.character.CharacterComponent;
@@ -42,10 +42,9 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 	private ImmutableArray<Entity> collidables;
 
 	public BulletSystem(SystemsCommonData systemsCommonData,
-						SoundPlayer soundPlayer,
 						GameAssetsManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, soundPlayer, assetsManager, lifeCycleHandler);
+		super(systemsCommonData, assetsManager, lifeCycleHandler);
 	}
 
 	@Override
@@ -60,7 +59,7 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 
 	private void enemyEngagesPrimaryAttack(final Entity character, final Vector3 direction, final Vector3 charPos) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
-		getSoundPlayer().playSound(Assets.Sounds.ATTACK_ENERGY_BALL);
+		getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.ATTACK_ENERGY_BALL);
 		createEnemyBullet(character, direction, charPos, enemyComp);
 	}
 
@@ -132,7 +131,7 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
 				.addParticleEffectComponent((PooledEngine) getEngine(), effect, pos)
 				.finishAndAddToEngine();
-		getSoundPlayer().playSound(Assets.Sounds.SMALL_EXP);
+		getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.SMALL_EXP);
 	}
 
 	private boolean checkCollisionWithCharacter(GameModelInstance gameModelInstance, Entity collidable) {

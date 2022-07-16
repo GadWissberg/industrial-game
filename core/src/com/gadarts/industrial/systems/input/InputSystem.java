@@ -4,10 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
-import com.gadarts.industrial.SoundPlayer;
+import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 
@@ -15,10 +14,9 @@ public class InputSystem extends GameSystem<InputSystemEventsSubscriber> impleme
 	private CameraInputController debugInput;
 
 	public InputSystem(SystemsCommonData systemsCommonData,
-					   SoundPlayer soundPlayer,
 					   GameAssetsManager assetsManager,
 					   GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, soundPlayer, assetsManager, lifeCycleHandler);
+		super(systemsCommonData, assetsManager, lifeCycleHandler);
 	}
 
 	@Override

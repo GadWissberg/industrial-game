@@ -11,16 +11,15 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.StringBuilder;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
-import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.console.commands.ConsoleCommandParameter;
 import com.gadarts.industrial.console.commands.ConsoleCommandResult;
 import com.gadarts.industrial.console.commands.ConsoleCommands;
 import com.gadarts.industrial.console.commands.ConsoleCommandsList;
 import com.gadarts.industrial.console.commands.types.ProfilerCommand;
+import com.gadarts.industrial.shared.assets.GameAssetsManager;
 
 public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 	public static final String WARNING_COLOR = "[RED]";
@@ -44,10 +43,9 @@ public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 	private ImmutableArray<Entity> modelInstanceEntities;
 
 	public ProfilingSystem(SystemsCommonData systemsCommonData,
-						   SoundPlayer soundPlayer,
 						   GameAssetsManager assetsManager,
 						   GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, soundPlayer, assetsManager, lifeCycleHandler);
+		super(systemsCommonData, assetsManager, lifeCycleHandler);
 		glProfiler = new GLProfiler(Gdx.graphics);
 		stringBuilder = new StringBuilder();
 		setGlProfiler();
