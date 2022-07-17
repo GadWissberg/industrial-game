@@ -24,7 +24,7 @@ public class OpenDoorCharacterCommand implements CharacterCommandImplementation 
 	public boolean reactToFrameChange(SystemsCommonData systemsCommonData,
 									  Entity character,
 									  TextureAtlas.AtlasRegion newFrame,
-									  List<CharacterSystemEventsSubscriber> subscribers, CharacterCommandContext currentCommand) {
+									  List<CharacterSystemEventsSubscriber> subscribers, CharacterCommandContext commandContext) {
 		return false;
 	}
 }

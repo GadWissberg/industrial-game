@@ -15,7 +15,6 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.animation.AnimationComponent;
-import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.*;
 import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.map.MapGraph;
@@ -43,15 +42,13 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		RenderSystemEventsSubscriber,
 		EnemySystemEventsSubscriber,
 		BulletSystemEventsSubscriber {
-	private static final int ROT_INTERVAL = 125;
+	private static final int ROTATION_INTERVAL = 125;
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Vector2 auxVector2_3 = new Vector2();
 	private static final CharacterCommandContext auxCommand = new CharacterCommandContext();
 	private static final long CHARACTER_PAIN_DURATION = 1000;
-	private final static Vector3 auxVector3_3 = new Vector3();
-	private final static Vector3 auxVector3_4 = new Vector3();
 	private final Map<SpriteType, CharacterCommandsDefinitions> onFrameChangedEvents = Map.of(
 			RUN, CharacterCommandsDefinitions.RUN,
 			PICKUP, CharacterCommandsDefinitions.PICKUP,
@@ -104,8 +101,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 										SystemsCommonData systemsCommonData,
 										CharacterCommandContext currentCommand) {
 		currentCommand.setStarted(true);
-		SpriteType spriteType = currentCommand.getDefinition().getSpriteType();
-		ComponentsMapper.character.get(character).getCharacterSpriteData().setSpriteType(spriteType);
+		ComponentsMapper.character.get(character).getRotationData().setRotating(true);
 		currentCommand.getDefinition().getCharacterCommandImplementation().initialize(
 				character,
 				systemsCommonData,
@@ -286,7 +282,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (charComponent.getCharacterSpriteData().getSpriteType() == PAIN) return;
 
 		CharacterRotationData rotationData = charComponent.getRotationData();
-		if (rotationData.isRotating() && TimeUtils.timeSinceMillis(rotationData.getLastRotation()) > ROT_INTERVAL) {
+		if (rotationData.isRotating() && TimeUtils.timeSinceMillis(rotationData.getLastRotation()) > ROTATION_INTERVAL) {
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onCharacterRotated(currentCommand.getCharacter());
 			}
@@ -324,17 +320,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private void rotationDone(CharacterRotationData rotationData,
 							  CharacterSpriteData charSpriteData) {
 		rotationData.setRotating(false);
-		charSpriteData.setSpriteType(RUN);
-	}
-
-	private SpriteType applyPrimaryAttackForCharacter(CharacterCommandContext currentCommand) {
-		SpriteType spriteType;
-		spriteType = ATTACK_PRIMARY;
-		CharacterComponent charComp = ComponentsMapper.character.get(currentCommand.getCharacter());
-		WeaponsDefinitions primary = charComp.getPrimaryAttack();
-		int bulletsToShoot = MathUtils.random(primary.getMinNumberOfBullets(), primary.getMaxNumberOfBullets());
-		charComp.getOnGoingAttack().initialize(CharacterComponent.AttackType.PRIMARY, bulletsToShoot);
-		return spriteType;
+		charSpriteData.setSpriteType(getSystemsCommonData().getCurrentCommand().getDefinition().getSpriteType());
 	}
 
 	@Override
@@ -398,36 +384,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 				commandDone(character);
 			}
 		}
-	}
-
-	private void engagePrimaryAttack(Entity character,
-									 TextureAtlas.AtlasRegion newFrame) {
-		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		OnGoingAttack onGoingAttack = characterComponent.getOnGoingAttack();
-		if (onGoingAttack.isDone()) return;
-
-		if (newFrame.index == characterComponent.getCharacterSpriteData().getPrimaryAttackHitFrameIndex()) {
-			CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(character);
-			MapGraphNode positionNode = getSystemsCommonData().getMap().getNode(charDecalComp.getDecal().getPosition());
-			Vector3 positionNodeCenterPosition = positionNode.getCenterPosition(auxVector3_4);
-			Vector3 direction = calculateDirectionToTarget(characterComponent, positionNodeCenterPosition);
-			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
-				subscriber.onCharacterEngagesPrimaryAttack(character, direction, positionNodeCenterPosition);
-			}
-			onGoingAttack.bulletShot();
-		}
-	}
-
-	private Vector3 calculateDirectionToTarget(CharacterComponent characterComp, Vector3 positionNodeCenterPosition) {
-		CharacterDecalComponent targetDecalComp = ComponentsMapper.characterDecal.get(characterComp.getTarget());
-		MapGraphNode targetNode = getSystemsCommonData().getMap().getNode(targetDecalComp.getDecal().getPosition());
-		Vector3 targetNodeCenterPosition = targetNode.getCenterPosition(auxVector3_3);
-		targetNodeCenterPosition.y += 0.5f;
-		return targetNodeCenterPosition.sub(positionNodeCenterPosition);
-	}
-
-	private void applyRunning(final Entity character,
-							  final TextureAtlas.AtlasRegion newFrame) {
 	}
 
 

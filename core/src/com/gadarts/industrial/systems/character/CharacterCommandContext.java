@@ -16,9 +16,10 @@ public class CharacterCommandContext {
 	@Setter
 	private boolean started;
 
-	public CharacterCommandContext init(final CharacterCommandsDefinitions type,
-										final Entity character,
-										final Object additionalData, MapGraphNode destinationNode) {
+	public CharacterCommandContext init(CharacterCommandsDefinitions type,
+										Entity character,
+										Object additionalData,
+										MapGraphNode destinationNode) {
 		this.definition = type;
 		this.character = character;
 		this.additionalData = additionalData;
@@ -27,6 +28,6 @@ public class CharacterCommandContext {
 	}
 
 	public CharacterCommandContext init(CharacterCommandContext command) {
-		return init(command.definition, command.character, command.additionalData, destinationNode);
+		return init(command.definition, command.character, command.additionalData, command.destinationNode);
 	}
 }

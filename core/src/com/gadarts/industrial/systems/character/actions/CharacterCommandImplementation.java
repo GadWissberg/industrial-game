@@ -17,5 +17,6 @@ public interface CharacterCommandImplementation {
 	boolean reactToFrameChange(SystemsCommonData systemsCommonData,
 							   Entity character,
 							   TextureAtlas.AtlasRegion newFrame,
-							   List<CharacterSystemEventsSubscriber> subscribers, CharacterCommandContext currentCommand);
+							   List<CharacterSystemEventsSubscriber> subscribers,
+							   CharacterCommandContext commandContext);
 }

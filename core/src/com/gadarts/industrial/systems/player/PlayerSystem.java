@@ -444,7 +444,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		Entity player = systemsCommonData.getPlayer();
 		MapGraphNode playerNode = map.getNode(characterDecal.get(player).getDecal().getPosition());
 		if (path.getCount() > 0 && !playerNode.equals(path.get(path.getCount() - 1))) {
-			applyPlayerCommand(RUN, playerPathPlanner.getCurrentPath(), path.get(path.getCount() - 1));
+			applyPlayerCommand(RUN, playerPathPlanner.getCurrentPath(), path.get(1));
 		}
 	}
 

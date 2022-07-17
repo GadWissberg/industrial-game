@@ -6,7 +6,6 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -72,6 +71,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private ImmutableArray<Entity> enemies;
 	private long nextAmbSoundTime;
 	private TextureRegion iconAttack;
+	private TextureRegion iconSearching;
 
 	public EnemySystem(SystemsCommonData systemsCommonData,
 					   GameAssetsManager assetsManager,
@@ -146,11 +146,10 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		if (accuracy != null && def.getRange() != Range.NONE) {
 			float disToTarget = calculateDistanceToTarget(enemy);
 			if (disToTarget <= def.getRange().getMaxDistance()) {
-				enemyPathPlanner.getCurrentPath().clear();
+				Entity target = character.get(enemy).getTarget();
 				MapGraph map = getSystemsCommonData().getMap();
-				MapGraphNode currentNode = map.getNode(characterDecal.get(enemy).getNodePosition(auxVector2_1));
-				enemyPathPlanner.getCurrentPath().add(currentNode);
-				applyCommand(enemy, CharacterCommandsDefinitions.ATTACK_PRIMARY);
+				MapGraphNode targetNode = map.getNode(characterDecal.get(target).getNodePosition(auxVector2_1));
+				applyCommand(enemy, CharacterCommandsDefinitions.ATTACK_PRIMARY, targetNode);
 			}
 		}
 	}
@@ -278,8 +277,17 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		request.setRequester(character);
 	}
 
-	private void applyCommand(final Entity enemy, final CharacterCommandsDefinitions attackPrimary) {
-		auxCommand.init(attackPrimary, enemy, enemyPathPlanner.getCurrentPath(), enemyPathPlanner.getCurrentPath().get(0));
+	private void applyCommand(Entity enemy,
+							  CharacterCommandsDefinitions commandDefinition,
+							  MapGraphNode destinationNode) {
+		applyCommand(enemy, commandDefinition, destinationNode, null);
+	}
+
+	private void applyCommand(Entity enemy,
+							  CharacterCommandsDefinitions commandDefinition,
+							  MapGraphNode destinationNode,
+							  Object additionalData) {
+		auxCommand.init(commandDefinition, enemy, additionalData, destinationNode);
 		subscribers.forEach(sub -> sub.onEnemyAppliedCommand(auxCommand, enemy));
 	}
 
@@ -288,10 +296,10 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		if (enemyComponent.getAiStatus() == ATTACKING) {
 			invokeEnemyAttackBehaviour(enemy);
 		} else {
-			CharacterDecalComponent charDecalComp = characterDecal.get(enemy);
 			MapGraphNode targetLastVisibleNode = enemyComponent.getTargetLastVisibleNode();
+			updateStatusIcon(enemy, iconSearching);
 			if (targetLastVisibleNode != null) {
-				goAttackAtTheLastVisibleNodeOfTarget(enemy, charDecalComp, targetLastVisibleNode);
+				goAttackAtTheLastVisibleNodeOfTarget(enemy, characterDecal.get(enemy), targetLastVisibleNode);
 			}
 		}
 	}
@@ -304,7 +312,11 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			applySearchingModeOnEnemy(enemy);
 		}
 		initializePathPlanRequest(targetLastVisibleNode, characterDecalComp, CLEAN, enemy);
-		tryToPlanThroughHeightDiff(enemy, characterDecalComp, targetLastVisibleNode);
+		if (GameUtils.calculatePath(request, enemyPathPlanner.getPathFinder(), enemyPathPlanner.getHeuristic())) {
+			applyCommand(enemy, CharacterCommandsDefinitions.RUN, targetLastVisibleNode, enemyPathPlanner.getCurrentPath());
+		} else {
+			enemyFinishedTurn();
+		}
 	}
 
 	private void tryToPlanThroughHeightDiff(Entity enemy,
@@ -377,11 +389,15 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private void updateFlowerOnAwakening(Entity enemy) {
+//		Decal flowerDecal = simpleDecalComponent.getDecal();
+//		flowerDecal.setTextureRegion(skillFlowerTexture);
+		updateStatusIcon(enemy, iconAttack);
+	}
+
+	private void updateStatusIcon(Entity enemy, TextureRegion iconTexture) {
 		SimpleDecalComponent simpleDecalComponent = simpleDecal.get(enemy);
-		Decal flowerDecal = simpleDecalComponent.getDecal();
-		flowerDecal.setTextureRegion(skillFlowerTexture);
 		List<RelatedDecal> relatedDecals = simpleDecalComponent.getRelatedDecals();
-		relatedDecals.get(relatedDecals.size() - 1).setTextureRegion(iconAttack);
+		relatedDecals.get(relatedDecals.size() - 1).setTextureRegion(iconTexture);
 	}
 
 	@Override
@@ -445,6 +461,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	@Override
 	public void initializeData( ) {
 		iconAttack = new TextureRegion(getAssetsManager().getTexture(UiTextures.ICON_ATTACK));
+		iconSearching = new TextureRegion(getAssetsManager().getTexture(UiTextures.ICON_LOOKING_FOR));
 	}
 
 	@Override

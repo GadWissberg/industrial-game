@@ -30,7 +30,7 @@ public class PickUpCharacterCommand implements CharacterCommandImplementation {
 	}
 
 	@Override
-	public boolean reactToFrameChange(SystemsCommonData systemsCommonData, Entity character, TextureAtlas.AtlasRegion newFrame, List<CharacterSystemEventsSubscriber> subscribers, CharacterCommandContext currentCommand) {
+	public boolean reactToFrameChange(SystemsCommonData systemsCommonData, Entity character, TextureAtlas.AtlasRegion newFrame, List<CharacterSystemEventsSubscriber> subscribers, CharacterCommandContext commandContext) {
 		return false;
 	}
 }
