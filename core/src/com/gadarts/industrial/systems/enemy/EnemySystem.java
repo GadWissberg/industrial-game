@@ -43,7 +43,6 @@ import java.util.List;
 
 import static com.badlogic.gdx.utils.TimeUtils.millis;
 import static com.badlogic.gdx.utils.TimeUtils.timeSinceMillis;
-import static com.gadarts.industrial.components.ComponentsMapper.*;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.HEIGHT_DIFF;
 import static com.gadarts.industrial.shared.assets.Assets.Sounds;
@@ -59,14 +58,13 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private static final long AMB_SOUND_INTERVAL_MAX = 50L;
 	private final static Vector2 auxVector2_1 = new Vector2();
 	private final static Vector2 auxVector2_2 = new Vector2();
-	private static final float ENEMY_HALF_FOV_ANGLE = 75F;
+	private static final float ENEMY_HALF_FOV_ANGLE = 90F;
 	private static final float MAX_SIGHT = 11;
 	private static final CalculatePathRequest request = new CalculatePathRequest();
 	private static final List<MapGraphNode> auxNodesList = new ArrayList<>();
 	private static final CharacterCommandContext auxCommand = new CharacterCommandContext();
 	private static final int NUMBER_OF_SKILL_FLOWER_LEAF = 8;
 	private final List<Sounds> ambSounds = List.of(Sounds.AMB_CHAINS, Sounds.AMB_SIGH, Sounds.AMB_LAUGH);
-	private final TextureRegion skillFlowerTexture;
 	private final PathPlanHandler enemyPathPlanner;
 	private ImmutableArray<Entity> enemies;
 	private long nextAmbSoundTime;
@@ -77,14 +75,23 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 					   GameAssetsManager assetsManager,
 					   GameLifeCycleHandler lifeCycleHandler) {
 		super(systemsCommonData, assetsManager, lifeCycleHandler);
-		skillFlowerTexture = new TextureRegion(assetsManager.getTexture(UiTextures.SKILL_FLOWER_CENTER));
 		enemyPathPlanner = new PathPlanHandler(getAssetsManager(), getSystemsCommonData().getMap());
 	}
 
 	private void onFrameChangedOfRun(final Entity entity) {
-		Vector3 position = ComponentsMapper.characterDecal.get(entity).getDecal().getPosition();
+		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(entity);
+		Vector3 position = characterDecalComponent.getDecal().getPosition();
 		SimpleDecalComponent simpleDecalComponent = ComponentsMapper.simpleDecal.get(entity);
-		float height = ComponentsMapper.enemy.get(entity).getEnemyDefinition().getHeight();
+		updateFlowerPosition(entity, characterDecalComponent, position, simpleDecalComponent);
+	}
+
+	private void updateFlowerPosition(Entity entity,
+									  CharacterDecalComponent characterDecalComponent,
+									  Vector3 position,
+									  SimpleDecalComponent simpleDecalComponent) {
+		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		MapGraphNode node = systemsCommonData.getMap().getNode(characterDecalComponent.getNodePosition(auxVector2_1));
+		float height = ComponentsMapper.enemy.get(entity).getEnemyDefinition().getHeight() + node.getHeight();
 		simpleDecalComponent.getDecal().setPosition(position.x, height + SKILL_FLOWER_HEIGHT_RELATIVE, position.z);
 		List<RelatedDecal> relatedDecals = simpleDecalComponent.getRelatedDecals();
 		for (RelatedDecal decal : relatedDecals) {
@@ -134,9 +141,9 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private float calculateDistanceToTarget(final Entity enemy) {
-		Entity target = character.get(enemy).getTarget();
-		Vector3 targetPosition = characterDecal.get(target).getDecal().getPosition();
-		Vector3 position = characterDecal.get(enemy).getDecal().getPosition();
+		Entity target = ComponentsMapper.character.get(enemy).getTarget();
+		Vector3 targetPosition = ComponentsMapper.characterDecal.get(target).getDecal().getPosition();
+		Vector3 position = ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition();
 		return position.dst(targetPosition);
 	}
 
@@ -146,9 +153,10 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		if (accuracy != null && def.getRange() != Range.NONE) {
 			float disToTarget = calculateDistanceToTarget(enemy);
 			if (disToTarget <= def.getRange().getMaxDistance()) {
-				Entity target = character.get(enemy).getTarget();
+				Entity target = ComponentsMapper.character.get(enemy).getTarget();
 				MapGraph map = getSystemsCommonData().getMap();
-				MapGraphNode targetNode = map.getNode(characterDecal.get(target).getNodePosition(auxVector2_1));
+				CharacterDecalComponent targetCharacterDecalComponent = ComponentsMapper.characterDecal.get(target);
+				MapGraphNode targetNode = map.getNode(targetCharacterDecalComponent.getNodePosition(auxVector2_1));
 				applyCommand(enemy, CharacterCommandsDefinitions.ATTACK_PRIMARY, targetNode);
 			}
 		}
@@ -197,7 +205,8 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		MapGraph map = getSystemsCommonData().getMap();
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		enemyComponent.setAiStatus(SEARCHING);
-		addPossibleNodesToLookIn(map, map.getNode(characterDecal.get(enemy).getNodePosition(auxVector2_1)), enemy);
+		CharacterDecalComponent enemyCharacterDecalComponent = ComponentsMapper.characterDecal.get(enemy);
+		addPossibleNodesToLookIn(map, map.getNode(enemyCharacterDecalComponent.getNodePosition(auxVector2_1)), enemy);
 		if (!auxNodesList.isEmpty()) {
 			enemyComponent.setTargetLastVisibleNode(auxNodesList.get(MathUtils.random(auxNodesList.size() - 1)));
 		}
@@ -299,14 +308,14 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			MapGraphNode targetLastVisibleNode = enemyComponent.getTargetLastVisibleNode();
 			updateStatusIcon(enemy, iconSearching);
 			if (targetLastVisibleNode != null) {
-				goAttackAtTheLastVisibleNodeOfTarget(enemy, characterDecal.get(enemy), targetLastVisibleNode);
+				goAttackAtTheLastVisibleNodeOfTarget(enemy, targetLastVisibleNode);
 			}
 		}
 	}
 
 	private void goAttackAtTheLastVisibleNodeOfTarget(Entity enemy,
-													  CharacterDecalComponent characterDecalComp,
 													  MapGraphNode targetLastVisibleNode) {
+		CharacterDecalComponent characterDecalComp = ComponentsMapper.characterDecal.get(enemy);
 		MapGraphNode enemyNode = getSystemsCommonData().getMap().getNode(characterDecalComp.getNodePosition(auxVector2_1));
 		if (enemyNode.equals(targetLastVisibleNode)) {
 			applySearchingModeOnEnemy(enemy);
@@ -328,7 +337,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	@Override
 	public void onNewTurn(Entity entity) {
-		if (enemy.has(entity)) {
+		if (ComponentsMapper.enemy.has(entity)) {
 			invokeEnemyTurn(entity);
 		}
 	}
@@ -340,9 +349,9 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private boolean isTargetInFov(final Entity enemy) {
-		Vector3 enemyPos = characterDecal.get(enemy).getDecal().getPosition();
-		CharacterComponent charComponent = character.get(enemy);
-		Vector3 targetPos = characterDecal.get(charComponent.getTarget()).getDecal().getPosition();
+		Vector3 enemyPos = ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition();
+		CharacterComponent charComponent = ComponentsMapper.character.get(enemy);
+		Vector3 targetPos = ComponentsMapper.characterDecal.get(charComponent.getTarget()).getDecal().getPosition();
 		Vector2 enemyDirection = charComponent.getCharacterSpriteData().getFacingDirection().getDirection(auxVector2_1);
 		float toDeg = enemyDirection.angleDeg() - ENEMY_HALF_FOV_ANGLE;
 		float fromDeg = enemyDirection.angleDeg() + ENEMY_HALF_FOV_ANGLE;
@@ -356,7 +365,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private boolean checkIfFloorNodesBlockSightToTarget(final Entity enemy, final Array<GridPoint2> nodes) {
-		Vector2 pos = characterDecal.get(enemy).getNodePosition(auxVector2_1);
+		Vector2 pos = ComponentsMapper.characterDecal.get(enemy).getNodePosition(auxVector2_1);
 		for (GridPoint2 n : nodes) {
 			MapGraph map = getSystemsCommonData().getMap();
 			if (map.getNode(n.x, n.y).getHeight() > map.getNode((int) pos.x, (int) pos.y).getHeight() + 1) {
@@ -367,45 +376,44 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private void awakeEnemyIfTargetSpotted(final Entity enemy) {
-		if (isTargetInFov(enemy) && !checkIfFloorNodesBlockSightToTarget(enemy)) {
-			Vector2 enemyPos = characterDecal.get(enemy).getNodePosition(auxVector2_1);
-			Entity target = character.get(enemy).getTarget();
-			Vector2 targetPos = characterDecal.get(target).getNodePosition(auxVector2_2);
-			if (enemyPos.dst2(targetPos) <= Math.pow(MAX_SIGHT, 2)) {
-				awakeEnemy(enemy);
+		if ((isTargetInFov(enemy) || ComponentsMapper.enemy.get(enemy).getAiStatus() != IDLE)) {
+			if (!checkIfFloorNodesBlockSightToTarget(enemy)) {
+				Vector2 enemyPos = ComponentsMapper.characterDecal.get(enemy).getNodePosition(auxVector2_1);
+				Entity target = ComponentsMapper.character.get(enemy).getTarget();
+				Vector2 targetPos = ComponentsMapper.characterDecal.get(target).getNodePosition(auxVector2_2);
+				if (enemyPos.dst2(targetPos) <= Math.pow(MAX_SIGHT, 2)) {
+					awakeEnemy(enemy);
+				}
 			}
 		}
 	}
 
 	private void awakeEnemy(final Entity enemy) {
-		if (character.get(enemy).getSkills().getHealthData().getHp() <= 0) return;
-		ComponentsMapper.enemy.get(enemy).setAiStatus(ATTACKING);
-		Sounds awakeSound = ComponentsMapper.enemy.get(enemy).getEnemyDefinition().getAwakeSound();
-		getSystemsCommonData().getSoundPlayer().playSound(awakeSound);
-		updateFlowerOnAwakening(enemy);
+		if (ComponentsMapper.character.get(enemy).getSkills().getHealthData().getHp() <= 0) return;
+		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
+		EnemyAiStatus prevAiStatus = enemyComponent.getAiStatus();
+		enemyComponent.setAiStatus(ATTACKING);
+		getSystemsCommonData().getSoundPlayer().playSound(enemyComponent.getEnemyDefinition().getAwakeSound());
+		updateStatusIcon(enemy, iconAttack);
 		for (EnemySystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onEnemyAwaken(enemy);
+			subscriber.onEnemyAwaken(enemy, prevAiStatus);
 		}
 	}
 
-	private void updateFlowerOnAwakening(Entity enemy) {
-//		Decal flowerDecal = simpleDecalComponent.getDecal();
-//		flowerDecal.setTextureRegion(skillFlowerTexture);
-		updateStatusIcon(enemy, iconAttack);
-	}
-
 	private void updateStatusIcon(Entity enemy, TextureRegion iconTexture) {
-		SimpleDecalComponent simpleDecalComponent = simpleDecal.get(enemy);
+		SimpleDecalComponent simpleDecalComponent = ComponentsMapper.simpleDecal.get(enemy);
 		List<RelatedDecal> relatedDecals = simpleDecalComponent.getRelatedDecals();
 		relatedDecals.get(relatedDecals.size() - 1).setTextureRegion(iconTexture);
 	}
 
 	@Override
 	public void onCharacterNodeChanged(final Entity entity, final MapGraphNode oldNode, final MapGraphNode newNode) {
-		if (player.has(entity)) {
+		if (ComponentsMapper.player.has(entity)) {
 			for (int i = 0; i < enemies.size(); i++) {
 				updateEnemyStatusAccordingToPlayerNewNode(oldNode, enemies.get(i));
 			}
+		} else if (ComponentsMapper.enemy.has(entity)) {
+			awakeEnemyIfTargetSpotted(entity);
 		}
 	}
 
@@ -413,7 +421,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		if (enemyComponent.getAiStatus() != ATTACKING) {
 			awakeEnemyIfTargetSpotted(enemy);
-		} else if (!isTargetInFov(enemy)
+		} else if ((!isTargetInFov(enemy))
 				|| checkIfFloorNodesBlockSightToTarget(enemy)
 				|| checkIfFloorNodesContainObjects(GameUtils.findAllNodesToTarget(enemy), enemy)) {
 			enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);

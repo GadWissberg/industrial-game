@@ -7,6 +7,7 @@ import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
+import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
 
@@ -51,7 +52,8 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 	}
 
 	@Override
-	public void onEnemyAwaken(Entity enemy) {
+	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
+		if (prevAiStatus != EnemyAiStatus.IDLE) return;
 		Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
 		turnsQueue.addLast(enemy);
 	}

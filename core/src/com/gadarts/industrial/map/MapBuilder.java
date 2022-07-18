@@ -718,7 +718,7 @@ public class MapBuilder implements Disposable {
 		Vector3 position = inflateCharacterPosition(charJsonObject, mapGraph);
 		CharacterData data = inflateCharData(charJsonObject, type, position);
 		addCharBaseComponents(b, data, type, type.getAtlasDefinition(), type.getPrimaryAttack());
-		addEnemySkillFlower(type, b, position);
+		addEnemySkillFlower(type, b, position, mapGraph);
 		initializeEnemy(position, b.finishAndAddToEngine());
 	}
 
@@ -727,9 +727,10 @@ public class MapBuilder implements Disposable {
 		initializeEnemyFlower(position, enemy);
 	}
 
-	private void addEnemySkillFlower(Enemies type, EntityBuilder builder, Vector3 position) {
+	private void addEnemySkillFlower(Enemies type, EntityBuilder builder, Vector3 position, MapGraph mapGraph) {
 		Texture skillFlowerTexture = assetsManager.getTexture(SKILL_FLOWER_CENTER_IDLE);
-		position.y += type.getHeight() + EnemySystem.SKILL_FLOWER_HEIGHT_RELATIVE;
+		MapGraphNode node = mapGraph.getNode(position);
+		position.y = node.getHeight() + type.getHeight() + EnemySystem.SKILL_FLOWER_HEIGHT_RELATIVE;
 		builder.addSimpleDecalComponent(position, skillFlowerTexture, true, true);
 		builder.addFlowerIconComponent();
 	}
