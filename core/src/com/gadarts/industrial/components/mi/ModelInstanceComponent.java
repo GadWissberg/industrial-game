@@ -3,6 +3,7 @@ package com.gadarts.industrial.components.mi;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Vector3;
+import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.components.GameComponent;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +20,7 @@ public class ModelInstanceComponent implements GameComponent {
 	private ColorAttribute colorAttribute;
 
 	@Setter
-	private Color flatColor;
+	private Color flatColor = DefaultGameSettings.DISABLE_FOG ? null : Color.BLACK;
 	private boolean castShadow;
 
 	public void init(final GameModelInstance modelInstance,

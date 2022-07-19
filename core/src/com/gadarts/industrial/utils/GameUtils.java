@@ -88,7 +88,8 @@ public class GameUtils {
 	public static boolean calculatePath(CalculatePathRequest request, GamePathFinder pathFinder, GameHeuristic heuristic) {
 		MapGraphPath outputPath = request.getOutputPath();
 		outputPath.clear();
-		return pathFinder.searchNodePathBeforeCommand(heuristic, request);
+		pathFinder.searchNodePathBeforeCommand(heuristic, request);
+		return outputPath.nodes.size > 1;
 	}
 
 	public static Array<GridPoint2> findAllNodesToTarget(final Entity enemy) {

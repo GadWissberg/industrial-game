@@ -53,7 +53,7 @@ public class PrimaryAttackCharacterCommand implements CharacterCommandImplementa
 										List<CharacterSystemEventsSubscriber> subscribers) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		OnGoingAttack onGoingAttack = characterComponent.getOnGoingAttack();
-		if (onGoingAttack.isDone()) return true;
+		if (onGoingAttack.isDone()) return false;
 
 		if (newFrame.index == characterComponent.getCharacterSpriteData().getPrimaryAttackHitFrameIndex()) {
 			CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(character);
@@ -64,7 +64,6 @@ public class PrimaryAttackCharacterCommand implements CharacterCommandImplementa
 				subscriber.onCharacterEngagesPrimaryAttack(character, direction, positionNodeCenterPosition);
 			}
 			onGoingAttack.bulletShot();
-			return true;
 		}
 		return false;
 	}

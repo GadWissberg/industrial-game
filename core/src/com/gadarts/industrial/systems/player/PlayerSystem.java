@@ -66,6 +66,12 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private static final Vector3 auxVector3 = new Vector3();
 	private PathPlanHandler playerPathPlanner;
 
+	public PlayerSystem(SystemsCommonData systemsCommonData,
+						GameAssetsManager assetsManager,
+						GameLifeCycleHandler lifeCycleHandler) {
+		super(systemsCommonData, assetsManager, lifeCycleHandler);
+	}
+
 	@Override
 	public void onDoorOpened(Entity doorEntity) {
 		refreshFogOfWar();
@@ -81,12 +87,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	}
 
-	public PlayerSystem(SystemsCommonData systemsCommonData,
-						GameAssetsManager assetsManager,
-						GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, assetsManager, lifeCycleHandler);
-	}
-
 	@Override
 	public void onCharacterNodeChanged(Entity entity, MapGraphNode oldNode, MapGraphNode newNode) {
 		if (player.has(entity)) {
@@ -95,6 +95,8 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	private void refreshFogOfWar( ) {
+		if (DefaultGameSettings.DISABLE_FOG) return;
+
 		MapGraph map = getSystemsCommonData().getMap();
 		Vector3 playerPos = characterDecal.get(getSystemsCommonData().getPlayer()).getNodePosition(auxVector3);
 		MapGraphNode playerNode = map.getNode(playerPos);

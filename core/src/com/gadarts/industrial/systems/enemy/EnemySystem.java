@@ -19,10 +19,7 @@ import com.gadarts.industrial.components.character.CharacterHealthData;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.components.sd.RelatedDecal;
 import com.gadarts.industrial.components.sd.SimpleDecalComponent;
-import com.gadarts.industrial.map.CalculatePathRequest;
-import com.gadarts.industrial.map.MapGraph;
-import com.gadarts.industrial.map.MapGraphConnectionCosts;
-import com.gadarts.industrial.map.MapGraphNode;
+import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
@@ -58,14 +55,14 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private static final long AMB_SOUND_INTERVAL_MAX = 50L;
 	private final static Vector2 auxVector2_1 = new Vector2();
 	private final static Vector2 auxVector2_2 = new Vector2();
-	private static final float ENEMY_HALF_FOV_ANGLE = 90F;
+	private static final float ENEMY_HALF_FOV_ANGLE = 95F;
 	private static final float MAX_SIGHT = 11;
 	private static final CalculatePathRequest request = new CalculatePathRequest();
 	private static final List<MapGraphNode> auxNodesList = new ArrayList<>();
 	private static final CharacterCommandContext auxCommand = new CharacterCommandContext();
 	private static final int NUMBER_OF_SKILL_FLOWER_LEAF = 8;
 	private final List<Sounds> ambSounds = List.of(Sounds.AMB_CHAINS, Sounds.AMB_SIGH, Sounds.AMB_LAUGH);
-	private final PathPlanHandler enemyPathPlanner;
+	private final PathPlanHandler pathPlanner;
 	private ImmutableArray<Entity> enemies;
 	private long nextAmbSoundTime;
 	private TextureRegion iconAttack;
@@ -75,7 +72,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 					   GameAssetsManager assetsManager,
 					   GameLifeCycleHandler lifeCycleHandler) {
 		super(systemsCommonData, assetsManager, lifeCycleHandler);
-		enemyPathPlanner = new PathPlanHandler(getAssetsManager(), getSystemsCommonData().getMap());
+		pathPlanner = new PathPlanHandler(getAssetsManager(), getSystemsCommonData().getMap());
 	}
 
 	private void onFrameChangedOfRun(final Entity entity) {
@@ -194,7 +191,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	private void addAsPossibleNodeToLookIn(final MapGraphNode enemyNode, final MapGraphNode node, Entity enemy) {
 		initializePathPlanRequest(enemyNode, node, CLEAN, true, enemy);
-		if (GameUtils.calculatePath(request, enemyPathPlanner.getPathFinder(), enemyPathPlanner.getHeuristic())) {
+		if (GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic())) {
 			if (!auxNodesList.contains(node)) {
 				auxNodesList.add(node);
 			}
@@ -280,7 +277,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 										  Entity character) {
 		request.setSourceNode(sourceNode);
 		request.setDestNode(destinationNode);
-		request.setOutputPath(enemyPathPlanner.getCurrentPath());
+		request.setOutputPath(pathPlanner.getCurrentPath());
 		request.setAvoidCharactersInCalculations(avoidCharactersInCalculations);
 		request.setMaxCostInclusive(maxCostInclusive);
 		request.setRequester(character);
@@ -315,14 +312,17 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	private void goAttackAtTheLastVisibleNodeOfTarget(Entity enemy,
 													  MapGraphNode targetLastVisibleNode) {
-		CharacterDecalComponent characterDecalComp = ComponentsMapper.characterDecal.get(enemy);
-		MapGraphNode enemyNode = getSystemsCommonData().getMap().getNode(characterDecalComp.getNodePosition(auxVector2_1));
+		CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(enemy);
+		MapGraphNode enemyNode = getSystemsCommonData().getMap().getNode(charDecalComp.getNodePosition(auxVector2_1));
 		if (enemyNode.equals(targetLastVisibleNode)) {
 			applySearchingModeOnEnemy(enemy);
 		}
-		initializePathPlanRequest(targetLastVisibleNode, characterDecalComp, CLEAN, enemy);
-		if (GameUtils.calculatePath(request, enemyPathPlanner.getPathFinder(), enemyPathPlanner.getHeuristic())) {
-			applyCommand(enemy, CharacterCommandsDefinitions.RUN, targetLastVisibleNode, enemyPathPlanner.getCurrentPath());
+
+		MapGraphNode updatedLastVisibleNode = ComponentsMapper.enemy.get(enemy).getTargetLastVisibleNode();
+		initializePathPlanRequest(updatedLastVisibleNode, charDecalComp, CLEAN, enemy);
+		if (updatedLastVisibleNode != null && GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic())) {
+			MapGraphPath currentPath = pathPlanner.getCurrentPath();
+			applyCommand(enemy, CharacterCommandsDefinitions.RUN, updatedLastVisibleNode, currentPath);
 		} else {
 			enemyFinishedTurn();
 		}
@@ -332,7 +332,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 											CharacterDecalComponent characterDecalComp,
 											MapGraphNode targetLastVisibleNode) {
 		initializePathPlanRequest(targetLastVisibleNode, characterDecalComp, HEIGHT_DIFF, enemy);
-		GameUtils.calculatePath(request, enemyPathPlanner.getPathFinder(), enemyPathPlanner.getHeuristic());
+		GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic());
 	}
 
 	@Override
@@ -353,10 +353,9 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		CharacterComponent charComponent = ComponentsMapper.character.get(enemy);
 		Vector3 targetPos = ComponentsMapper.characterDecal.get(charComponent.getTarget()).getDecal().getPosition();
 		Vector2 enemyDirection = charComponent.getCharacterSpriteData().getFacingDirection().getDirection(auxVector2_1);
-		float toDeg = enemyDirection.angleDeg() - ENEMY_HALF_FOV_ANGLE;
-		float fromDeg = enemyDirection.angleDeg() + ENEMY_HALF_FOV_ANGLE;
 		float dirToTarget = auxVector2_2.set(targetPos.x, targetPos.z).sub(enemyPos.x, enemyPos.z).nor().angleDeg();
-		return (dirToTarget - fromDeg + 360 + 180) % 360 - 180 + ((toDeg - dirToTarget + 360 + 180) % 360 - 180) < 180;
+		float anglediff = (enemyDirection.angleDeg() - dirToTarget + 180 + 360) % 360 - 180;
+		return anglediff <= ENEMY_HALF_FOV_ANGLE && anglediff >= -ENEMY_HALF_FOV_ANGLE;
 	}
 
 
@@ -376,7 +375,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private void awakeEnemyIfTargetSpotted(final Entity enemy) {
-		if ((isTargetInFov(enemy) || ComponentsMapper.enemy.get(enemy).getAiStatus() != IDLE)) {
+		if ((isTargetInFov(enemy))) {
 			if (!checkIfFloorNodesBlockSightToTarget(enemy)) {
 				Vector2 enemyPos = ComponentsMapper.characterDecal.get(enemy).getNodePosition(auxVector2_1);
 				Entity target = ComponentsMapper.character.get(enemy).getTarget();
@@ -419,10 +418,10 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	private void updateEnemyStatusAccordingToPlayerNewNode(MapGraphNode oldNode, Entity enemy) {
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
-		if (enemyComponent.getAiStatus() != ATTACKING) {
+		EnemyAiStatus aiStatus = enemyComponent.getAiStatus();
+		if (aiStatus != ATTACKING) {
 			awakeEnemyIfTargetSpotted(enemy);
-		} else if ((!isTargetInFov(enemy))
-				|| checkIfFloorNodesBlockSightToTarget(enemy)
+		} else if (checkIfFloorNodesBlockSightToTarget(enemy)
 				|| checkIfFloorNodesContainObjects(GameUtils.findAllNodesToTarget(enemy), enemy)) {
 			enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
 			enemyComponent.setTargetLastVisibleNode(oldNode);
