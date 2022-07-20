@@ -8,11 +8,14 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.character.OnGoingAttack;
+import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
+import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterCommandContext;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
+import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.List;
 
@@ -55,7 +58,11 @@ public class PrimaryAttackCharacterCommand implements CharacterCommandImplementa
 		OnGoingAttack onGoingAttack = characterComponent.getOnGoingAttack();
 		if (onGoingAttack.isDone()) return false;
 
-		if (newFrame.index == characterComponent.getCharacterSpriteData().getPrimaryAttackHitFrameIndex()) {
+		Weapon selectedWeapon = commonData.getStorage().getSelectedWeapon();
+		PlayerWeaponsDefinitions definition = (PlayerWeaponsDefinitions) (selectedWeapon.getDefinition());
+		int primaryAttackHitFrameIndex = GameUtils.getPrimaryAttackHitFrameIndexForCharacter(character, definition);
+
+		if (newFrame.index == primaryAttackHitFrameIndex) {
 			CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(character);
 			MapGraphNode positionNode = commonData.getMap().getNode(charDecalComp.getDecal().getPosition());
 			Vector3 positionNodeCenterPosition = positionNode.getCenterPosition(auxVector3_1);

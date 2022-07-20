@@ -5,11 +5,14 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
+import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.map.CalculatePathRequest;
 import com.gadarts.industrial.map.GameHeuristic;
 import com.gadarts.industrial.map.GamePathFinder;
 import com.gadarts.industrial.map.MapGraphPath;
+import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.google.gson.JsonObject;
 
 import static com.gadarts.industrial.components.ComponentsMapper.character;
@@ -101,5 +104,13 @@ public class GameUtils {
 
 	public static Array<GridPoint2> findAllNodesBetweenNodes(Vector2 source, Vector2 destination) {
 		return bresenham.line((int) source.x, (int) source.y, (int) destination.x, (int) destination.y);
+	}
+
+	public static int getPrimaryAttackHitFrameIndexForCharacter(Entity character, PlayerWeaponsDefinitions selectedWeapon) {
+		if (ComponentsMapper.player.has(character)) {
+			return selectedWeapon.getHitFrameIndex();
+		} else {
+			return ComponentsMapper.character.get(character).getCharacterSpriteData().getPrimaryAttackHitFrameIndex();
+		}
 	}
 }

@@ -8,7 +8,6 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -17,6 +16,7 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.animation.AnimationComponent;
 import com.gadarts.industrial.components.character.*;
 import com.gadarts.industrial.components.player.PlayerComponent;
+import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
@@ -24,6 +24,7 @@ import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
+import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.actions.CharacterCommandImplementation;
@@ -32,9 +33,11 @@ import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
 import com.gadarts.industrial.systems.projectiles.BulletSystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.utils.EntityBuilder;
+import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.Map;
 
+import static com.gadarts.industrial.components.ComponentsMapper.character;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.*;
 
 public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber> implements
@@ -131,7 +134,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	private void applyDamageToCharacter(final Entity attacked, final int damage) {
-		CharacterComponent characterComponent = ComponentsMapper.character.get(attacked);
+		CharacterComponent characterComponent = character.get(attacked);
 		characterComponent.dealDamage(damage);
 		handleDeath(attacked);
 		Vector3 pos = ComponentsMapper.characterDecal.get(attacked).getNodePosition(auxVector3_1);
@@ -224,10 +227,12 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (spriteType.isAddReverse()) {
 			handleAnimationReverse(character, animationComponent, animation, spriteType);
 		} else if (onGoingAttack.getType() != null) {
-			int primaryAttackHitFrameIndex = characterComp.getCharacterSpriteData().getPrimaryAttackHitFrameIndex();
+			Weapon selectedWeapon = getSystemsCommonData().getStorage().getSelectedWeapon();
+			PlayerWeaponsDefinitions definition = (PlayerWeaponsDefinitions) (selectedWeapon.getDefinition());
+			int primaryAttackHitFrameIndex = GameUtils.getPrimaryAttackHitFrameIndexForCharacter(character, definition);
 			if (onGoingAttack.isDone()) {
 				onGoingAttack.setType(null);
-				animationComponent.setStateTime((primaryAttackHitFrameIndex - 1) * animation.getFrameDuration());
+				animationComponent.setStateTime(0);
 				animation.setPlayMode(Animation.PlayMode.REVERSED);
 			} else {
 				animationComponent.setStateTime((primaryAttackHitFrameIndex) * animation.getFrameDuration());
@@ -237,6 +242,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			commandDone(character);
 		}
 	}
+
 
 	private void handleAnimationReverse(Entity character,
 										AnimationComponent animationComponent,
@@ -259,7 +265,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	private void handleCurrentCommand(final CharacterCommandContext currentCommand) {
-		CharacterComponent characterComponent = ComponentsMapper.character.get(currentCommand.getCharacter());
+		CharacterComponent characterComponent = character.get(currentCommand.getCharacter());
 		SpriteType spriteType = characterComponent.getCharacterSpriteData().getSpriteType();
 		if (spriteType == PICKUP || spriteType == ATTACK_PRIMARY) {
 			handleModeWithNonLoopingAnimation(currentCommand.getCharacter());
@@ -345,7 +351,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	@Override
 	public void onHitScanCollisionWithAnotherEntity(WeaponsDefinitions definition, Entity collidable) {
-		if (ComponentsMapper.character.has(collidable)) {
+		if (character.has(collidable)) {
 			applyDamageToCharacter(collidable, definition.getDamage());
 		}
 	}
@@ -367,7 +373,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	@Override
 	public void onProjectileCollisionWithAnotherEntity(final Entity bullet, final Entity collidable) {
-		if (ComponentsMapper.character.has(collidable)) {
+		if (character.has(collidable)) {
 			applyDamageToCharacter(collidable, ComponentsMapper.bullet.get(bullet).getDamage());
 		}
 	}

@@ -231,7 +231,7 @@ public class GeneralHandler implements
 										   final TextureAtlas atlas,
 										   final SpriteType spriteType,
 										   final Direction dir) {
-		String spriteTypeName = spriteType.name().toLowerCase();
+		String spriteTypeName = Optional.ofNullable(spriteType.getRegionName()).orElse(spriteType.name()).toLowerCase();
 		String name = (spriteType.isSingleAnimation()) ? spriteTypeName : spriteTypeName + "_" + dir.name().toLowerCase();
 		CharacterAnimation a = createAnimation(atlas, spriteType, name, dir);
 		if (a != null && a.getKeyFrames().length > 0) {
