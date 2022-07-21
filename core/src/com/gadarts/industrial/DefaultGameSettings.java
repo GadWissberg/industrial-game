@@ -24,5 +24,5 @@ public final class DefaultGameSettings {
 	public static final PlayerWeaponsDefinitions STARTING_WEAPON = PlayerWeaponsDefinitions.COLT;
 
 	public static final boolean ALLOW_STATIC_SHADOWS = true;
-	public static final boolean DISABLE_FOG = true;
+	public static final boolean DISABLE_FOG = false;
 }

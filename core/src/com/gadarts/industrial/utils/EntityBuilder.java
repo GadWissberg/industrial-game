@@ -60,13 +60,14 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addBulletComponent(final Vector3 initialPosition,
-											final Vector3 direction,
-											final Entity owner,
-											final Integer damagePoints) {
+	public EntityBuilder addBulletComponent(Vector3 initialPos,
+											Vector3 direction,
+											Entity owner,
+											Integer damagePoints,
+											float bulletSpeed) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		BulletComponent bulletComponent = engine.createComponent(BulletComponent.class);
-		bulletComponent.init(auxVector2.set(initialPosition.x, initialPosition.z), direction, owner, damagePoints);
+		bulletComponent.init(auxVector2.set(initialPos.x, initialPos.z), direction, owner, damagePoints, bulletSpeed);
 		currentEntity.add(bulletComponent);
 		return instance;
 	}
@@ -148,16 +149,11 @@ public class EntityBuilder {
 		return pickup;
 	}
 
-	public EntityBuilder addModelInstanceComponent(final GameModelInstance modelInstance, final boolean visible) {
-		return addModelInstanceComponent(modelInstance, visible, true);
-	}
-
 	public EntityBuilder addModelInstanceComponent(final GameModelInstance modelInstance,
-												   final boolean visible,
-												   final boolean castShadow) {
+												   final boolean visible) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		ModelInstanceComponent component = engine.createComponent(ModelInstanceComponent.class);
-		component.init(modelInstance, visible, castShadow);
+		component.init(modelInstance, visible);
 		currentEntity.add(component);
 		component.getModelInstance().userData = currentEntity;
 		return instance;

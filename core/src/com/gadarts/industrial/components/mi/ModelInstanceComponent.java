@@ -20,16 +20,13 @@ public class ModelInstanceComponent implements GameComponent {
 	private ColorAttribute colorAttribute;
 
 	@Setter
-	private Color flatColor = DefaultGameSettings.DISABLE_FOG ? null : Color.BLACK;
-	private boolean castShadow;
+	private Color flatColor;
 
 	public void init(final GameModelInstance modelInstance,
-					 final boolean visible,
-					 final boolean castShadow) {
+					 final boolean visible) {
 		this.modelInstance = modelInstance;
 		this.visible = visible;
 		this.colorAttribute = null;
-		this.castShadow = castShadow;
 	}
 
 	public ColorAttribute getColorAttribute() {

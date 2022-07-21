@@ -4,22 +4,17 @@ import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.gadarts.industrial.shared.model.characters.Direction;
-import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.components.GameComponent;
 import com.gadarts.industrial.components.character.CharacterAnimations;
+import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import lombok.Getter;
 
 import static com.gadarts.industrial.shared.model.characters.CharacterTypes.BILLBOARD_SCALE;
-import static com.gadarts.industrial.shared.model.characters.CharacterTypes.BILLBOARD_Y;
 
 
 @Getter
 public class CharacterDecalComponent implements GameComponent {
-	public static final float SHADOW_OPACITY = 0.6f;
-	public static final float SHADOW_OFFSET_Z = 0.4f;
-	public static final float SHADOW_OFFSET_Y = BILLBOARD_Y - 0.1f;
 	private static final Vector3 auxVector3 = new Vector3();
 	private static final Vector2 auxVector2 = new Vector2();
 	private Decal decal;

@@ -333,7 +333,7 @@ public class MapBuilder implements Disposable {
 		avoidZeroDimensions(bBox);
 		bBox.mul(auxMatrix.set(wall.getModelInstance().transform).setTranslation(Vector3.Zero));
 		GameModelInstance modelInstance = new GameModelInstance(wall.getModelInstance(), bBox, true, Color.WHITE);
-		beginBuildingEntity(engine).addModelInstanceComponent(modelInstance, true, false)
+		beginBuildingEntity(engine).addModelInstanceComponent(modelInstance, true)
 				.addWallComponent(mapGraph.getNode(parentNodeData.getCoords()))
 				.finishAndAddToEngine();
 	}
@@ -512,7 +512,7 @@ public class MapBuilder implements Disposable {
 		GameModelInstance mi = inflateEnvironmentModelInstance(node, envJsonObj.get(DIRECTION).getAsInt(), type, height);
 		mi.getAdditionalRenderData().setColorWhenOutside(Color.WHITE);
 		GeneralUtils.applyExplicitModelTexture(type.getModelDefinition(), mi, assetsManager);
-		builder.addModelInstanceComponent(mi, true, type.isCastShadow());
+		builder.addModelInstanceComponent(mi, true);
 		Optional.ofNullable(type.getAppendixModelDefinition())
 				.ifPresent(a -> {
 					GameModelInstance appendixModelInstance = new GameModelInstance(assetsManager.getModel(a));
@@ -545,13 +545,12 @@ public class MapBuilder implements Disposable {
 		GameModelInstance mi = inflateEnvModelInstanceComponent(node, jsonObject, type, builder);
 		inflateEnvLightComponent(builder, type, mi, dirIndex);
 		node.setType(type.getNodeType());
-		inflateDoor(type, builder, mapGraph, node);
+		inflateDoor(type, builder, node);
 		builder.addCollisionComponent();
 	}
 
 	private void inflateDoor(EnvironmentObjectDefinition type,
 							 EntityBuilder builder,
-							 MapGraph mapGraph,
 							 MapGraphNode node) {
 		if (type.getEnvironmentObjectType() == EnvironmentObjectType.DOOR) {
 			builder.addDoorComponent(node);
@@ -711,7 +710,6 @@ public class MapBuilder implements Disposable {
 				.addAnimationComponent();
 	}
 
-	@SuppressWarnings("ConstantConditions")
 	private void inflateEnemy(final JsonObject charJsonObject, final MapGraph mapGraph) {
 		Enemies type = inflateEnemyType(charJsonObject);
 		EntityBuilder b = beginBuildingEntity(engine).addEnemyComponent(type, inflateEnemyBulletFrames(type));

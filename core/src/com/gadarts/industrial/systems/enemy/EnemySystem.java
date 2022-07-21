@@ -400,6 +400,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private void updateStatusIcon(Entity enemy, TextureRegion iconTexture) {
+		if (ComponentsMapper.character.get(enemy).getSkills().getHealthData().getHp() <= 0) return;
 		SimpleDecalComponent simpleDecalComponent = ComponentsMapper.simpleDecal.get(enemy);
 		List<RelatedDecal> relatedDecals = simpleDecalComponent.getRelatedDecals();
 		relatedDecals.get(relatedDecals.size() - 1).setTextureRegion(iconTexture);

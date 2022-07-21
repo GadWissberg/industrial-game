@@ -19,7 +19,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
-import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.player.Item;
@@ -181,9 +180,8 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		ArrayDeque<Coord3D> nodes = (ArrayDeque<Coord3D>) Bresenham.line3D(
 				(int) camera.position.x, (int) (camera.position.y), (int) camera.position.z,
 				(int) ray.x, 0, (int) ray.z);
-		MapGraphNode result = findNearestNodeOnCameraLineOfSight(map, nodes);
 
-		return result;
+		return findNearestNodeOnCameraLineOfSight(map, nodes);
 	}
 
 	private MapGraphNode findNearestNodeOnCameraLineOfSight(MapGraph map,
@@ -269,7 +267,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		Model model = getAssetsManager().getModel(Assets.Models.CURSOR);
 		model.calculateBoundingBox(auxBoundingBox);
 		return EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-				.addModelInstanceComponent(new GameModelInstance(model, auxBoundingBox, false), true, false)
+				.addModelInstanceComponent(new GameModelInstance(model, auxBoundingBox, false), true)
 				.finishAndAddToEngine();
 	}
 

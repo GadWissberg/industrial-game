@@ -160,7 +160,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		MapGraphNode nearbyNode = map.getNode(node.getCol() + colOffset, node.getRow() + rowOffset);
 		boolean result = true;
 		if (nearbyNode != null && nearbyNode.getEntity() != null) {
-			result = modelInstance.get(nearbyNode.getEntity()).getFlatColor() != null;
+			result = DefaultGameSettings.DISABLE_FOG && modelInstance.get(nearbyNode.getEntity()).getFlatColor() != null;
 		}
 		total |= result ? mask : 0;
 		return total;

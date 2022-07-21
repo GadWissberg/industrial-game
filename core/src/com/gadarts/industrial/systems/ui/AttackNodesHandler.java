@@ -4,7 +4,6 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -73,7 +72,6 @@ public class AttackNodesHandler implements Disposable {
 				attackNodesEntities.add(EntityBuilder.beginBuildingEntity((PooledEngine) engine)
 						.addModelInstanceComponent(
 								new GameModelInstance(attackNodeModel, auxBoundingBox, false),
-								false,
 								false)
 						.finishAndAddToEngine()
 				));

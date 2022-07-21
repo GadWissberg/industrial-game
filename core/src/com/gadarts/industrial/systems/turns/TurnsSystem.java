@@ -7,6 +7,7 @@ import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
+import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
@@ -14,12 +15,17 @@ import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
 public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> implements
 		PlayerSystemEventsSubscriber,
 		EnemySystemEventsSubscriber,
-		AmbSystemEventsSubscriber {
-
+		AmbSystemEventsSubscriber,
+		CharacterSystemEventsSubscriber {
 	public TurnsSystem(SystemsCommonData systemsCommonData,
 					   GameAssetsManager assetsManager,
 					   GameLifeCycleHandler lifeCycleHandler) {
 		super(systemsCommonData, assetsManager, lifeCycleHandler);
+	}
+
+	@Override
+	public void onCharacterDies(Entity character) {
+		getSystemsCommonData().getTurnsQueue().removeValue(character, true);
 	}
 
 	@Override

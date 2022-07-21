@@ -17,10 +17,15 @@ import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.collision.CollisionComponent;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
+import com.gadarts.industrial.components.player.PlayerComponent;
+import com.gadarts.industrial.components.player.Weapon;
+import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
+import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
@@ -30,7 +35,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> implements CharacterSystemEventsSubscriber {
-	private static final float BULLET_SPEED = 0.2f;
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final float BULLET_MAX_DISTANCE = 14;
 	private static final Vector3 auxVector3_1 = new Vector3();
@@ -54,40 +58,55 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 
 		if (ComponentsMapper.enemy.has(character)) {
 			enemyEngagesPrimaryAttack(character, direction, charPos);
+		} else if (ComponentsMapper.player.has(character)) {
+			playerEngagesSelectedWeapon(character, direction, charPos);
 		}
+	}
+
+	private void playerEngagesSelectedWeapon(Entity character, Vector3 direction, Vector3 charPos) {
+		Weapon selectedWeapon = getSystemsCommonData().getStorage().getSelectedWeapon();
+		PlayerWeaponsDefinitions definition = (PlayerWeaponsDefinitions) selectedWeapon.getDefinition();
+		WeaponsDefinitions weaponDefinition = definition.getWeaponsDefinition();
+		getSystemsCommonData().getSoundPlayer().playSound(weaponDefinition.getEngageSound());
+		createBullet(character, direction, charPos, weaponDefinition, PlayerComponent.PLAYER_HEIGHT);
 	}
 
 	private void enemyEngagesPrimaryAttack(final Entity character, final Vector3 direction, final Vector3 charPos) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
 		getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.ATTACK_ENERGY_BALL);
-		createEnemyBullet(character, direction, charPos, enemyComp);
+		float height = ComponentsMapper.enemy.get(character).getEnemyDefinition().getHeight();
+		createBullet(character, direction, charPos, enemyComp.getEnemyDefinition().getPrimaryAttack(), height);
 	}
 
-	private void createEnemyBullet(Entity character,
-								   Vector3 direction,
-								   Vector3 charPos,
-								   EnemyComponent enemyComp) {
-		charPos.y += ComponentsMapper.enemy.get(character).getEnemyDefinition().getHeight() / 2F;
-		Integer damagePoints = enemyComp.getEnemyDefinition().getPrimaryAttack().getDamage();
+	private void createBullet(Entity character,
+							  Vector3 direction,
+							  Vector3 charPos,
+							  WeaponsDefinitions weaponDefinition,
+							  float characterHeight) {
+		charPos.y += characterHeight / 2F;
+		Integer damagePoints = weaponDefinition.getDamage();
 		GameAssetsManager assetsManager = getAssetsManager();
 		ParticleEffect effect = assetsManager.getParticleEffect(Assets.ParticleEffects.ENERGY_BALL_TRAIL);
-		if (!pooledBulletModels.containsKey(Assets.Models.LASER_BULLET)) {
-			pooledBulletModels.put(Assets.Models.LASER_BULLET, new Pool<>() {
+		Assets.Models modelDefinition = weaponDefinition.getModelDefinition();
+		if (!pooledBulletModels.containsKey(modelDefinition)) {
+			pooledBulletModels.put(modelDefinition, new Pool<>() {
 				@Override
 				protected GameModelInstance newObject( ) {
-					return new GameModelInstance(assetsManager.getModel(Assets.Models.LASER_BULLET));
+					return new GameModelInstance(assetsManager.getModel(modelDefinition));
 				}
 			});
 		}
 
-		GameModelInstance modelInstance = pooledBulletModels.get(Assets.Models.LASER_BULLET).obtain();
+		GameModelInstance modelInstance = pooledBulletModels.get(modelDefinition).obtain();
 		modelInstance.transform.setToTranslation(charPos);
 		modelInstance.transform.rotate(Vector3.Y, -auxVector2_1.set(direction.x, direction.z).nor().angleDeg());
-		Entity bullet = EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-				.addBulletComponent(charPos, direction, character, damagePoints)
-				.addModelInstanceComponent(modelInstance, true, false)
-				.addShadowlessLightComponent(charPos, PROJ_LIGHT_INTENSITY, PROJ_LIGHT_RADIUS, PROJ_LIGHT_COLOR)
-				.finishAndAddToEngine();
+		EntityBuilder builder = EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
+				.addBulletComponent(charPos, direction, character, damagePoints, weaponDefinition.getBulletSpeed())
+				.addModelInstanceComponent(modelInstance, true);
+		if (weaponDefinition.isEmitsLight()) {
+			builder.addShadowlessLightComponent(charPos, PROJ_LIGHT_INTENSITY, PROJ_LIGHT_RADIUS, PROJ_LIGHT_COLOR);
+		}
+		Entity bullet = builder.finishAndAddToEngine();
 		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
 				.addParticleEffectComponent((PooledEngine) getEngine(), effect, auxVector3_1.set(charPos), bullet)
 				.finishAndAddToEngine();
@@ -101,10 +120,13 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 
 	private boolean handleCollisionsWithWalls(final Entity bullet) {
 		GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(bullet).getModelInstance();
-		Vector3 position = modelInstance.transform.getTranslation(auxVector3_1);
-		MapGraphNode node = getSystemsCommonData().getMap().getNode(position);
+		Vector3 pos = modelInstance.transform.getTranslation(auxVector3_1);
+		MapGraph map = getSystemsCommonData().getMap();
+		if (pos.x < 0 || pos.x >= map.getWidth() || pos.z < 0 || pos.z >= map.getDepth()) return true;
+
+		MapGraphNode node = map.getNode(pos);
 		MapNodesTypes nodeType = node.getType();
-		if (nodeType != MapNodesTypes.PASSABLE_NODE || node.getHeight() >= position.y) {
+		if (nodeType != MapNodesTypes.PASSABLE_NODE || node.getHeight() >= pos.y) {
 			onCollisionWithWall(bullet, node);
 			return true;
 		}
@@ -196,7 +218,7 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 	}
 
 	private void handleBulletMovement(GameModelInstance gameModelInstance, BulletComponent bulletComponent) {
-		Vector3 velocity = bulletComponent.getDirection(auxVector3_1).nor().scl(BULLET_SPEED);
+		Vector3 velocity = bulletComponent.getDirection(auxVector3_1).nor().scl(bulletComponent.getBulletSpeed());
 		gameModelInstance.transform.trn(velocity);
 	}
 

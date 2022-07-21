@@ -7,6 +7,6 @@ import lombok.Getter;
 @Getter
 public class AppendixModelInstanceComponent extends ModelInstanceComponent {
 	public void init(GameModelInstance modelInstance) {
-		super.init(modelInstance, true, true);
+		super.init(modelInstance, true);
 	}
 }
