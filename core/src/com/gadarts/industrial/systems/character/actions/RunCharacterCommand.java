@@ -14,7 +14,6 @@ import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.map.MapGraphPath;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.model.characters.CharacterTypes;
-import com.gadarts.industrial.shared.model.characters.attributes.Agility;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterCommandContext;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
@@ -28,22 +27,24 @@ public class RunCharacterCommand implements CharacterCommandImplementation {
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Vector2 auxVector2_3 = new Vector2();
-	private static final float CHARACTER_STEP_SIZE = 0.22f;
+	private static final float CHAR_STEP_SIZE = 0.22f;
 	private final static Vector3 auxVector3_1 = new Vector3();
 	private MapGraphPath path;
 	private MapGraphNode nextNode;
+	private SystemsCommonData systemsCommonData;
+	private MapGraphNode prevNode;
 
 	@Override
 	public void initialize(Entity character,
 						   SystemsCommonData commonData,
 						   Object additionalData,
 						   List<CharacterSystemEventsSubscriber> subscribers) {
-		Agility agility = ComponentsMapper.character.get(character).getSkills().getAgility();
+		systemsCommonData = commonData;
 		path = (MapGraphPath) additionalData;
 		Array<MapGraphNode> nodes = path.nodes;
-		nodes.removeIndex(0);
+		prevNode = nodes.removeIndex(0);
 		nextNode = nodes.get(0);
-		int agilityValue = agility.getValue();
+		int agilityValue = ComponentsMapper.character.get(character).getSkills().getAgility().getValue();
 		if (nodes.size > agilityValue) {
 			nodes.removeRange(agilityValue, nodes.size - 1);
 		}
@@ -72,8 +73,9 @@ public class RunCharacterCommand implements CharacterCommandImplementation {
 								  CharacterCommandContext commandContext) {
 		Decal decal = ComponentsMapper.characterDecal.get(character).getDecal();
 		Vector2 characterPosition = auxVector2_1.set(decal.getX(), decal.getZ());
-		if (nextNode == null || characterPosition.dst2(nextNode.getCenterPosition(auxVector2_2)) < EPSILON) {
-			return reachedNodeOfPath(character, nextNode, systemsCommonData, subscribers, commandContext);
+		Vector2 nextNodeCenterPosition = nextNode.getCenterPosition(auxVector2_2);
+		if (nextNode == null || characterPosition.dst2(nextNodeCenterPosition) < EPSILON) {
+			return reachedNodeOfPath(character, nextNode, subscribers, commandContext);
 		} else {
 			takeStep(character, systemsCommonData, subscribers);
 			return false;
@@ -85,11 +87,11 @@ public class RunCharacterCommand implements CharacterCommandImplementation {
 						  List<CharacterSystemEventsSubscriber> subscribers) {
 		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(entity);
 		MapGraph map = systemsCommonData.getMap();
-		MapGraphNode oldNode = map.getNode(characterDecalComponent.getNodePosition(auxVector2_3));
+		MapGraphNode currentNode = map.getNode(characterDecalComponent.getNodePosition(auxVector2_3));
 		translateCharacter(characterDecalComponent);
 		MapGraphNode newNode = map.getNode(characterDecalComponent.getNodePosition(auxVector2_3));
-		if (oldNode != newNode) {
-			enteredNewNode(entity, oldNode, newNode, subscribers);
+		if (currentNode != newNode) {
+			enteredNewNode(entity, currentNode, newNode, subscribers);
 		}
 	}
 
@@ -113,9 +115,9 @@ public class RunCharacterCommand implements CharacterCommandImplementation {
 
 	private boolean reachedNodeOfPath(Entity character,
 									  MapGraphNode node,
-									  SystemsCommonData systemsCommonData,
 									  List<CharacterSystemEventsSubscriber> subscribers,
 									  CharacterCommandContext commandContext) {
+		prevNode = nextNode;
 		nextNode = path.getNextOf(nextNode);
 		commandContext.setDestinationNode(nextNode);
 		if (isReachedEndOfPath(systemsCommonData.getMap().findConnection(node, nextNode), systemsCommonData)) {
@@ -139,7 +141,7 @@ public class RunCharacterCommand implements CharacterCommandImplementation {
 
 	private void translateCharacter(CharacterDecalComponent characterDecalComponent) {
 		Decal decal = characterDecalComponent.getDecal();
-		Vector2 velocity = auxVector2_2.sub(auxVector2_1.set(decal.getX(), decal.getZ())).nor().scl(CHARACTER_STEP_SIZE);
+		Vector2 velocity = nextNode.getCenterPosition(auxVector2_2).sub(prevNode.getCenterPosition(auxVector2_1)).nor().scl(CHAR_STEP_SIZE);
 		decal.translate(auxVector3_1.set(velocity.x, 0, velocity.y));
 	}
 

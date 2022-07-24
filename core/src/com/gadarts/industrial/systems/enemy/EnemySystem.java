@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
@@ -40,6 +41,7 @@ import java.util.List;
 
 import static com.badlogic.gdx.utils.TimeUtils.millis;
 import static com.badlogic.gdx.utils.TimeUtils.timeSinceMillis;
+import static com.gadarts.industrial.DefaultGameSettings.PARALYZED_ENEMIES;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.HEIGHT_DIFF;
 import static com.gadarts.industrial.shared.assets.Assets.Sounds;
@@ -388,7 +390,8 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private void awakeEnemy(final Entity enemy) {
-		if (ComponentsMapper.character.get(enemy).getSkills().getHealthData().getHp() <= 0) return;
+		if (PARALYZED_ENEMIES || ComponentsMapper.character.get(enemy).getSkills().getHealthData().getHp() <= 0) return;
+
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		EnemyAiStatus prevAiStatus = enemyComponent.getAiStatus();
 		enemyComponent.setAiStatus(ATTACKING);
