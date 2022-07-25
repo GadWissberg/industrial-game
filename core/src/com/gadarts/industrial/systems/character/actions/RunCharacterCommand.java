@@ -32,7 +32,6 @@ public class RunCharacterCommand implements CharacterCommandImplementation {
 	private MapGraphPath path;
 	private MapGraphNode nextNode;
 	private SystemsCommonData systemsCommonData;
-	private MapGraphNode prevNode;
 
 	@Override
 	public void initialize(Entity character,
@@ -42,7 +41,7 @@ public class RunCharacterCommand implements CharacterCommandImplementation {
 		systemsCommonData = commonData;
 		path = (MapGraphPath) additionalData;
 		Array<MapGraphNode> nodes = path.nodes;
-		prevNode = nodes.removeIndex(0);
+		nodes.removeIndex(0);
 		nextNode = nodes.get(0);
 		int agilityValue = ComponentsMapper.character.get(character).getSkills().getAgility().getValue();
 		if (nodes.size > agilityValue) {
@@ -117,7 +116,6 @@ public class RunCharacterCommand implements CharacterCommandImplementation {
 									  MapGraphNode node,
 									  List<CharacterSystemEventsSubscriber> subscribers,
 									  CharacterCommandContext commandContext) {
-		prevNode = nextNode;
 		nextNode = path.getNextOf(nextNode);
 		commandContext.setDestinationNode(nextNode);
 		if (isReachedEndOfPath(systemsCommonData.getMap().findConnection(node, nextNode), systemsCommonData)) {
@@ -141,7 +139,7 @@ public class RunCharacterCommand implements CharacterCommandImplementation {
 
 	private void translateCharacter(CharacterDecalComponent characterDecalComponent) {
 		Decal decal = characterDecalComponent.getDecal();
-		Vector2 velocity = nextNode.getCenterPosition(auxVector2_2).sub(prevNode.getCenterPosition(auxVector2_1)).nor().scl(CHAR_STEP_SIZE);
+		Vector2 velocity = auxVector2_2.sub(auxVector2_1.set(decal.getX(), decal.getZ())).nor().scl(CHAR_STEP_SIZE);
 		decal.translate(auxVector3_1.set(velocity.x, 0, velocity.y));
 	}
 

@@ -25,5 +25,5 @@ public final class DefaultGameSettings {
 
 	public static final boolean ALLOW_STATIC_SHADOWS = true;
 	public static final boolean DISABLE_FOG = false;
-	public static final boolean PARALYZED_ENEMIES = true;
+	public static final boolean PARALYZED_ENEMIES = false;
 }

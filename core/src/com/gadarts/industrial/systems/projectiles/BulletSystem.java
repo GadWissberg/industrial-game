@@ -41,6 +41,7 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 	private final static float PROJ_LIGHT_INTENSITY = 0.05F;
 	private final static float PROJ_LIGHT_RADIUS = 1F;
 	private final static Color PROJ_LIGHT_COLOR = Color.valueOf("#8396FF");
+	private static final float BULLET_ENGAGE_LIGHT_DURATION = 0.1F;
 	private final Map<Assets.Models, Pool<GameModelInstance>> pooledBulletModels = new HashMap<>();
 	private ImmutableArray<Entity> bullets;
 	private ImmutableArray<Entity> collidables;
@@ -107,6 +108,16 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 			builder.addShadowlessLightComponent(charPos, PROJ_LIGHT_INTENSITY, PROJ_LIGHT_RADIUS, PROJ_LIGHT_COLOR);
 		}
 		Entity bullet = builder.finishAndAddToEngine();
+
+		if (weaponDefinition.isLightOnCreation()) {
+			EntityBuilder.beginBuildingEntity((PooledEngine) getEngine()).addShadowlessLightComponent(
+					charPos,
+					PROJ_LIGHT_INTENSITY,
+					PROJ_LIGHT_RADIUS,
+					PROJ_LIGHT_COLOR,
+					BULLET_ENGAGE_LIGHT_DURATION).finishAndAddToEngine();
+		}
+
 		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
 				.addParticleEffectComponent((PooledEngine) getEngine(), effect, auxVector3_1.set(charPos), bullet)
 				.finishAndAddToEngine();

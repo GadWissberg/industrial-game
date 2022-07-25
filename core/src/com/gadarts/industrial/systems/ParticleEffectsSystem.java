@@ -11,16 +11,19 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.g3d.particles.batches.PointSpriteParticleBatch;
 import com.badlogic.gdx.graphics.g3d.particles.emitters.RegularEmitter;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.ParticleComponent;
+import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 
 import java.util.ArrayList;
 
 public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 	private static final Matrix4 auxMatrix = new Matrix4();
+	private static final Vector3 auxVector = new Vector3();
 	private final ArrayList<Entity> particleEntitiesToRemove = new ArrayList<>();
 	private final ArrayList<ParticleEffect> particleEffectsToFollow = new ArrayList<>();
 	private final ArrayList<ParticleEffect> particleEffectsToRemove = new ArrayList<>();
@@ -74,14 +77,14 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 		}
 	}
 
-	private void updatesEffectsWithParentsAccordingly() {
+	private void updatesEffectsWithParentsAccordingly( ) {
 		for (Entity particleEntity : particleEntities) {
 			ParticleComponent particleComponent = ComponentsMapper.particle.get(particleEntity);
 			ParticleEffect particleEffect = particleComponent.getParticleEffect();
-			Entity parent = particleComponent.getParent();
-			if (parent != null && ComponentsMapper.simpleDecal.has(parent)) {
+			if (particleComponent.getParent() != null && ComponentsMapper.modelInstance.has(particleComponent.getParent())) {
 				particleEffect.setTransform(auxMatrix.idt());
-				particleEffect.translate(ComponentsMapper.simpleDecal.get(parent).getDecal().getPosition());
+				ModelInstanceComponent miComponent = ComponentsMapper.modelInstance.get(particleComponent.getParent());
+				particleEffect.translate(miComponent.getModelInstance().transform.getTranslation(auxVector));
 			}
 		}
 	}
@@ -96,7 +99,7 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 		particleEffectsToRemove.clear();
 	}
 
-	private void markToRemoveFollowedEffectsThatComplete() {
+	private void markToRemoveFollowedEffectsThatComplete( ) {
 		particleEntitiesToRemove.clear();
 		for (ParticleEffect effect : particleEffectsToFollow) {
 			if (effect.isComplete()) {
@@ -113,7 +116,7 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 		}
 	}
 
-	private void addCompleteToRemove() {
+	private void addCompleteToRemove( ) {
 		for (Entity entity : particleEntities) {
 			ParticleEffect particleEffect = ComponentsMapper.particle.get(entity).getParticleEffect();
 			if (particleEffect.isComplete()) {
@@ -134,12 +137,12 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 	}
 
 	@Override
-	public Class<SystemEventsSubscriber> getEventsSubscriberClass() {
+	public Class<SystemEventsSubscriber> getEventsSubscriberClass( ) {
 		return null;
 	}
 
 	@Override
-	public void initializeData() {
+	public void initializeData( ) {
 		ParticleSystem particleSystem = new ParticleSystem();
 		getSystemsCommonData().setParticleSystem(particleSystem);
 		particleSystem.add(pointSpriteBatch);
@@ -147,7 +150,7 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 	}
 
 	@Override
-	public void dispose() {
+	public void dispose( ) {
 
 	}
 
