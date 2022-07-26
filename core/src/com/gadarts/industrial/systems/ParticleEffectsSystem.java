@@ -13,9 +13,12 @@ import com.badlogic.gdx.graphics.g3d.particles.emitters.RegularEmitter;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.ParticleComponent;
+import com.gadarts.industrial.components.FlyingParticleComponent;
+import com.gadarts.industrial.components.ParticleEffectComponent;
+import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 
@@ -23,12 +26,19 @@ import java.util.ArrayList;
 
 public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 	private static final Matrix4 auxMatrix = new Matrix4();
-	private static final Vector3 auxVector = new Vector3();
+	private static final Vector3 auxVector_1 = new Vector3();
+	private static final Vector3 auxVector_2 = new Vector3();
+	private static final Vector3 auxVector_3 = new Vector3();
+	public static final int BULLET_JACKET_TIME_TO_LEAVE = 5000;
+	public static final float FLYING_PART_ROTATION_STEP = 64F;
+	public static final float FLYING_PARTICLE_DECCELERATION = 0.9F;
+	public static final float GRAVITY_COEFF = 5F;
 	private final ArrayList<Entity> particleEntitiesToRemove = new ArrayList<>();
 	private final ArrayList<ParticleEffect> particleEffectsToFollow = new ArrayList<>();
 	private final ArrayList<ParticleEffect> particleEffectsToRemove = new ArrayList<>();
 	private PointSpriteParticleBatch pointSpriteBatch;
-	private ImmutableArray<Entity> particleEntities;
+	private ImmutableArray<Entity> particleEffectsEntities;
+	private ImmutableArray<Entity> flyingParticlesEntities;
 
 	public ParticleEffectsSystem(SystemsCommonData systemsCommonData,
 								 GameAssetsManager assetsManager,
@@ -43,12 +53,13 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 	@Override
 	public void addedToEngine(Engine engine) {
 		super.addedToEngine(engine);
-		particleEntities = getEngine().getEntitiesFor(Family.all(ParticleComponent.class).get());
+		particleEffectsEntities = getEngine().getEntitiesFor(Family.all(ParticleEffectComponent.class).get());
+		flyingParticlesEntities = getEngine().getEntitiesFor(Family.all(FlyingParticleComponent.class).get());
 		getEngine().addEntityListener(new EntityListener() {
 			@Override
 			public void entityAdded(final Entity entity) {
-				if (ComponentsMapper.particle.has(entity)) {
-					ParticleEffect effect = ComponentsMapper.particle.get(entity).getParticleEffect();
+				if (ComponentsMapper.particleEffect.has(entity)) {
+					ParticleEffect effect = ComponentsMapper.particleEffect.get(entity).getParticleEffect();
 					effect.init();
 					effect.start();
 					getSystemsCommonData().getParticleSystem().add(effect);
@@ -62,41 +73,41 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 					for (Entity child : children) {
 						finalizeEffect(child);
 					}
-				} else if (ComponentsMapper.particle.has(entity)) {
+				} else if (ComponentsMapper.particleEffect.has(entity)) {
 					finalizeEffect(entity);
-					particleEffectsToFollow.add(ComponentsMapper.particle.get(entity).getParticleEffect());
+					particleEffectsToFollow.add(ComponentsMapper.particleEffect.get(entity).getParticleEffect());
 				}
 			}
 		});
 	}
 
 	private void finalizeEffect(final Entity effect) {
-		for (ParticleController con : ComponentsMapper.particle.get(effect).getParticleEffect().getControllers()) {
+		for (ParticleController con : ComponentsMapper.particleEffect.get(effect).getParticleEffect().getControllers()) {
 			RegularEmitter emitter = (RegularEmitter) con.emitter;
 			emitter.setContinuous(false);
 		}
 	}
 
 	private void updatesEffectsWithParentsAccordingly( ) {
-		for (Entity particleEntity : particleEntities) {
-			ParticleComponent particleComponent = ComponentsMapper.particle.get(particleEntity);
-			ParticleEffect particleEffect = particleComponent.getParticleEffect();
-			if (particleComponent.getParent() != null && ComponentsMapper.modelInstance.has(particleComponent.getParent())) {
+		for (Entity particleEntity : particleEffectsEntities) {
+			ParticleEffectComponent particleEffectComponent = ComponentsMapper.particleEffect.get(particleEntity);
+			ParticleEffect particleEffect = particleEffectComponent.getParticleEffect();
+			if (particleEffectComponent.getParent() != null && ComponentsMapper.modelInstance.has(particleEffectComponent.getParent())) {
 				particleEffect.setTransform(auxMatrix.idt());
-				ModelInstanceComponent miComponent = ComponentsMapper.modelInstance.get(particleComponent.getParent());
-				particleEffect.translate(miComponent.getModelInstance().transform.getTranslation(auxVector));
+				ModelInstanceComponent miComponent = ComponentsMapper.modelInstance.get(particleEffectComponent.getParent());
+				particleEffect.translate(miComponent.getModelInstance().transform.getTranslation(auxVector_1));
 			}
 		}
 	}
 
 	private void handleCompletedParticleEffects(final ParticleSystem particleSystem) {
+		particleEntitiesToRemove.clear();
 		addCompleteToRemove();
-		removeEffectsMarkedToBeRemoved(particleSystem);
+		removeParticleEffectsMarkedToBeRemoved();
 		markToRemoveFollowedEffectsThatComplete();
-		for (ParticleEffect effect : particleEffectsToRemove) {
-			particleSystem.remove(effect);
+		for (Object effect : particleEffectsToRemove) {
+			particleSystem.remove((ParticleEffect) effect);
 		}
-		particleEffectsToRemove.clear();
 	}
 
 	private void markToRemoveFollowedEffectsThatComplete( ) {
@@ -108,17 +119,22 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 		}
 	}
 
-	private void removeEffectsMarkedToBeRemoved(ParticleSystem particleSystem) {
+	private void removeParticleEffectsMarkedToBeRemoved( ) {
 		for (Entity entity : particleEntitiesToRemove) {
-			particleSystem.remove(ComponentsMapper.particle.get(entity).getParticleEffect());
-			entity.remove(ParticleComponent.class);
+			if (ComponentsMapper.particleEffect.has(entity)) {
+				ParticleSystem particleSystem = getSystemsCommonData().getParticleSystem();
+				particleSystem.remove(ComponentsMapper.particleEffect.get(entity).getParticleEffect());
+				entity.remove(ParticleEffectComponent.class);
+			} else {
+				entity.remove(FlyingParticleComponent.class);
+			}
 			getEngine().removeEntity(entity);
 		}
 	}
 
 	private void addCompleteToRemove( ) {
-		for (Entity entity : particleEntities) {
-			ParticleEffect particleEffect = ComponentsMapper.particle.get(entity).getParticleEffect();
+		for (Entity entity : particleEffectsEntities) {
+			ParticleEffect particleEffect = ComponentsMapper.particleEffect.get(entity).getParticleEffect();
 			if (particleEffect.isComplete()) {
 				particleEntitiesToRemove.add(entity);
 			}
@@ -134,6 +150,47 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 		particleSystem.draw();
 		particleSystem.end();
 		handleCompletedParticleEffects(particleSystem);
+		updateFlyingParticles(deltaTime);
+	}
+
+	private void updateFlyingParticles(float deltaTime) {
+		particleEntitiesToRemove.clear();
+		for (Entity flyingPart : flyingParticlesEntities) {
+			updateFlyingParticle(deltaTime, flyingPart);
+		}
+		removeParticleEffectsMarkedToBeRemoved();
+	}
+
+	private void updateFlyingParticle(float deltaTime, Entity flyingPart) {
+		GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(flyingPart).getModelInstance();
+		FlyingParticleComponent flyingPartComponent = ComponentsMapper.flyingParticles.get(flyingPart);
+		if (flyingPartComponent.getDestroyTime() < 0) {
+			takeStepForFlyingParticle(deltaTime, flyingPart, modelInstance);
+			modelInstance.transform.rotate(Vector3.Z, FLYING_PART_ROTATION_STEP);
+			startCountDownForFlyingParticleWhenReachesGround(modelInstance, flyingPartComponent);
+		} else if (TimeUtils.timeSinceMillis(flyingPartComponent.getDestroyTime()) > 0) {
+			flyingPartComponent.setDestroyTime(0);
+			particleEntitiesToRemove.add(flyingPart);
+		}
+	}
+
+	private void startCountDownForFlyingParticleWhenReachesGround(GameModelInstance modelInstance,
+																  FlyingParticleComponent flyingPartComponent) {
+		if (modelInstance.transform.getTranslation(auxVector_1).y <= flyingPartComponent.getNodeHeight()) {
+			modelInstance.transform.setTranslation(auxVector_1.x, auxVector_1.y + 0.1F, auxVector_1.z);
+			flyingPartComponent.setDestroyTime(TimeUtils.millis() + BULLET_JACKET_TIME_TO_LEAVE);
+		}
+	}
+
+	private void takeStepForFlyingParticle(float deltaTime,
+										   Entity flyingParticle,
+										   GameModelInstance modelInstance) {
+		FlyingParticleComponent flyingParticleComponent = ComponentsMapper.flyingParticles.get(flyingParticle);
+		Vector3 step = flyingParticleComponent.getFlyAwayVelocity(auxVector_2);
+		modelInstance.transform.trn(auxVector_3.set(step).scl(deltaTime));
+		step.scl(FLYING_PARTICLE_DECCELERATION);
+		flyingParticleComponent.setFlyAwayVelocity(step);
+		modelInstance.transform.trn(auxVector_1.set(Vector3.Y).scl(-deltaTime * GRAVITY_COEFF));
 	}
 
 	@Override

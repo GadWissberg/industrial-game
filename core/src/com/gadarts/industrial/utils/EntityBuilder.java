@@ -149,8 +149,12 @@ public class EntityBuilder {
 		return pickup;
 	}
 
-	public EntityBuilder addModelInstanceComponent(final GameModelInstance modelInstance,
-												   final boolean visible) {
+	public EntityBuilder addModelInstanceComponent(GameModelInstance modelInstance) {
+		return addModelInstanceComponent(modelInstance, true);
+	}
+
+	public EntityBuilder addModelInstanceComponent(GameModelInstance modelInstance,
+												   boolean visible) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		ModelInstanceComponent component = engine.createComponent(ModelInstanceComponent.class);
 		component.init(modelInstance, visible);
@@ -291,7 +295,7 @@ public class EntityBuilder {
 													final Entity parent) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		ParticleEffect effect = originalEffect.copy();
-		ParticleComponent particleComponent = engine.createComponent(ParticleComponent.class);
+		ParticleEffectComponent particleEffectComponent = engine.createComponent(ParticleEffectComponent.class);
 		if (parent != null) {
 			ParticleEffectParentComponent particleComponentParent;
 			if (!ComponentsMapper.particleParent.has(parent)) {
@@ -301,9 +305,9 @@ public class EntityBuilder {
 			}
 			particleComponentParent.getChildren().add(currentEntity);
 		}
-		particleComponent.init(effect, parent);
+		particleEffectComponent.init(effect, parent);
 		effect.translate(position);
-		currentEntity.add(particleComponent);
+		currentEntity.add(particleEffectComponent);
 		return instance;
 	}
 
@@ -366,6 +370,14 @@ public class EntityBuilder {
 		DoorComponent doorComponent = engine.createComponent(DoorComponent.class);
 		doorComponent.init(node);
 		currentEntity.add(doorComponent);
+		return instance;
+	}
+
+	public EntityBuilder addFlyingParticleComponent(float nodeHeight) {
+		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
+		FlyingParticleComponent component = engine.createComponent(FlyingParticleComponent.class);
+		component.init(nodeHeight);
+		currentEntity.add(component);
 		return instance;
 	}
 }

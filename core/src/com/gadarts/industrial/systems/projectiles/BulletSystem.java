@@ -7,6 +7,7 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pool;
@@ -42,7 +43,7 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 	private final static float PROJ_LIGHT_RADIUS = 1F;
 	private final static Color PROJ_LIGHT_COLOR = Color.valueOf("#8396FF");
 	private static final float BULLET_ENGAGE_LIGHT_DURATION = 0.1F;
-	private final Map<Assets.Models, Pool<GameModelInstance>> pooledBulletModels = new HashMap<>();
+	private final Map<Assets.Models, Pool<GameModelInstance>> pooledModelInstances = new HashMap<>();
 	private ImmutableArray<Entity> bullets;
 	private ImmutableArray<Entity> collidables;
 
@@ -89,16 +90,8 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 		GameAssetsManager assetsManager = getAssetsManager();
 		ParticleEffect effect = assetsManager.getParticleEffect(Assets.ParticleEffects.ENERGY_BALL_TRAIL);
 		Assets.Models modelDefinition = weaponDefinition.getModelDefinition();
-		if (!pooledBulletModels.containsKey(modelDefinition)) {
-			pooledBulletModels.put(modelDefinition, new Pool<>() {
-				@Override
-				protected GameModelInstance newObject( ) {
-					return new GameModelInstance(assetsManager.getModel(modelDefinition));
-				}
-			});
-		}
-
-		GameModelInstance modelInstance = pooledBulletModels.get(modelDefinition).obtain();
+		createPoolForModelInstanceIfNotExists(assetsManager, modelDefinition);
+		GameModelInstance modelInstance = pooledModelInstances.get(modelDefinition).obtain();
 		modelInstance.transform.setToTranslation(charPos);
 		modelInstance.transform.rotate(Vector3.Y, -auxVector2_1.set(direction.x, direction.z).nor().angleDeg());
 		EntityBuilder builder = EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
@@ -118,9 +111,33 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 					BULLET_ENGAGE_LIGHT_DURATION).finishAndAddToEngine();
 		}
 
+		Assets.Models bulletJacket = weaponDefinition.getBulletJacket();
+		if (bulletJacket != null) {
+			createPoolForModelInstanceIfNotExists(assetsManager, bulletJacket);
+			Vector3 nodePosition = ComponentsMapper.characterDecal.get(character).getNodePosition(auxVector3_1);
+			MapGraphNode currentNode = getSystemsCommonData().getMap().getNode(nodePosition);
+			GameModelInstance jacketGameModelInstance = pooledModelInstances.get(bulletJacket).obtain();
+			jacketGameModelInstance.transform.setToTranslation(charPos).rotate(Vector3.Y, MathUtils.random(360F));
+			EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
+					.addModelInstanceComponent(jacketGameModelInstance)
+					.addFlyingParticleComponent(currentNode.getHeight())
+					.finishAndAddToEngine();
+		}
+
 		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
 				.addParticleEffectComponent((PooledEngine) getEngine(), effect, auxVector3_1.set(charPos), bullet)
 				.finishAndAddToEngine();
+	}
+
+	private void createPoolForModelInstanceIfNotExists(GameAssetsManager assetsManager, Assets.Models modelDefinition) {
+		if (!pooledModelInstances.containsKey(modelDefinition)) {
+			pooledModelInstances.put(modelDefinition, new Pool<>() {
+				@Override
+				protected GameModelInstance newObject( ) {
+					return new GameModelInstance(assetsManager.getModel(modelDefinition));
+				}
+			});
+		}
 	}
 
 	@Override
