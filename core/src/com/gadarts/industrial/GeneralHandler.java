@@ -142,6 +142,11 @@ public class GeneralHandler implements
 
 	private void createAndSetEngine( ) {
 		Optional.ofNullable(engine).ifPresent(e -> {
+			e.getSystems().forEach(s -> {
+				if (s instanceof Disposable) {
+					((Disposable) s).dispose();
+				}
+			});
 			e.clearPools();
 			e.removeAllEntities();
 			e.removeAllSystems();

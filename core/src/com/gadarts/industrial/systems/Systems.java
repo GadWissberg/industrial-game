@@ -16,6 +16,7 @@ public enum Systems {
 	CAMERA(CameraSystem.class),
 	INPUT(InputSystem.class),
 	PLAYER(PlayerSystem.class),
+	PARTICLE_EFFECTS(ParticleEffectsSystem.class),
 	RENDER(RenderSystem.class),
 	USER_INTERFACE(UserInterfaceSystem.class),
 	PROFILING(ProfilingSystem.class),
@@ -23,7 +24,6 @@ public enum Systems {
 	TURNS(TurnsSystem.class),
 	ENEMY(EnemySystem.class),
 	PROJECTILE(BulletSystem.class),
-	PARTICLE_EFFECTS(ParticleEffectsSystem.class),
 	CHARACTER(CharacterSystem.class),
 	AMB(AmbSystem.class);
 

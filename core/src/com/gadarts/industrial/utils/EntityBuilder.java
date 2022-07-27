@@ -64,11 +64,11 @@ public class EntityBuilder {
 											Vector3 direction,
 											Entity owner,
 											Integer damagePoints,
-											float bulletSpeed) {
+											WeaponsDefinitions weaponDefinition) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
-		BulletComponent bulletComponent = engine.createComponent(BulletComponent.class);
-		bulletComponent.init(auxVector2.set(initialPos.x, initialPos.z), direction, owner, damagePoints, bulletSpeed);
-		currentEntity.add(bulletComponent);
+		BulletComponent bulletComp = engine.createComponent(BulletComponent.class);
+		bulletComp.init(auxVector2.set(initialPos.x, initialPos.z), direction, owner, damagePoints, weaponDefinition);
+		currentEntity.add(bulletComp);
 		return instance;
 	}
 

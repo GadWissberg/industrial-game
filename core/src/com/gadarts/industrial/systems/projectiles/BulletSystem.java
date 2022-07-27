@@ -95,7 +95,7 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 		modelInstance.transform.setToTranslation(charPos);
 		modelInstance.transform.rotate(Vector3.Y, -auxVector2_1.set(direction.x, direction.z).nor().angleDeg());
 		EntityBuilder builder = EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-				.addBulletComponent(charPos, direction, character, damagePoints, weaponDefinition.getBulletSpeed())
+				.addBulletComponent(charPos, direction, character, damagePoints, weaponDefinition)
 				.addModelInstanceComponent(modelInstance, true);
 		if (weaponDefinition.isEmitsLight()) {
 			builder.addShadowlessLightComponent(charPos, PROJ_LIGHT_INTENSITY, PROJ_LIGHT_RADIUS, PROJ_LIGHT_COLOR);
@@ -124,9 +124,9 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 					.finishAndAddToEngine();
 		}
 
-		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-				.addParticleEffectComponent((PooledEngine) getEngine(), effect, auxVector3_1.set(charPos), bullet)
-				.finishAndAddToEngine();
+//		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
+//				.addParticleEffectComponent((PooledEngine) getEngine(), effect, auxVector3_1.set(charPos), bullet)
+//				.finishAndAddToEngine();
 	}
 
 	private void createPoolForModelInstanceIfNotExists(GameAssetsManager assetsManager, Assets.Models modelDefinition) {
@@ -169,9 +169,10 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 	}
 
 	private void destroyBullet(final Entity bullet) {
+		WeaponsDefinitions weaponDefinition = ComponentsMapper.bullet.get(bullet).getWeaponDefinition();
 		bullet.remove(BulletComponent.class);
 		getEngine().removeEntity(bullet);
-		ParticleEffect effect = getAssetsManager().getParticleEffect(Assets.ParticleEffects.ENERGY_BALL_EXPLOSION);
+		ParticleEffect effect = getAssetsManager().getParticleEffect(weaponDefinition.getParticleEffectOnDestroy());
 		GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(bullet).getModelInstance();
 		Vector3 pos = auxVector3_1.set(modelInstance.transform.getTranslation(auxVector3_1));
 		createExplosion(effect, pos);
@@ -246,7 +247,8 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 	}
 
 	private void handleBulletMovement(GameModelInstance gameModelInstance, BulletComponent bulletComponent) {
-		Vector3 velocity = bulletComponent.getDirection(auxVector3_1).nor().scl(bulletComponent.getBulletSpeed());
+		float bulletSpeed = bulletComponent.getWeaponDefinition().getBulletSpeed();
+		Vector3 velocity = bulletComponent.getDirection(auxVector3_1).nor().scl(bulletSpeed);
 		gameModelInstance.transform.trn(velocity);
 	}
 

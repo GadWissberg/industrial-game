@@ -10,7 +10,7 @@ import lombok.Setter;
 public class FlyingParticleComponent implements GameComponent {
 	public static final float MINIMUM_DEGREE = 45F;
 	public static final float MAX_DEGREE_TO_ADD = 90F;
-	public static final float FLY_AWAY_COEFF = 16F;
+	public static final float FLY_AWAY_COEFF = 0.1F;
 	@Getter(AccessLevel.NONE)
 	private final Vector3 flyAwayVelocity = new Vector3();
 	private float nodeHeight;
