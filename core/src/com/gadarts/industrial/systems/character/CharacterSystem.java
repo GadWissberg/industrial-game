@@ -59,6 +59,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	);
 	private ParticleEffect bloodSplatterEffect;
 	private ImmutableArray<Entity> characters;
+	private ParticleEffect smallExpEffect;
 
 	public CharacterSystem(SystemsCommonData systemsCommonData,
 						   GameAssetsManager assetsManager,
@@ -80,6 +81,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	@Override
 	public void initializeData( ) {
 		bloodSplatterEffect = getAssetsManager().getParticleEffect(Assets.ParticleEffects.BLOOD_SPLATTER);
+		smallExpEffect = getAssetsManager().getParticleEffect(Assets.ParticleEffects.SMALL_EXP);
 	}
 
 	/**
@@ -144,7 +146,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	private void addSplatterEffect(final Vector3 pos) {
 		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-				.addParticleEffectComponent((PooledEngine) getEngine(), bloodSplatterEffect, pos)
+				.addParticleEffectComponent(bloodSplatterEffect, pos)
 				.finishAndAddToEngine();
 	}
 
@@ -185,9 +187,21 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (ComponentsMapper.animation.has(character)) {
 			ComponentsMapper.animation.get(character).resetStateTime();
 		}
+		createExplosionOnCharacterDeath(character);
 		getSystemsCommonData().getSoundPlayer().playSound(soundData.getDeathSound());
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onCharacterDies(character);
+		}
+	}
+
+	private void createExplosionOnCharacterDeath(Entity character) {
+		if (ComponentsMapper.enemy.has(character)) {
+			Vector3 position = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
+			float height = ComponentsMapper.enemy.get(character).getEnemyDefinition().getHeight();
+			EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
+					.addParticleEffectComponent(smallExpEffect,
+							auxVector3_1.set(position).add(0F, height / 4F, 0F))
+					.finishAndAddToEngine();
 		}
 	}
 

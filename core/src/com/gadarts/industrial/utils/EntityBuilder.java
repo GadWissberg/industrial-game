@@ -283,9 +283,8 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addParticleEffectComponent(final PooledEngine engine,
-													final ParticleEffect originalEffect,
-													final Vector3 position) {
+	public EntityBuilder addParticleEffectComponent(ParticleEffect originalEffect,
+													Vector3 position) {
 		return addParticleEffectComponent(engine, originalEffect, position, null);
 	}
 

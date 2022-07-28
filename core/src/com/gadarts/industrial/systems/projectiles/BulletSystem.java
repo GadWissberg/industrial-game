@@ -180,7 +180,7 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 
 	private void createExplosion(final ParticleEffect effect, final Vector3 pos) {
 		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-				.addParticleEffectComponent((PooledEngine) getEngine(), effect, pos)
+				.addParticleEffectComponent(effect, pos)
 				.finishAndAddToEngine();
 		getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.SMALL_EXP);
 	}
