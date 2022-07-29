@@ -5,8 +5,11 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.Pool;
 import com.gadarts.industrial.SoundPlayer;
+import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.map.MapGraph;
+import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.systems.character.CharacterCommandContext;
 import com.gadarts.industrial.systems.player.PlayerStorage;
 import com.gadarts.industrial.systems.render.DrawFlags;
@@ -16,12 +19,16 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Setter
 @Getter
 @RequiredArgsConstructor
 public class SystemsCommonData implements Disposable {
 	public static final int CAMERA_LIGHT_FAR = 30;
 	public static final String TABLE_NAME_HUD = "hud";
+	private final ModelInstancePools pooledModelInstances = new ModelInstancePools();
 
 	@Setter(AccessLevel.NONE)
 	private final String versionName;

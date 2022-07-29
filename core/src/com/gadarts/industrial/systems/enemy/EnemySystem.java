@@ -3,30 +3,36 @@ package com.gadarts.industrial.systems.enemy;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g3d.decals.Decal;
+import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.FlyingParticleComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.character.CharacterHealthData;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
+import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.sd.RelatedDecal;
 import com.gadarts.industrial.components.sd.SimpleDecalComponent;
 import com.gadarts.industrial.map.*;
+import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
 import com.gadarts.industrial.shared.model.characters.attributes.Range;
 import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
 import com.gadarts.industrial.systems.GameSystem;
+import com.gadarts.industrial.systems.ModelInstancePools;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterCommandContext;
 import com.gadarts.industrial.systems.character.CharacterCommandsDefinitions;
@@ -34,6 +40,7 @@ import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
+import com.gadarts.industrial.utils.EntityBuilder;
 import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.ArrayList;
@@ -63,12 +70,22 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private static final List<MapGraphNode> auxNodesList = new ArrayList<>();
 	private static final CharacterCommandContext auxCommand = new CharacterCommandContext();
 	private static final int NUMBER_OF_SKILL_FLOWER_LEAF = 8;
+	private static final float METAL_PART_FLY_AWAY_STRENGTH = 0.2F;
+	private static final float METAL_PART_FLY_AWAY_MIN_DEGREE = -45F;
+	private static final float METAL_PART_FLY_AWAY_MAX_DEGREE_TO_ADD = -90F;
+	private static final float METAL_PART_FLY_AWAY_MIN_DEC = 0.9F;
+	private static final float METAL_PART_FLY_AWAY_MAX_DEC = 0.97F;
+	private static final int MIN_METAL_PARTS_TO_SPAWN = 2;
+	private static final int MAX_METAL_PARTS_TO_SPAWN = 5;
+	private static final Vector3 auxVector3_1 = new Vector3();
+	private static final float SMOKE_HEIGHT_BIAS = 0.4F;
 	private final List<Sounds> ambSounds = List.of(Sounds.AMB_CHAINS, Sounds.AMB_SIGH, Sounds.AMB_LAUGH);
 	private final PathPlanHandler pathPlanner;
 	private ImmutableArray<Entity> enemies;
 	private long nextAmbSoundTime;
 	private TextureRegion iconAttack;
 	private TextureRegion iconSearching;
+	private ParticleEffect smokeEffect;
 
 	public EnemySystem(SystemsCommonData systemsCommonData,
 					   GameAssetsManager assetsManager,
@@ -236,7 +253,32 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 				awakeEnemy(entity);
 			}
 			refreshSkillFlower(entity);
+			createFlyingMetalParts(entity);
 		}
+	}
+
+	private void createFlyingMetalParts(Entity entity) {
+		for (int i = 0; i < MathUtils.random(MIN_METAL_PARTS_TO_SPAWN, MAX_METAL_PARTS_TO_SPAWN); i++) {
+			createFlyingMetalPart(entity);
+		}
+	}
+
+	private void createFlyingMetalPart(Entity entity) {
+		Decal decal = ComponentsMapper.characterDecal.get(entity).getDecal();
+		ModelInstancePools pooledModelInstances = getSystemsCommonData().getPooledModelInstances();
+		GameModelInstance modelInstance = pooledModelInstances.obtain(getAssetsManager(), Assets.Models.METAL_PART);
+		float characterHeight = ComponentsMapper.enemy.get(entity).getEnemyDefinition().getHeight();
+		modelInstance.transform.setTranslation(decal.getPosition()).trn(0F, characterHeight / 2F, 0F);
+		float nodeHeight = getSystemsCommonData().getMap().getNode(decal.getPosition()).getHeight();
+		float deceleration = MathUtils.random(METAL_PART_FLY_AWAY_MIN_DEC, METAL_PART_FLY_AWAY_MAX_DEC);
+		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
+				.addFlyingParticleComponent(nodeHeight,
+						METAL_PART_FLY_AWAY_STRENGTH,
+						deceleration,
+						METAL_PART_FLY_AWAY_MIN_DEGREE,
+						METAL_PART_FLY_AWAY_MAX_DEGREE_TO_ADD)
+				.addModelInstanceComponent(modelInstance)
+				.finishAndAddToEngine();
 	}
 
 	private void refreshSkillFlower(Entity enemy) {
@@ -252,12 +294,23 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	@Override
 	public void onCharacterDies(final Entity character) {
 		if (ComponentsMapper.enemy.has(character)) {
+			createSmoke(character);
+			createFlyingMetalParts(character);
 			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(character);
 			if (enemyComponent.getAiStatus() != IDLE) {
 				enemyComponent.setAiStatus(IDLE);
 			}
 			character.remove(SimpleDecalComponent.class);
 		}
+	}
+
+	private void createSmoke(Entity character) {
+		MapGraph map = getSystemsCommonData().getMap();
+		MapGraphNode node = map.getNode(ComponentsMapper.characterDecal.get(character).getDecal().getPosition());
+		Vector3 centerPosition = node.getCenterPosition(auxVector3_1.add(0F, SMOKE_HEIGHT_BIAS, 0F));
+		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
+				.addParticleEffectComponent(smokeEffect, centerPosition)
+				.finishAndAddToEngine();
 	}
 
 	private void initializePathPlanRequest(MapGraphNode destinationNode,
@@ -473,6 +526,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	public void initializeData( ) {
 		iconAttack = new TextureRegion(getAssetsManager().getTexture(UiTextures.ICON_ATTACK));
 		iconSearching = new TextureRegion(getAssetsManager().getTexture(UiTextures.ICON_LOOKING_FOR));
+		smokeEffect = getAssetsManager().getParticleEffect(Assets.ParticleEffects.SMOKE);
 	}
 
 	@Override

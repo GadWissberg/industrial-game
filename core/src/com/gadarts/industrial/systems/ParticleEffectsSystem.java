@@ -31,8 +31,7 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 	private static final Vector3 auxVector_3 = new Vector3();
 	public static final int BULLET_JACKET_TIME_TO_LEAVE = 5000;
 	public static final float FLYING_PART_ROTATION_STEP = 64F;
-	public static final float FLYING_PARTICLE_DECELERATION = 0.9F;
-	public static final float GRAVITY_COEFF = 0.05F;
+	public static final float GRAVITY_COEFF = 1.05F;
 	private final ArrayList<Entity> particleEntitiesToRemove = new ArrayList<>();
 	private final ArrayList<ParticleEffect> particleEffectsToFollow = new ArrayList<>();
 	private PointSpriteParticleBatch pointSpriteBatch;
@@ -99,7 +98,7 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 		}
 	}
 
-	private void handleCompletedParticleEffects() {
+	private void handleCompletedParticleEffects( ) {
 		particleEntitiesToRemove.clear();
 		addCompleteToRemove();
 		removeParticleEffectsMarkedToBeRemoved();
@@ -180,11 +179,13 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 	private void takeStepForFlyingParticle(Entity flyingParticle,
 										   GameModelInstance modelInstance) {
 		FlyingParticleComponent flyingParticleComponent = ComponentsMapper.flyingParticles.get(flyingParticle);
-		Vector3 step = flyingParticleComponent.getFlyAwayVelocity(auxVector_2);
+		Vector3 step = flyingParticleComponent.getFlyAwayForce(auxVector_2);
 		modelInstance.transform.trn(auxVector_3.set(step));
-		step.scl(FLYING_PARTICLE_DECELERATION);
-		flyingParticleComponent.setFlyAwayVelocity(step);
-		modelInstance.transform.trn(auxVector_1.set(Vector3.Y).scl(-GRAVITY_COEFF));
+		step.scl(flyingParticleComponent.getDeceleration());
+		flyingParticleComponent.setFlyAwayForce(step);
+		Vector3 gravityForce = flyingParticleComponent.getGravityForce(auxVector_2);
+		modelInstance.transform.trn(gravityForce);
+		flyingParticleComponent.setGravityForce(gravityForce.scl(GRAVITY_COEFF));
 	}
 
 	@Override

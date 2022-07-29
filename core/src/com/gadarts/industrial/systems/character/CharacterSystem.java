@@ -15,6 +15,7 @@ import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.animation.AnimationComponent;
 import com.gadarts.industrial.components.character.*;
+import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.map.MapGraph;
@@ -23,7 +24,6 @@ import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
-import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -135,29 +135,21 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		}
 	}
 
-	private void applyDamageToCharacter(final Entity attacked, final int damage) {
+	private void applyDamageToCharacter(Entity attacked,
+										int damage,
+										ModelInstanceComponent bulletModelInstanceComponent) {
 		CharacterComponent characterComponent = character.get(attacked);
 		characterComponent.dealDamage(damage);
 		handleDeath(attacked);
-		Vector3 pos = ComponentsMapper.characterDecal.get(attacked).getNodePosition(auxVector3_1);
-		float height = calculateSplatterEffectHeight(attacked, pos);
-		addSplatterEffect(auxVector3_1.set(pos.x + 0.5F, height, pos.z + 0.5F));
+		if (ComponentsMapper.player.has(attacked)) {
+			addSplatterEffect(bulletModelInstanceComponent.getModelInstance().transform.getTranslation(auxVector3_1));
+		}
 	}
 
 	private void addSplatterEffect(final Vector3 pos) {
 		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
 				.addParticleEffectComponent(bloodSplatterEffect, pos)
 				.finishAndAddToEngine();
-	}
-
-	private float calculateSplatterEffectHeight(final Entity attacked, final Vector3 pos) {
-		float height = pos.y;
-		if (ComponentsMapper.enemy.has(attacked)) {
-			height += ComponentsMapper.enemy.get(attacked).getEnemyDefinition().getHeight() / 2F;
-		} else if (ComponentsMapper.player.has(attacked)) {
-			height += PlayerComponent.PLAYER_HEIGHT;
-		}
-		return height;
 	}
 
 	private void handleDeath(final Entity character) {
@@ -363,13 +355,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		onCharacterAppliedCommand(command, getSystemsCommonData().getPlayer());
 	}
 
-	@Override
-	public void onHitScanCollisionWithAnotherEntity(WeaponsDefinitions definition, Entity collidable) {
-		if (character.has(collidable)) {
-			applyDamageToCharacter(collidable, definition.getDamage());
-		}
-	}
-
 	private void onCharacterAppliedCommand(CharacterCommandContext command, Entity character) {
 		auxCommand.init(command);
 		applyCommand(auxCommand, character);
@@ -388,7 +373,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	@Override
 	public void onProjectileCollisionWithAnotherEntity(final Entity bullet, final Entity collidable) {
 		if (character.has(collidable)) {
-			applyDamageToCharacter(collidable, ComponentsMapper.bullet.get(bullet).getDamage());
+			ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(bullet);
+			applyDamageToCharacter(collidable, ComponentsMapper.bullet.get(bullet).getDamage(), modelInstanceComponent);
 		}
 	}
 

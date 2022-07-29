@@ -320,8 +320,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		List<Entity> nearbyCharacters = ComponentsMapper.floor.get(entity).getNearbyCharacters();
 		nearbyCharacters.clear();
 		for (Entity character : characterDecalsEntities) {
-			if (ComponentsMapper.character.get(character).getSkills().getHealthData().getHp() <= 0) continue;
-
 			Vector3 position = characterDecal.get(character).getDecal().getPosition();
 			auxCircle.set(position.x, position.z, CharacterComponent.CHAR_RAD * 3F);
 			Vector3 floorPos = modelInstance.get(entity).getModelInstance().transform.getTranslation(auxVector3_1);

@@ -10,10 +10,10 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Pool;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.BulletComponent;
 import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.FlyingParticleComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.collision.CollisionComponent;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
@@ -28,12 +28,10 @@ import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
+import com.gadarts.industrial.systems.ModelInstancePools;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.utils.EntityBuilder;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> implements CharacterSystemEventsSubscriber {
 	private static final Vector2 auxVector2_1 = new Vector2();
@@ -43,7 +41,10 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 	private final static float PROJ_LIGHT_RADIUS = 1F;
 	private final static Color PROJ_LIGHT_COLOR = Color.valueOf("#8396FF");
 	private static final float BULLET_ENGAGE_LIGHT_DURATION = 0.1F;
-	private final Map<Assets.Models, Pool<GameModelInstance>> pooledModelInstances = new HashMap<>();
+	private static final float JACKET_FLY_AWAY_STRENGTH = 0.1F;
+	private static final float JACKET_FLY_AWAY_MIN_DEGREE = 45F;
+	private static final float JACKET_FLY_AWAY_MAX_DEGREE_TO_ADD = 90F;
+	private static final float JACKET_FLY_AWAY_DEC = 0.9F;
 	private ImmutableArray<Entity> bullets;
 	private ImmutableArray<Entity> collidables;
 
@@ -88,10 +89,10 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 		charPos.y += characterHeight / 2F;
 		Integer damagePoints = weaponDefinition.getDamage();
 		GameAssetsManager assetsManager = getAssetsManager();
-		ParticleEffect effect = assetsManager.getParticleEffect(Assets.ParticleEffects.ENERGY_BALL_TRAIL);
 		Assets.Models modelDefinition = weaponDefinition.getModelDefinition();
-		createPoolForModelInstanceIfNotExists(assetsManager, modelDefinition);
-		GameModelInstance modelInstance = pooledModelInstances.get(modelDefinition).obtain();
+		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		ModelInstancePools pooledModelInstances = systemsCommonData.getPooledModelInstances();
+		GameModelInstance modelInstance = pooledModelInstances.obtain(assetsManager, modelDefinition);
 		modelInstance.transform.setToTranslation(charPos);
 		modelInstance.transform.rotate(Vector3.Y, -auxVector2_1.set(direction.x, direction.z).nor().angleDeg());
 		EntityBuilder builder = EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
@@ -100,7 +101,7 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 		if (weaponDefinition.isEmitsLight()) {
 			builder.addShadowlessLightComponent(charPos, PROJ_LIGHT_INTENSITY, PROJ_LIGHT_RADIUS, PROJ_LIGHT_COLOR);
 		}
-		Entity bullet = builder.finishAndAddToEngine();
+		builder.finishAndAddToEngine();
 
 		if (weaponDefinition.isLightOnCreation()) {
 			EntityBuilder.beginBuildingEntity((PooledEngine) getEngine()).addShadowlessLightComponent(
@@ -113,14 +114,17 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 
 		Assets.Models bulletJacket = weaponDefinition.getBulletJacket();
 		if (bulletJacket != null) {
-			createPoolForModelInstanceIfNotExists(assetsManager, bulletJacket);
 			Vector3 nodePosition = ComponentsMapper.characterDecal.get(character).getNodePosition(auxVector3_1);
-			MapGraphNode currentNode = getSystemsCommonData().getMap().getNode(nodePosition);
-			GameModelInstance jacketGameModelInstance = pooledModelInstances.get(bulletJacket).obtain();
+			MapGraphNode currentNode = systemsCommonData.getMap().getNode(nodePosition);
+			GameModelInstance jacketGameModelInstance = pooledModelInstances.obtain(assetsManager, bulletJacket);
 			jacketGameModelInstance.transform.setToTranslation(charPos).rotate(Vector3.Y, MathUtils.random(360F));
 			EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
 					.addModelInstanceComponent(jacketGameModelInstance)
-					.addFlyingParticleComponent(currentNode.getHeight())
+					.addFlyingParticleComponent(
+							currentNode.getHeight(),
+							JACKET_FLY_AWAY_STRENGTH,
+							JACKET_FLY_AWAY_DEC,
+							JACKET_FLY_AWAY_MIN_DEGREE, JACKET_FLY_AWAY_MAX_DEGREE_TO_ADD)
 					.finishAndAddToEngine();
 		}
 
@@ -129,16 +133,6 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 //				.finishAndAddToEngine();
 	}
 
-	private void createPoolForModelInstanceIfNotExists(GameAssetsManager assetsManager, Assets.Models modelDefinition) {
-		if (!pooledModelInstances.containsKey(modelDefinition)) {
-			pooledModelInstances.put(modelDefinition, new Pool<>() {
-				@Override
-				protected GameModelInstance newObject( ) {
-					return new GameModelInstance(assetsManager.getModel(modelDefinition));
-				}
-			});
-		}
-	}
 
 	@Override
 	public void addedToEngine(Engine engine) {

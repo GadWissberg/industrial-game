@@ -372,10 +372,14 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addFlyingParticleComponent(float nodeHeight) {
+	public EntityBuilder addFlyingParticleComponent(float nodeHeight,
+													float strength,
+													float deceleration,
+													float minimumDegree,
+													float maxDegreeToAdd) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		FlyingParticleComponent component = engine.createComponent(FlyingParticleComponent.class);
-		component.init(nodeHeight);
+		component.init(nodeHeight, strength, deceleration, minimumDegree, maxDegreeToAdd);
 		currentEntity.add(component);
 		return instance;
 	}
