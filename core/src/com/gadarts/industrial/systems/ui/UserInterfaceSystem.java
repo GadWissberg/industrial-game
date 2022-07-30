@@ -32,6 +32,7 @@ import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
+import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
@@ -49,6 +50,7 @@ import java.util.List;
 import static com.badlogic.gdx.Application.LOG_DEBUG;
 import static com.gadarts.industrial.DefaultGameSettings.FULL_SCREEN;
 import static com.gadarts.industrial.Industrial.*;
+import static com.gadarts.industrial.components.ComponentsMapper.character;
 import static com.gadarts.industrial.systems.SystemsCommonData.TABLE_NAME_HUD;
 
 public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSubscriber> implements
@@ -229,7 +231,8 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	public void touchDown(final int screenX, final int screenY, final int button) {
 		if (isTouchDisabled()) return;
 		SystemsCommonData data = getSystemsCommonData();
-		if (button == Input.Buttons.LEFT && data.getCurrentCommandContext() == null) {
+		CharacterCommand command = character.get(getSystemsCommonData().getTurnsQueue().first()).getCommand();
+		if (button == Input.Buttons.LEFT && (command == null || command.isDone()) ) {
 			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(data.getCursor()).getModelInstance();
 			Vector3 cursorPos = modelInstance.transform.getTranslation(auxVector3_2);
 			MapGraphNode node = data.getMap().getNode(cursorPos);

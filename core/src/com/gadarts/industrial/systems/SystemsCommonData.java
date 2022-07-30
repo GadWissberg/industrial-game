@@ -7,7 +7,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Disposable;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.map.MapGraph;
-import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.player.PlayerStorage;
 import com.gadarts.industrial.systems.render.DrawFlags;
 import com.gadarts.industrial.systems.ui.GameStage;
@@ -39,8 +38,6 @@ public class SystemsCommonData implements Disposable {
 	private int numberOfVisible;
 	private GameStage uiStage;
 	private boolean cameraIsRotating;
-	@Getter
-	private CharacterCommand currentCommandContext;
 	private Entity currentHighLightedPickup;
 	private Entity itemToPickup;
 	private long currentTurnId;

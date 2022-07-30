@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -28,7 +29,6 @@ import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
-import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
 import com.gadarts.industrial.systems.projectiles.BulletSystemEventsSubscriber;
@@ -45,7 +45,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		PlayerSystemEventsSubscriber,
 		RenderSystemEventsSubscriber,
 		EnemySystemEventsSubscriber,
-		BulletSystemEventsSubscriber {
+		BulletSystemEventsSubscriber,
+		CharacterSystemEventsSubscriber {
 	private static final int ROTATION_INTERVAL = 125;
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final Vector2 auxVector2_1 = new Vector2();
@@ -93,11 +94,17 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	@SuppressWarnings("JavaDoc")
 	public void applyCommand(final CharacterCommand command,
 							 final Entity character) {
+		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
+		CharacterCommand prevCommand = characterComponent.getCommand();
+		if (prevCommand != null) {
+			prevCommand.free();
+		}
+		characterComponent.setCommand(command);
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		systemsCommonData.setCurrentCommandContext(command);
-		CharacterCommand currentCommand = systemsCommonData.getCurrentCommandContext();
+		Entity currentTurn = getSystemsCommonData().getTurnsQueue().first();
+		CharacterCommand currentCommand = ComponentsMapper.character.get(currentTurn).getCommand();
 		currentCommand.setStarted(false);
-		if (ComponentsMapper.character.get(character).getCharacterSpriteData().getSpriteType() != PAIN) {
+		if (characterComponent.getCharacterSpriteData().getSpriteType() != PAIN) {
 			beginProcessingCommand(character, systemsCommonData, currentCommand);
 		}
 	}
@@ -105,6 +112,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private void beginProcessingCommand(Entity character,
 										SystemsCommonData systemsCommonData,
 										CharacterCommand currentCommand) {
+		currentCommand.setDone(false);
 		currentCommand.setStarted(true);
 		ComponentsMapper.character.get(character).getRotationData().setRotating(true);
 		currentCommand.initialize(
@@ -112,12 +120,13 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 				systemsCommonData,
 				currentCommand.getAdditionalData(),
 				getSubscribers());
+		subscribers.forEach(CharacterSystemEventsSubscriber::onCommandInitialized);
 	}
 
 	@Override
 	public void update(float deltaTime) {
 		super.update(deltaTime);
-		CharacterCommand currentCommand = getSystemsCommonData().getCurrentCommandContext();
+		CharacterCommand currentCommand = character.get(getSystemsCommonData().getTurnsQueue().first()).getCommand();
 		if (currentCommand != null) {
 			handleCurrentCommand(currentCommand);
 		}
@@ -199,22 +208,18 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	private void painDone(Entity character, CharacterSpriteData spriteData) {
 		spriteData.setSpriteType(IDLE);
-		CharacterCommand currentCommand = getSystemsCommonData().getCurrentCommandContext();
+		Entity currentTurn = getSystemsCommonData().getTurnsQueue().first();
+		CharacterCommand currentCommand = ComponentsMapper.character.get(currentTurn).getCommand();
 		if (currentCommand != null && !currentCommand.isStarted()) {
 			applyCommand(currentCommand, character);
 		}
 	}
 
-	@Override
-	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
-		getSystemsCommonData().getCurrentCommandContext().onEnemyAwaken(enemy, prevAiStatus);
-	}
-
 	public void commandDone(final Entity character) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		characterComponent.getCharacterSpriteData().setSpriteType(SpriteType.IDLE);
-		CharacterCommand lastCommand = getSystemsCommonData().getCurrentCommandContext();
-		getSystemsCommonData().setCurrentCommandContext(null);
+		CharacterCommand lastCommand = characterComponent.getCommand();
+		lastCommand.setDone(true);
 		characterComponent.getRotationData().setRotating(false);
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onCharacterCommandDone(character, lastCommand);
@@ -323,6 +328,11 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		}
 	}
 
+	@Override
+	public void onCharacterNodeChanged(Entity entity, MapGraphNode oldNode, MapGraphNode newNode) {
+		character.get(entity).getRotationData().setRotating(true);
+	}
+
 	private Direction calculateDirectionToTarget(final Entity character) {
 		Vector3 pos = auxVector3_1.set(ComponentsMapper.characterDecal.get(character).getDecal().getPosition());
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
@@ -337,7 +347,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private void rotationDone(CharacterRotationData rotationData,
 							  CharacterSpriteData charSpriteData) {
 		rotationData.setRotating(false);
-		charSpriteData.setSpriteType(getSystemsCommonData().getCurrentCommandContext().getDefinition().getSpriteType());
+		CharacterCommand command = character.get(getSystemsCommonData().getTurnsQueue().first()).getCommand();
+		charSpriteData.setSpriteType(command.getDefinition().getSpriteType());
 	}
 
 	@Override
@@ -366,7 +377,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	private void handlePickup(Entity character, TextureAtlas.AtlasRegion newFrame) {
 		if (newFrame.index == 1 && ComponentsMapper.animation.get(character).isDoingReverse()) {
-			CharacterCommand currentCommand = getSystemsCommonData().getCurrentCommandContext();
+			Entity currentTurn = getSystemsCommonData().getTurnsQueue().first();
+			CharacterCommand currentCommand = ComponentsMapper.character.get(currentTurn).getCommand();
 			Entity itemPickedUp = (Entity) currentCommand.getAdditionalData();
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onItemPickedUp(itemPickedUp);
@@ -384,12 +396,14 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	@Override
 	public void onFrameChanged(final Entity character, final float deltaTime, final TextureAtlas.AtlasRegion newFrame) {
-		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		CharacterSpriteData characterSpriteData = characterComponent.getCharacterSpriteData();
+		CharacterSpriteData characterSpriteData = ComponentsMapper.character.get(character).getCharacterSpriteData();
 		CharacterCommandsDefinitions commandDef = onFrameChangedEvents.get(characterSpriteData.getSpriteType());
 		if (commandDef != null) {
 			SystemsCommonData commonData = getSystemsCommonData();
-			if (commonData.getCurrentCommandContext().reactToFrameChange(commonData, character, newFrame, subscribers)) {
+			Entity currentTurn = getSystemsCommonData().getTurnsQueue().first();
+			CharacterComponent characterComp = ComponentsMapper.character.get(currentTurn);
+			CharacterCommand currentCommand = characterComp.getCommand();
+			if (currentCommand.reactToFrameChange(commonData, character, newFrame, subscribers)) {
 				commandDone(character);
 			}
 		}

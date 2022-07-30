@@ -3,6 +3,7 @@ package com.gadarts.industrial.systems.character.commands;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.map.MapGraph;
@@ -35,5 +36,15 @@ public class PickUpCharacterCommand extends CharacterCommand {
 									  TextureAtlas.AtlasRegion newFrame,
 									  List<CharacterSystemEventsSubscriber> subscribers) {
 		return false;
+	}
+
+	@Override
+	public void free( ) {
+		Pools.get(PickUpCharacterCommand.class).free(this);
+	}
+
+	@Override
+	public void reset( ) {
+
 	}
 }

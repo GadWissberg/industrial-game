@@ -49,6 +49,7 @@ import java.util.List;
 import static com.badlogic.gdx.utils.TimeUtils.millis;
 import static com.badlogic.gdx.utils.TimeUtils.timeSinceMillis;
 import static com.gadarts.industrial.DefaultGameSettings.PARALYZED_ENEMIES;
+import static com.gadarts.industrial.components.ComponentsMapper.player;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.HEIGHT_DIFF;
 import static com.gadarts.industrial.shared.assets.Assets.Sounds;
@@ -133,13 +134,13 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			engagePrimaryAttack(enemy, enemyDefinition);
 		} else {
 			enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
-			enemyFinishedTurn();
+			invokeEnemyTurn(enemy);
 		}
 	}
 
 	@Override
 	public void onCharacterCommandDone(final Entity character, final CharacterCommand executedCommand) {
-		if (ComponentsMapper.enemy.has(character)) {
+		if (ComponentsMapper.enemy.has(character) && executedCommand.isNewTurnOnCompletion()) {
 			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(character);
 			long currentTurnId = getSystemsCommonData().getCurrentTurnId();
 			if (executedCommand != null && executedCommand.getDefinition() == CharacterCommandsDefinitions.ATTACK_PRIMARY) {
@@ -209,7 +210,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	private void addAsPossibleNodeToLookIn(final MapGraphNode enemyNode, final MapGraphNode node, Entity enemy) {
 		initializePathPlanRequest(enemyNode, node, CLEAN, true, enemy);
-		if (GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic())) {
+		if (GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic(), 2)) {
 			if (!auxNodesList.contains(node)) {
 				auxNodesList.add(node);
 			}
@@ -348,7 +349,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 							  MapGraphNode destinationNode,
 							  Object additionalData) {
 		CharacterCommand command = Pools.get(commandDefinition.getCharacterCommandImplementation()).obtain();
-		command.init(commandDefinition, enemy, additionalData, destinationNode);
+		command.set(commandDefinition, enemy, additionalData, destinationNode);
 		subscribers.forEach(sub -> sub.onEnemyAppliedCommand(command, enemy));
 	}
 
@@ -359,23 +360,24 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		} else {
 			MapGraphNode targetLastVisibleNode = enemyComponent.getTargetLastVisibleNode();
 			updateStatusIcon(enemy, iconSearching);
-			if (targetLastVisibleNode != null) {
-				goAttackAtTheLastVisibleNodeOfTarget(enemy, targetLastVisibleNode);
+			if (targetLastVisibleNode == null) {
+				applySearchingModeOnEnemy(enemy);
 			}
+			goAttackAtTheLastVisibleNodeOfTarget(enemy);
 		}
 	}
 
-	private void goAttackAtTheLastVisibleNodeOfTarget(Entity enemy,
-													  MapGraphNode targetLastVisibleNode) {
+	private void goAttackAtTheLastVisibleNodeOfTarget(Entity enemy) {
 		CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(enemy);
 		MapGraphNode enemyNode = getSystemsCommonData().getMap().getNode(charDecalComp.getNodePosition(auxVector2_1));
+		MapGraphNode targetLastVisibleNode = ComponentsMapper.enemy.get(enemy).getTargetLastVisibleNode();
 		if (enemyNode.equals(targetLastVisibleNode)) {
 			applySearchingModeOnEnemy(enemy);
 		}
 
 		MapGraphNode updatedLastVisibleNode = ComponentsMapper.enemy.get(enemy).getTargetLastVisibleNode();
 		initializePathPlanRequest(updatedLastVisibleNode, charDecalComp, CLEAN, enemy);
-		if (updatedLastVisibleNode != null && GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic())) {
+		if (updatedLastVisibleNode != null && GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic(), 2)) {
 			MapGraphPath currentPath = pathPlanner.getCurrentPath();
 			applyCommand(enemy, CharacterCommandsDefinitions.RUN, updatedLastVisibleNode, currentPath);
 		} else {
@@ -387,7 +389,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 											CharacterDecalComponent characterDecalComp,
 											MapGraphNode targetLastVisibleNode) {
 		initializePathPlanRequest(targetLastVisibleNode, characterDecalComp, HEIGHT_DIFF, enemy);
-		GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic());
+		GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic(), 2);
 	}
 
 	@Override
@@ -470,6 +472,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			}
 		} else if (ComponentsMapper.enemy.has(entity)) {
 			awakeEnemyIfTargetSpotted(entity);
+			subscribers.forEach(s -> s.onEnemyFinishedTurn());
 		}
 	}
 

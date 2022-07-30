@@ -3,6 +3,7 @@ package com.gadarts.industrial.systems.turns;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.GameLifeCycleHandler;
+import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -65,9 +66,11 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 	}
 
 	private void startNewTurn(boolean pushToLast) {
+		Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
+		if (turnsQueue.size == 1) return;
+
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		systemsCommonData.setCurrentTurnId(systemsCommonData.getCurrentTurnId() + 1);
-		Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
 		Entity removeFirst = turnsQueue.removeFirst();
 		if (pushToLast) {
 			turnsQueue.addLast(removeFirst);

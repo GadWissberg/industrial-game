@@ -6,12 +6,11 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.player.Weapon;
-import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.map.CalculatePathRequest;
 import com.gadarts.industrial.map.GameHeuristic;
 import com.gadarts.industrial.map.GamePathFinder;
 import com.gadarts.industrial.map.MapGraphPath;
+import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.google.gson.JsonObject;
 
@@ -88,11 +87,24 @@ public class GameUtils {
 		return result;
 	}
 
-	public static boolean calculatePath(CalculatePathRequest request, GamePathFinder pathFinder, GameHeuristic heuristic) {
+	public static boolean calculatePath(CalculatePathRequest request,
+										GamePathFinder pathFinder,
+										GameHeuristic heuristic) {
+		return calculatePath(request, pathFinder, heuristic, 0);
+	}
+
+	public static boolean calculatePath(CalculatePathRequest request,
+										GamePathFinder pathFinder,
+										GameHeuristic heuristic,
+										int maxNumberOfNodes) {
 		MapGraphPath outputPath = request.getOutputPath();
 		outputPath.clear();
 		pathFinder.searchNodePathBeforeCommand(heuristic, request);
-		return outputPath.nodes.size > 1;
+		boolean foundPath = outputPath.nodes.size > 1;
+		if (maxNumberOfNodes > 0 && maxNumberOfNodes < outputPath.nodes.size && foundPath) {
+			outputPath.nodes.removeRange(maxNumberOfNodes, outputPath.nodes.size - 1);
+		}
+		return foundPath;
 	}
 
 	public static Array<GridPoint2> findAllNodesToTarget(final Entity enemy) {

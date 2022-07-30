@@ -11,7 +11,6 @@ public class MapGraphPath extends DefaultGraphPath<MapGraphNode> {
 			result = nodes.get(index + 1);
 		}
 		return result;
-
 	}
 
 	public void set(MapGraphPath path) {

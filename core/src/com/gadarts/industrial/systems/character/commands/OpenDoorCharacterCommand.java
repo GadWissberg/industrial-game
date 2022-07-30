@@ -2,6 +2,7 @@ package com.gadarts.industrial.systems.character.commands;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 
@@ -27,4 +28,13 @@ public class OpenDoorCharacterCommand extends CharacterCommand {
 		return false;
 	}
 
+	@Override
+	public void free( ) {
+		Pools.get(OpenDoorCharacterCommand.class).free(this);
+	}
+
+	@Override
+	public void reset( ) {
+
+	}
 }

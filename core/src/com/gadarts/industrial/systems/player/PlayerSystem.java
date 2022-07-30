@@ -36,6 +36,8 @@ import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
+import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
+import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.AttackNodesHandler;
@@ -55,7 +57,8 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		CharacterSystemEventsSubscriber,
 		RenderSystemEventsSubscriber,
 		AmbSystemEventsSubscriber,
-		TurnsSystemEventsSubscriber {
+		TurnsSystemEventsSubscriber,
+		EnemySystemEventsSubscriber {
 	public static final float LOS_MAX = 24F;
 	public static final int LOS_CHECK_DELTA = 5;
 	private static final Vector2 auxVector2_1 = new Vector2();
@@ -69,6 +72,24 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 						GameAssetsManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
 		super(systemsCommonData, assetsManager, lifeCycleHandler);
+	}
+
+	@Override
+	public void onCommandInitialized( ) {
+		CharacterCommand command = character.get(getSystemsCommonData().getTurnsQueue().first()).getCommand();
+		if (!player.has(command.getCharacter())) return;
+
+		for (Entity entity : getSystemsCommonData().getTurnsQueue()) {
+			if (enemy.has(entity) && enemy.get(entity).getAiStatus() == EnemyAiStatus.ATTACKING) {
+				command.onInFight();
+				return;
+			}
+		}
+	}
+
+	@Override
+	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
+		character.get(getSystemsCommonData().getTurnsQueue().first()).getCommand().onEnemyAwaken(enemy, prevAiStatus);
 	}
 
 	@Override
@@ -90,6 +111,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	public void onCharacterNodeChanged(Entity entity, MapGraphNode oldNode, MapGraphNode newNode) {
 		if (player.has(entity)) {
 			refreshFogOfWar();
+			notifyPlayerFinishedTurn();
 		}
 	}
 
@@ -217,10 +239,14 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	@Override
 	public void onCharacterCommandDone(final Entity character, final CharacterCommand executedCommand) {
-		if (player.has(character)) {
-			for (PlayerSystemEventsSubscriber subscriber : subscribers) {
-				subscriber.onPlayerFinishedTurn();
-			}
+		if (player.has(character) && executedCommand.isNewTurnOnCompletion()) {
+			notifyPlayerFinishedTurn();
+		}
+	}
+
+	private void notifyPlayerFinishedTurn( ) {
+		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
+			subscriber.onPlayerFinishedTurn();
 		}
 	}
 
@@ -287,7 +313,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		charComp.setTarget(targetNode);
 		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
 			CharacterCommand command = Pools.get(ATTACK_PRIMARY.getCharacterCommandImplementation()).obtain();
-			subscriber.onPlayerAppliedCommand(command.init(ATTACK_PRIMARY, player, targetNode, node));
+			subscriber.onPlayerAppliedCommand(command.set(ATTACK_PRIMARY, player, targetNode, node));
 		}
 	}
 
@@ -435,7 +461,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 									MapGraphNode destinationNode) {
 		Entity player = getSystemsCommonData().getPlayer();
 		CharacterCommand command = Pools.get(commandDefinition.getCharacterCommandImplementation()).obtain();
-		command.init(commandDefinition, player, additionalData, destinationNode);
+		command.set(commandDefinition, player, additionalData, destinationNode);
 		subscribers.forEach(sub -> sub.onPlayerAppliedCommand(command));
 	}
 

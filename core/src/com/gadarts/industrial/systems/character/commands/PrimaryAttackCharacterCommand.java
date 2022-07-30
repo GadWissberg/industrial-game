@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
@@ -19,9 +20,14 @@ import com.gadarts.industrial.utils.GameUtils;
 import java.util.List;
 
 public class PrimaryAttackCharacterCommand extends CharacterCommand {
-
 	private final static Vector3 auxVector3_1 = new Vector3();
+
 	private final static Vector3 auxVector3_2 = new Vector3();
+
+	@Override
+	public void reset( ) {
+
+	}
 
 	@Override
 	public void initialize(Entity character,
@@ -45,6 +51,11 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 									  TextureAtlas.AtlasRegion newFrame,
 									  List<CharacterSystemEventsSubscriber> subscribers) {
 		return engagePrimaryAttack(character, newFrame, systemsCommonData, subscribers);
+	}
+
+	@Override
+	public void free( ) {
+		Pools.get(PrimaryAttackCharacterCommand.class).free(this);
 	}
 
 	private Vector3 calculateDirectionToTarget(CharacterComponent characterComp,
@@ -81,6 +92,5 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 		}
 		return false;
 	}
-
 
 }

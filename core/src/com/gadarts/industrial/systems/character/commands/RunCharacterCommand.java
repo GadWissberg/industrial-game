@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.map.MapGraph;
@@ -16,6 +18,7 @@ import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.model.characters.CharacterTypes;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
+import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 
 import java.util.List;
 
@@ -29,9 +32,16 @@ public class RunCharacterCommand extends CharacterCommand {
 	private final static Vector3 auxVector3_1 = new Vector3();
 	private static final float MOVEMENT_EPSILON = 0.02F;
 	private MapGraphPath path;
-
 	private MapGraphNode nextNode;
 	private SystemsCommonData systemsCommonData;
+	private MapGraphNode prevNode;
+
+	@Override
+	public void reset( ) {
+		path = null;
+		nextNode = null;
+		prevNode = null;
+	}
 
 	@Override
 	public void initialize(Entity character,
@@ -39,14 +49,27 @@ public class RunCharacterCommand extends CharacterCommand {
 						   Object additionalData,
 						   List<CharacterSystemEventsSubscriber> subscribers) {
 		systemsCommonData = commonData;
-		path = (MapGraphPath) additionalData;
+		path = ((MapGraphPath) additionalData);
 		Array<MapGraphNode> nodes = path.nodes;
-		nodes.removeIndex(0);
+		prevNode = nodes.removeIndex(0);
 		nextNode = nodes.get(0);
-		int agilityValue = ComponentsMapper.character.get(character).getSkills().getAgility().getValue();
-		if (nodes.size > agilityValue) {
-			nodes.removeRange(agilityValue, nodes.size - 1);
+	}
+
+	@Override
+	public boolean isNewTurnOnCompletion( ) {
+		return false;
+	}
+
+	@Override
+	public void onInFight( ) {
+		if (path.nodes.size > 1) {
+			path.nodes.removeRange(1, path.nodes.size - 1);
 		}
+	}
+
+	@Override
+	public void free( ) {
+		Pools.get(RunCharacterCommand.class).free(this);
 	}
 
 	@Override
@@ -56,6 +79,14 @@ public class RunCharacterCommand extends CharacterCommand {
 									  List<CharacterSystemEventsSubscriber> subscribers) {
 		playStepSound(systemsCommonData, character, newFrame);
 		return applyMovement(systemsCommonData, character, subscribers);
+	}
+
+	@Override
+	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
+		int nextNodeIndex = path.nodes.indexOf(nextNode, true);
+		if (nextNodeIndex < path.nodes.size - 1) {
+			path.nodes.removeRange(nextNodeIndex + 1, path.nodes.size - 1);
+		}
 	}
 
 	private void playStepSound(SystemsCommonData systemsCommonData, Entity character, AtlasRegion newFrame) {
@@ -73,8 +104,8 @@ public class RunCharacterCommand extends CharacterCommand {
 		Vector2 characterPosition = auxVector2_1.set(decal.getX(), decal.getZ());
 		Vector2 nextNodeCenterPosition = nextNode.getCenterPosition(auxVector2_2);
 		boolean done = false;
-		if (nextNode == null || characterPosition.dst2(nextNodeCenterPosition) < MOVEMENT_EPSILON) {
-			done = reachedNodeOfPath(nextNode);
+		if (characterPosition.dst2(nextNodeCenterPosition) < MOVEMENT_EPSILON) {
+			done = reachedNodeOfPath(nextNode, subscribers, character);
 		}
 		if (!done) {
 			takeStep(character, systemsCommonData, subscribers);
@@ -91,7 +122,7 @@ public class RunCharacterCommand extends CharacterCommand {
 		translateCharacter(characterDecalComponent);
 		MapGraphNode newNode = map.getNode(characterDecalComponent.getNodePosition(auxVector2_3));
 		if (currentNode != newNode) {
-			enteredNewNode(entity, currentNode, newNode, subscribers);
+			fixHeightPositionOfDecals(entity, newNode);
 		}
 	}
 
@@ -103,17 +134,13 @@ public class RunCharacterCommand extends CharacterCommand {
 		decal.setPosition(position.x, newNodeHeight + CharacterTypes.BILLBOARD_Y, position.z);
 	}
 
-	private void enteredNewNode(Entity entity,
-								MapGraphNode oldNode,
-								MapGraphNode newNode,
-								List<CharacterSystemEventsSubscriber> subscribers) {
-		fixHeightPositionOfDecals(entity, newNode);
+	private boolean reachedNodeOfPath(MapGraphNode node,
+									  List<CharacterSystemEventsSubscriber> subscribers,
+									  Entity character) {
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onCharacterNodeChanged(entity, oldNode, newNode);
+			subscriber.onCharacterNodeChanged(character, prevNode, nextNode);
 		}
-	}
-
-	private boolean reachedNodeOfPath(MapGraphNode node) {
+		prevNode = nextNode;
 		nextNode = path.getNextOf(nextNode);
 		setDestinationNode(nextNode);
 		return isReachedEndOfPath(systemsCommonData.getMap().findConnection(node, nextNode), systemsCommonData);
@@ -134,5 +161,4 @@ public class RunCharacterCommand extends CharacterCommand {
 		Vector2 velocity = auxVector2_2.sub(auxVector2_1.set(decal.getX(), decal.getZ())).nor().scl(CHAR_STEP_SIZE);
 		decal.translate(auxVector3_1.set(velocity.x, 0, velocity.y));
 	}
-
 }
