@@ -17,7 +17,7 @@ import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
-import com.gadarts.industrial.systems.character.CharacterCommandContext;
+import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
@@ -52,7 +52,7 @@ public class PickupSystem extends GameSystem<SystemEventsSubscriber> implements 
 	}
 
 	@Override
-	public void onPlayerAppliedCommand(CharacterCommandContext command) {
+	public void onPlayerAppliedCommand(CharacterCommand command) {
 
 	}
 

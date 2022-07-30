@@ -16,7 +16,6 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.animation.AnimationComponent;
 import com.gadarts.industrial.components.character.*;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
-import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
@@ -27,7 +26,9 @@ import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
-import com.gadarts.industrial.systems.character.actions.CharacterCommandImplementation;
+import com.gadarts.industrial.systems.character.commands.CharacterCommand;
+import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
+import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
 import com.gadarts.industrial.systems.projectiles.BulletSystemEventsSubscriber;
@@ -50,7 +51,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Vector2 auxVector2_3 = new Vector2();
-	private static final CharacterCommandContext auxCommand = new CharacterCommandContext();
 	private static final long CHARACTER_PAIN_DURATION = 1000;
 	private final Map<SpriteType, CharacterCommandsDefinitions> onFrameChangedEvents = Map.of(
 			RUN, CharacterCommandsDefinitions.RUN,
@@ -91,11 +91,11 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	 * @param character
 	 */
 	@SuppressWarnings("JavaDoc")
-	public void applyCommand(final CharacterCommandContext command,
+	public void applyCommand(final CharacterCommand command,
 							 final Entity character) {
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		systemsCommonData.setCurrentCommand(command);
-		CharacterCommandContext currentCommand = systemsCommonData.getCurrentCommand();
+		systemsCommonData.setCurrentCommandContext(command);
+		CharacterCommand currentCommand = systemsCommonData.getCurrentCommandContext();
 		currentCommand.setStarted(false);
 		if (ComponentsMapper.character.get(character).getCharacterSpriteData().getSpriteType() != PAIN) {
 			beginProcessingCommand(character, systemsCommonData, currentCommand);
@@ -104,10 +104,10 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	private void beginProcessingCommand(Entity character,
 										SystemsCommonData systemsCommonData,
-										CharacterCommandContext currentCommand) {
+										CharacterCommand currentCommand) {
 		currentCommand.setStarted(true);
 		ComponentsMapper.character.get(character).getRotationData().setRotating(true);
-		currentCommand.getDefinition().getCharacterCommandImplementation().initialize(
+		currentCommand.initialize(
 				character,
 				systemsCommonData,
 				currentCommand.getAdditionalData(),
@@ -117,7 +117,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	@Override
 	public void update(float deltaTime) {
 		super.update(deltaTime);
-		CharacterCommandContext currentCommand = getSystemsCommonData().getCurrentCommand();
+		CharacterCommand currentCommand = getSystemsCommonData().getCurrentCommandContext();
 		if (currentCommand != null) {
 			handleCurrentCommand(currentCommand);
 		}
@@ -199,17 +199,22 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	private void painDone(Entity character, CharacterSpriteData spriteData) {
 		spriteData.setSpriteType(IDLE);
-		CharacterCommandContext currentCommand = getSystemsCommonData().getCurrentCommand();
+		CharacterCommand currentCommand = getSystemsCommonData().getCurrentCommandContext();
 		if (currentCommand != null && !currentCommand.isStarted()) {
 			applyCommand(currentCommand, character);
 		}
 	}
 
+	@Override
+	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
+		getSystemsCommonData().getCurrentCommandContext().onEnemyAwaken(enemy, prevAiStatus);
+	}
+
 	public void commandDone(final Entity character) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		characterComponent.getCharacterSpriteData().setSpriteType(SpriteType.IDLE);
-		CharacterCommandContext lastCommand = getSystemsCommonData().getCurrentCommand();
-		getSystemsCommonData().setCurrentCommand(null);
+		CharacterCommand lastCommand = getSystemsCommonData().getCurrentCommandContext();
+		getSystemsCommonData().setCurrentCommandContext(null);
 		characterComponent.getRotationData().setRotating(false);
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onCharacterCommandDone(character, lastCommand);
@@ -270,7 +275,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		animationComponent.setDoingReverse(true);
 	}
 
-	private void handleCurrentCommand(final CharacterCommandContext currentCommand) {
+	private void handleCurrentCommand(final CharacterCommand currentCommand) {
 		CharacterComponent characterComponent = character.get(currentCommand.getCharacter());
 		SpriteType spriteType = characterComponent.getCharacterSpriteData().getSpriteType();
 		if (spriteType == PICKUP || spriteType == ATTACK_PRIMARY) {
@@ -280,7 +285,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		}
 	}
 
-	private Direction calculateDirectionToDestination(CharacterCommandContext currentCommand) {
+	private Direction calculateDirectionToDestination(CharacterCommand currentCommand) {
 		Entity character = currentCommand.getCharacter();
 		Vector3 characterPos = auxVector3_1.set(ComponentsMapper.characterDecal.get(character).getDecal().getPosition());
 		Vector2 destPos = currentCommand.getDestinationNode().getCenterPosition(auxVector2_2);
@@ -289,7 +294,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 
-	private void handleRotation(CharacterCommandContext currentCommand,
+	private void handleRotation(CharacterCommand currentCommand,
 								CharacterComponent charComponent) {
 		if (charComponent.getCharacterSpriteData().getSpriteType() == PAIN) return;
 
@@ -332,7 +337,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private void rotationDone(CharacterRotationData rotationData,
 							  CharacterSpriteData charSpriteData) {
 		rotationData.setRotating(false);
-		charSpriteData.setSpriteType(getSystemsCommonData().getCurrentCommand().getDefinition().getSpriteType());
+		charSpriteData.setSpriteType(getSystemsCommonData().getCurrentCommandContext().getDefinition().getSpriteType());
 	}
 
 	@Override
@@ -346,23 +351,22 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	@Override
-	public void onEnemyAppliedCommand(CharacterCommandContext auxCommand, Entity enemy) {
+	public void onEnemyAppliedCommand(CharacterCommand auxCommand, Entity enemy) {
 		onCharacterAppliedCommand(auxCommand, enemy);
 	}
 
 	@Override
-	public void onPlayerAppliedCommand(CharacterCommandContext command) {
+	public void onPlayerAppliedCommand(CharacterCommand command) {
 		onCharacterAppliedCommand(command, getSystemsCommonData().getPlayer());
 	}
 
-	private void onCharacterAppliedCommand(CharacterCommandContext command, Entity character) {
-		auxCommand.init(command);
-		applyCommand(auxCommand, character);
+	private void onCharacterAppliedCommand(CharacterCommand command, Entity character) {
+		applyCommand(command, character);
 	}
 
 	private void handlePickup(Entity character, TextureAtlas.AtlasRegion newFrame) {
 		if (newFrame.index == 1 && ComponentsMapper.animation.get(character).isDoingReverse()) {
-			CharacterCommandContext currentCommand = getSystemsCommonData().getCurrentCommand();
+			CharacterCommand currentCommand = getSystemsCommonData().getCurrentCommandContext();
 			Entity itemPickedUp = (Entity) currentCommand.getAdditionalData();
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onItemPickedUp(itemPickedUp);
@@ -384,9 +388,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		CharacterSpriteData characterSpriteData = characterComponent.getCharacterSpriteData();
 		CharacterCommandsDefinitions commandDef = onFrameChangedEvents.get(characterSpriteData.getSpriteType());
 		if (commandDef != null) {
-			CharacterCommandImplementation impl = commandDef.getCharacterCommandImplementation();
 			SystemsCommonData commonData = getSystemsCommonData();
-			if (impl.reactToFrameChange(commonData, character, newFrame, subscribers, commonData.getCurrentCommand())) {
+			if (commonData.getCurrentCommandContext().reactToFrameChange(commonData, character, newFrame, subscribers)) {
 				commandDone(character);
 			}
 		}

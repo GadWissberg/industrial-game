@@ -229,7 +229,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	public void touchDown(final int screenX, final int screenY, final int button) {
 		if (isTouchDisabled()) return;
 		SystemsCommonData data = getSystemsCommonData();
-		if (button == Input.Buttons.LEFT && data.getCurrentCommand() == null) {
+		if (button == Input.Buttons.LEFT && data.getCurrentCommandContext() == null) {
 			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(data.getCursor()).getModelInstance();
 			Vector3 cursorPos = modelInstance.transform.getTranslation(auxVector3_2);
 			MapGraphNode node = data.getMap().getNode(cursorPos);

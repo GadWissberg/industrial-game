@@ -3,7 +3,7 @@ package com.gadarts.industrial.systems.player;
 import com.gadarts.industrial.components.player.Item;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.systems.SystemEventsSubscriber;
-import com.gadarts.industrial.systems.character.CharacterCommandContext;
+import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ public interface PlayerSystemEventsSubscriber extends SystemEventsSubscriber {
 
 	}
 
-	default void onPlayerAppliedCommand(CharacterCommandContext command) {
+	default void onPlayerAppliedCommand(CharacterCommand command) {
 
 	}
 

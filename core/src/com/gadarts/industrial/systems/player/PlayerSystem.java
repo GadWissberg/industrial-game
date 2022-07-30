@@ -33,9 +33,9 @@ import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
-import com.gadarts.industrial.systems.character.CharacterCommandContext;
-import com.gadarts.industrial.systems.character.CharacterCommandsDefinitions;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
+import com.gadarts.industrial.systems.character.commands.CharacterCommand;
+import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.AttackNodesHandler;
@@ -47,7 +47,7 @@ import java.util.List;
 import static com.gadarts.industrial.components.ComponentsMapper.*;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.shared.model.characters.Direction.*;
-import static com.gadarts.industrial.systems.character.CharacterCommandsDefinitions.*;
+import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.*;
 import static com.gadarts.industrial.utils.GameUtils.calculatePath;
 
 public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> implements
@@ -62,7 +62,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Vector2 auxVector2_3 = new Vector2();
 	private static final CalculatePathRequest request = new CalculatePathRequest();
-	private static final CharacterCommandContext auxCommand = new CharacterCommandContext();
 	private static final Vector3 auxVector3 = new Vector3();
 	private PathPlanHandler playerPathPlanner;
 
@@ -217,7 +216,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	@Override
-	public void onCharacterCommandDone(final Entity character, final CharacterCommandContext executedCommand) {
+	public void onCharacterCommandDone(final Entity character, final CharacterCommand executedCommand) {
 		if (player.has(character)) {
 			for (PlayerSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onPlayerFinishedTurn();
@@ -243,17 +242,17 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	private void applyPlayerTurn(final MapGraphNode cursorNode, AttackNodesHandler attackNodesHandler) {
 		MapGraphPath currentPath = playerPathPlanner.getCurrentPath();
+		planPath(cursorNode, attackNodesHandler);
 		int pathSize = currentPath.getCount();
 		if (!currentPath.nodes.isEmpty() && currentPath.get(pathSize - 1).equals(cursorNode)) {
 			applyPlayerCommandAccordingToPlan(cursorNode, attackNodesHandler);
-		} else {
-			planPath(cursorNode, attackNodesHandler);
 		}
 	}
 
 	private void planPath(final MapGraphNode cursorNode, AttackNodesHandler attackNodesHandler) {
 		Entity enemyAtNode = getSystemsCommonData().getMap().fetchAliveEnemyFromNode(cursorNode);
 		if (!calculatePathAccordingToSelection(cursorNode, enemyAtNode)) return;
+
 		MapGraphNode selectedAttackNode = attackNodesHandler.getSelectedAttackNode();
 		SystemsCommonData commonData = getSystemsCommonData();
 		Entity highLightedPickup = commonData.getCurrentHighLightedPickup();
@@ -287,7 +286,8 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		Entity targetNode = getSystemsCommonData().getMap().fetchAliveEnemyFromNode(node);
 		charComp.setTarget(targetNode);
 		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onPlayerAppliedCommand(auxCommand.init(ATTACK_PRIMARY, player, targetNode, node));
+			CharacterCommand command = Pools.get(ATTACK_PRIMARY.getCharacterCommandImplementation()).obtain();
+			subscriber.onPlayerAppliedCommand(command.init(ATTACK_PRIMARY, player, targetNode, node));
 		}
 	}
 
@@ -305,8 +305,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onPlayerPathCreated(destination);
 		}
-		Entity player = getSystemsCommonData().getPlayer();
-		playerPathPlanner.displayPathPlan(character.get(player).getSkills().getAgility());
 	}
 
 	public boolean calculatePathToCharacter(MapGraphNode sourceNode,
@@ -432,12 +430,13 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		return map.getNode(pickupPosition).equals(playerNode);
 	}
 
-	private void applyPlayerCommand(CharacterCommandsDefinitions CommandDefinition,
+	private void applyPlayerCommand(CharacterCommandsDefinitions commandDefinition,
 									Object additionalData,
 									MapGraphNode destinationNode) {
 		Entity player = getSystemsCommonData().getPlayer();
-		auxCommand.init(CommandDefinition, player, additionalData, destinationNode);
-		subscribers.forEach(sub -> sub.onPlayerAppliedCommand(auxCommand));
+		CharacterCommand command = Pools.get(commandDefinition.getCharacterCommandImplementation()).obtain();
+		command.init(commandDefinition, player, additionalData, destinationNode);
+		subscribers.forEach(sub -> sub.onPlayerAppliedCommand(command));
 	}
 
 	private void applyGoToCommand(final MapGraphPath path) {

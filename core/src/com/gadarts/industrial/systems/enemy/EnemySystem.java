@@ -14,9 +14,9 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.FlyingParticleComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.character.CharacterHealthData;
@@ -34,8 +34,8 @@ import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.ModelInstancePools;
 import com.gadarts.industrial.systems.SystemsCommonData;
-import com.gadarts.industrial.systems.character.CharacterCommandContext;
-import com.gadarts.industrial.systems.character.CharacterCommandsDefinitions;
+import com.gadarts.industrial.systems.character.commands.CharacterCommand;
+import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
@@ -68,7 +68,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private static final float MAX_SIGHT = 11;
 	private static final CalculatePathRequest request = new CalculatePathRequest();
 	private static final List<MapGraphNode> auxNodesList = new ArrayList<>();
-	private static final CharacterCommandContext auxCommand = new CharacterCommandContext();
 	private static final int NUMBER_OF_SKILL_FLOWER_LEAF = 8;
 	private static final float METAL_PART_FLY_AWAY_STRENGTH = 0.2F;
 	private static final float METAL_PART_FLY_AWAY_MIN_DEGREE = -45F;
@@ -139,7 +138,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	@Override
-	public void onCharacterCommandDone(final Entity character, final CharacterCommandContext executedCommand) {
+	public void onCharacterCommandDone(final Entity character, final CharacterCommand executedCommand) {
 		if (ComponentsMapper.enemy.has(character)) {
 			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(character);
 			long currentTurnId = getSystemsCommonData().getCurrentTurnId();
@@ -348,8 +347,9 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 							  CharacterCommandsDefinitions commandDefinition,
 							  MapGraphNode destinationNode,
 							  Object additionalData) {
-		auxCommand.init(commandDefinition, enemy, additionalData, destinationNode);
-		subscribers.forEach(sub -> sub.onEnemyAppliedCommand(auxCommand, enemy));
+		CharacterCommand command = Pools.get(commandDefinition.getCharacterCommandImplementation()).obtain();
+		command.init(commandDefinition, enemy, additionalData, destinationNode);
+		subscribers.forEach(sub -> sub.onEnemyAppliedCommand(command, enemy));
 	}
 
 	private void invokeEnemyTurn(final Entity enemy) {

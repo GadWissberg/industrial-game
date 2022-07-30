@@ -1,4 +1,4 @@
-package com.gadarts.industrial.systems.character.actions;
+package com.gadarts.industrial.systems.character.commands;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
@@ -15,21 +15,21 @@ import com.gadarts.industrial.map.MapGraphPath;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.model.characters.CharacterTypes;
 import com.gadarts.industrial.systems.SystemsCommonData;
-import com.gadarts.industrial.systems.character.CharacterCommandContext;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 
 import java.util.List;
 
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
-import static com.gadarts.industrial.utils.GameUtils.EPSILON;
 
-public class RunCharacterCommand implements CharacterCommandImplementation {
+public class RunCharacterCommand extends CharacterCommand {
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Vector2 auxVector2_3 = new Vector2();
 	private static final float CHAR_STEP_SIZE = 0.22f;
 	private final static Vector3 auxVector3_1 = new Vector3();
+	private static final float MOVEMENT_EPSILON = 0.02F;
 	private MapGraphPath path;
+
 	private MapGraphNode nextNode;
 	private SystemsCommonData systemsCommonData;
 
@@ -49,6 +49,15 @@ public class RunCharacterCommand implements CharacterCommandImplementation {
 		}
 	}
 
+	@Override
+	public boolean reactToFrameChange(SystemsCommonData systemsCommonData,
+									  Entity character,
+									  AtlasRegion newFrame,
+									  List<CharacterSystemEventsSubscriber> subscribers) {
+		playStepSound(systemsCommonData, character, newFrame);
+		return applyMovement(systemsCommonData, character, subscribers);
+	}
+
 	private void playStepSound(SystemsCommonData systemsCommonData, Entity character, AtlasRegion newFrame) {
 		if (newFrame.index == 0 || newFrame.index == 5) {
 			Assets.Sounds stepSound = ComponentsMapper.character.get(character).getSoundData().getStepSound();
@@ -56,29 +65,21 @@ public class RunCharacterCommand implements CharacterCommandImplementation {
 		}
 	}
 
-	@Override
-	public boolean reactToFrameChange(SystemsCommonData systemsCommonData,
-									  Entity character,
-									  AtlasRegion newFrame,
-									  List<CharacterSystemEventsSubscriber> subscribers,
-									  CharacterCommandContext commandContext) {
-		playStepSound(systemsCommonData, character, newFrame);
-		return applyMovement(systemsCommonData, character, subscribers, commandContext);
-	}
 
 	private boolean applyMovement(SystemsCommonData systemsCommonData,
 								  Entity character,
-								  List<CharacterSystemEventsSubscriber> subscribers,
-								  CharacterCommandContext commandContext) {
+								  List<CharacterSystemEventsSubscriber> subscribers) {
 		Decal decal = ComponentsMapper.characterDecal.get(character).getDecal();
 		Vector2 characterPosition = auxVector2_1.set(decal.getX(), decal.getZ());
 		Vector2 nextNodeCenterPosition = nextNode.getCenterPosition(auxVector2_2);
-		if (nextNode == null || characterPosition.dst2(nextNodeCenterPosition) < EPSILON) {
-			return reachedNodeOfPath(character, nextNode, subscribers, commandContext);
-		} else {
-			takeStep(character, systemsCommonData, subscribers);
-			return false;
+		boolean done = false;
+		if (nextNode == null || characterPosition.dst2(nextNodeCenterPosition) < MOVEMENT_EPSILON) {
+			done = reachedNodeOfPath(nextNode);
 		}
+		if (!done) {
+			takeStep(character, systemsCommonData, subscribers);
+		}
+		return done;
 	}
 
 	private void takeStep(Entity entity,
@@ -112,19 +113,10 @@ public class RunCharacterCommand implements CharacterCommandImplementation {
 		}
 	}
 
-	private boolean reachedNodeOfPath(Entity character,
-									  MapGraphNode node,
-									  List<CharacterSystemEventsSubscriber> subscribers,
-									  CharacterCommandContext commandContext) {
+	private boolean reachedNodeOfPath(MapGraphNode node) {
 		nextNode = path.getNextOf(nextNode);
-		commandContext.setDestinationNode(nextNode);
-		if (isReachedEndOfPath(systemsCommonData.getMap().findConnection(node, nextNode), systemsCommonData)) {
-			return true;
-		} else {
-			ComponentsMapper.character.get(character).getRotationData().setRotating(true);
-			takeStep(character, systemsCommonData, subscribers);
-			return false;
-		}
+		setDestinationNode(nextNode);
+		return isReachedEndOfPath(systemsCommonData.getMap().findConnection(node, nextNode), systemsCommonData);
 	}
 
 	private boolean isReachedEndOfPath(MapGraphConnection connection,

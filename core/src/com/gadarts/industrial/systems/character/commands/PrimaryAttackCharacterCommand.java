@@ -1,4 +1,4 @@
-package com.gadarts.industrial.systems.character.actions;
+package com.gadarts.industrial.systems.character.commands;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -13,13 +13,12 @@ import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.SystemsCommonData;
-import com.gadarts.industrial.systems.character.CharacterCommandContext;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.List;
 
-public class PrimaryAttackCharacterCommand implements CharacterCommandImplementation {
+public class PrimaryAttackCharacterCommand extends CharacterCommand {
 
 	private final static Vector3 auxVector3_1 = new Vector3();
 	private final static Vector3 auxVector3_2 = new Vector3();
@@ -38,6 +37,14 @@ public class PrimaryAttackCharacterCommand implements CharacterCommandImplementa
 		WeaponsDefinitions primary = charComp.getPrimaryAttack();
 		int bulletsToShoot = MathUtils.random(primary.getMinNumberOfBullets(), primary.getMaxNumberOfBullets());
 		charComp.getOnGoingAttack().initialize(CharacterComponent.AttackType.PRIMARY, bulletsToShoot);
+	}
+
+	@Override
+	public boolean reactToFrameChange(SystemsCommonData systemsCommonData,
+									  Entity character,
+									  TextureAtlas.AtlasRegion newFrame,
+									  List<CharacterSystemEventsSubscriber> subscribers) {
+		return engagePrimaryAttack(character, newFrame, systemsCommonData, subscribers);
 	}
 
 	private Vector3 calculateDirectionToTarget(CharacterComponent characterComp,
@@ -75,12 +82,5 @@ public class PrimaryAttackCharacterCommand implements CharacterCommandImplementa
 		return false;
 	}
 
-	@Override
-	public boolean reactToFrameChange(SystemsCommonData systemsCommonData,
-									  Entity character,
-									  TextureAtlas.AtlasRegion newFrame,
-									  List<CharacterSystemEventsSubscriber> subscribers,
-									  CharacterCommandContext commandContext) {
-		return engagePrimaryAttack(character, newFrame, systemsCommonData, subscribers);
-	}
+
 }

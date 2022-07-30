@@ -55,19 +55,6 @@ public class PathPlanHandler {
 		arrowsEntities.forEach(arrow -> ComponentsMapper.simpleDecal.get(arrow).setVisible(false));
 	}
 
-	void displayPathPlan(final Agility agility) {
-		hideAllArrows();
-		IntStream.range(0, Math.min(getCurrentPath().getCount(), agility.getValue())).forEach(i -> {
-			if (i < arrowsEntities.size() && i < currentPath.getCount() - 1) {
-				MapGraphNode n = currentPath.get(i);
-				MapGraphNode next = currentPath.get(i + 1);
-				Vector2 dirVector = auxVector2.set(next.getCol(), next.getRow()).sub(n.getCol(), n.getRow()).nor().scl(0.5f);
-				transformArrowDecal(n, dirVector, ComponentsMapper.simpleDecal.get(arrowsEntities.get(i)).getDecal());
-				ComponentsMapper.simpleDecal.get(arrowsEntities.get(i)).setVisible(true);
-			}
-		});
-	}
-
 	private void transformArrowDecal(final MapGraphNode currentNode, final Vector2 directionVector, final Decal decal) {
 		decal.getRotation().idt();
 		decal.rotateX(90);

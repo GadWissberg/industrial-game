@@ -1,14 +1,13 @@
-package com.gadarts.industrial.systems.character.actions;
+package com.gadarts.industrial.systems.character.commands;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.gadarts.industrial.systems.SystemsCommonData;
-import com.gadarts.industrial.systems.character.CharacterCommandContext;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 
 import java.util.List;
 
-public class OpenDoorCharacterCommand implements CharacterCommandImplementation {
+public class OpenDoorCharacterCommand extends CharacterCommand {
 
 	@Override
 	public void initialize(Entity character,
@@ -24,7 +23,8 @@ public class OpenDoorCharacterCommand implements CharacterCommandImplementation 
 	public boolean reactToFrameChange(SystemsCommonData systemsCommonData,
 									  Entity character,
 									  TextureAtlas.AtlasRegion newFrame,
-									  List<CharacterSystemEventsSubscriber> subscribers, CharacterCommandContext commandContext) {
+									  List<CharacterSystemEventsSubscriber> subscribers) {
 		return false;
 	}
+
 }

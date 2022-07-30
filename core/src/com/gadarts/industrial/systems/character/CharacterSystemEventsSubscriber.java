@@ -4,9 +4,10 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector3;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.systems.SystemEventsSubscriber;
+import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 
 public interface CharacterSystemEventsSubscriber extends SystemEventsSubscriber {
-	default void onCharacterCommandDone(final Entity character, final CharacterCommandContext lastCommand) {
+	default void onCharacterCommandDone(final Entity character, final CharacterCommand lastCommand) {
 
 	}
 

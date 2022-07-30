@@ -1,4 +1,4 @@
-package com.gadarts.industrial.systems.character;
+package com.gadarts.industrial.systems.character.commands;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -7,11 +7,11 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.systems.SystemsCommonData;
-import com.gadarts.industrial.systems.character.actions.CharacterCommandImplementation;
+import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 
 import java.util.List;
 
-public class PickUpCharacterCommand implements CharacterCommandImplementation {
+public class PickUpCharacterCommand extends CharacterCommand {
 
 	private final static Vector2 auxVector2 = new Vector2();
 
@@ -30,7 +30,10 @@ public class PickUpCharacterCommand implements CharacterCommandImplementation {
 	}
 
 	@Override
-	public boolean reactToFrameChange(SystemsCommonData systemsCommonData, Entity character, TextureAtlas.AtlasRegion newFrame, List<CharacterSystemEventsSubscriber> subscribers, CharacterCommandContext commandContext) {
+	public boolean reactToFrameChange(SystemsCommonData systemsCommonData,
+									  Entity character,
+									  TextureAtlas.AtlasRegion newFrame,
+									  List<CharacterSystemEventsSubscriber> subscribers) {
 		return false;
 	}
 }

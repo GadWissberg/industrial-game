@@ -5,12 +5,9 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.Pool;
 import com.gadarts.industrial.SoundPlayer;
-import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.map.MapGraph;
-import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.systems.character.CharacterCommandContext;
+import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.player.PlayerStorage;
 import com.gadarts.industrial.systems.render.DrawFlags;
 import com.gadarts.industrial.systems.ui.GameStage;
@@ -18,9 +15,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Setter
 @Getter
@@ -46,7 +40,7 @@ public class SystemsCommonData implements Disposable {
 	private GameStage uiStage;
 	private boolean cameraIsRotating;
 	@Getter
-	private CharacterCommandContext currentCommand;
+	private CharacterCommand currentCommandContext;
 	private Entity currentHighLightedPickup;
 	private Entity itemToPickup;
 	private long currentTurnId;

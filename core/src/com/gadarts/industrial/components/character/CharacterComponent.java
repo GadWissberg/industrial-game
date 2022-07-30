@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector2;
 import com.gadarts.industrial.components.GameComponent;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
+import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +15,8 @@ public class CharacterComponent implements GameComponent {
 	public final static float CHAR_RAD = 0.3f;
 
 	private static final Vector2 auxVector = new Vector2();
+
+	private CharacterCommand command;
 	private Entity target;
 	private CharacterRotationData rotationData = new CharacterRotationData();
 	private CharacterSpriteData characterSpriteData;
