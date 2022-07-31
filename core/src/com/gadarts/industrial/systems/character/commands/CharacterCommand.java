@@ -18,8 +18,6 @@ public abstract class CharacterCommand implements Pool.Poolable {
 	private Entity character;
 	private Object additionalData;
 	@Setter
-	private boolean done;
-	@Setter
 	private MapGraphNode destinationNode;
 	@Setter
 	private boolean started;

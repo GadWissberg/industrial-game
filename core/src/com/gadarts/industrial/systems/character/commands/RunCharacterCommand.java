@@ -31,14 +31,13 @@ public class RunCharacterCommand extends CharacterCommand {
 	private static final float CHAR_STEP_SIZE = 0.22f;
 	private final static Vector3 auxVector3_1 = new Vector3();
 	private static final float MOVEMENT_EPSILON = 0.02F;
-	private MapGraphPath path;
+	private MapGraphPath path = new MapGraphPath();
 	private MapGraphNode nextNode;
 	private SystemsCommonData systemsCommonData;
 	private MapGraphNode prevNode;
 
 	@Override
 	public void reset( ) {
-		path = null;
 		nextNode = null;
 		prevNode = null;
 	}
@@ -49,7 +48,7 @@ public class RunCharacterCommand extends CharacterCommand {
 						   Object additionalData,
 						   List<CharacterSystemEventsSubscriber> subscribers) {
 		systemsCommonData = commonData;
-		path = ((MapGraphPath) additionalData);
+		path.set((MapGraphPath) additionalData);
 		Array<MapGraphNode> nodes = path.nodes;
 		prevNode = nodes.removeIndex(0);
 		nextNode = nodes.get(0);
@@ -77,12 +76,16 @@ public class RunCharacterCommand extends CharacterCommand {
 									  Entity character,
 									  AtlasRegion newFrame,
 									  List<CharacterSystemEventsSubscriber> subscribers) {
+		if (path == null || path.nodes.isEmpty()) return true;
+
 		playStepSound(systemsCommonData, character, newFrame);
 		return applyMovement(systemsCommonData, character, subscribers);
 	}
 
 	@Override
 	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
+		if (path == null || path.nodes.isEmpty()) return;
+
 		int nextNodeIndex = path.nodes.indexOf(nextNode, true);
 		if (nextNodeIndex < path.nodes.size - 1) {
 			path.nodes.removeRange(nextNodeIndex + 1, path.nodes.size - 1);
@@ -102,9 +105,8 @@ public class RunCharacterCommand extends CharacterCommand {
 								  List<CharacterSystemEventsSubscriber> subscribers) {
 		Decal decal = ComponentsMapper.characterDecal.get(character).getDecal();
 		Vector2 characterPosition = auxVector2_1.set(decal.getX(), decal.getZ());
-		Vector2 nextNodeCenterPosition = nextNode.getCenterPosition(auxVector2_2);
 		boolean done = false;
-		if (characterPosition.dst2(nextNodeCenterPosition) < MOVEMENT_EPSILON) {
+		if (nextNode == null || characterPosition.dst2(nextNode.getCenterPosition(auxVector2_2)) < MOVEMENT_EPSILON) {
 			done = reachedNodeOfPath(nextNode, subscribers, character);
 		}
 		if (!done) {

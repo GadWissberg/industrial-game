@@ -89,7 +89,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	@Override
 	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
-		character.get(getSystemsCommonData().getTurnsQueue().first()).getCommand().onEnemyAwaken(enemy, prevAiStatus);
+		character.get(getSystemsCommonData().getPlayer()).getCommand().onEnemyAwaken(enemy, prevAiStatus);
 	}
 
 	@Override

@@ -472,7 +472,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			}
 		} else if (ComponentsMapper.enemy.has(entity)) {
 			awakeEnemyIfTargetSpotted(entity);
-			subscribers.forEach(s -> s.onEnemyFinishedTurn());
+			subscribers.forEach(EnemySystemEventsSubscriber::onEnemyFinishedTurn);
 		}
 	}
 

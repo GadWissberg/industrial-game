@@ -95,10 +95,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	public void applyCommand(final CharacterCommand command,
 							 final Entity character) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		CharacterCommand prevCommand = characterComponent.getCommand();
-		if (prevCommand != null) {
-			prevCommand.free();
-		}
 		characterComponent.setCommand(command);
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		Entity currentTurn = getSystemsCommonData().getTurnsQueue().first();
@@ -112,7 +108,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private void beginProcessingCommand(Entity character,
 										SystemsCommonData systemsCommonData,
 										CharacterCommand currentCommand) {
-		currentCommand.setDone(false);
 		currentCommand.setStarted(true);
 		ComponentsMapper.character.get(character).getRotationData().setRotating(true);
 		currentCommand.initialize(
@@ -219,10 +214,13 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		characterComponent.getCharacterSpriteData().setSpriteType(SpriteType.IDLE);
 		CharacterCommand lastCommand = characterComponent.getCommand();
-		lastCommand.setDone(true);
 		characterComponent.getRotationData().setRotating(false);
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onCharacterCommandDone(character, lastCommand);
+		}
+		CharacterCommand prevCommand = characterComponent.getCommand();
+		if (prevCommand != null) {
+			prevCommand.free();
 		}
 	}
 
@@ -400,10 +398,10 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		CharacterCommandsDefinitions commandDef = onFrameChangedEvents.get(characterSpriteData.getSpriteType());
 		if (commandDef != null) {
 			SystemsCommonData commonData = getSystemsCommonData();
-			Entity currentTurn = getSystemsCommonData().getTurnsQueue().first();
-			CharacterComponent characterComp = ComponentsMapper.character.get(currentTurn);
+			CharacterComponent characterComp = ComponentsMapper.character.get(character);
 			CharacterCommand currentCommand = characterComp.getCommand();
-			if (currentCommand.reactToFrameChange(commonData, character, newFrame, subscribers)) {
+			Entity turn = commonData.getTurnsQueue().first();
+			if (turn == character && currentCommand.reactToFrameChange(commonData, character, newFrame, subscribers)) {
 				commandDone(character);
 			}
 		}

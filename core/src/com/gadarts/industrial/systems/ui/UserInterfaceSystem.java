@@ -232,7 +232,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		if (isTouchDisabled()) return;
 		SystemsCommonData data = getSystemsCommonData();
 		CharacterCommand command = character.get(getSystemsCommonData().getTurnsQueue().first()).getCommand();
-		if (button == Input.Buttons.LEFT && (command == null || command.isDone()) ) {
+		if (button == Input.Buttons.LEFT ) {
 			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(data.getCursor()).getModelInstance();
 			Vector3 cursorPos = modelInstance.transform.getTranslation(auxVector3_2);
 			MapGraphNode node = data.getMap().getNode(cursorPos);

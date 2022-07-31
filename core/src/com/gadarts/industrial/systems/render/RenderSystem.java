@@ -66,6 +66,7 @@ import static com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import static com.gadarts.industrial.components.ComponentsMapper.*;
 import static com.gadarts.industrial.shared.assets.Assets.Shaders.*;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.ATTACK_PRIMARY;
+import static com.gadarts.industrial.shared.model.characters.SpriteType.RUN;
 import static com.gadarts.industrial.systems.SystemsCommonData.CAMERA_LIGHT_FAR;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -645,7 +646,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		boolean sameSpriteType = spriteType.equals(characterDecal.get(entity).getSpriteType());
 		if ((!sameSpriteType || !characterDecal.get(entity).getDirection().equals(direction))) {
 			updateCharacterDecalSprite(entity, direction, spriteType, sameSpriteType);
-		} else {
+		} else if (spriteType != RUN || getSystemsCommonData().getTurnsQueue().first() == entity) {
 			updateCharacterDecalFrame(deltaTime, entity, charSpriteData, spriteType);
 		}
 	}

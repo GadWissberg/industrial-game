@@ -3,7 +3,6 @@ package com.gadarts.industrial.systems.turns;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.GameLifeCycleHandler;
-import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -18,10 +17,25 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 		EnemySystemEventsSubscriber,
 		AmbSystemEventsSubscriber,
 		CharacterSystemEventsSubscriber {
+	private boolean currentTurnDone;
+
 	public TurnsSystem(SystemsCommonData systemsCommonData,
 					   GameAssetsManager assetsManager,
 					   GameLifeCycleHandler lifeCycleHandler) {
 		super(systemsCommonData, assetsManager, lifeCycleHandler);
+	}
+
+	@Override
+	public void update(float deltaTime) {
+		if (currentTurnDone) {
+			currentTurnDone = false;
+			Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
+			SystemsCommonData systemsCommonData = getSystemsCommonData();
+			systemsCommonData.setCurrentTurnId(systemsCommonData.getCurrentTurnId() + 1);
+			Entity removeFirst = turnsQueue.removeFirst();
+			turnsQueue.addLast(removeFirst);
+			subscribers.forEach(s -> s.onNewTurn(turnsQueue.first()));
+		}
 	}
 
 	@Override
@@ -36,7 +50,7 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 
 	@Override
 	public void onEnemyFinishedTurn( ) {
-		startNewTurn();
+		markCurrentTurnAsDone();
 	}
 
 	@Override
@@ -46,16 +60,12 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 
 	@Override
 	public void onPlayerFinishedTurn( ) {
-		startNewTurn();
+		markCurrentTurnAsDone();
 	}
 
 	@Override
 	public void onDoorClosed(Entity doorEntity) {
-		startNewTurn(false);
-	}
-
-	private void startNewTurn( ) {
-		startNewTurn(true);
+		markCurrentTurnAsDone();
 	}
 
 	@Override
@@ -65,22 +75,13 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 		turnsQueue.addLast(enemy);
 	}
 
-	private void startNewTurn(boolean pushToLast) {
-		Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
-		if (turnsQueue.size == 1) return;
-
-		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		systemsCommonData.setCurrentTurnId(systemsCommonData.getCurrentTurnId() + 1);
-		Entity removeFirst = turnsQueue.removeFirst();
-		if (pushToLast) {
-			turnsQueue.addLast(removeFirst);
-		}
-		subscribers.forEach(s -> s.onNewTurn(turnsQueue.first()));
+	private void markCurrentTurnAsDone( ) {
+		currentTurnDone = true;
 	}
 
 	@Override
 	public void onDoorStayedOpenInTurn(Entity entity) {
-		startNewTurn();
+		markCurrentTurnAsDone();
 	}
 
 	@Override
