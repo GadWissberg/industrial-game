@@ -231,7 +231,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	public void touchDown(final int screenX, final int screenY, final int button) {
 		if (isTouchDisabled()) return;
 		SystemsCommonData data = getSystemsCommonData();
-		CharacterCommand command = character.get(getSystemsCommonData().getTurnsQueue().first()).getCommand();
 		if (button == Input.Buttons.LEFT ) {
 			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(data.getCursor()).getModelInstance();
 			Vector3 cursorPos = modelInstance.transform.getTranslation(auxVector3_2);

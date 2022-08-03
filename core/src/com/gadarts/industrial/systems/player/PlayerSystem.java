@@ -44,6 +44,7 @@ import com.gadarts.industrial.systems.ui.AttackNodesHandler;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
 import com.gadarts.industrial.utils.GameUtils;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import static com.gadarts.industrial.components.ComponentsMapper.*;
@@ -66,6 +67,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private static final Vector2 auxVector2_3 = new Vector2();
 	private static final CalculatePathRequest request = new CalculatePathRequest();
 	private static final Vector3 auxVector3 = new Vector3();
+	private final static LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
 	private PathPlanHandler playerPathPlanner;
 
 	public PlayerSystem(SystemsCommonData systemsCommonData,
@@ -181,7 +183,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		MapGraphNode nearbyNode = map.getNode(node.getCol() + colOffset, node.getRow() + rowOffset);
 		boolean result = true;
 		if (nearbyNode != null && nearbyNode.getEntity() != null) {
-			result = DefaultGameSettings.DISABLE_FOG && modelInstance.get(nearbyNode.getEntity()).getFlatColor() != null;
+			result = !DefaultGameSettings.DISABLE_FOG && modelInstance.get(nearbyNode.getEntity()).getFlatColor() != null;
 		}
 		total |= result ? mask : 0;
 		return total;
@@ -192,7 +194,10 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				.add(auxVector2_3.set(1, 0)
 						.setAngleDeg(dir).nor()
 						.scl(LOS_MAX));
-		Array<GridPoint2> nodes = GameUtils.findAllNodesBetweenNodes(auxVector2_1.set(src.x, src.z), maxSight);
+		LinkedHashSet<GridPoint2> nodes = GameUtils.findAllNodesBetweenNodes(
+				auxVector2_1.set(src.x, src.z),
+				maxSight,
+				bresenhamOutput);
 		boolean blocked = false;
 		for (GridPoint2 nodeCoord : nodes) {
 			blocked = applyLineOfSightOnNode(map, playerNode, blocked, nodeCoord);
@@ -204,7 +209,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		if (currentNode != null && currentNode.getEntity() != null) {
 			FloorComponent floorComponent = floor.get(currentNode.getEntity());
 			ModelInstanceComponent modelInstanceComponent = modelInstance.get(currentNode.getEntity());
-			if (!floorComponent.isRevealCalculated() || modelInstanceComponent.getFlatColor() != null) {
+			if (!floorComponent.isRevealCalculated()) {
 				modelInstanceComponent.setFlatColor(blocked ? Color.BLACK : null);
 				floorComponent.setRevealCalculated(true);
 			}

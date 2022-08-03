@@ -13,7 +13,6 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -34,9 +33,9 @@ import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.ModelInstancePools;
 import com.gadarts.industrial.systems.SystemsCommonData;
+import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
-import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
@@ -44,12 +43,12 @@ import com.gadarts.industrial.utils.EntityBuilder;
 import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import static com.badlogic.gdx.utils.TimeUtils.millis;
 import static com.badlogic.gdx.utils.TimeUtils.timeSinceMillis;
 import static com.gadarts.industrial.DefaultGameSettings.PARALYZED_ENEMIES;
-import static com.gadarts.industrial.components.ComponentsMapper.player;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.HEIGHT_DIFF;
 import static com.gadarts.industrial.shared.assets.Assets.Sounds;
@@ -79,6 +78,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private static final int MAX_METAL_PARTS_TO_SPAWN = 5;
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final float SMOKE_HEIGHT_BIAS = 0.4F;
+	private final static LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
 	private final List<Sounds> ambSounds = List.of(Sounds.AMB_CHAINS, Sounds.AMB_SIGH, Sounds.AMB_LAUGH);
 	private final PathPlanHandler pathPlanner;
 	private ImmutableArray<Entity> enemies;
@@ -143,7 +143,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		if (ComponentsMapper.enemy.has(character) && executedCommand.isNewTurnOnCompletion()) {
 			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(character);
 			long currentTurnId = getSystemsCommonData().getCurrentTurnId();
-			if (executedCommand != null && executedCommand.getDefinition() == CharacterCommandsDefinitions.ATTACK_PRIMARY) {
+			if (executedCommand.getDefinition() == CharacterCommandsDefinitions.ATTACK_PRIMARY) {
 				enemyComponent.getTimeStamps().setLastPrimaryAttack(currentTurnId);
 			}
 			enemyComponent.getTimeStamps().setLastTurn(currentTurnId);
@@ -178,7 +178,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		}
 	}
 
-	private boolean checkIfFloorNodesContainObjects(final Array<GridPoint2> nodes, Entity enemyToCheckFor) {
+	private boolean checkIfFloorNodesContainObjects(LinkedHashSet<GridPoint2> nodes, Entity enemyToCheckFor) {
 		boolean result = false;
 		for (GridPoint2 point : nodes) {
 			if (checkIfNodeContainsObject(enemyToCheckFor, point)) {
@@ -200,7 +200,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private boolean checkIfWayIsClearToTarget(final Entity enemy) {
-		Array<GridPoint2> nodes = GameUtils.findAllNodesToTarget(enemy);
+		LinkedHashSet<GridPoint2> nodes = GameUtils.findAllNodesToTarget(enemy, bresenhamOutput);
 		boolean blocked = checkIfFloorNodesBlockSightToTarget(enemy, nodes);
 		if (!blocked) {
 			blocked = checkIfFloorNodesContainObjects(nodes, enemy);
@@ -411,16 +411,16 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		Vector3 targetPos = ComponentsMapper.characterDecal.get(charComponent.getTarget()).getDecal().getPosition();
 		Vector2 enemyDirection = charComponent.getCharacterSpriteData().getFacingDirection().getDirection(auxVector2_1);
 		float dirToTarget = auxVector2_2.set(targetPos.x, targetPos.z).sub(enemyPos.x, enemyPos.z).nor().angleDeg();
-		float anglediff = (enemyDirection.angleDeg() - dirToTarget + 180 + 360) % 360 - 180;
-		return anglediff <= ENEMY_HALF_FOV_ANGLE && anglediff >= -ENEMY_HALF_FOV_ANGLE;
+		float angleDiff = (enemyDirection.angleDeg() - dirToTarget + 180 + 360) % 360 - 180;
+		return angleDiff <= ENEMY_HALF_FOV_ANGLE && angleDiff >= -ENEMY_HALF_FOV_ANGLE;
 	}
 
 
 	private boolean checkIfFloorNodesBlockSightToTarget(final Entity enemy) {
-		return checkIfFloorNodesBlockSightToTarget(enemy, GameUtils.findAllNodesToTarget(enemy));
+		return checkIfFloorNodesBlockSightToTarget(enemy, GameUtils.findAllNodesToTarget(enemy, bresenhamOutput));
 	}
 
-	private boolean checkIfFloorNodesBlockSightToTarget(final Entity enemy, final Array<GridPoint2> nodes) {
+	private boolean checkIfFloorNodesBlockSightToTarget(Entity enemy, LinkedHashSet<GridPoint2> nodes) {
 		Vector2 pos = ComponentsMapper.characterDecal.get(enemy).getNodePosition(auxVector2_1);
 		for (GridPoint2 n : nodes) {
 			MapGraph map = getSystemsCommonData().getMap();
@@ -482,7 +482,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		if (aiStatus != ATTACKING) {
 			awakeEnemyIfTargetSpotted(enemy);
 		} else if (checkIfFloorNodesBlockSightToTarget(enemy)
-				|| checkIfFloorNodesContainObjects(GameUtils.findAllNodesToTarget(enemy), enemy)) {
+				|| checkIfFloorNodesContainObjects(GameUtils.findAllNodesToTarget(enemy, bresenhamOutput), enemy)) {
 			enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
 			enemyComponent.setTargetLastVisibleNode(oldNode);
 		}

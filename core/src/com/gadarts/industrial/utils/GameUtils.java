@@ -14,6 +14,8 @@ import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.google.gson.JsonObject;
 
+import java.util.LinkedHashSet;
+
 import static com.gadarts.industrial.components.ComponentsMapper.character;
 import static com.gadarts.industrial.components.ComponentsMapper.characterDecal;
 
@@ -107,15 +109,27 @@ public class GameUtils {
 		return foundPath;
 	}
 
-	public static Array<GridPoint2> findAllNodesToTarget(final Entity enemy) {
+	public static LinkedHashSet<GridPoint2> findAllNodesToTarget(Entity enemy, LinkedHashSet<GridPoint2> output) {
+		output.clear();
 		Vector2 pos = characterDecal.get(enemy).getNodePosition(auxVector2_1);
 		Entity target = character.get(enemy).getTarget();
 		Vector2 targetPos = characterDecal.get(target).getNodePosition(auxVector2_2);
-		return findAllNodesBetweenNodes(pos, targetPos);
+		return findAllNodesBetweenNodes(pos, targetPos, output);
 	}
 
-	public static Array<GridPoint2> findAllNodesBetweenNodes(Vector2 source, Vector2 destination) {
-		return bresenham.line((int) source.x, (int) source.y, (int) destination.x, (int) destination.y);
+	public static LinkedHashSet<GridPoint2> findAllNodesBetweenNodes(Vector2 src,
+																	 Vector2 dst,
+																	 LinkedHashSet<GridPoint2> output) {
+		output.clear();
+		Array<GridPoint2> srcToDst = bresenham.line((int) src.x, (int) src.y, (int) dst.x, (int) dst.y);
+		Array<GridPoint2> dstToSrc = bresenham.line((int) dst.x, (int) dst.y, (int) src.x, (int) src.y);
+		for (int i = srcToDst.size - 1; i >= 0; i--) {
+			output.add(srcToDst.get(i));
+		}
+		for (int i = dstToSrc.size - 1; i >= 0; i--) {
+			output.add(dstToSrc.get(i));
+		}
+		return output;
 	}
 
 	public static int getPrimaryAttackHitFrameIndexForCharacter(Entity character, PlayerWeaponsDefinitions selectedWeapon) {
