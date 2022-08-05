@@ -118,19 +118,19 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	private void refreshFogOfWar( ) {
-		if (DefaultGameSettings.DISABLE_FOG) return;
+//		if (DefaultGameSettings.DISABLE_FOG) return;
 
 		MapGraph map = getSystemsCommonData().getMap();
 		Vector3 playerPos = characterDecal.get(getSystemsCommonData().getPlayer()).getNodePosition(auxVector3);
 		MapGraphNode playerNode = map.getNode(playerPos);
-		clearFlatColorForRegionOfNodes(playerNode);
+		clearFlatColorAndFowSignatureForRegionOfNodes(playerNode);
 		for (int dir = 0; dir < 360; dir += LOS_CHECK_DELTA) {
 			revealNodes(map, playerPos, playerNode, dir);
 		}
 		calculateFogOfWarEdgesForFloor(playerNode, map);
 	}
 
-	private void clearFlatColorForRegionOfNodes(MapGraphNode playerNode) {
+	private void clearFlatColorAndFowSignatureForRegionOfNodes(MapGraphNode playerNode) {
 		MapGraph map = getSystemsCommonData().getMap();
 		int playerRow = playerNode.getRow();
 		int playerCol = playerNode.getCol();
@@ -142,6 +142,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				Entity floorEntity = map.getNode(col, row).getEntity();
 				if (floorEntity != null) {
 					floor.get(floorEntity).setRevealCalculated(false);
+					floor.get(floorEntity).setFogOfWarSignature(16);
 				}
 			}
 		}
@@ -157,7 +158,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				MapGraphNode nearbyNode = map.getNode(col, row);
 				if (nearbyNode != null && nearbyNode.getEntity() != null) {
 					if ((row != 0 || col != 0)) {
-						calculateFogOfWarEdges(nearbyNode.getEntity());
+						calculateFogOfWarSignature(nearbyNode.getEntity());
 					} else {
 						int northWest = NORTH.getMask() | WEST.getMask() | NORTH_EAST.getMask() | SOUTH_WEST.getMask();
 						floor.get(nearbyNode.getEntity()).setFogOfWarSignature(northWest);
@@ -167,12 +168,12 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		}
 	}
 
-	private void calculateFogOfWarEdges(Entity entity) {
-		int total = 0;
-		FloorComponent floorComponent = floor.get(entity);
+	private void calculateFogOfWarSignature(Entity floor) {
+		int total = ComponentsMapper.floor.get(floor).getFogOfWarSignature() & 16;
+		FloorComponent floorComponent = ComponentsMapper.floor.get(floor);
 		for (Direction direction : Direction.values()) {
 			Vector2 vector = direction.getDirection(auxVector2_1);
-			total = calculateFogOfWarForNode(entity, total, (int) vector.x, (int) vector.y, direction.getMask());
+			total = calculateFogOfWarForNode(floor, total, (int) vector.x, (int) vector.y, direction.getMask());
 		}
 		floorComponent.setFogOfWarSignature(total);
 	}
@@ -210,7 +211,8 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			FloorComponent floorComponent = floor.get(currentNode.getEntity());
 			ModelInstanceComponent modelInstanceComponent = modelInstance.get(currentNode.getEntity());
 			if (!floorComponent.isRevealCalculated()) {
-				modelInstanceComponent.setFlatColor(blocked ? Color.BLACK : null);
+				modelInstanceComponent.setFlatColor(!DefaultGameSettings.DISABLE_FOG && blocked ? Color.BLACK : null);
+				floorComponent.setFogOfWarSignature(blocked ? 16 : 0);
 				floorComponent.setRevealCalculated(true);
 			}
 			if (!blocked && checkIfNodeBlocks(playerNode, currentNode)) {

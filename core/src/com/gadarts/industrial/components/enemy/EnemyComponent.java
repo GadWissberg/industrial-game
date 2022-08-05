@@ -18,6 +18,7 @@ public class EnemyComponent implements GameComponent {
 	public static final int ROAM_SOUND_INTERVAL_MAXIMUM = 10000;
 
 	private MapGraphNode targetLastVisibleNode;
+	private int engineEnergy;
 	private long nextRoamSound;
 	private Enemies enemyDefinition;
 	private EnemyAiStatus aiStatus;
@@ -34,14 +35,15 @@ public class EnemyComponent implements GameComponent {
 		targetLastVisibleNode = null;
 		aiStatus = EnemyAiStatus.IDLE;
 		iconDisplayInFlowerTimeStamp = 0;
+		engineEnergy = enemyDefinition.getEngine();
 	}
 
 	@Override
-	public void reset() {
+	public void reset( ) {
 
 	}
 
-	public void calculateNextRoamSound() {
+	public void calculateNextRoamSound( ) {
 		nextRoamSound = TimeUtils.millis() + MathUtils.random(ROAM_SOUND_INTERVAL_MINIMUM, ROAM_SOUND_INTERVAL_MAXIMUM);
 	}
 

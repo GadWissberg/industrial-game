@@ -130,7 +130,8 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private void invokeEnemyAttackBehaviour(final Entity enemy) {
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		Enemies enemyDefinition = enemyComponent.getEnemyDefinition();
-		if (checkIfWayIsClearToTarget(enemy)) {
+		int engineConsumption = enemyComponent.getEnemyDefinition().getPrimaryAttack().getEngineConsumption();
+		if (enemyComponent.getEngineEnergy() >= engineConsumption && checkIfWayIsClearToTarget(enemy)) {
 			engagePrimaryAttack(enemy, enemyDefinition);
 		} else {
 			enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
@@ -147,7 +148,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 				enemyComponent.getTimeStamps().setLastPrimaryAttack(currentTurnId);
 			}
 			enemyComponent.getTimeStamps().setLastTurn(currentTurnId);
-			enemyFinishedTurn();
+			enemyFinishedTurn(character);
 		}
 	}
 
@@ -381,7 +382,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			MapGraphPath currentPath = pathPlanner.getCurrentPath();
 			applyCommand(enemy, CharacterCommandsDefinitions.RUN, updatedLastVisibleNode, currentPath);
 		} else {
-			enemyFinishedTurn();
+			enemyFinishedTurn(enemy);
 		}
 	}
 
@@ -399,7 +400,9 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		}
 	}
 
-	private void enemyFinishedTurn( ) {
+	private void enemyFinishedTurn(Entity character) {
+		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
+		enemyComp.setEngineEnergy(Math.min(enemyComp.getEngineEnergy() + 1, enemyComp.getEnemyDefinition().getEngine()));
 		for (EnemySystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onEnemyFinishedTurn();
 		}

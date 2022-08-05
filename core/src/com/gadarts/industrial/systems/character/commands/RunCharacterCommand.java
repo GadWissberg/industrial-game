@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
@@ -30,8 +29,9 @@ public class RunCharacterCommand extends CharacterCommand {
 	private static final Vector2 auxVector2_3 = new Vector2();
 	private static final float CHAR_STEP_SIZE = 0.22f;
 	private final static Vector3 auxVector3_1 = new Vector3();
+	private final static Vector3 auxVector3_2 = new Vector3();
 	private static final float MOVEMENT_EPSILON = 0.02F;
-	private MapGraphPath path = new MapGraphPath();
+	private final MapGraphPath path = new MapGraphPath();
 	private MapGraphNode nextNode;
 	private SystemsCommonData systemsCommonData;
 	private MapGraphNode prevNode;
@@ -76,7 +76,7 @@ public class RunCharacterCommand extends CharacterCommand {
 									  Entity character,
 									  AtlasRegion newFrame,
 									  List<CharacterSystemEventsSubscriber> subscribers) {
-		if (path == null || path.nodes.isEmpty()) return true;
+		if (path.nodes.isEmpty()) return true;
 
 		playStepSound(systemsCommonData, character, newFrame);
 		return applyMovement(systemsCommonData, character, subscribers);
@@ -84,7 +84,7 @@ public class RunCharacterCommand extends CharacterCommand {
 
 	@Override
 	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
-		if (path == null || path.nodes.isEmpty()) return;
+		if (path.nodes.isEmpty()) return;
 
 		int nextNodeIndex = path.nodes.indexOf(nextNode, true);
 		if (nextNodeIndex < path.nodes.size - 1) {
@@ -110,18 +110,17 @@ public class RunCharacterCommand extends CharacterCommand {
 			done = reachedNodeOfPath(nextNode, subscribers, character);
 		}
 		if (!done) {
-			takeStep(character, systemsCommonData, subscribers);
+			takeStep(character, systemsCommonData);
 		}
 		return done;
 	}
 
 	private void takeStep(Entity entity,
-						  SystemsCommonData systemsCommonData,
-						  List<CharacterSystemEventsSubscriber> subscribers) {
+						  SystemsCommonData systemsCommonData) {
 		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(entity);
 		MapGraph map = systemsCommonData.getMap();
 		MapGraphNode currentNode = map.getNode(characterDecalComponent.getNodePosition(auxVector2_3));
-		translateCharacter(characterDecalComponent);
+		translateCharacter(characterDecalComponent, systemsCommonData);
 		MapGraphNode newNode = map.getNode(characterDecalComponent.getNodePosition(auxVector2_3));
 		if (currentNode != newNode) {
 			fixHeightPositionOfDecals(entity, newNode);
@@ -158,9 +157,16 @@ public class RunCharacterCommand extends CharacterCommand {
 				|| !map.checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(nextNode, null);
 	}
 
-	private void translateCharacter(CharacterDecalComponent characterDecalComponent) {
+	private void translateCharacter(CharacterDecalComponent characterDecalComponent, SystemsCommonData systemsCommonData) {
+		Vector3 decalPos = characterDecalComponent.getDecal().getPosition();
+		Entity floorEntity = systemsCommonData.getMap().getNode(decalPos).getEntity();
 		Decal decal = characterDecalComponent.getDecal();
-		Vector2 velocity = auxVector2_2.sub(auxVector2_1.set(decal.getX(), decal.getZ())).nor().scl(CHAR_STEP_SIZE);
-		decal.translate(auxVector3_1.set(velocity.x, 0, velocity.y));
+		if ((ComponentsMapper.floor.get(floorEntity).getFogOfWarSignature() & 16) == 0) {
+			Vector2 velocity = auxVector2_2.sub(auxVector2_1.set(decal.getX(), decal.getZ())).nor().scl(CHAR_STEP_SIZE);
+			decal.translate(auxVector3_1.set(velocity.x, 0, velocity.y));
+		} else {
+			Vector3 centerPos = nextNode.getCenterPosition(auxVector3_1);
+			decal.setPosition(auxVector3_2.set(centerPos.x, centerPos.y + CharacterTypes.BILLBOARD_Y, centerPos.z));
+		}
 	}
 }

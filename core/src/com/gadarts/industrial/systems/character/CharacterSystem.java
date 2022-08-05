@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -39,6 +38,7 @@ import com.gadarts.industrial.utils.GameUtils;
 import java.util.Map;
 
 import static com.gadarts.industrial.components.ComponentsMapper.character;
+import static com.gadarts.industrial.shared.model.characters.Direction.*;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.*;
 
 public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber> implements
@@ -293,7 +293,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		Vector3 characterPos = auxVector3_1.set(ComponentsMapper.characterDecal.get(character).getDecal().getPosition());
 		Vector2 destPos = currentCommand.getDestinationNode().getCenterPosition(auxVector2_2);
 		Vector2 directionToDest = destPos.sub(characterPos.x, characterPos.z).nor();
-		return Direction.findDirection(directionToDest);
+		return findDirection(directionToDest);
 	}
 
 
@@ -308,19 +308,25 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			}
 			rotationData.setLastRotation(TimeUtils.millis());
 			Direction directionToDest = calculateDirectionToDestination(currentCommand);
-			rotate(charComponent, rotationData, directionToDest);
+			rotate(charComponent, rotationData, directionToDest, currentCommand.getCharacter());
 		}
 	}
 
 	private void rotate(CharacterComponent charComponent,
 						CharacterRotationData rotationData,
-						Direction directionToDest) {
+						Direction directionToDest,
+						Entity character) {
 		if (charComponent.getCharacterSpriteData().getFacingDirection() != directionToDest) {
 			CharacterSpriteData characterSpriteData = charComponent.getCharacterSpriteData();
-			Vector2 currentDirVector = characterSpriteData.getFacingDirection().getDirection(auxVector2_1);
-			float diff = directionToDest.getDirection(auxVector2_2).angleDeg() - currentDirVector.angleDeg();
+			Vector2 currentDirVec = characterSpriteData.getFacingDirection().getDirection(auxVector2_1);
+			float diff = directionToDest.getDirection(auxVector2_2).angleDeg() - currentDirVec.angleDeg();
 			int side = auxVector2_3.set(1, 0).setAngleDeg(diff).angleDeg() > 180 ? -1 : 1;
-			characterSpriteData.setFacingDirection(Direction.findDirection(currentDirVector.rotateDeg(45f * side)));
+			Vector3 charPos = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
+			Entity floorEntity = getSystemsCommonData().getMap().getNode(charPos).getEntity();
+			int fogOfWarSig = ComponentsMapper.floor.get(floorEntity).getFogOfWarSignature();
+			boolean isNodeHidden = (fogOfWarSig & 16) == 16;
+			Direction newDir = isNodeHidden ? directionToDest : findDirection(currentDirVec.rotateDeg(45f * side));
+			characterSpriteData.setFacingDirection(newDir);
 		} else {
 			rotationDone(rotationData, charComponent.getCharacterSpriteData());
 		}
@@ -339,7 +345,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		MapGraphNode targetNode = map.getNode(ComponentsMapper.characterDecal.get(target).getDecal().getPosition());
 		Vector2 destPos = targetNode.getCenterPosition(auxVector2_2);
 		Vector2 directionToDest = destPos.sub(pos.x, pos.z).nor();
-		return Direction.findDirection(directionToDest);
+		return findDirection(directionToDest);
 	}
 
 	private void rotationDone(CharacterRotationData rotationData,
