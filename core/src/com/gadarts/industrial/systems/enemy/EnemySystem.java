@@ -30,6 +30,7 @@ import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
 import com.gadarts.industrial.shared.model.characters.attributes.Range;
 import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
+import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.ModelInstancePools;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -127,11 +128,32 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		}
 	}
 
+	private static void consumeEngineEnergy(Entity character) {
+		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
+		WeaponsDefinitions primaryAttack = enemyComp.getEnemyDefinition().getPrimaryAttack();
+		enemyComp.setEngineEnergy(Math.max(enemyComp.getEngineEnergy() - primaryAttack.getEngineConsumption(), 0));
+	}
+
+	@Override
+	public void onSpriteTypeChanged(Entity entity, SpriteType spriteType) {
+		if (ComponentsMapper.enemy.has(entity) && spriteType == SpriteType.ATTACK_PRIMARY) {
+			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(entity);
+			WeaponsDefinitions primaryAttack = enemyComponent.getEnemyDefinition().getPrimaryAttack();
+			if (enemyComponent.getEngineEnergy() >= primaryAttack.getEngineConsumption()) {
+				consumeEngineEnergy(entity);
+			} else {
+				CharacterComponent characterComponent = ComponentsMapper.character.get(entity);
+				characterComponent.setCommand(null);
+				characterComponent.getCharacterSpriteData().setSpriteType(SpriteType.IDLE);
+				enemyFinishedTurn();
+			}
+		}
+	}
+
 	private void invokeEnemyAttackBehaviour(final Entity enemy) {
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		Enemies enemyDefinition = enemyComponent.getEnemyDefinition();
-		int engineConsumption = enemyComponent.getEnemyDefinition().getPrimaryAttack().getEngineConsumption();
-		if (enemyComponent.getEngineEnergy() >= engineConsumption && checkIfWayIsClearToTarget(enemy)) {
+		if (checkIfWayIsClearToTarget(enemy)) {
 			engagePrimaryAttack(enemy, enemyDefinition);
 		} else {
 			enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
@@ -148,7 +170,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 				enemyComponent.getTimeStamps().setLastPrimaryAttack(currentTurnId);
 			}
 			enemyComponent.getTimeStamps().setLastTurn(currentTurnId);
-			enemyFinishedTurn(character);
+			enemyFinishedTurn();
 		}
 	}
 
@@ -355,6 +377,8 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private void invokeEnemyTurn(final Entity enemy) {
+		EnemyComponent enemyComp = ComponentsMapper.enemy.get(enemy);
+		enemyComp.setEngineEnergy(Math.min(enemyComp.getEngineEnergy() + 1, enemyComp.getEnemyDefinition().getEngine()));
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		if (enemyComponent.getAiStatus() == ATTACKING) {
 			invokeEnemyAttackBehaviour(enemy);
@@ -382,7 +406,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			MapGraphPath currentPath = pathPlanner.getCurrentPath();
 			applyCommand(enemy, CharacterCommandsDefinitions.RUN, updatedLastVisibleNode, currentPath);
 		} else {
-			enemyFinishedTurn(enemy);
+			enemyFinishedTurn();
 		}
 	}
 
@@ -400,9 +424,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		}
 	}
 
-	private void enemyFinishedTurn(Entity character) {
-		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
-		enemyComp.setEngineEnergy(Math.min(enemyComp.getEngineEnergy() + 1, enemyComp.getEnemyDefinition().getEngine()));
+	private void enemyFinishedTurn( ) {
 		for (EnemySystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onEnemyFinishedTurn();
 		}
@@ -475,7 +497,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			}
 		} else if (ComponentsMapper.enemy.has(entity)) {
 			awakeEnemyIfTargetSpotted(entity);
-			subscribers.forEach(EnemySystemEventsSubscriber::onEnemyFinishedTurn);
+			enemyFinishedTurn();
 		}
 	}
 

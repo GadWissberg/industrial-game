@@ -706,15 +706,14 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 											Direction direction,
 											SpriteType spriteType,
 											boolean sameSpriteType) {
-		AnimationComponent animationComponent = animation.get(entity);
-		characterDecal.get(entity).initializeSprite(spriteType, direction);
+		CharacterDecalComponent characterDecalComponent = characterDecal.get(entity);
+		SpriteType prevSprite = characterDecalComponent.getSpriteType();
+		characterDecalComponent.initializeSprite(spriteType, direction);
 		if (animation.has(entity)) {
-			if (spriteType.isSingleAnimation()) {
-				if (!animationComponent.getAnimation().isAnimationFinished(animationComponent.getStateTime())) {
-					direction = Direction.SOUTH;
-				}
-			}
 			initializeCharacterAnimationBySpriteType(entity, direction, spriteType, sameSpriteType);
+		}
+		if (prevSprite != characterDecalComponent.getSpriteType()) {
+			subscribers.forEach(sub -> sub.onSpriteTypeChanged(entity, characterDecalComponent.getSpriteType()));
 		}
 	}
 
@@ -723,6 +722,11 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 														  SpriteType spriteType,
 														  boolean sameSpriteType) {
 		AnimationComponent animationComponent = animation.get(entity);
+		if (spriteType.isSingleAnimation()) {
+			if (!animationComponent.getAnimation().isAnimationFinished(animationComponent.getStateTime())) {
+				direction = Direction.SOUTH;
+			}
+		}
 		CharacterAnimation animation = null;
 		if (characterDecal.get(entity).getAnimations().contains(spriteType)) {
 			animation = characterDecal.get(entity).getAnimations().get(spriteType, direction);

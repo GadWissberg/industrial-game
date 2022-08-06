@@ -35,6 +35,7 @@ public class CharacterDecalComponent implements GameComponent {
 		this.spriteType = type;
 		createCharacterDecal(animations, type, direction, position);
 	}
+
 	private void createCharacterDecal(final CharacterAnimations animations,
 									  final SpriteType type,
 									  final Direction direction,
@@ -44,6 +45,10 @@ public class CharacterDecalComponent implements GameComponent {
 		decal.setPosition(position);
 	}
 
+
+	public void initializeSprite(final SpriteType type) {
+		initializeSprite(type, direction);
+	}
 
 	public void initializeSprite(final SpriteType type, final Direction direction) {
 		this.spriteType = type;

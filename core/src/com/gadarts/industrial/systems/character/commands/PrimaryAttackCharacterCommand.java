@@ -9,7 +9,6 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.character.OnGoingAttack;
-import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
@@ -35,7 +34,6 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 						   SystemsCommonData commonData,
 						   Object additionalData,
 						   List<CharacterSystemEventsSubscriber> subscribers) {
-		updateEngineEnergy(character);
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		if (characterComponent.getTarget() != null) {
 			characterComponent.getRotationData().setRotating(true);
@@ -44,14 +42,6 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 		WeaponsDefinitions primary = charComp.getPrimaryAttack();
 		int bulletsToShoot = MathUtils.random(primary.getMinNumberOfBullets(), primary.getMaxNumberOfBullets());
 		charComp.getOnGoingAttack().initialize(CharacterComponent.AttackType.PRIMARY, bulletsToShoot);
-	}
-
-	private static void updateEngineEnergy(Entity character) {
-		if (ComponentsMapper.enemy.has(character)) {
-			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(character);
-			WeaponsDefinitions primaryAttack = enemyComponent.getEnemyDefinition().getPrimaryAttack();
-			enemyComponent.setEngineEnergy(enemyComponent.getEngineEnergy() - primaryAttack.getEngineConsumption());
-		}
 	}
 
 	@Override
