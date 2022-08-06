@@ -275,7 +275,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			if (ComponentsMapper.enemy.get(entity).getAiStatus() != ATTACKING) {
 				awakeEnemy(entity);
 			}
-			refreshSkillFlower(entity);
 			createFlyingMetalParts(entity);
 		}
 	}

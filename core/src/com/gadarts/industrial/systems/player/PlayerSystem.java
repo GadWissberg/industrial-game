@@ -118,8 +118,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	private void refreshFogOfWar( ) {
-//		if (DefaultGameSettings.DISABLE_FOG) return;
-
 		MapGraph map = getSystemsCommonData().getMap();
 		Vector3 playerPos = characterDecal.get(getSystemsCommonData().getPlayer()).getNodePosition(auxVector3);
 		MapGraphNode playerNode = map.getNode(playerPos);
