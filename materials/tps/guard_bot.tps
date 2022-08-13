@@ -221,14 +221,70 @@
             <key type="filename">../sprites/guard_bot/guard/attack_primary_west_2.png</key>
             <key type="filename">../sprites/guard_bot/guard/attack_primary_west_3.png</key>
             <key type="filename">../sprites/guard_bot/guard/attack_primary_west_4.png</key>
-            <key type="filename">../sprites/guard_bot/guard/idle_east_0.png</key>
-            <key type="filename">../sprites/guard_bot/guard/idle_north_0.png</key>
-            <key type="filename">../sprites/guard_bot/guard/idle_north_east_0.png</key>
-            <key type="filename">../sprites/guard_bot/guard/idle_north_west_0.png</key>
-            <key type="filename">../sprites/guard_bot/guard/idle_south_0.png</key>
-            <key type="filename">../sprites/guard_bot/guard/idle_south_east_0.png</key>
-            <key type="filename">../sprites/guard_bot/guard/idle_south_west_0.png</key>
-            <key type="filename">../sprites/guard_bot/guard/idle_west_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_east_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_east_1.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_east_2.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_east_3.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_north_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_north_1.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_north_2.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_north_3.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_north_east_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_north_east_1.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_north_east_2.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_north_east_3.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_north_west_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_north_west_1.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_north_west_2.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_north_west_3.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_south_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_south_1.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_south_2.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_south_3.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_south_east_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_south_east_1.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_south_east_2.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_south_east_3.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_south_west_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_south_west_1.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_south_west_2.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_south_west_3.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_west_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_west_1.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_west_2.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_0_west_3.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_east_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_east_1.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_east_2.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_east_3.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_north_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_north_1.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_north_2.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_north_3.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_north_east_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_north_east_1.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_north_east_2.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_north_east_3.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_north_west_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_north_west_1.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_north_west_2.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_north_west_3.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_south_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_south_1.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_south_2.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_south_3.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_south_east_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_south_east_1.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_south_east_2.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_south_east_3.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_south_west_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_south_west_1.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_south_west_2.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_south_west_3.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_west_0.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_west_1.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_west_2.png</key>
+            <key type="filename">../sprites/guard_bot/guard/idle_1_west_3.png</key>
             <key type="filename">../sprites/guard_bot/guard/pain_east_0.png</key>
             <key type="filename">../sprites/guard_bot/guard/pain_east_1.png</key>
             <key type="filename">../sprites/guard_bot/guard/pain_east_2.png</key>
@@ -360,6 +416,32 @@
         </map>
         <key>fileList</key>
         <array>
+            <filename>../sprites/guard_bot/light_death_1_0.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_1.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_10.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_2.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_3.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_4.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_5.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_6.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_7.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_8.png</filename>
+            <filename>../sprites/guard_bot/light_death_1_9.png</filename>
+            <filename>../sprites/guard_bot/light_death_2_0.png</filename>
+            <filename>../sprites/guard_bot/light_death_2_1.png</filename>
+            <filename>../sprites/guard_bot/light_death_2_2.png</filename>
+            <filename>../sprites/guard_bot/light_death_2_3.png</filename>
+            <filename>../sprites/guard_bot/light_death_2_4.png</filename>
+            <filename>../sprites/guard_bot/light_death_2_5.png</filename>
+            <filename>../sprites/guard_bot/light_death_2_6.png</filename>
+            <filename>../sprites/guard_bot/light_death_2_7.png</filename>
+            <filename>../sprites/guard_bot/light_death_3_0.png</filename>
+            <filename>../sprites/guard_bot/light_death_3_1.png</filename>
+            <filename>../sprites/guard_bot/light_death_3_2.png</filename>
+            <filename>../sprites/guard_bot/light_death_3_3.png</filename>
+            <filename>../sprites/guard_bot/light_death_3_4.png</filename>
+            <filename>../sprites/guard_bot/light_death_3_5.png</filename>
+            <filename>../sprites/guard_bot/light_death_3_6.png</filename>
             <filename>../sprites/guard_bot/guard/attack_primary_east_0.png</filename>
             <filename>../sprites/guard_bot/guard/attack_primary_east_1.png</filename>
             <filename>../sprites/guard_bot/guard/attack_primary_east_2.png</filename>
@@ -400,14 +482,70 @@
             <filename>../sprites/guard_bot/guard/attack_primary_west_2.png</filename>
             <filename>../sprites/guard_bot/guard/attack_primary_west_3.png</filename>
             <filename>../sprites/guard_bot/guard/attack_primary_west_4.png</filename>
-            <filename>../sprites/guard_bot/guard/idle_east_0.png</filename>
-            <filename>../sprites/guard_bot/guard/idle_north_0.png</filename>
-            <filename>../sprites/guard_bot/guard/idle_north_east_0.png</filename>
-            <filename>../sprites/guard_bot/guard/idle_north_west_0.png</filename>
-            <filename>../sprites/guard_bot/guard/idle_south_0.png</filename>
-            <filename>../sprites/guard_bot/guard/idle_south_east_0.png</filename>
-            <filename>../sprites/guard_bot/guard/idle_south_west_0.png</filename>
-            <filename>../sprites/guard_bot/guard/idle_west_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_east_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_east_1.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_east_2.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_east_3.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_north_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_north_1.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_north_2.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_north_3.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_north_east_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_north_east_1.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_north_east_2.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_north_east_3.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_north_west_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_north_west_1.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_north_west_2.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_north_west_3.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_south_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_south_1.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_south_2.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_south_3.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_south_east_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_south_east_1.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_south_east_2.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_south_east_3.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_south_west_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_south_west_1.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_south_west_2.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_south_west_3.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_west_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_west_1.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_west_2.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_0_west_3.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_east_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_east_1.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_east_2.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_east_3.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_north_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_north_1.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_north_2.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_north_3.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_north_east_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_north_east_1.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_north_east_2.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_north_east_3.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_north_west_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_north_west_1.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_north_west_2.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_north_west_3.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_south_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_south_1.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_south_2.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_south_3.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_south_east_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_south_east_1.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_south_east_2.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_south_east_3.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_south_west_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_south_west_1.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_south_west_2.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_south_west_3.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_west_0.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_west_1.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_west_2.png</filename>
+            <filename>../sprites/guard_bot/guard/idle_1_west_3.png</filename>
             <filename>../sprites/guard_bot/guard/pain_east_0.png</filename>
             <filename>../sprites/guard_bot/guard/pain_east_1.png</filename>
             <filename>../sprites/guard_bot/guard/pain_east_2.png</filename>
@@ -496,32 +634,6 @@
             <filename>../sprites/guard_bot/guard/run_west_5.png</filename>
             <filename>../sprites/guard_bot/guard/run_west_6.png</filename>
             <filename>../sprites/guard_bot/guard/run_west_7.png</filename>
-            <filename>../sprites/guard_bot/light_death_1_0.png</filename>
-            <filename>../sprites/guard_bot/light_death_1_1.png</filename>
-            <filename>../sprites/guard_bot/light_death_1_10.png</filename>
-            <filename>../sprites/guard_bot/light_death_1_2.png</filename>
-            <filename>../sprites/guard_bot/light_death_1_3.png</filename>
-            <filename>../sprites/guard_bot/light_death_1_4.png</filename>
-            <filename>../sprites/guard_bot/light_death_1_5.png</filename>
-            <filename>../sprites/guard_bot/light_death_1_6.png</filename>
-            <filename>../sprites/guard_bot/light_death_1_7.png</filename>
-            <filename>../sprites/guard_bot/light_death_1_8.png</filename>
-            <filename>../sprites/guard_bot/light_death_1_9.png</filename>
-            <filename>../sprites/guard_bot/light_death_2_0.png</filename>
-            <filename>../sprites/guard_bot/light_death_2_1.png</filename>
-            <filename>../sprites/guard_bot/light_death_2_2.png</filename>
-            <filename>../sprites/guard_bot/light_death_2_3.png</filename>
-            <filename>../sprites/guard_bot/light_death_2_4.png</filename>
-            <filename>../sprites/guard_bot/light_death_2_5.png</filename>
-            <filename>../sprites/guard_bot/light_death_2_6.png</filename>
-            <filename>../sprites/guard_bot/light_death_2_7.png</filename>
-            <filename>../sprites/guard_bot/light_death_3_0.png</filename>
-            <filename>../sprites/guard_bot/light_death_3_1.png</filename>
-            <filename>../sprites/guard_bot/light_death_3_2.png</filename>
-            <filename>../sprites/guard_bot/light_death_3_3.png</filename>
-            <filename>../sprites/guard_bot/light_death_3_4.png</filename>
-            <filename>../sprites/guard_bot/light_death_3_5.png</filename>
-            <filename>../sprites/guard_bot/light_death_3_6.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
