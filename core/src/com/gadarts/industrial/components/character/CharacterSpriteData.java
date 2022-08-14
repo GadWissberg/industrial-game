@@ -14,6 +14,7 @@ public class CharacterSpriteData implements Pool.Poolable {
 	private SpriteType spriteType;
 	private int primaryAttackHitFrameIndex;
 	private boolean singleDeathAnimation;
+	private long nextIdleAnimationPlay;
 
 	@Override
 	public void reset( ) {

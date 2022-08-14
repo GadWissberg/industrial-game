@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import static com.gadarts.industrial.systems.ui.menu.NewGameMenuOptions.OFFICE;
 
@@ -236,12 +237,20 @@ public class GeneralHandler implements
 										   final TextureAtlas atlas,
 										   final SpriteType spriteType,
 										   final Direction dir) {
-		String spriteTypeName = Optional.ofNullable(spriteType.getRegionName()).orElse(spriteType.name()).toLowerCase();
-		String name = (spriteType.isSingleAnimation()) ? spriteTypeName : spriteTypeName + "_" + dir.name().toLowerCase();
-		CharacterAnimation a = createAnimation(atlas, spriteType, name, dir);
-		if (a != null && a.getKeyFrames().length > 0) {
-			animations.put(spriteType, dir, a);
-		}
+		String sprTypeName = Optional.ofNullable(spriteType.getRegionName()).orElse(spriteType.name()).toLowerCase();
+		int vars = spriteType.getVariations();
+		IntStream.range(0, vars).forEach(variationIndex -> {
+			boolean singleAnimation = spriteType.isSingleAnimation();
+			String name = singleAnimation ? sprTypeName : formatNameForVariation(dir, sprTypeName, vars, variationIndex);
+			CharacterAnimation a = createAnimation(atlas, spriteType, name, dir);
+			if (a != null && a.getKeyFrames().length > 0) {
+				animations.put(spriteType, variationIndex, dir, a);
+			}
+		});
+	}
+
+	private static String formatNameForVariation(Direction dir, String sprTypeName, int vars, int variationIndex) {
+		return String.format("%s_%s%s", sprTypeName, vars > 1 ? variationIndex + "_" : "", dir.name().toLowerCase());
 	}
 
 	private CharacterAnimation createAnimation(final TextureAtlas atlas,

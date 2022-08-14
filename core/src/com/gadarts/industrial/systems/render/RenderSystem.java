@@ -9,6 +9,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Pixmap.Format;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -65,8 +66,7 @@ import java.util.List;
 import static com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import static com.gadarts.industrial.components.ComponentsMapper.*;
 import static com.gadarts.industrial.shared.assets.Assets.Shaders.*;
-import static com.gadarts.industrial.shared.model.characters.SpriteType.ATTACK_PRIMARY;
-import static com.gadarts.industrial.shared.model.characters.SpriteType.RUN;
+import static com.gadarts.industrial.shared.model.characters.SpriteType.*;
 import static com.gadarts.industrial.systems.SystemsCommonData.CAMERA_LIGHT_FAR;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -658,11 +658,16 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		CharacterDecalComponent characterDecalComponent = characterDecal.get(entity);
 		AnimationComponent aniComp = animation.get(entity);
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		if (!systemsCommonData.getMenuTable().isVisible() && animation.has(entity) && aniComp.getAnimation() != null) {
-			AtlasRegion currentFrame = (AtlasRegion) characterDecalComponent.getDecal().getTextureRegion();
-			AtlasRegion newFrame = calculateCharacterDecalNewFrame(delta, entity, aniComp, currentFrame);
-			if (characterDecalComponent.getSpriteType() == spriteType && currentFrame != newFrame) {
-				updateCharacterDecalTextureAccordingToAnimation(entity, charSpriteData, spriteType, newFrame);
+		Animation<AtlasRegion> anim = aniComp.getAnimation();
+		if (!systemsCommonData.getMenuTable().isVisible() && ComponentsMapper.animation.has(entity) && anim != null) {
+			if (anim.getPlayMode() == Animation.PlayMode.LOOP_PINGPONG && anim.isAnimationFinished(aniComp.getStateTime())) {
+				anim.setFrameDuration(spriteType.getAnimationDuration());
+			} else {
+				AtlasRegion currentFrame = (AtlasRegion) characterDecalComponent.getDecal().getTextureRegion();
+				AtlasRegion newFrame = calculateCharacterDecalNewFrame(delta, entity, aniComp, currentFrame);
+				if (characterDecalComponent.getSpriteType() == spriteType && currentFrame != newFrame) {
+					updateCharacterDecalTextureAccordingToAnimation(entity, charSpriteData, spriteType, newFrame);
+				}
 			}
 		}
 	}

@@ -4,29 +4,36 @@ package com.gadarts.industrial.components.character;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.IntStream;
 
 public class CharacterAnimations {
-	final HashMap<SpriteType, Map<Direction, CharacterAnimation>> animations = new HashMap<>();
+	final HashMap<SpriteType, List<Map<Direction, CharacterAnimation>>> animations = new HashMap<>();
 
-	public void put(final SpriteType type, final Direction dir, final CharacterAnimation animation) {
+	public void put(SpriteType type, int variationIndex, Direction dir, CharacterAnimation animation) {
 		if (!animations.containsKey(type)) {
-			animations.put(type, new HashMap<>());
+			ArrayList<Map<Direction, CharacterAnimation>> variations = new ArrayList<>();
+			IntStream.range(0, type.getVariations()).forEach(i -> variations.add(new HashMap<>()));
+			animations.put(type, variations);
 		}
-		animations.get(type).put(dir, animation);
+		animations.get(type).get(variationIndex).put(dir, animation);
 	}
 
 	public void clear( ) {
-		Set<Map.Entry<SpriteType, Map<Direction, CharacterAnimation>>> entrySet = animations.entrySet();
-		for (Map.Entry<SpriteType, Map<Direction, CharacterAnimation>> entry : entrySet) {
-			entry.getValue().clear();
+		Set<Map.Entry<SpriteType, List<Map<Direction, CharacterAnimation>>>> entrySet = animations.entrySet();
+		for (Map.Entry<SpriteType, List<Map<Direction, CharacterAnimation>>> entry : entrySet) {
+			List<Map<Direction, CharacterAnimation>> variations = entry.getValue();
+			variations.forEach(map -> map.clear());
+			variations.clear();
 		}
 	}
 
 	public CharacterAnimation get(final SpriteType type, final Direction direction) {
-		return animations.get(type).get(direction);
+		return get(type, 0, direction);
+	}
+
+	public CharacterAnimation get(SpriteType type, int variationIndex, Direction direction) {
+		return animations.get(type).get(variationIndex).get(direction);
 	}
 
 	public boolean contains(final SpriteType spriteType) {

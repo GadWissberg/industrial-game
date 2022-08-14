@@ -8,6 +8,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -52,7 +53,9 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Vector2 auxVector2_3 = new Vector2();
-	private static final long CHARACTER_PAIN_DURATION = 1000;
+	private static final long CHARACTER_PAIN_DURATION = 1000L;
+	private static final long MIN_IDLE_ANIMATION_INTERVAL = 2000L;
+	public static final long MAX_IDLE_ANIMATION_INTERVAL = 10000L;
 	private final Map<SpriteType, CharacterCommandsDefinitions> onFrameChangedEvents = Map.of(
 			RUN, CharacterCommandsDefinitions.RUN,
 			PICKUP, CharacterCommandsDefinitions.PICKUP,
@@ -125,8 +128,24 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (currentCommand != null) {
 			handleCurrentCommand(currentCommand);
 		}
+		updateCharacters();
+	}
+
+	private void updateCharacters( ) {
+		long now = TimeUtils.millis();
 		for (int i = 0; i < characters.size(); i++) {
-			handlePain(characters.get(i));
+			Entity character = characters.get(i);
+			handleIdle(character, now);
+			handlePain(character);
+		}
+	}
+
+	private void handleIdle(Entity character, long now) {
+		CharacterSpriteData spriteData = ComponentsMapper.character.get(character).getCharacterSpriteData();
+		if (spriteData.getSpriteType() == IDLE && spriteData.getNextIdleAnimationPlay() < now) {
+			long random = MathUtils.random(MAX_IDLE_ANIMATION_INTERVAL - MIN_IDLE_ANIMATION_INTERVAL);
+			spriteData.setNextIdleAnimationPlay(now + MIN_IDLE_ANIMATION_INTERVAL + random);
+			ComponentsMapper.animation.get(character).getAnimation().setFrameDuration(0.15F);
 		}
 	}
 
@@ -179,7 +198,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	private void characterDies(Entity character, CharacterComponent characterComponent, CharacterSoundData soundData) {
 		CharacterSpriteData charSpriteData = characterComponent.getCharacterSpriteData();
-		charSpriteData.setSpriteType(charSpriteData.isSingleDeathAnimation() ? LIGHT_DEATH_1 : randomLightDeath());
+		charSpriteData.setSpriteType(LIGHT_DEATH);
 		if (ComponentsMapper.animation.has(character)) {
 			ComponentsMapper.animation.get(character).resetStateTime();
 		}

@@ -45,7 +45,7 @@ enum StorageWindowOnEvents {
 		if (parameters.getWindowEvent().getTarget() == storageWindow) {
 			if (storageWindow.getPlayerLayout().getWeaponChoice() == null) {
 				StorageGrid storageGrid = storageWindow.getStorageGrid();
-				ItemDisplay itemDisplay = storageGrid.findItemDisplay(PlayerWeaponsDefinitions.HAMMER.getId());
+				ItemDisplay itemDisplay = storageGrid.findItemDisplay(PlayerWeaponsDefinitions.COLT.getId());
 				List<UserInterfaceSystemEventsSubscriber> subscribers = parameters.getSubscribers();
 				storageWindow.getPlayerLayout().applySelectionToSelectedWeapon(storageGrid, itemDisplay, subscribers);
 			}
