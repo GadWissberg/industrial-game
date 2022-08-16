@@ -261,7 +261,7 @@ public class GeneralHandler implements
 		CharacterAnimation animation = null;
 		if (!regions.isEmpty()) {
 			animation = new CharacterAnimation(
-					spriteType.getAnimationDuration(),
+					spriteType.getFrameDuration(),
 					regions,
 					spriteType.getPlayMode(),
 					dir);

@@ -28,10 +28,7 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
-import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.LightComponent;
-import com.gadarts.industrial.components.ShadowlessLightComponent;
-import com.gadarts.industrial.components.StaticLightComponent;
+import com.gadarts.industrial.components.*;
 import com.gadarts.industrial.components.animation.AnimationComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterAnimation;
@@ -64,7 +61,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
-import static com.gadarts.industrial.components.ComponentsMapper.*;
 import static com.gadarts.industrial.shared.assets.Assets.Shaders.*;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.*;
 import static com.gadarts.industrial.systems.SystemsCommonData.CAMERA_LIGHT_FAR;
@@ -250,9 +246,10 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		modelBatch.begin(camera);
 		for (Entity entity : modelInstanceEntities) {
 			if (exclude != entity) {
-				renderModel(modelBatch, camera, entity, renderLight, modelInstance.get(entity));
-				if (appendixModelInstance.has(entity)) {
-					renderModel(modelBatch, camera, entity, true, appendixModelInstance.get(entity));
+				renderModel(modelBatch, camera, entity, renderLight, ComponentsMapper.modelInstance.get(entity));
+				if (ComponentsMapper.appendixModelInstance.has(entity)) {
+					AppendixModelInstanceComponent appendix = ComponentsMapper.appendixModelInstance.get(entity);
+					renderModel(modelBatch, camera, entity, true, appendix);
 				}
 			}
 		}
@@ -301,7 +298,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private void applySpecificRendering(Entity entity) {
 		if (ComponentsMapper.floor.has(entity)) {
 			renderCharactersShadowsOnFloor(entity);
-		} else if (wall.has(entity)) {
+		} else if (ComponentsMapper.wall.has(entity)) {
 			applySpecificRenderingForWall(entity);
 		}
 	}
@@ -309,10 +306,10 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private void applySpecificRenderingForWall(Entity entity) {
 		if (entity == null) return;
 
-		ModelInstanceComponent modelInstanceComp = modelInstance.get(entity);
-		Entity nodeEntity = wall.get(entity).getParentNode().getEntity();
+		ModelInstanceComponent modelInstanceComp = ComponentsMapper.modelInstance.get(entity);
+		Entity nodeEntity = ComponentsMapper.wall.get(entity).getParentNode().getEntity();
 		modelInstanceComp.setFlatColor(null);
-		if (nodeEntity == null || modelInstance.get(nodeEntity).getFlatColor() != null) {
+		if (nodeEntity == null || ComponentsMapper.modelInstance.get(nodeEntity).getFlatColor() != null) {
 			modelInstanceComp.setFlatColor(Color.BLACK);
 		}
 	}
@@ -321,9 +318,10 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		List<Entity> nearbyCharacters = ComponentsMapper.floor.get(entity).getNearbyCharacters();
 		nearbyCharacters.clear();
 		for (Entity character : characterDecalsEntities) {
-			Vector3 position = characterDecal.get(character).getDecal().getPosition();
+			Vector3 position = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
 			auxCircle.set(position.x, position.z, CharacterComponent.CHAR_RAD * 3F);
-			Vector3 floorPos = modelInstance.get(entity).getModelInstance().transform.getTranslation(auxVector3_1);
+			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(entity).getModelInstance();
+			Vector3 floorPos = modelInstance.transform.getTranslation(auxVector3_1);
 			auxRect.set(floorPos.x, floorPos.z, 1F, 1F);
 			if (Intersector.overlaps(auxCircle, auxRect)) {
 				nearbyCharacters.add(character);
@@ -340,17 +338,22 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		DrawFlags drawFlags = getSystemsCommonData().getDrawFlags();
 		return (!miComp.isVisible())
 				|| !isVisible(camera, miComp)
-				|| floor.has(entity) && !drawFlags.isDrawGround()
-				|| obstacle.has(entity) && !drawFlags.isDrawEnv()
+				|| ComponentsMapper.floor.has(entity) && !drawFlags.isDrawGround()
+				|| ComponentsMapper.obstacle.has(entity) && !drawFlags.isDrawEnv()
 				|| getSystemsCommonData().getCursor() == entity && !drawFlags.isDrawCursor()
 				|| isInFow(entity, miComp.getModelInstance().transform.getTranslation(auxVector3_1));
 	}
 
 	private boolean isInFow(Entity entity, Vector3 position) {
-		if (floor.has(entity) || wall.has(entity) || entity == getSystemsCommonData().getCursor()) return false;
+		if (ComponentsMapper.floor.has(entity)
+				|| ComponentsMapper.wall.has(entity)
+				|| entity == getSystemsCommonData().getCursor()) return false;
+
 		MapGraph map = getSystemsCommonData().getMap();
 		MapGraphNode node = map.getNode(position);
-		return node != null && node.getEntity() != null && modelInstance.get(node.getEntity()).getFlatColor() != null;
+		return node != null
+				&& node.getEntity() != null
+				&& ComponentsMapper.modelInstance.get(node.getEntity()).getFlatColor() != null;
 	}
 
 	@Override
@@ -408,8 +411,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private void handleSimpleDecalAnimation(final Entity entity, final SimpleDecalComponent simpleDecalComponent) {
-		if (animation.has(entity) && simpleDecalComponent.isAnimatedByAnimationComponent()) {
-			AnimationComponent animationComponent = animation.get(entity);
+		if (ComponentsMapper.animation.has(entity) && simpleDecalComponent.isAnimatedByAnimationComponent()) {
+			AnimationComponent animationComponent = ComponentsMapper.animation.get(entity);
 			simpleDecalComponent.getDecal().setTextureRegion(animationComponent.calculateFrame());
 		}
 	}
@@ -422,7 +425,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private void renderSimpleDecal(final DecalBatch decalBatch, final Entity entity) {
-		SimpleDecalComponent component = simpleDecal.get(entity);
+		SimpleDecalComponent component = ComponentsMapper.simpleDecal.get(entity);
 		if (component != null && component.isVisible() && !isInFow(entity, component.getDecal().getPosition())) {
 			handleSimpleDecalAnimation(entity, component);
 			faceDecalToCamera(component, component.getDecal());
@@ -445,7 +448,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private void renderLiveCharacters(final float deltaTime) {
 		for (Entity entity : characterDecalsEntities) {
-			Vector3 position = characterDecal.get(entity).getDecal().getPosition();
+			Vector3 position = ComponentsMapper.characterDecal.get(entity).getDecal().getPosition();
 			Entity floorEntity = getSystemsCommonData().getMap().getNode(position).getEntity();
 			initializeCharacterDecalForRendering(deltaTime, entity);
 			if (isNodeRevealed(floorEntity) && (shouldRenderPlayer(entity) || shouldRenderEnemy(entity))) {
@@ -459,11 +462,11 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private boolean shouldRenderEnemy(Entity entity) {
-		return enemy.has(entity) && getSystemsCommonData().getDrawFlags().isDrawEnemy();
+		return ComponentsMapper.enemy.has(entity) && getSystemsCommonData().getDrawFlags().isDrawEnemy();
 	}
 
 	private boolean shouldRenderPlayer(Entity entity) {
-		return player.has(entity) && !ComponentsMapper.player.get(entity).isDisabled();
+		return ComponentsMapper.player.has(entity) && !ComponentsMapper.player.get(entity).isDisabled();
 	}
 
 	private boolean shouldApplyLightsOnDecal(final Entity entity,
@@ -586,7 +589,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private float applyLightsOnDecal(final Decal decal, float minDistance) {
 		for (Entity light : shadowlessLightsEntities) {
-			minDistance = applyLightOnDecal(decal, minDistance, shadowlessLight.get(light));
+			minDistance = applyLightOnDecal(decal, minDistance, ComponentsMapper.shadowlessLight.get(light));
 		}
 		for (Entity light : staticLightsEntities) {
 			minDistance = applyLightOnDecal(decal, minDistance, ComponentsMapper.staticLight.get(light));
@@ -595,7 +598,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private void renderCharacterDecal(final Entity entity) {
-		Decal decal = characterDecal.get(entity).getDecal();
+		Decal decal = ComponentsMapper.characterDecal.get(entity).getDecal();
 		Vector3 decalPosition = decal.getPosition();
 		Camera camera = getSystemsCommonData().getCamera();
 		float ambient = getSystemsCommonData().getMap().getAmbient();
@@ -626,11 +629,12 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private void updateLight(final Entity light) {
-		ShadowlessLightComponent lc = shadowlessLight.get(light);
+		ShadowlessLightComponent lc = ComponentsMapper.shadowlessLight.get(light);
 		long now = TimeUtils.millis();
 		updateFlicker(lc, now);
-		if (modelInstance.has(light)) {
-			lc.setPosition(modelInstance.get(lc.getParent()).getModelInstance().transform.getTranslation(auxVector3_1));
+		if (ComponentsMapper.modelInstance.has(light)) {
+			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(lc.getParent()).getModelInstance();
+			lc.setPosition(modelInstance.transform.getTranslation(auxVector3_1));
 		}
 		float duration = lc.getDuration();
 		if (duration > 0 && TimeUtils.timeSinceMillis(lc.getBeginTime()) >= (duration * 1000F)) {
@@ -640,11 +644,11 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private void initializeCharacterDecalForRendering(float deltaTime, Entity entity) {
 		Camera camera = getSystemsCommonData().getCamera();
-		CharacterSpriteData charSpriteData = character.get(entity).getCharacterSpriteData();
+		CharacterSpriteData charSpriteData = ComponentsMapper.character.get(entity).getCharacterSpriteData();
 		Direction direction = CharacterUtils.calculateDirectionSeenFromCamera(camera, charSpriteData.getFacingDirection());
 		SpriteType spriteType = charSpriteData.getSpriteType();
-		boolean sameSpriteType = spriteType.equals(characterDecal.get(entity).getSpriteType());
-		if ((!sameSpriteType || !characterDecal.get(entity).getDirection().equals(direction))) {
+		boolean sameSpriteType = spriteType.equals(ComponentsMapper.characterDecal.get(entity).getSpriteType());
+		if ((!sameSpriteType || !ComponentsMapper.characterDecal.get(entity).getDirection().equals(direction))) {
 			updateCharacterDecalSprite(entity, direction, spriteType, sameSpriteType);
 		} else if (spriteType != RUN || getSystemsCommonData().getTurnsQueue().first() == entity) {
 			updateCharacterDecalFrame(deltaTime, entity, charSpriteData, spriteType);
@@ -655,19 +659,31 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 										   Entity entity,
 										   CharacterSpriteData charSpriteData,
 										   SpriteType spriteType) {
-		CharacterDecalComponent characterDecalComponent = characterDecal.get(entity);
-		AnimationComponent aniComp = animation.get(entity);
+		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(entity);
+		AnimationComponent aniComp = ComponentsMapper.animation.get(entity);
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		Animation<AtlasRegion> anim = aniComp.getAnimation();
 		if (!systemsCommonData.getMenuTable().isVisible() && ComponentsMapper.animation.has(entity) && anim != null) {
-			if (anim.getPlayMode() == Animation.PlayMode.LOOP_PINGPONG && anim.isAnimationFinished(aniComp.getStateTime())) {
-				anim.setFrameDuration(spriteType.getAnimationDuration());
-			} else {
-				AtlasRegion currentFrame = (AtlasRegion) characterDecalComponent.getDecal().getTextureRegion();
-				AtlasRegion newFrame = calculateCharacterDecalNewFrame(delta, entity, aniComp, currentFrame);
-				if (characterDecalComponent.getSpriteType() == spriteType && currentFrame != newFrame) {
-					updateCharacterDecalTextureAccordingToAnimation(entity, charSpriteData, spriteType, newFrame);
+			if (spriteType == IDLE && anim.isAnimationFinished(aniComp.getStateTime())) {
+				if (anim.getPlayMode() == Animation.PlayMode.NORMAL) {
+					anim.setPlayMode(Animation.PlayMode.REVERSED);
+				} else {
+					anim.setPlayMode(Animation.PlayMode.NORMAL);
+					Direction direction = CharacterUtils.calculateDirectionSeenFromCamera(
+							systemsCommonData.getCamera(),
+							charSpriteData.getFacingDirection());
+					CharacterAnimation animation = fetchCharacterAnimationByDirectionAndType(
+							entity,
+							direction,
+							spriteType);
+					aniComp.init(0, animation);
 				}
+				aniComp.resetStateTime();
+			}
+			AtlasRegion currentFrame = (AtlasRegion) characterDecalComponent.getDecal().getTextureRegion();
+			AtlasRegion newFrame = calculateCharacterDecalNewFrame(delta, entity, aniComp, currentFrame);
+			if (characterDecalComponent.getSpriteType() == spriteType && currentFrame != newFrame) {
+				updateCharacterDecalTextureAccordingToAnimation(entity, charSpriteData, spriteType, newFrame);
 			}
 		}
 	}
@@ -676,7 +692,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 																 CharacterSpriteData characterSpriteData,
 																 SpriteType spriteType,
 																 AtlasRegion newFrame) {
-		CharacterDecalComponent characterDecalComponent = characterDecal.get(entity);
+		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(entity);
 		CharacterAnimations animations = characterDecalComponent.getAnimations();
 		Decal decal = characterDecalComponent.getDecal();
 		decal.setTextureRegion(newFrame);
@@ -687,8 +703,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		if (animations.contains(spriteType)) {
 			animations.get(spriteType, facingDirection);
 		} else {
-			if (player.has(entity)) {
-				CharacterAnimations generalAnim = player.get(entity).getGeneralAnimations();
+			if (ComponentsMapper.player.has(entity)) {
+				CharacterAnimations generalAnim = ComponentsMapper.player.get(entity).getGeneralAnimations();
 				generalAnim.get(spriteType, facingDirection);
 			}
 		}
@@ -711,10 +727,10 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 											Direction direction,
 											SpriteType spriteType,
 											boolean sameSpriteType) {
-		CharacterDecalComponent characterDecalComponent = characterDecal.get(entity);
+		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(entity);
 		SpriteType prevSprite = characterDecalComponent.getSpriteType();
 		characterDecalComponent.initializeSprite(spriteType, direction);
-		if (animation.has(entity)) {
+		if (ComponentsMapper.animation.has(entity)) {
 			initializeCharacterAnimationBySpriteType(entity, direction, spriteType, sameSpriteType);
 		}
 		if (prevSprite != characterDecalComponent.getSpriteType()) {
@@ -726,24 +742,35 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 														  Direction direction,
 														  SpriteType spriteType,
 														  boolean sameSpriteType) {
-		AnimationComponent animationComponent = animation.get(entity);
+		AnimationComponent animationComponent = ComponentsMapper.animation.get(entity);
 		if (spriteType.isSingleAnimation()) {
 			if (!animationComponent.getAnimation().isAnimationFinished(animationComponent.getStateTime())) {
 				direction = Direction.SOUTH;
 			}
 		}
-		CharacterAnimation animation = null;
-		if (characterDecal.get(entity).getAnimations().contains(spriteType)) {
-			animation = characterDecal.get(entity).getAnimations().get(spriteType, direction);
-		} else if (player.has(entity)) {
-			animation = player.get(entity).getGeneralAnimations().get(spriteType, direction);
-		}
+		CharacterAnimation animation;
+		animation = fetchCharacterAnimationByDirectionAndType(entity, direction, spriteType);
 		if (animation != null) {
-			animationComponent.init(spriteType.getAnimationDuration(), animation);
-			if (!sameSpriteType) {
+			boolean isIdle = spriteType == IDLE;
+			animationComponent.init(isIdle ? 0 : spriteType.getFrameDuration(), animation);
+			if (!sameSpriteType || isIdle) {
 				animationComponent.resetStateTime();
 			}
 		}
+	}
+
+	private static CharacterAnimation fetchCharacterAnimationByDirectionAndType(Entity entity,
+																				Direction direction,
+																				SpriteType sprType) {
+		int randomIndex = MathUtils.random(sprType.getVariations() - 1);
+		CharacterAnimation animation = null;
+		CharacterAnimations animations = ComponentsMapper.characterDecal.get(entity).getAnimations();
+		if (animations.contains(sprType)) {
+			animation = animations.get(sprType, randomIndex, direction);
+		} else if (ComponentsMapper.player.has(entity)) {
+			animation = ComponentsMapper.player.get(entity).getGeneralAnimations().get(sprType, randomIndex, direction);
+		}
+		return animation;
 	}
 
 	@Override

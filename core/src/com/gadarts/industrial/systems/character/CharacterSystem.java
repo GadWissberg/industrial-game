@@ -142,10 +142,11 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	private void handleIdle(Entity character, long now) {
 		CharacterSpriteData spriteData = ComponentsMapper.character.get(character).getCharacterSpriteData();
-		if (spriteData.getSpriteType() == IDLE && spriteData.getNextIdleAnimationPlay() < now) {
+		SpriteType spriteType = spriteData.getSpriteType();
+		if (spriteType == IDLE && spriteData.getNextIdleAnimationPlay() < now) {
 			long random = MathUtils.random(MAX_IDLE_ANIMATION_INTERVAL - MIN_IDLE_ANIMATION_INTERVAL);
 			spriteData.setNextIdleAnimationPlay(now + MIN_IDLE_ANIMATION_INTERVAL + random);
-			ComponentsMapper.animation.get(character).getAnimation().setFrameDuration(0.15F);
+			ComponentsMapper.animation.get(character).getAnimation().setFrameDuration(spriteType.getFrameDuration());
 		}
 	}
 
@@ -286,7 +287,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			animation.setPlayMode(Animation.PlayMode.NORMAL);
 			animationComponent.setDoingReverse(false);
 		} else {
-			animation.setFrameDuration(spriteType.getAnimationDuration());
+			animation.setFrameDuration(spriteType.getFrameDuration());
 			applyAnimationToReverse(animationComponent);
 		}
 	}

@@ -236,7 +236,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		CharacterAnimations animations = getAssetsManager().get(Assets.Atlases.findByRelatedWeapon(definition).name());
 		cdc.init(animations, cdc.getSpriteType(), cdc.getDirection(), auxVector3.set(cdc.getDecal().getPosition()));
 		CharacterAnimation animation = animations.get(cdc.getSpriteType(), cdc.getDirection());
-		ComponentsMapper.animation.get(player).init(cdc.getSpriteType().getAnimationDuration(), animation);
+		ComponentsMapper.animation.get(player).init(cdc.getSpriteType().getFrameDuration(), animation);
 		if (selectedWeapon != systemsCommonData.getStorage().getSelectedWeapon()) {
 			systemsCommonData.getStorage().setSelectedWeapon(selectedWeapon);
 		}
