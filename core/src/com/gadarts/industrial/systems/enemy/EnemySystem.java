@@ -27,8 +27,6 @@ import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
-import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
-import com.gadarts.industrial.shared.model.characters.attributes.Range;
 import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
@@ -153,12 +151,25 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private void invokeEnemyAttackBehaviour(final Entity enemy) {
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		Enemies enemyDefinition = enemyComponent.getEnemyDefinition();
-		if (checkIfWayIsClearToTarget(enemy)) {
-			engagePrimaryAttack(enemy, enemyDefinition);
+		if (considerPrimaryAttack(enemy, enemyDefinition)) {
+			engagePrimaryAttack(enemy);
 		} else {
 			enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
 			invokeEnemyTurn(enemy);
 		}
+	}
+
+	private boolean considerPrimaryAttack(Entity enemy, Enemies enemyDefinition) {
+		float disToTarget = calculateDistanceToTarget(enemy);
+		boolean result = false;
+		if (disToTarget <= enemyDefinition.getRange().getMaxDistance()) {
+			if (enemyDefinition.getPrimaryAttack().isMelee()) {
+				result = disToTarget <= 1;
+			} else {
+				result = checkIfWayIsClearToTarget(enemy);
+			}
+		}
+		return result;
 	}
 
 	@Override
@@ -183,22 +194,17 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		Entity target = ComponentsMapper.character.get(enemy).getTarget();
 		Vector3 targetPosition = ComponentsMapper.characterDecal.get(target).getDecal().getPosition();
 		Vector3 position = ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition();
-		return position.dst(targetPosition);
+		Vector2 src = auxVector2_1.set(position.x, position.z);
+		Vector2 dst = auxVector2_2.set(targetPosition.x, targetPosition.z);
+		return GameUtils.findAllNodesBetweenNodes(src, dst, true, bresenhamOutput).size();
 	}
 
-	private void engagePrimaryAttack(final Entity enemy,
-									 final Enemies def) {
-		Accuracy accuracy = def.getAccuracy();
-		if (accuracy != null && def.getRange() != Range.NONE) {
-			float disToTarget = calculateDistanceToTarget(enemy);
-			if (disToTarget <= def.getRange().getMaxDistance()) {
-				Entity target = ComponentsMapper.character.get(enemy).getTarget();
-				MapGraph map = getSystemsCommonData().getMap();
-				CharacterDecalComponent targetCharacterDecalComponent = ComponentsMapper.characterDecal.get(target);
-				MapGraphNode targetNode = map.getNode(targetCharacterDecalComponent.getNodePosition(auxVector2_1));
-				applyCommand(enemy, CharacterCommandsDefinitions.ATTACK_PRIMARY, targetNode);
-			}
-		}
+	private void engagePrimaryAttack(Entity enemy) {
+		Entity target = ComponentsMapper.character.get(enemy).getTarget();
+		MapGraph map = getSystemsCommonData().getMap();
+		CharacterDecalComponent targetCharacterDecalComponent = ComponentsMapper.characterDecal.get(target);
+		MapGraphNode targetNode = map.getNode(targetCharacterDecalComponent.getNodePosition(auxVector2_1));
+		applyCommand(enemy, CharacterCommandsDefinitions.ATTACK_PRIMARY, targetNode);
 	}
 
 	private boolean checkIfFloorNodesContainObjects(LinkedHashSet<GridPoint2> nodes, Entity enemyToCheckFor) {
@@ -456,14 +462,13 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private void awakeEnemyIfTargetSpotted(final Entity enemy) {
-		if ((isTargetInFov(enemy))) {
-			if (!checkIfFloorNodesBlockSightToTarget(enemy)) {
-				Vector2 enemyPos = ComponentsMapper.characterDecal.get(enemy).getNodePosition(auxVector2_1);
-				Entity target = ComponentsMapper.character.get(enemy).getTarget();
-				Vector2 targetPos = ComponentsMapper.characterDecal.get(target).getNodePosition(auxVector2_2);
-				if (enemyPos.dst2(targetPos) <= Math.pow(MAX_SIGHT, 2)) {
-					awakeEnemy(enemy);
-				}
+		if ((isTargetInFov(enemy) && !checkIfFloorNodesBlockSightToTarget(enemy))) {
+			Vector2 enemyPos = ComponentsMapper.characterDecal.get(enemy).getNodePosition(auxVector2_1);
+			Entity target = ComponentsMapper.character.get(enemy).getTarget();
+			Vector2 targetPos = ComponentsMapper.characterDecal.get(target).getNodePosition(auxVector2_2);
+			ComponentsMapper.enemy.get(enemy).setTargetLastVisibleNode(getSystemsCommonData().getMap().getNode(targetPos));
+			if (enemyPos.dst2(targetPos) <= Math.pow(MAX_SIGHT, 2)) {
+				awakeEnemy(enemy);
 			}
 		}
 	}

@@ -114,21 +114,37 @@ public class GameUtils {
 		Vector2 pos = characterDecal.get(enemy).getNodePosition(auxVector2_1);
 		Entity target = character.get(enemy).getTarget();
 		Vector2 targetPos = characterDecal.get(target).getNodePosition(auxVector2_2);
-		return findAllNodesBetweenNodes(pos, targetPos, output);
+		return findAllNodesBetweenNodes(pos, targetPos, false, output);
 	}
 
 	public static LinkedHashSet<GridPoint2> findAllNodesBetweenNodes(Vector2 src,
 																	 Vector2 dst,
 																	 LinkedHashSet<GridPoint2> output) {
+		return findAllNodesBetweenNodes(src, dst, false, output);
+	}
+
+	public static LinkedHashSet<GridPoint2> findAllNodesBetweenNodes(Vector2 src,
+																	 Vector2 dst,
+																	 boolean srcToDstOnly,
+																	 LinkedHashSet<GridPoint2> output) {
 		output.clear();
+
 		Array<GridPoint2> srcToDst = bresenham.line((int) src.x, (int) src.y, (int) dst.x, (int) dst.y);
-		Array<GridPoint2> dstToSrc = bresenham.line((int) dst.x, (int) dst.y, (int) src.x, (int) src.y);
+		Array<GridPoint2> dstToSrc = null;
+
+		if (!srcToDstOnly) {
+			dstToSrc = bresenham.line((int) dst.x, (int) dst.y, (int) src.x, (int) src.y);
+		}
+
 		for (int i = srcToDst.size - 1; i >= 0; i--) {
 			output.add(srcToDst.get(i));
 		}
-		for (int i = dstToSrc.size - 1; i >= 0; i--) {
-			output.add(dstToSrc.get(i));
+		if (!srcToDstOnly) {
+			for (int i = dstToSrc.size - 1; i >= 0; i--) {
+				output.add(dstToSrc.get(i));
+			}
 		}
+
 		return output;
 	}
 
