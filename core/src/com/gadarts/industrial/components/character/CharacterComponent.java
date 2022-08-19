@@ -26,6 +26,7 @@ public class CharacterComponent implements GameComponent {
 	@Setter(AccessLevel.NONE)
 	private OnGoingAttack onGoingAttack = new OnGoingAttack();
 	private WeaponsDefinitions primaryAttack;
+	private float turnTimeLeft;
 
 	@Override
 	public void reset( ) {

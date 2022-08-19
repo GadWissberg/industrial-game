@@ -8,6 +8,7 @@ import lombok.Setter;
 @Getter
 public class PlayerComponent implements GameComponent {
 	public static final float PLAYER_HEIGHT = 1;
+	public static final float PLAYER_AGILITY = 1F;
 	private CharacterAnimations generalAnimations;
 
 	@Setter

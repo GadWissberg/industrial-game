@@ -29,6 +29,7 @@ import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
+import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
 import com.gadarts.industrial.systems.projectiles.BulletSystemEventsSubscriber;
@@ -242,6 +243,9 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (prevCommand != null) {
 			prevCommand.free();
 		}
+		if (characterComponent.getTurnTimeLeft() > 0) {
+			subscribers.forEach(subscriber -> subscriber.onCharacterStillHasTime(character));
+		}
 	}
 
 	private void handleModeWithNonLoopingAnimation(final Entity character) {
@@ -427,11 +431,21 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			CharacterComponent characterComp = ComponentsMapper.character.get(character);
 			CharacterCommand currentCommand = characterComp.getCommand();
 			Entity turn = commonData.getTurnsQueue().first();
-			if (turn == character && currentCommand.reactToFrameChange(commonData, character, newFrame, subscribers)) {
-				commandDone(character);
+			if (turn == character) {
+				if (currentCommand.reactToFrameChange(commonData, character, newFrame, subscribers)) {
+					commandDone(character);
+				}
+				if (characterComp.getTurnTimeLeft() <= 0) {
+					subscribers.forEach(subscriber -> subscriber.onCharacterFinishedTurn(character));
+				}
 			}
 		}
 	}
 
-
+	@Override
+	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
+		if (prevAiStatus == EnemyAiStatus.IDLE) {
+			commandDone(getSystemsCommonData().getPlayer());
+		}
+	}
 }

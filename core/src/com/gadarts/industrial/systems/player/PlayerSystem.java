@@ -90,11 +90,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	@Override
-	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
-		character.get(getSystemsCommonData().getPlayer()).getCommand().onEnemyAwaken(enemy, prevAiStatus);
-	}
-
-	@Override
 	public void onDoorOpened(Entity doorEntity) {
 		refreshFogOfWar();
 	}
@@ -244,7 +239,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	@Override
 	public void onCharacterCommandDone(final Entity character, final CharacterCommand executedCommand) {
-		if (player.has(character) && executedCommand.isNewTurnOnCompletion()) {
+		if (player.has(character)) {
 			notifyPlayerFinishedTurn();
 		}
 	}
@@ -476,7 +471,15 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		Entity player = systemsCommonData.getPlayer();
 		MapGraphNode playerNode = map.getNode(characterDecal.get(player).getDecal().getPosition());
 		if (path.getCount() > 0 && !playerNode.equals(path.get(path.getCount() - 1))) {
+			shrinkRunCommandInBattle();
 			applyPlayerCommand(RUN, playerPathPlanner.getCurrentPath(), path.get(1));
+		}
+	}
+
+	private void shrinkRunCommandInBattle( ) {
+		Array<MapGraphNode> nodes = playerPathPlanner.getCurrentPath().nodes;
+		if (nodes.size > 2 && getSystemsCommonData().getTurnsQueue().size > 1) {
+			nodes.removeRange(2, nodes.size - 1);
 		}
 	}
 

@@ -46,4 +46,12 @@ public interface CharacterSystemEventsSubscriber extends SystemEventsSubscriber 
 	default void onCommandInitialized( ) {
 
 	}
+
+	default void onCharacterStillHasTime(Entity character) {
+
+	}
+
+	default void onCharacterFinishedTurn(Entity character) {
+
+	}
 }

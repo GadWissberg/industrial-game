@@ -78,6 +78,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final float SMOKE_HEIGHT_BIAS = 0.4F;
 	private final static LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
+	public static final float TURN_DURATION = 1F;
 	private final List<Sounds> ambSounds = List.of(Sounds.AMB_CHAINS, Sounds.AMB_SIGH, Sounds.AMB_LAUGH);
 	private final PathPlanHandler pathPlanner;
 	private ImmutableArray<Entity> enemies;
@@ -154,9 +155,13 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		if (considerPrimaryAttack(enemy, enemyDefinition)) {
 			engagePrimaryAttack(enemy);
 		} else {
-			enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
-			invokeEnemyTurn(enemy);
+			enemyDecidedToMove(enemy, enemyComponent);
 		}
+	}
+
+	private void enemyDecidedToMove(Entity enemy, EnemyComponent enemyComponent) {
+		enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
+		invokeEnemyTurn(enemy);
 	}
 
 	private boolean considerPrimaryAttack(Entity enemy, Enemies enemyDefinition) {
@@ -174,14 +179,12 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	@Override
 	public void onCharacterCommandDone(final Entity character, final CharacterCommand executedCommand) {
-		if (ComponentsMapper.enemy.has(character) && executedCommand.isNewTurnOnCompletion()) {
+		if (ComponentsMapper.enemy.has(character)) {
 			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(character);
 			long currentTurnId = getSystemsCommonData().getCurrentTurnId();
 			if (executedCommand.getDefinition() == CharacterCommandsDefinitions.ATTACK_PRIMARY) {
 				enemyComponent.getTimeStamps().setLastPrimaryAttack(currentTurnId);
 			}
-			enemyComponent.getTimeStamps().setLastTurn(currentTurnId);
-			enemyFinishedTurn();
 		}
 	}
 
@@ -388,12 +391,17 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		if (enemyComponent.getAiStatus() == ATTACKING) {
 			invokeEnemyAttackBehaviour(enemy);
 		} else {
-			MapGraphNode targetLastVisibleNode = enemyComponent.getTargetLastVisibleNode();
-			updateStatusIcon(enemy, iconSearching);
-			if (targetLastVisibleNode == null) {
-				applySearchingModeOnEnemy(enemy);
+			CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
+			if (characterComponent.getTurnTimeLeft() >= characterComponent.getSkills().getAgility()) {
+				MapGraphNode targetLastVisibleNode = enemyComponent.getTargetLastVisibleNode();
+				updateStatusIcon(enemy, iconSearching);
+				if (targetLastVisibleNode == null) {
+					applySearchingModeOnEnemy(enemy);
+				}
+				goAttackAtTheLastVisibleNodeOfTarget(enemy);
+			} else {
+				enemyFinishedTurn();
 			}
-			goAttackAtTheLastVisibleNodeOfTarget(enemy);
 		}
 	}
 
@@ -425,6 +433,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	@Override
 	public void onNewTurn(Entity entity) {
 		if (ComponentsMapper.enemy.has(entity)) {
+			ComponentsMapper.character.get(entity).setTurnTimeLeft(TURN_DURATION);
 			invokeEnemyTurn(entity);
 		}
 	}
@@ -445,6 +454,12 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		return angleDiff <= ENEMY_HALF_FOV_ANGLE && angleDiff >= -ENEMY_HALF_FOV_ANGLE;
 	}
 
+	@Override
+	public void onCharacterFinishedTurn(Entity character) {
+		if (ComponentsMapper.enemy.has(character)) {
+			enemyFinishedTurn();
+		}
+	}
 
 	private boolean checkIfFloorNodesBlockSightToTarget(final Entity enemy) {
 		return checkIfFloorNodesBlockSightToTarget(enemy, GameUtils.findAllNodesToTarget(enemy, bresenhamOutput));
@@ -501,7 +516,13 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			}
 		} else if (ComponentsMapper.enemy.has(entity)) {
 			awakeEnemyIfTargetSpotted(entity);
-			enemyFinishedTurn();
+		}
+	}
+
+	@Override
+	public void onCharacterStillHasTime(Entity character) {
+		if (ComponentsMapper.enemy.has(character)) {
+			invokeEnemyTurn(character);
 		}
 	}
 

@@ -3,14 +3,14 @@ package com.gadarts.industrial.systems.player;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g3d.decals.Decal;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.map.GameHeuristic;
+import com.gadarts.industrial.map.GamePathFinder;
+import com.gadarts.industrial.map.MapGraph;
+import com.gadarts.industrial.map.MapGraphPath;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
-import com.gadarts.industrial.shared.model.characters.attributes.Agility;
-import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.utils.EntityBuilder;
 import lombok.Getter;
 
@@ -20,8 +20,6 @@ import java.util.stream.IntStream;
 
 public class PathPlanHandler {
 	public static final int ARROWS_POOL_SIZE = 20;
-	public static final float ARROW_HEIGHT = 0.2f;
-	private static final Vector2 auxVector2 = new Vector2();
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private final GameAssetsManager assetManager;
 	private final List<Entity> arrowsEntities = new ArrayList<>();
@@ -53,14 +51,6 @@ public class PathPlanHandler {
 
 	public void hideAllArrows( ) {
 		arrowsEntities.forEach(arrow -> ComponentsMapper.simpleDecal.get(arrow).setVisible(false));
-	}
-
-	private void transformArrowDecal(final MapGraphNode currentNode, final Vector2 directionVector, final Decal decal) {
-		decal.getRotation().idt();
-		decal.rotateX(90);
-		decal.rotateZ(directionVector.angleDeg());
-		Vector3 pos = auxVector3_1.set(currentNode.getCol() + 0.5f, ARROW_HEIGHT, currentNode.getRow() + 0.5f);
-		decal.setPosition(pos.add(directionVector.x, currentNode.getHeight(), directionVector.y));
 	}
 
 	public void init(final PooledEngine engine) {

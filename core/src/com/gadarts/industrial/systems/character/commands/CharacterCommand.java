@@ -27,10 +27,6 @@ public abstract class CharacterCommand implements Pool.Poolable {
 									Object additionalData,
 									List<CharacterSystemEventsSubscriber> subscribers);
 
-	public boolean isNewTurnOnCompletion( ) {
-		return true;
-	}
-
 	public abstract boolean reactToFrameChange(SystemsCommonData systemsCommonData,
 											   Entity character,
 											   TextureAtlas.AtlasRegion newFrame,
@@ -45,10 +41,6 @@ public abstract class CharacterCommand implements Pool.Poolable {
 		this.additionalData = additionalData;
 		this.destinationNode = destinationNode;
 		return this;
-	}
-
-	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
-
 	}
 
 	public void onInFight( ) {

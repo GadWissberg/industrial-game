@@ -44,7 +44,6 @@ import com.gadarts.industrial.shared.model.characters.CharacterDefinition;
 import com.gadarts.industrial.shared.model.characters.CharacterTypes;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
-import com.gadarts.industrial.shared.model.characters.attributes.Agility;
 import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.shared.model.env.EnvironmentObjectDefinition;
@@ -669,7 +668,7 @@ public class MapBuilder implements Disposable {
 		auxCharacterSoundData.set(Sounds.PLAYER_PAIN, Sounds.PLAYER_DEATH, Sounds.STEP);
 		CharacterSkillsParameters skills = new CharacterSkillsParameters(
 				PLAYER_HEALTH,
-				Agility.HIGH,
+				PlayerComponent.PLAYER_AGILITY,
 				Accuracy.LOW);
 		CharacterData data = new CharacterData(
 				position,

@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
+import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphConnection;
 import com.gadarts.industrial.map.MapGraphNode;
@@ -55,11 +56,6 @@ public class RunCharacterCommand extends CharacterCommand {
 	}
 
 	@Override
-	public boolean isNewTurnOnCompletion( ) {
-		return false;
-	}
-
-	@Override
 	public void onInFight( ) {
 		if (path.nodes.size > 1) {
 			path.nodes.removeRange(1, path.nodes.size - 1);
@@ -80,16 +76,6 @@ public class RunCharacterCommand extends CharacterCommand {
 
 		playStepSound(systemsCommonData, character, newFrame);
 		return applyMovement(systemsCommonData, character, subscribers);
-	}
-
-	@Override
-	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
-		if (path.nodes.isEmpty()) return;
-
-		int nextNodeIndex = path.nodes.indexOf(nextNode, true);
-		if (nextNodeIndex < path.nodes.size - 1) {
-			path.nodes.removeRange(nextNodeIndex + 1, path.nodes.size - 1);
-		}
 	}
 
 	private void playStepSound(SystemsCommonData systemsCommonData, Entity character, AtlasRegion newFrame) {
@@ -144,6 +130,8 @@ public class RunCharacterCommand extends CharacterCommand {
 		prevNode = nextNode;
 		nextNode = path.getNextOf(nextNode);
 		setDestinationNode(nextNode);
+		CharacterComponent characterComp = ComponentsMapper.character.get(character);
+		characterComp.setTurnTimeLeft(characterComp.getTurnTimeLeft() - characterComp.getSkills().getAgility());
 		return isReachedEndOfPath(systemsCommonData.getMap().findConnection(node, nextNode), systemsCommonData);
 	}
 
