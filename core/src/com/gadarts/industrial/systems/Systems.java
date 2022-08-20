@@ -5,7 +5,7 @@ import com.gadarts.industrial.systems.character.CharacterSystem;
 import com.gadarts.industrial.systems.enemy.EnemySystem;
 import com.gadarts.industrial.systems.input.InputSystem;
 import com.gadarts.industrial.systems.player.PlayerSystem;
-import com.gadarts.industrial.systems.projectiles.BulletSystem;
+import com.gadarts.industrial.systems.projectiles.AttackSystem;
 import com.gadarts.industrial.systems.render.RenderSystem;
 import com.gadarts.industrial.systems.turns.TurnsSystem;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystem;
@@ -23,7 +23,7 @@ public enum Systems {
 	PICKUP(PickupSystem.class),
 	TURNS(TurnsSystem.class),
 	ENEMY(EnemySystem.class),
-	PROJECTILE(BulletSystem.class),
+	PROJECTILE(AttackSystem.class),
 	CHARACTER(CharacterSystem.class),
 	AMB(AmbSystem.class);
 

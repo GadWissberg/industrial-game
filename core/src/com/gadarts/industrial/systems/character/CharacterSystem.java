@@ -7,6 +7,7 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -17,14 +18,14 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.animation.AnimationComponent;
 import com.gadarts.industrial.components.character.*;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
-import com.gadarts.industrial.components.player.Weapon;
+import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
-import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
+import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
@@ -32,7 +33,7 @@ import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefini
 import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
-import com.gadarts.industrial.systems.projectiles.BulletSystemEventsSubscriber;
+import com.gadarts.industrial.systems.projectiles.AttackSystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.utils.EntityBuilder;
 import com.gadarts.industrial.utils.GameUtils;
@@ -47,7 +48,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		PlayerSystemEventsSubscriber,
 		RenderSystemEventsSubscriber,
 		EnemySystemEventsSubscriber,
-		BulletSystemEventsSubscriber,
+		AttackSystemEventsSubscriber,
 		CharacterSystemEventsSubscriber {
 	private static final int ROTATION_INTERVAL = 125;
 	private static final Vector3 auxVector3_1 = new Vector3();
@@ -161,20 +162,37 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	private void applyDamageToCharacter(Entity attacked,
+										int damage) {
+		applyDamageToCharacter(attacked, damage, null);
+	}
+
+	private void applyDamageToCharacter(Entity attacked,
 										int damage,
 										ModelInstanceComponent bulletModelInstanceComponent) {
 		CharacterComponent characterComponent = character.get(attacked);
 		characterComponent.dealDamage(damage);
 		handleDeath(attacked);
 		if (ComponentsMapper.player.has(attacked)) {
-			addSplatterEffect(bulletModelInstanceComponent.getModelInstance().transform.getTranslation(auxVector3_1));
+			addSplatterEffect(bulletModelInstanceComponent);
 		}
 	}
 
-	private void addSplatterEffect(final Vector3 pos) {
+	private void addSplatterEffect(final ModelInstanceComponent bulletModelInstanceComponent) {
+		Vector3 position = positionBloodSplatter(bulletModelInstanceComponent);
 		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-				.addParticleEffectComponent(bloodSplatterEffect, pos)
+				.addParticleEffectComponent(bloodSplatterEffect, position)
 				.finishAndAddToEngine();
+	}
+
+	private Vector3 positionBloodSplatter(ModelInstanceComponent bulletModelInstanceComponent) {
+		Vector3 position;
+		if (bulletModelInstanceComponent != null) {
+			position = bulletModelInstanceComponent.getModelInstance().transform.getTranslation(auxVector3_1);
+		} else {
+			Decal decal = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer()).getDecal();
+			position = auxVector3_1.set(decal.getPosition()).add(0F, PlayerComponent.PLAYER_HEIGHT, 0F);
+		}
+		return position;
 	}
 
 	private void handleDeath(final Entity character) {
@@ -222,13 +240,9 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		}
 	}
 
-	private void painDone(Entity character, CharacterSpriteData spriteData) {
-		spriteData.setSpriteType(IDLE);
-		Entity currentTurn = getSystemsCommonData().getTurnsQueue().first();
-		CharacterCommand currentCommand = ComponentsMapper.character.get(currentTurn).getCommand();
-		if (currentCommand != null && !currentCommand.isStarted()) {
-			applyCommand(currentCommand, character);
-		}
+	@Override
+	public void onMeleeAttackAppliedOnTarget(Entity character, Entity target, WeaponsDefinitions primaryAttack) {
+		applyDamageToCharacter(target, primaryAttack.getDamage());
 	}
 
 	public void commandDone(final Entity character) {
@@ -243,8 +257,18 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (prevCommand != null) {
 			prevCommand.free();
 		}
+		characterComponent.setCommand(null);
 		if (characterComponent.getTurnTimeLeft() > 0) {
 			subscribers.forEach(subscriber -> subscriber.onCharacterStillHasTime(character));
+		}
+	}
+
+	private void painDone(Entity character, CharacterSpriteData spriteData) {
+		spriteData.setSpriteType(IDLE);
+		Entity currentTurn = getSystemsCommonData().getTurnsQueue().first();
+		CharacterCommand currentCommand = ComponentsMapper.character.get(currentTurn).getCommand();
+		if (currentCommand != null && !currentCommand.isStarted()) {
+			applyCommand(currentCommand, character);
 		}
 	}
 
@@ -265,13 +289,14 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (spriteType.isAddReverse()) {
 			handleAnimationReverse(character, animationComponent, animation, spriteType);
 		} else if (onGoingAttack.getType() != null) {
-			Weapon selectedWeapon = getSystemsCommonData().getStorage().getSelectedWeapon();
-			PlayerWeaponsDefinitions definition = (PlayerWeaponsDefinitions) (selectedWeapon.getDefinition());
-			int primaryAttackHitFrameIndex = GameUtils.getPrimaryAttackHitFrameIndexForCharacter(character, definition);
+			SystemsCommonData commonData = getSystemsCommonData();
+			int primaryAttackHitFrameIndex = GameUtils.getPrimaryAttackHitFrameIndexForCharacter(character, commonData);
 			if (onGoingAttack.isDone()) {
 				onGoingAttack.setType(null);
-				animationComponent.setStateTime(0);
-				animation.setPlayMode(Animation.PlayMode.REVERSED);
+				if (!characterComp.getPrimaryAttack().isMelee()) {
+					animationComponent.setStateTime(0);
+					animation.setPlayMode(Animation.PlayMode.REVERSED);
+				}
 			} else {
 				animationComponent.setStateTime((primaryAttackHitFrameIndex) * animation.getFrameDuration());
 			}

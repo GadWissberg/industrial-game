@@ -177,7 +177,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		MapGraphNode nearbyNode = map.getNode(node.getCol() + colOffset, node.getRow() + rowOffset);
 		boolean result = true;
 		if (nearbyNode != null && nearbyNode.getEntity() != null) {
-			result = !DefaultGameSettings.DISABLE_FOG && modelInstance.get(nearbyNode.getEntity()).getFlatColor() != null;
+			result = !DefaultGameSettings.DISABLE_FOW && modelInstance.get(nearbyNode.getEntity()).getFlatColor() != null;
 		}
 		total |= result ? mask : 0;
 		return total;
@@ -204,7 +204,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			FloorComponent floorComponent = floor.get(currentNode.getEntity());
 			ModelInstanceComponent modelInstanceComponent = modelInstance.get(currentNode.getEntity());
 			if (!floorComponent.isRevealCalculated()) {
-				modelInstanceComponent.setFlatColor(!DefaultGameSettings.DISABLE_FOG && blocked ? Color.BLACK : null);
+				modelInstanceComponent.setFlatColor(!DefaultGameSettings.DISABLE_FOW && blocked ? Color.BLACK : null);
 				floorComponent.setFogOfWarSignature(blocked ? 16 : 0);
 				floorComponent.setRevealCalculated(true);
 			}

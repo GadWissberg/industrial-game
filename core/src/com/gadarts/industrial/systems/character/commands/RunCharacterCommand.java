@@ -9,7 +9,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
-import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphConnection;
 import com.gadarts.industrial.map.MapGraphNode;
@@ -18,7 +17,6 @@ import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.model.characters.CharacterTypes;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
-import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 
 import java.util.List;
 
@@ -130,10 +128,10 @@ public class RunCharacterCommand extends CharacterCommand {
 		prevNode = nextNode;
 		nextNode = path.getNextOf(nextNode);
 		setDestinationNode(nextNode);
-		CharacterComponent characterComp = ComponentsMapper.character.get(character);
-		characterComp.setTurnTimeLeft(characterComp.getTurnTimeLeft() - characterComp.getSkills().getAgility());
+		consumeTurnTime(character, ComponentsMapper.character.get(character).getSkills().getAgility());
 		return isReachedEndOfPath(systemsCommonData.getMap().findConnection(node, nextNode), systemsCommonData);
 	}
+
 
 	private boolean isReachedEndOfPath(MapGraphConnection connection,
 									   SystemsCommonData systemsCommonData) {

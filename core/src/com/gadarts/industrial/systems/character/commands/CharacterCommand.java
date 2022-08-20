@@ -3,10 +3,11 @@ package com.gadarts.industrial.systems.character.commands;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Pool;
+import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
-import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -48,4 +49,9 @@ public abstract class CharacterCommand implements Pool.Poolable {
 	}
 
 	abstract public void free( );
+
+	void consumeTurnTime(Entity character, float consume) {
+		CharacterComponent characterComp = ComponentsMapper.character.get(character);
+		characterComp.setTurnTimeLeft(characterComp.getTurnTimeLeft() - consume);
+	}
 }

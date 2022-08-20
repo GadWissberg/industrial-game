@@ -6,12 +6,14 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.map.CalculatePathRequest;
 import com.gadarts.industrial.map.GameHeuristic;
 import com.gadarts.industrial.map.GamePathFinder;
 import com.gadarts.industrial.map.MapGraphPath;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
+import com.gadarts.industrial.systems.SystemsCommonData;
 import com.google.gson.JsonObject;
 
 import java.util.LinkedHashSet;
@@ -148,9 +150,11 @@ public class GameUtils {
 		return output;
 	}
 
-	public static int getPrimaryAttackHitFrameIndexForCharacter(Entity character, PlayerWeaponsDefinitions selectedWeapon) {
+	public static int getPrimaryAttackHitFrameIndexForCharacter(Entity character, SystemsCommonData commonData) {
 		if (ComponentsMapper.player.has(character)) {
-			return selectedWeapon.getHitFrameIndex();
+			Weapon selectedWeapon = commonData.getStorage().getSelectedWeapon();
+			PlayerWeaponsDefinitions definition = (PlayerWeaponsDefinitions) (selectedWeapon.getDefinition());
+			return definition.getHitFrameIndex();
 		} else {
 			return ComponentsMapper.character.get(character).getCharacterSpriteData().getPrimaryAttackHitFrameIndex();
 		}

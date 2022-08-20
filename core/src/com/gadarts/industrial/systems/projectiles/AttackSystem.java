@@ -13,7 +13,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.BulletComponent;
 import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.FlyingParticleComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.collision.CollisionComponent;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
@@ -33,7 +32,7 @@ import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.utils.EntityBuilder;
 
-public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> implements CharacterSystemEventsSubscriber {
+public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> implements CharacterSystemEventsSubscriber {
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final float BULLET_MAX_DISTANCE = 14;
 	private static final Vector3 auxVector3_1 = new Vector3();
@@ -48,7 +47,7 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 	private ImmutableArray<Entity> bullets;
 	private ImmutableArray<Entity> collidables;
 
-	public BulletSystem(SystemsCommonData systemsCommonData,
+	public AttackSystem(SystemsCommonData systemsCommonData,
 						GameAssetsManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
 		super(systemsCommonData, assetsManager, lifeCycleHandler);
@@ -78,7 +77,15 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
 		getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.ATTACK_ENERGY_BALL);
 		float height = ComponentsMapper.enemy.get(character).getEnemyDefinition().getHeight();
-		createBullet(character, direction, charPos, enemyComp.getEnemyDefinition().getPrimaryAttack(), height);
+		WeaponsDefinitions primaryAttack = enemyComp.getEnemyDefinition().getPrimaryAttack();
+		if (primaryAttack.isMelee()) {
+			subscribers.forEach(subscriber -> {
+				Entity target = ComponentsMapper.character.get(character).getTarget();
+				subscriber.onMeleeAttackAppliedOnTarget(character, target, primaryAttack);
+			});
+		} else {
+			createBullet(character, direction, charPos, primaryAttack, height);
+		}
 	}
 
 	private void createBullet(Entity character,
@@ -156,7 +163,7 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 	}
 
 	private void onCollisionWithWall(final Entity bullet, final MapGraphNode node) {
-		for (BulletSystemEventsSubscriber subscriber : subscribers) {
+		for (AttackSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onBulletCollisionWithWall(bullet, node);
 		}
 		destroyBullet(bullet);
@@ -206,7 +213,7 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 	}
 
 	private void onProjectileCollisionWithAnotherEntity(final Entity bullet, final Entity collidable) {
-		for (BulletSystemEventsSubscriber subscriber : subscribers) {
+		for (AttackSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onProjectileCollisionWithAnotherEntity(bullet, collidable);
 		}
 		destroyBullet(bullet);
@@ -247,8 +254,8 @@ public class BulletSystem extends GameSystem<BulletSystemEventsSubscriber> imple
 	}
 
 	@Override
-	public Class<BulletSystemEventsSubscriber> getEventsSubscriberClass( ) {
-		return BulletSystemEventsSubscriber.class;
+	public Class<AttackSystemEventsSubscriber> getEventsSubscriberClass( ) {
+		return AttackSystemEventsSubscriber.class;
 	}
 
 	@Override

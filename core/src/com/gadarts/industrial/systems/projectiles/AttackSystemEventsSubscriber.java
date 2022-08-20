@@ -5,7 +5,7 @@ import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.systems.SystemEventsSubscriber;
 
-public interface BulletSystemEventsSubscriber extends SystemEventsSubscriber {
+public interface AttackSystemEventsSubscriber extends SystemEventsSubscriber {
 	default void onBulletCollisionWithWall(Entity bullet, MapGraphNode node) {
 
 	}
@@ -15,5 +15,9 @@ public interface BulletSystemEventsSubscriber extends SystemEventsSubscriber {
 	}
 
 	default void onHitScanCollisionWithAnotherEntity(WeaponsDefinitions definition, Entity collidable) {
+	}
+
+	default void onMeleeAttackAppliedOnTarget(Entity character, Entity target, WeaponsDefinitions primaryAttack) {
+
 	}
 }

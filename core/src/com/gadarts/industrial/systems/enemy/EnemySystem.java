@@ -167,12 +167,10 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private boolean considerPrimaryAttack(Entity enemy, Enemies enemyDefinition) {
 		float disToTarget = calculateDistanceToTarget(enemy);
 		boolean result = false;
-		if (disToTarget <= enemyDefinition.getRange().getMaxDistance()) {
-			if (enemyDefinition.getPrimaryAttack().isMelee()) {
-				result = disToTarget <= 1;
-			} else {
-				result = checkIfWayIsClearToTarget(enemy);
-			}
+		WeaponsDefinitions primaryAttack = enemyDefinition.getPrimaryAttack();
+		float turnTimeLeft = ComponentsMapper.character.get(enemy).getTurnTimeLeft();
+		if (turnTimeLeft >= primaryAttack.getDuration() && disToTarget <= enemyDefinition.getSight().getMaxDistance()) {
+			result = primaryAttack.isMelee() ? disToTarget <= 1 : checkIfWayIsClearToTarget(enemy);
 		}
 		return result;
 	}
@@ -199,7 +197,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		Vector3 position = ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition();
 		Vector2 src = auxVector2_1.set(position.x, position.z);
 		Vector2 dst = auxVector2_2.set(targetPosition.x, targetPosition.z);
-		return GameUtils.findAllNodesBetweenNodes(src, dst, true, bresenhamOutput).size();
+		return GameUtils.findAllNodesBetweenNodes(src, dst, true, bresenhamOutput).size() - 1;
 	}
 
 	private void engagePrimaryAttack(Entity enemy) {
@@ -250,6 +248,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private void applySearchingModeOnEnemy(final Entity enemy) {
+		updateStatusIcon(enemy, iconSearching);
 		MapGraph map = getSystemsCommonData().getMap();
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		enemyComponent.setAiStatus(SEARCHING);
@@ -394,7 +393,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
 			if (characterComponent.getTurnTimeLeft() >= characterComponent.getSkills().getAgility()) {
 				MapGraphNode targetLastVisibleNode = enemyComponent.getTargetLastVisibleNode();
-				updateStatusIcon(enemy, iconSearching);
 				if (targetLastVisibleNode == null) {
 					applySearchingModeOnEnemy(enemy);
 				}

@@ -40,7 +40,7 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 		}
 		CharacterComponent charComp = ComponentsMapper.character.get(character);
 		WeaponsDefinitions primary = charComp.getPrimaryAttack();
-		int bulletsToShoot = MathUtils.random(primary.getMinNumberOfBullets(), primary.getMaxNumberOfBullets());
+		int bulletsToShoot = primary.isMelee() ? 1 : randomNumberOfBullets(primary);
 		charComp.getOnGoingAttack().initialize(CharacterComponent.AttackType.PRIMARY, bulletsToShoot);
 	}
 
@@ -55,6 +55,10 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 	@Override
 	public void free( ) {
 		Pools.get(PrimaryAttackCharacterCommand.class).free(this);
+	}
+
+	private static int randomNumberOfBullets(WeaponsDefinitions primary) {
+		return MathUtils.random(primary.getMinNumberOfBullets(), primary.getMaxNumberOfBullets());
 	}
 
 	private Vector3 calculateDirectionToTarget(CharacterComponent characterComp,
@@ -75,10 +79,7 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 		OnGoingAttack onGoingAttack = characterComponent.getOnGoingAttack();
 		if (onGoingAttack.isDone()) return false;
 
-		Weapon selectedWeapon = commonData.getStorage().getSelectedWeapon();
-		PlayerWeaponsDefinitions definition = (PlayerWeaponsDefinitions) (selectedWeapon.getDefinition());
-		int primaryAttackHitFrameIndex = GameUtils.getPrimaryAttackHitFrameIndexForCharacter(character, definition);
-
+		int primaryAttackHitFrameIndex = GameUtils.getPrimaryAttackHitFrameIndexForCharacter(character, commonData);
 		if (newFrame.index == primaryAttackHitFrameIndex) {
 			CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(character);
 			MapGraphNode positionNode = commonData.getMap().getNode(charDecalComp.getDecal().getPosition());
@@ -88,6 +89,9 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 				subscriber.onCharacterEngagesPrimaryAttack(character, direction, positionNodeCenterPosition);
 			}
 			onGoingAttack.bulletShot();
+			if (onGoingAttack.getBulletsToShoot() <= 0) {
+				consumeTurnTime(character, characterComponent.getPrimaryAttack().getDuration());
+			}
 		}
 		return false;
 	}
