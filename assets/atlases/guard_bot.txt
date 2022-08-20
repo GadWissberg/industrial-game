@@ -731,182 +731,182 @@ idle_1_west
   orig: 128, 128
   offset: 0, 0
   index: 3
-light_death_1
+light_death_0
   rotate: false
   xy: 781, 781
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 0
-light_death_1
+light_death_0
   rotate: false
   xy: 781, 911
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 1
-light_death_1
+light_death_0
   rotate: false
   xy: 781, 1171
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 2
-light_death_1
+light_death_0
   rotate: false
   xy: 781, 1301
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 3
-light_death_1
+light_death_0
   rotate: false
   xy: 781, 1431
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 4
-light_death_1
+light_death_0
   rotate: false
   xy: 781, 1561
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 5
-light_death_1
+light_death_0
   rotate: false
   xy: 781, 1691
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 6
-light_death_1
+light_death_0
   rotate: false
   xy: 781, 1821
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 7
-light_death_1
+light_death_0
   rotate: false
   xy: 911, 1
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 8
-light_death_1
+light_death_0
   rotate: false
   xy: 911, 131
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 9
-light_death_1
+light_death_0
   rotate: false
   xy: 781, 1041
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 10
-light_death_2
+light_death_1
   rotate: false
   xy: 911, 261
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 0
-light_death_2
+light_death_1
   rotate: false
   xy: 911, 391
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 1
-light_death_2
+light_death_1
   rotate: false
   xy: 911, 521
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 2
-light_death_2
+light_death_1
   rotate: false
   xy: 911, 651
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 3
-light_death_2
+light_death_1
   rotate: false
   xy: 911, 781
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 4
-light_death_2
+light_death_1
   rotate: false
   xy: 911, 911
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 5
-light_death_2
+light_death_1
   rotate: false
   xy: 911, 1041
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 6
-light_death_2
+light_death_1
   rotate: false
   xy: 911, 1171
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 7
-light_death_3
+light_death_2
   rotate: false
   xy: 911, 1301
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 0
-light_death_3
+light_death_2
   rotate: false
   xy: 911, 1431
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 1
-light_death_3
+light_death_2
   rotate: false
   xy: 911, 1561
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 2
-light_death_3
+light_death_2
   rotate: false
   xy: 911, 1691
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 3
-light_death_3
+light_death_2
   rotate: false
   xy: 911, 1821
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 4
-light_death_3
+light_death_2
   rotate: false
   xy: 1041, 1
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: 5
-light_death_3
+light_death_2
   rotate: false
   xy: 1041, 131
   size: 128, 128

@@ -181,14 +181,14 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">../sprites/player/light_death_0.png</key>
-            <key type="filename">../sprites/player/light_death_1.png</key>
-            <key type="filename">../sprites/player/light_death_2.png</key>
-            <key type="filename">../sprites/player/light_death_3.png</key>
-            <key type="filename">../sprites/player/light_death_4.png</key>
-            <key type="filename">../sprites/player/light_death_5.png</key>
-            <key type="filename">../sprites/player/light_death_6.png</key>
-            <key type="filename">../sprites/player/light_death_7.png</key>
+            <key type="filename">../sprites/player/light_death_0_0.png</key>
+            <key type="filename">../sprites/player/light_death_0_1.png</key>
+            <key type="filename">../sprites/player/light_death_0_2.png</key>
+            <key type="filename">../sprites/player/light_death_0_3.png</key>
+            <key type="filename">../sprites/player/light_death_0_4.png</key>
+            <key type="filename">../sprites/player/light_death_0_5.png</key>
+            <key type="filename">../sprites/player/light_death_0_6.png</key>
+            <key type="filename">../sprites/player/light_death_0_7.png</key>
             <key type="filename">../sprites/player/pickup_east_0.png</key>
             <key type="filename">../sprites/player/pickup_east_1.png</key>
             <key type="filename">../sprites/player/pickup_east_2.png</key>
@@ -238,14 +238,6 @@
         </map>
         <key>fileList</key>
         <array>
-            <filename>../sprites/player/light_death_0.png</filename>
-            <filename>../sprites/player/light_death_1.png</filename>
-            <filename>../sprites/player/light_death_2.png</filename>
-            <filename>../sprites/player/light_death_3.png</filename>
-            <filename>../sprites/player/light_death_4.png</filename>
-            <filename>../sprites/player/light_death_5.png</filename>
-            <filename>../sprites/player/light_death_6.png</filename>
-            <filename>../sprites/player/light_death_7.png</filename>
             <filename>../sprites/player/pickup_east_0.png</filename>
             <filename>../sprites/player/pickup_east_1.png</filename>
             <filename>../sprites/player/pickup_east_2.png</filename>
@@ -278,6 +270,14 @@
             <filename>../sprites/player/pickup_west_1.png</filename>
             <filename>../sprites/player/pickup_west_2.png</filename>
             <filename>../sprites/player/pickup_west_3.png</filename>
+            <filename>../sprites/player/light_death_0_0.png</filename>
+            <filename>../sprites/player/light_death_0_1.png</filename>
+            <filename>../sprites/player/light_death_0_2.png</filename>
+            <filename>../sprites/player/light_death_0_3.png</filename>
+            <filename>../sprites/player/light_death_0_4.png</filename>
+            <filename>../sprites/player/light_death_0_5.png</filename>
+            <filename>../sprites/player/light_death_0_6.png</filename>
+            <filename>../sprites/player/light_death_0_7.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

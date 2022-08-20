@@ -697,7 +697,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		Decal decal = characterDecalComponent.getDecal();
 		decal.setTextureRegion(newFrame);
 		Direction facingDirection = characterSpriteData.getFacingDirection();
-		if (spriteType.isSingleAnimation()) {
+		if (spriteType.isSingleDirection()) {
 			facingDirection = Direction.SOUTH;
 		}
 		if (animations.contains(spriteType)) {
@@ -743,7 +743,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 														  SpriteType spriteType,
 														  boolean sameSpriteType) {
 		AnimationComponent animationComponent = ComponentsMapper.animation.get(entity);
-		if (spriteType.isSingleAnimation()) {
+		if (spriteType.isSingleDirection()) {
 			if (!animationComponent.getAnimation().isAnimationFinished(animationComponent.getStateTime())) {
 				direction = Direction.SOUTH;
 			}

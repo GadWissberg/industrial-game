@@ -41,6 +41,7 @@ import com.gadarts.industrial.utils.GameUtils;
 import java.util.Map;
 
 import static com.gadarts.industrial.components.ComponentsMapper.character;
+import static com.gadarts.industrial.components.player.PlayerComponent.*;
 import static com.gadarts.industrial.shared.model.characters.Direction.*;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.*;
 
@@ -52,6 +53,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		CharacterSystemEventsSubscriber {
 	private static final int ROTATION_INTERVAL = 125;
 	private static final Vector3 auxVector3_1 = new Vector3();
+	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Vector2 auxVector2_3 = new Vector2();
@@ -190,7 +192,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			position = bulletModelInstanceComponent.getModelInstance().transform.getTranslation(auxVector3_1);
 		} else {
 			Decal decal = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer()).getDecal();
-			position = auxVector3_1.set(decal.getPosition()).add(0F, PlayerComponent.PLAYER_HEIGHT, 0F);
+			MapGraph map = getSystemsCommonData().getMap();
+			position = map.getNode(decal.getPosition()).getCenterPosition(auxVector3_2).add(0F, PLAYER_HEIGHT, 0F);
 		}
 		return position;
 	}
@@ -231,11 +234,12 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	private void createExplosionOnCharacterDeath(Entity character) {
 		if (ComponentsMapper.enemy.has(character)) {
-			Vector3 position = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
+			Decal decal = ComponentsMapper.characterDecal.get(character).getDecal();
+			MapGraphNode node = getSystemsCommonData().getMap().getNode(decal.getPosition());
 			float height = ComponentsMapper.enemy.get(character).getEnemyDefinition().getHeight();
+			Vector3 pos = node.getCenterPosition(auxVector3_1).add(0F, height / 4F, 0F);
 			EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-					.addParticleEffectComponent(smallExpEffect,
-							auxVector3_1.set(position).add(0F, height / 4F, 0F))
+					.addParticleEffectComponent(smallExpEffect, pos)
 					.finishAndAddToEngine();
 		}
 	}

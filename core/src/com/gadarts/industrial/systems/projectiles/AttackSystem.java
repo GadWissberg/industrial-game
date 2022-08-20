@@ -134,12 +134,7 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 							JACKET_FLY_AWAY_MIN_DEGREE, JACKET_FLY_AWAY_MAX_DEGREE_TO_ADD)
 					.finishAndAddToEngine();
 		}
-
-//		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-//				.addParticleEffectComponent((PooledEngine) getEngine(), effect, auxVector3_1.set(charPos), bullet)
-//				.finishAndAddToEngine();
 	}
-
 
 	@Override
 	public void addedToEngine(Engine engine) {

@@ -101,7 +101,7 @@ public class GeneralHandler implements
 		CharacterAnimations animations = new CharacterAnimations();
 		TextureAtlas atlas = assetsManager.getAtlas(character);
 		Arrays.stream(SpriteType.values()).forEach(spriteType -> {
-			if (spriteType.isSingleAnimation()) {
+			if (spriteType.isSingleDirection()) {
 				inflateCharacterAnimation(animations, atlas, spriteType, Direction.SOUTH);
 			} else {
 				Direction[] directions = Direction.values();
@@ -240,8 +240,7 @@ public class GeneralHandler implements
 		String sprTypeName = Optional.ofNullable(spriteType.getRegionName()).orElse(spriteType.name()).toLowerCase();
 		int vars = spriteType.getVariations();
 		IntStream.range(0, vars).forEach(variationIndex -> {
-			boolean singleAnimation = spriteType.isSingleAnimation();
-			String name = singleAnimation ? sprTypeName : formatNameForVariation(dir, sprTypeName, vars, variationIndex);
+			String name = formatNameForVariation(dir, sprTypeName, vars, variationIndex, spriteType.isSingleDirection());
 			CharacterAnimation a = createAnimation(atlas, spriteType, name, dir);
 			if (a != null && a.getKeyFrames().length > 0) {
 				animations.put(spriteType, variationIndex, dir, a);
@@ -249,8 +248,15 @@ public class GeneralHandler implements
 		});
 	}
 
-	private static String formatNameForVariation(Direction dir, String sprTypeName, int vars, int variationIndex) {
-		return String.format("%s_%s%s", sprTypeName, vars > 1 ? variationIndex + "_" : "", dir.name().toLowerCase());
+	private static String formatNameForVariation(Direction dir,
+												 String sprTypeName,
+												 int vars,
+												 int variationIndex,
+												 boolean singleDirection) {
+		return String.format("%s%s%s",
+				sprTypeName,
+				vars > 1 ? "_" + variationIndex : "",
+				singleDirection ? "" : "_" + dir.name().toLowerCase());
 	}
 
 	private CharacterAnimation createAnimation(final TextureAtlas atlas,

@@ -181,17 +181,25 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
+            <key type="filename">../sprites/maint_bot/light_death_0_0.png</key>
+            <key type="filename">../sprites/maint_bot/light_death_0_1.png</key>
+            <key type="filename">../sprites/maint_bot/light_death_0_10.png</key>
+            <key type="filename">../sprites/maint_bot/light_death_0_2.png</key>
+            <key type="filename">../sprites/maint_bot/light_death_0_3.png</key>
+            <key type="filename">../sprites/maint_bot/light_death_0_4.png</key>
+            <key type="filename">../sprites/maint_bot/light_death_0_5.png</key>
+            <key type="filename">../sprites/maint_bot/light_death_0_6.png</key>
+            <key type="filename">../sprites/maint_bot/light_death_0_7.png</key>
+            <key type="filename">../sprites/maint_bot/light_death_0_8.png</key>
+            <key type="filename">../sprites/maint_bot/light_death_0_9.png</key>
             <key type="filename">../sprites/maint_bot/light_death_1_0.png</key>
             <key type="filename">../sprites/maint_bot/light_death_1_1.png</key>
-            <key type="filename">../sprites/maint_bot/light_death_1_10.png</key>
             <key type="filename">../sprites/maint_bot/light_death_1_2.png</key>
             <key type="filename">../sprites/maint_bot/light_death_1_3.png</key>
             <key type="filename">../sprites/maint_bot/light_death_1_4.png</key>
             <key type="filename">../sprites/maint_bot/light_death_1_5.png</key>
             <key type="filename">../sprites/maint_bot/light_death_1_6.png</key>
             <key type="filename">../sprites/maint_bot/light_death_1_7.png</key>
-            <key type="filename">../sprites/maint_bot/light_death_1_8.png</key>
-            <key type="filename">../sprites/maint_bot/light_death_1_9.png</key>
             <key type="filename">../sprites/maint_bot/light_death_2_0.png</key>
             <key type="filename">../sprites/maint_bot/light_death_2_1.png</key>
             <key type="filename">../sprites/maint_bot/light_death_2_2.png</key>
@@ -199,14 +207,6 @@
             <key type="filename">../sprites/maint_bot/light_death_2_4.png</key>
             <key type="filename">../sprites/maint_bot/light_death_2_5.png</key>
             <key type="filename">../sprites/maint_bot/light_death_2_6.png</key>
-            <key type="filename">../sprites/maint_bot/light_death_2_7.png</key>
-            <key type="filename">../sprites/maint_bot/light_death_3_0.png</key>
-            <key type="filename">../sprites/maint_bot/light_death_3_1.png</key>
-            <key type="filename">../sprites/maint_bot/light_death_3_2.png</key>
-            <key type="filename">../sprites/maint_bot/light_death_3_3.png</key>
-            <key type="filename">../sprites/maint_bot/light_death_3_4.png</key>
-            <key type="filename">../sprites/maint_bot/light_death_3_5.png</key>
-            <key type="filename">../sprites/maint_bot/light_death_3_6.png</key>
             <key type="filename">../sprites/maint_bot/maint/attack_primary_east_0.png</key>
             <key type="filename">../sprites/maint_bot/maint/attack_primary_east_1.png</key>
             <key type="filename">../sprites/maint_bot/maint/attack_primary_east_2.png</key>
@@ -368,32 +368,6 @@
         </map>
         <key>fileList</key>
         <array>
-            <filename>../sprites/maint_bot/light_death_1_0.png</filename>
-            <filename>../sprites/maint_bot/light_death_1_1.png</filename>
-            <filename>../sprites/maint_bot/light_death_1_10.png</filename>
-            <filename>../sprites/maint_bot/light_death_1_2.png</filename>
-            <filename>../sprites/maint_bot/light_death_1_3.png</filename>
-            <filename>../sprites/maint_bot/light_death_1_4.png</filename>
-            <filename>../sprites/maint_bot/light_death_1_5.png</filename>
-            <filename>../sprites/maint_bot/light_death_1_6.png</filename>
-            <filename>../sprites/maint_bot/light_death_1_7.png</filename>
-            <filename>../sprites/maint_bot/light_death_1_8.png</filename>
-            <filename>../sprites/maint_bot/light_death_1_9.png</filename>
-            <filename>../sprites/maint_bot/light_death_2_0.png</filename>
-            <filename>../sprites/maint_bot/light_death_2_1.png</filename>
-            <filename>../sprites/maint_bot/light_death_2_2.png</filename>
-            <filename>../sprites/maint_bot/light_death_2_3.png</filename>
-            <filename>../sprites/maint_bot/light_death_2_4.png</filename>
-            <filename>../sprites/maint_bot/light_death_2_5.png</filename>
-            <filename>../sprites/maint_bot/light_death_2_6.png</filename>
-            <filename>../sprites/maint_bot/light_death_2_7.png</filename>
-            <filename>../sprites/maint_bot/light_death_3_0.png</filename>
-            <filename>../sprites/maint_bot/light_death_3_1.png</filename>
-            <filename>../sprites/maint_bot/light_death_3_2.png</filename>
-            <filename>../sprites/maint_bot/light_death_3_3.png</filename>
-            <filename>../sprites/maint_bot/light_death_3_4.png</filename>
-            <filename>../sprites/maint_bot/light_death_3_5.png</filename>
-            <filename>../sprites/maint_bot/light_death_3_6.png</filename>
             <filename>../sprites/maint_bot/maint/attack_primary_east_0.png</filename>
             <filename>../sprites/maint_bot/maint/attack_primary_east_1.png</filename>
             <filename>../sprites/maint_bot/maint/attack_primary_east_2.png</filename>
@@ -538,6 +512,32 @@
             <filename>../sprites/maint_bot/maint/run_south_west_1.png</filename>
             <filename>../sprites/maint_bot/maint/run_west_0.png</filename>
             <filename>../sprites/maint_bot/maint/run_west_1.png</filename>
+            <filename>../sprites/maint_bot/light_death_0_0.png</filename>
+            <filename>../sprites/maint_bot/light_death_0_1.png</filename>
+            <filename>../sprites/maint_bot/light_death_0_10.png</filename>
+            <filename>../sprites/maint_bot/light_death_0_2.png</filename>
+            <filename>../sprites/maint_bot/light_death_0_3.png</filename>
+            <filename>../sprites/maint_bot/light_death_0_4.png</filename>
+            <filename>../sprites/maint_bot/light_death_0_5.png</filename>
+            <filename>../sprites/maint_bot/light_death_0_6.png</filename>
+            <filename>../sprites/maint_bot/light_death_0_7.png</filename>
+            <filename>../sprites/maint_bot/light_death_0_8.png</filename>
+            <filename>../sprites/maint_bot/light_death_0_9.png</filename>
+            <filename>../sprites/maint_bot/light_death_1_0.png</filename>
+            <filename>../sprites/maint_bot/light_death_1_1.png</filename>
+            <filename>../sprites/maint_bot/light_death_1_2.png</filename>
+            <filename>../sprites/maint_bot/light_death_1_3.png</filename>
+            <filename>../sprites/maint_bot/light_death_1_4.png</filename>
+            <filename>../sprites/maint_bot/light_death_1_5.png</filename>
+            <filename>../sprites/maint_bot/light_death_1_6.png</filename>
+            <filename>../sprites/maint_bot/light_death_1_7.png</filename>
+            <filename>../sprites/maint_bot/light_death_2_0.png</filename>
+            <filename>../sprites/maint_bot/light_death_2_1.png</filename>
+            <filename>../sprites/maint_bot/light_death_2_2.png</filename>
+            <filename>../sprites/maint_bot/light_death_2_3.png</filename>
+            <filename>../sprites/maint_bot/light_death_2_4.png</filename>
+            <filename>../sprites/maint_bot/light_death_2_5.png</filename>
+            <filename>../sprites/maint_bot/light_death_2_6.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
