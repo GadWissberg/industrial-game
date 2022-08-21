@@ -264,6 +264,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		characterComponent.setCommand(null);
 		if (characterComponent.getTurnTimeLeft() > 0) {
 			subscribers.forEach(subscriber -> subscriber.onCharacterStillHasTime(character));
+		} else {
+			subscribers.forEach(subscriber -> subscriber.onCharacterFinishedTurn(character));
 		}
 	}
 
@@ -464,7 +466,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 				if (currentCommand.reactToFrameChange(commonData, character, newFrame, subscribers)) {
 					commandDone(character);
 				}
-				if (characterComp.getTurnTimeLeft() <= 0) {
+				CharacterCommandsDefinitions definition = currentCommand.getDefinition();
+				if (characterComp.getTurnTimeLeft() <= 0 && definition != CharacterCommandsDefinitions.ATTACK_PRIMARY) {
 					subscribers.forEach(subscriber -> subscriber.onCharacterFinishedTurn(character));
 				}
 			}

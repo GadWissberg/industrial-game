@@ -44,6 +44,7 @@ import com.gadarts.industrial.utils.GameUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static com.badlogic.gdx.utils.TimeUtils.millis;
 import static com.badlogic.gdx.utils.TimeUtils.timeSinceMillis;
@@ -86,6 +87,36 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private TextureRegion iconAttack;
 	private TextureRegion iconSearching;
 	private ParticleEffect smokeEffect;
+	private List<PrimaryAttackValidation> primaryAttackValidations = List.of(
+			new PrimaryAttackValidation(
+					entity -> {
+						EnemyComponent enemyComp = ComponentsMapper.enemy.get(entity);
+						WeaponsDefinitions primaryAttack = enemyComp.getEnemyDefinition().getPrimaryAttack();
+						return enemyComp.getEngineEnergy() >= primaryAttack.getEngineConsumption();
+					},
+					this::enemyDecidedToMove),
+			new PrimaryAttackValidation(
+					entity -> {
+						Enemies enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDefinition();
+						WeaponsDefinitions primaryAttack = enemyDefinition.getPrimaryAttack();
+						return ComponentsMapper.character.get(entity).getTurnTimeLeft() >= primaryAttack.getDuration();
+					},
+					this::enemyDecidedToMove),
+			new PrimaryAttackValidation(
+					entity -> {
+						Enemies enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDefinition();
+						float disToTarget = calculateDistanceToTarget(entity);
+						return disToTarget <= enemyDefinition.getSight().getMaxDistance();
+					},
+					this::enemyDecidedToMove),
+			new PrimaryAttackValidation(
+					entity -> {
+						Enemies enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDefinition();
+						WeaponsDefinitions primaryAttack = enemyDefinition.getPrimaryAttack();
+						float disToTarget = calculateDistanceToTarget(entity);
+						return primaryAttack.isMelee() ? disToTarget <= 1 : checkIfWayIsClearToTarget(entity);
+					},
+					this::enemyDecidedToMove));
 
 	public EnemySystem(SystemsCommonData systemsCommonData,
 					   GameAssetsManager assetsManager,
@@ -136,43 +167,30 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	@Override
 	public void onSpriteTypeChanged(Entity entity, SpriteType spriteType) {
 		if (ComponentsMapper.enemy.has(entity) && spriteType == SpriteType.ATTACK_PRIMARY) {
-			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(entity);
-			WeaponsDefinitions primaryAttack = enemyComponent.getEnemyDefinition().getPrimaryAttack();
-			if (enemyComponent.getEngineEnergy() >= primaryAttack.getEngineConsumption()) {
-				consumeEngineEnergy(entity);
-			} else {
-				CharacterComponent characterComponent = ComponentsMapper.character.get(entity);
-				characterComponent.setCommand(null);
-				characterComponent.getCharacterSpriteData().setSpriteType(SpriteType.IDLE);
-				enemyFinishedTurn();
-			}
+			consumeEngineEnergy(entity);
 		}
 	}
 
 	private void invokeEnemyAttackBehaviour(final Entity enemy) {
-		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
-		Enemies enemyDefinition = enemyComponent.getEnemyDefinition();
-		if (considerPrimaryAttack(enemy, enemyDefinition)) {
+		if (considerPrimaryAttack(enemy)) {
 			engagePrimaryAttack(enemy);
-		} else {
-			enemyDecidedToMove(enemy, enemyComponent);
 		}
 	}
 
-	private void enemyDecidedToMove(Entity enemy, EnemyComponent enemyComponent) {
-		enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
+	private void enemyDecidedToMove(Entity enemy) {
+		ComponentsMapper.enemy.get(enemy).setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
 		invokeEnemyTurn(enemy);
 	}
 
-	private boolean considerPrimaryAttack(Entity enemy, Enemies enemyDefinition) {
-		float disToTarget = calculateDistanceToTarget(enemy);
-		boolean result = false;
-		WeaponsDefinitions primaryAttack = enemyDefinition.getPrimaryAttack();
-		float turnTimeLeft = ComponentsMapper.character.get(enemy).getTurnTimeLeft();
-		if (turnTimeLeft >= primaryAttack.getDuration() && disToTarget <= enemyDefinition.getSight().getMaxDistance()) {
-			result = primaryAttack.isMelee() ? disToTarget <= 1 : checkIfWayIsClearToTarget(enemy);
+	private boolean considerPrimaryAttack(Entity enemy) {
+		for (int i = 0; i < primaryAttackValidations.size(); i++) {
+			PrimaryAttackValidation primaryAttackValidation = primaryAttackValidations.get(i);
+			if (!primaryAttackValidation.validate(enemy)) {
+				primaryAttackValidation.alternative().run(enemy);
+				return false;
+			}
 		}
-		return result;
+		return true;
 	}
 
 	@Override
