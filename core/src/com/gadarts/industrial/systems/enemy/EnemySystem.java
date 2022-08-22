@@ -27,7 +27,6 @@ import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
-import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.ModelInstancePools;
@@ -44,7 +43,6 @@ import com.gadarts.industrial.utils.GameUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.function.Predicate;
 
 import static com.badlogic.gdx.utils.TimeUtils.millis;
 import static com.badlogic.gdx.utils.TimeUtils.timeSinceMillis;
@@ -60,6 +58,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		TurnsSystemEventsSubscriber,
 		RenderSystemEventsSubscriber {
 	public static final float SKILL_FLOWER_HEIGHT_RELATIVE = 1F;
+	public static final float TURN_DURATION = 1F;
 	private static final long AMB_SOUND_INTERVAL_MIN = 10L;
 	private static final long AMB_SOUND_INTERVAL_MAX = 50L;
 	private final static Vector2 auxVector2_1 = new Vector2();
@@ -79,7 +78,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final float SMOKE_HEIGHT_BIAS = 0.4F;
 	private final static LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
-	public static final float TURN_DURATION = 1F;
 	private final List<Sounds> ambSounds = List.of(Sounds.AMB_CHAINS, Sounds.AMB_SIGH, Sounds.AMB_LAUGH);
 	private final PathPlanHandler pathPlanner;
 	private ImmutableArray<Entity> enemies;
@@ -87,42 +85,60 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private TextureRegion iconAttack;
 	private TextureRegion iconSearching;
 	private ParticleEffect smokeEffect;
-	private List<PrimaryAttackValidation> primaryAttackValidations = List.of(
-			new PrimaryAttackValidation(
-					entity -> {
-						EnemyComponent enemyComp = ComponentsMapper.enemy.get(entity);
-						WeaponsDefinitions primaryAttack = enemyComp.getEnemyDefinition().getPrimaryAttack();
-						return enemyComp.getEngineEnergy() >= primaryAttack.getEngineConsumption();
-					},
-					this::enemyDecidedToMove),
-			new PrimaryAttackValidation(
-					entity -> {
-						Enemies enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDefinition();
-						WeaponsDefinitions primaryAttack = enemyDefinition.getPrimaryAttack();
-						return ComponentsMapper.character.get(entity).getTurnTimeLeft() >= primaryAttack.getDuration();
-					},
-					this::enemyDecidedToMove),
-			new PrimaryAttackValidation(
-					entity -> {
-						Enemies enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDefinition();
-						float disToTarget = calculateDistanceToTarget(entity);
-						return disToTarget <= enemyDefinition.getSight().getMaxDistance();
-					},
-					this::enemyDecidedToMove),
-			new PrimaryAttackValidation(
-					entity -> {
-						Enemies enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDefinition();
-						WeaponsDefinitions primaryAttack = enemyDefinition.getPrimaryAttack();
-						float disToTarget = calculateDistanceToTarget(entity);
-						return primaryAttack.isMelee() ? disToTarget <= 1 : checkIfWayIsClearToTarget(entity);
-					},
-					this::enemyDecidedToMove));
 
 	public EnemySystem(SystemsCommonData systemsCommonData,
 					   GameAssetsManager assetsManager,
 					   GameLifeCycleHandler lifeCycleHandler) {
 		super(systemsCommonData, assetsManager, lifeCycleHandler);
 		pathPlanner = new PathPlanHandler(getAssetsManager(), getSystemsCommonData().getMap());
+	}
+
+	@Override
+	public void onFrameChanged(final Entity entity, final float deltaTime, final TextureAtlas.AtlasRegion newFrame) {
+		SpriteType spriteType = ComponentsMapper.character.get(entity).getCharacterSpriteData().getSpriteType();
+		if (ComponentsMapper.enemy.has(entity)) {
+			if (spriteType == SpriteType.RUN) {
+				onFrameChangedOfRun(entity);
+			}
+		}
+	}
+
+	@Override
+	public void onSpriteTypeChanged(Entity entity, SpriteType spriteType) {
+		if (ComponentsMapper.enemy.has(entity) && spriteType == SpriteType.ATTACK_PRIMARY) {
+			consumeEngineEnergy(entity);
+		}
+	}
+
+	@Override
+	public void onCharacterCommandDone(final Entity character, final CharacterCommand executedCommand) {
+		if (ComponentsMapper.enemy.has(character)) {
+			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(character);
+			long currentTurnId = getSystemsCommonData().getCurrentTurnId();
+			if (executedCommand.getDefinition() == CharacterCommandsDefinitions.ATTACK_PRIMARY) {
+				enemyComponent.getTimeStamps().setLastPrimaryAttack(currentTurnId);
+			}
+		}
+	}
+
+	@Override
+	public void onDestinationReached(Entity character) {
+		CharacterSystemEventsSubscriber.super.onDestinationReached(character);
+	}
+
+	boolean checkIfWayIsClearToTarget(final Entity enemy) {
+		LinkedHashSet<GridPoint2> nodes = GameUtils.findAllNodesToTarget(enemy, bresenhamOutput);
+		boolean blocked = checkIfFloorNodesBlockSightToTarget(enemy, nodes);
+		if (!blocked) {
+			blocked = checkIfFloorNodesContainObjects(nodes, enemy);
+		}
+		return !blocked;
+	}
+
+	private static void consumeEngineEnergy(Entity character) {
+		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
+		WeaponsDefinitions primaryAttack = enemyComp.getEnemyDefinition().getPrimaryAttack();
+		enemyComp.setEngineEnergy(Math.max(enemyComp.getEngineEnergy() - primaryAttack.getEngineConsumption(), 0));
 	}
 
 	private void onFrameChangedOfRun(final Entity entity) {
@@ -148,75 +164,31 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		}
 	}
 
-	@Override
-	public void onFrameChanged(final Entity entity, final float deltaTime, final TextureAtlas.AtlasRegion newFrame) {
-		SpriteType spriteType = ComponentsMapper.character.get(entity).getCharacterSpriteData().getSpriteType();
-		if (ComponentsMapper.enemy.has(entity)) {
-			if (spriteType == SpriteType.RUN) {
-				onFrameChangedOfRun(entity);
-			}
-		}
-	}
-
-	private static void consumeEngineEnergy(Entity character) {
-		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
-		WeaponsDefinitions primaryAttack = enemyComp.getEnemyDefinition().getPrimaryAttack();
-		enemyComp.setEngineEnergy(Math.max(enemyComp.getEngineEnergy() - primaryAttack.getEngineConsumption(), 0));
-	}
-
-	@Override
-	public void onSpriteTypeChanged(Entity entity, SpriteType spriteType) {
-		if (ComponentsMapper.enemy.has(entity) && spriteType == SpriteType.ATTACK_PRIMARY) {
-			consumeEngineEnergy(entity);
-		}
-	}
-
 	private void invokeEnemyAttackBehaviour(final Entity enemy) {
 		if (considerPrimaryAttack(enemy)) {
 			engagePrimaryAttack(enemy);
 		}
 	}
 
-	private void enemyDecidedToMove(Entity enemy) {
-		ComponentsMapper.enemy.get(enemy).setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
-		invokeEnemyTurn(enemy);
-	}
-
 	private boolean considerPrimaryAttack(Entity enemy) {
-		for (int i = 0; i < primaryAttackValidations.size(); i++) {
-			PrimaryAttackValidation primaryAttackValidation = primaryAttackValidations.get(i);
-			if (!primaryAttackValidation.validate(enemy)) {
-				primaryAttackValidation.alternative().run(enemy);
+		for (int i = 0; i < PrimaryAttackValidations.primaryAttackValidations.size(); i++) {
+			PrimaryAttackValidation primaryAttackValidation = PrimaryAttackValidations.primaryAttackValidations.get(i);
+			if (!primaryAttackValidation.validate(enemy, this)) {
+				applyAlternative(enemy, primaryAttackValidation);
 				return false;
 			}
 		}
 		return true;
 	}
 
-	@Override
-	public void onCharacterCommandDone(final Entity character, final CharacterCommand executedCommand) {
-		if (ComponentsMapper.enemy.has(character)) {
-			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(character);
-			long currentTurnId = getSystemsCommonData().getCurrentTurnId();
-			if (executedCommand.getDefinition() == CharacterCommandsDefinitions.ATTACK_PRIMARY) {
-				enemyComponent.getTimeStamps().setLastPrimaryAttack(currentTurnId);
-			}
+	private void applyAlternative(Entity enemy, PrimaryAttackValidation primaryAttackValidation) {
+		if (primaryAttackValidation.alternative() != null) {
+			primaryAttackValidation.alternative().run(enemy, this);
+		} else {
+			enemyFinishedTurn();
 		}
 	}
 
-	@Override
-	public void onDestinationReached(Entity character) {
-		CharacterSystemEventsSubscriber.super.onDestinationReached(character);
-	}
-
-	private float calculateDistanceToTarget(final Entity enemy) {
-		Entity target = ComponentsMapper.character.get(enemy).getTarget();
-		Vector3 targetPosition = ComponentsMapper.characterDecal.get(target).getDecal().getPosition();
-		Vector3 position = ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition();
-		Vector2 src = auxVector2_1.set(position.x, position.z);
-		Vector2 dst = auxVector2_2.set(targetPosition.x, targetPosition.z);
-		return GameUtils.findAllNodesBetweenNodes(src, dst, true, bresenhamOutput).size() - 1;
-	}
 
 	private void engagePrimaryAttack(Entity enemy) {
 		Entity target = ComponentsMapper.character.get(enemy).getTarget();
@@ -245,15 +217,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		}
 		Entity obstacle = getSystemsCommonData().getMap().fetchObstacleFromNode(node);
 		return obstacle != null;
-	}
-
-	private boolean checkIfWayIsClearToTarget(final Entity enemy) {
-		LinkedHashSet<GridPoint2> nodes = GameUtils.findAllNodesToTarget(enemy, bresenhamOutput);
-		boolean blocked = checkIfFloorNodesBlockSightToTarget(enemy, nodes);
-		if (!blocked) {
-			blocked = checkIfFloorNodesContainObjects(nodes, enemy);
-		}
-		return !blocked;
 	}
 
 	private void addAsPossibleNodeToLookIn(final MapGraphNode enemyNode, final MapGraphNode node, Entity enemy) {
@@ -401,13 +364,21 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		subscribers.forEach(sub -> sub.onEnemyAppliedCommand(command, enemy));
 	}
 
-	private void invokeEnemyTurn(final Entity enemy) {
+	void invokeEnemyTurn(final Entity enemy) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(enemy);
 		enemyComp.setEngineEnergy(Math.min(enemyComp.getEngineEnergy() + 1, enemyComp.getEnemyDefinition().getEngine()));
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
-		if (enemyComponent.getAiStatus() == ATTACKING) {
+		EnemyAiStatus aiStatus = enemyComponent.getAiStatus();
+		if (aiStatus == ATTACKING) {
 			invokeEnemyAttackBehaviour(enemy);
-		} else {
+		} else if (aiStatus == DODGING) {
+			MapGraph map = getSystemsCommonData().getMap();
+			Decal decal = ComponentsMapper.characterDecal.get(enemy).getDecal();
+			List<MapGraphNode> availableNodes = map.getAvailableNodesAroundNode(map.getNode(decal.getPosition()));
+			int count = availableNodes.size();
+			MapGraphNode dst = count > 0 ? availableNodes.get(MathUtils.random(count - 1)) : null;
+			goAttackAtGivenLocation(enemy, dst, CharacterCommandsDefinitions.DODGE);
+		} else if (aiStatus == RUNNING_TO_LAST_SEEN_POSITION) {
 			CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
 			if (characterComponent.getTurnTimeLeft() >= characterComponent.getSkills().getAgility()) {
 				MapGraphNode targetLastVisibleNode = enemyComponent.getTargetLastVisibleNode();
@@ -428,12 +399,15 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		if (enemyNode.equals(targetLastVisibleNode)) {
 			applySearchingModeOnEnemy(enemy);
 		}
-
 		MapGraphNode updatedLastVisibleNode = ComponentsMapper.enemy.get(enemy).getTargetLastVisibleNode();
-		initializePathPlanRequest(updatedLastVisibleNode, charDecalComp, CLEAN, enemy);
-		if (updatedLastVisibleNode != null && GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic(), 2)) {
+		goAttackAtGivenLocation(enemy, updatedLastVisibleNode, CharacterCommandsDefinitions.RUN);
+	}
+
+	private void goAttackAtGivenLocation(Entity enemy, MapGraphNode dst, CharacterCommandsDefinitions commandDefinition) {
+		initializePathPlanRequest(dst, ComponentsMapper.characterDecal.get(enemy), CLEAN, enemy);
+		if (dst != null && GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic(), 2)) {
 			MapGraphPath currentPath = pathPlanner.getCurrentPath();
-			applyCommand(enemy, CharacterCommandsDefinitions.RUN, updatedLastVisibleNode, currentPath);
+			applyCommand(enemy, commandDefinition, dst, currentPath);
 		} else {
 			enemyFinishedTurn();
 		}

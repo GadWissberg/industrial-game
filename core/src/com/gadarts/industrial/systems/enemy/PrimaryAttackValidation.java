@@ -2,11 +2,9 @@ package com.gadarts.industrial.systems.enemy;
 
 import com.badlogic.ashley.core.Entity;
 
-import java.util.function.Predicate;
-
-public record PrimaryAttackValidation(Predicate<Entity> validation,
+public record PrimaryAttackValidation(PrimaryAttackPredicate predicate,
 									  PrimaryAttackValidationAlternative alternative) {
-	public boolean validate(Entity enemy) {
-		return validation.test(enemy);
+	public boolean validate(Entity enemy, EnemySystem enemySystem) {
+		return predicate.test(enemy, enemySystem);
 	}
 }

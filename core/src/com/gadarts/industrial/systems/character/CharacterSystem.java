@@ -353,17 +353,21 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 
 	private void handleRotation(CharacterCommand currentCommand,
-								CharacterComponent charComponent) {
-		if (charComponent.getCharacterSpriteData().getSpriteType() == PAIN) return;
+								CharacterComponent charComp) {
+		if (charComp.getCharacterSpriteData().getSpriteType() == PAIN) return;
 
-		CharacterRotationData rotationData = charComponent.getRotationData();
-		if (rotationData.isRotating() && TimeUtils.timeSinceMillis(rotationData.getLastRotation()) > ROTATION_INTERVAL) {
-			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
-				subscriber.onCharacterRotated(currentCommand.getCharacter());
+		CharacterRotationData rotData = charComp.getRotationData();
+		if (!currentCommand.getDefinition().isRotationForbidden()) {
+			if (rotData.isRotating() && TimeUtils.timeSinceMillis(rotData.getLastRotation()) > ROTATION_INTERVAL) {
+				for (CharacterSystemEventsSubscriber subscriber : subscribers) {
+					subscriber.onCharacterRotated(currentCommand.getCharacter());
+				}
+				rotData.setLastRotation(TimeUtils.millis());
+				Direction directionToDest = calculateDirectionToDestination(currentCommand);
+				rotate(charComp, rotData, directionToDest, currentCommand.getCharacter());
 			}
-			rotationData.setLastRotation(TimeUtils.millis());
-			Direction directionToDest = calculateDirectionToDestination(currentCommand);
-			rotate(charComponent, rotationData, directionToDest, currentCommand.getCharacter());
+		} else {
+			rotationDone(rotData, charComp.getCharacterSpriteData());
 		}
 	}
 

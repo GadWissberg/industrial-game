@@ -27,6 +27,7 @@ public class GameUtils {
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Bresenham2 bresenham = new Bresenham2();
+	private static final LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
 
 	/**
 	 * Whether given contained is fully inside the container.
@@ -105,7 +106,7 @@ public class GameUtils {
 		outputPath.clear();
 		pathFinder.searchNodePathBeforeCommand(heuristic, request);
 		boolean foundPath = outputPath.nodes.size > 1;
-		if (maxNumberOfNodes > 0 && maxNumberOfNodes < outputPath.nodes.size && foundPath) {
+		if (maxNumberOfNodes > 0 && maxNumberOfNodes < outputPath.nodes.size) {
 			outputPath.nodes.removeRange(maxNumberOfNodes, outputPath.nodes.size - 1);
 		}
 		return foundPath;
@@ -158,5 +159,14 @@ public class GameUtils {
 		} else {
 			return ComponentsMapper.character.get(character).getCharacterSpriteData().getPrimaryAttackHitFrameIndex();
 		}
+	}
+
+	public static float calculateDistanceToTarget(Entity character) {
+		Entity target = ComponentsMapper.character.get(character).getTarget();
+		Vector3 targetPosition = ComponentsMapper.characterDecal.get(target).getDecal().getPosition();
+		Vector3 position = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
+		Vector2 src = auxVector2_1.set(position.x, position.z);
+		Vector2 dst = auxVector2_2.set(targetPosition.x, targetPosition.z);
+		return GameUtils.findAllNodesBetweenNodes(src, dst, true, bresenhamOutput).size() - 1;
 	}
 }
