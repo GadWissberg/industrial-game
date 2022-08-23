@@ -8,19 +8,19 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 
-public class MainShaderProvider extends DefaultShaderProvider {
-	private final DefaultShader.Config mainShaderConfig;
+public class ModelsShaderProvider extends DefaultShaderProvider {
+	private final DefaultShader.Config shaderConfig;
 	private final FrameBuffer shadowFrameBuffer;
 
-	public MainShaderProvider(final GameAssetsManager assetsManager, FrameBuffer shadowFrameBuffer) {
-		mainShaderConfig = new DefaultShader.Config();
-		mainShaderConfig.vertexShader = assetsManager.getShader(Assets.Shaders.VERTEX);
-		mainShaderConfig.fragmentShader = assetsManager.getShader(Assets.Shaders.FRAGMENT);
+	public ModelsShaderProvider(final GameAssetsManager assetsManager, FrameBuffer shadowFrameBuffer) {
+		shaderConfig = new DefaultShader.Config();
+		shaderConfig.vertexShader = assetsManager.getShader(Assets.Shaders.VERTEX);
+		shaderConfig.fragmentShader = assetsManager.getShader(Assets.Shaders.FRAGMENT);
 		this.shadowFrameBuffer = shadowFrameBuffer;
 	}
 
 	@Override
 	protected Shader createShader(final Renderable renderable) {
-		return new ModelsShader(renderable, mainShaderConfig, shadowFrameBuffer);
+		return new ModelsShader(renderable, shaderConfig, shadowFrameBuffer);
 	}
 }

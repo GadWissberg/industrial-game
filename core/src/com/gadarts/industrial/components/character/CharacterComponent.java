@@ -27,6 +27,7 @@ public class CharacterComponent implements GameComponent {
 	private OnGoingAttack onGoingAttack = new OnGoingAttack();
 	private WeaponsDefinitions primaryAttack;
 	private float turnTimeLeft;
+	private float shadowRadius;
 
 	@Override
 	public void reset( ) {
@@ -37,11 +38,13 @@ public class CharacterComponent implements GameComponent {
 	public void init(CharacterSpriteData characterSpriteData,
 					 CharacterSoundData soundData,
 					 CharacterSkillsParameters skills,
-					 WeaponsDefinitions primaryAttack) {
+					 WeaponsDefinitions primaryAttack,
+					 float shadowRadius) {
 		this.characterSpriteData = characterSpriteData;
 		this.skills.applyParameters(skills);
 		this.soundData.set(soundData);
 		this.primaryAttack = primaryAttack;
+		this.shadowRadius = shadowRadius;
 	}
 
 	public void dealDamage(final int damagePoints) {

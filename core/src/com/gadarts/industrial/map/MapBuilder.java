@@ -703,7 +703,9 @@ public class MapBuilder implements Disposable {
 									   WeaponsDefinitions primaryAttack) {
 		CharacterSpriteData characterSpriteData = createCharacterSpriteData(data, def);
 		Direction direction = data.getDirection();
-		entityBuilder.addCharacterComponent(characterSpriteData, data.getSoundData(), data.getSkills(), primaryAttack)
+		float radius = def.getShadowRadius();
+		CharacterSoundData soundData = data.getSoundData();
+		entityBuilder.addCharacterComponent(characterSpriteData, soundData, data.getSkills(), primaryAttack, radius)
 				.addCharacterDecalComponent(assetsManager.get(atlasDefinition.name()), IDLE, direction, data.getPosition())
 				.addCollisionComponent()
 				.addAnimationComponent();

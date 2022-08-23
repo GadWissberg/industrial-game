@@ -95,13 +95,13 @@ uniform vec4 u_fogColor;
 varying float v_fog;
 #endif // fogFlag
 
-// Necronemes custom uniforms
+// TerrorEffector custom uniforms
 
 uniform float u_affectedByLight;
 uniform vec3 u_shadowlessLightsColors[16];
 uniform vec3 u_shadowlessLightsExtraData[16];
 uniform vec3 u_shadowlessLightsPositions[16];
-uniform vec2 u_nearbyCharactersPositions[2];
+uniform vec3 u_nearbyCharactersData[2];
 uniform int u_numberOfShadowlessLights;
 varying vec3 v_frag_pos;
 uniform float u_screenWidth;
@@ -208,17 +208,18 @@ void main() {
             gl_FragColor.rgb+=vec3(gl_FragColor.r*color.a, gl_FragColor.g*color.a, gl_FragColor.b*color.a);
 
             float minDistToChar = 21390950.0;
+            float shadowRadius = 1.0;
             for (int i = 0; i< u_numberOfNearbyCharacters; i++){
-                vec2 sub = u_nearbyCharactersPositions[i].xy - v_frag_pos.xz;
+                vec2 sub = u_nearbyCharactersData[i].xy - v_frag_pos.xz;
                 float distance = length(sub);
                 if (distance < minDistToChar){
                     minDistToChar = distance;
+                    shadowRadius = u_nearbyCharactersData[i].z;
                 }
             }
 
-            const float SHADOW_RADIUS = 0.25;
             const float SHADOW_MAX_OPACITY = 0.2;
-            if (minDistToChar < SHADOW_RADIUS){
+            if (minDistToChar < shadowRadius){
                 gl_FragColor.rgb*=1.0 - min(SHADOW_MAX_OPACITY, 1.0/(1.0 + minDistToChar));
             }
 

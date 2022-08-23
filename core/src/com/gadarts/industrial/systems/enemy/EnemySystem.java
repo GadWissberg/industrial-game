@@ -64,7 +64,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private final static Vector2 auxVector2_1 = new Vector2();
 	private final static Vector2 auxVector2_2 = new Vector2();
 	private static final float ENEMY_HALF_FOV_ANGLE = 95F;
-	private static final float MAX_SIGHT = 11;
 	private static final CalculatePathRequest request = new CalculatePathRequest();
 	private static final List<MapGraphNode> auxNodesList = new ArrayList<>();
 	private static final int NUMBER_OF_SKILL_FLOWER_LEAF = 8;
@@ -378,7 +377,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			int count = availableNodes.size();
 			MapGraphNode dst = count > 0 ? availableNodes.get(MathUtils.random(count - 1)) : null;
 			goAttackAtGivenLocation(enemy, dst, CharacterCommandsDefinitions.DODGE);
-		} else if (aiStatus == RUNNING_TO_LAST_SEEN_POSITION) {
+		} else {
 			CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
 			if (characterComponent.getTurnTimeLeft() >= characterComponent.getSkills().getAgility()) {
 				MapGraphNode targetLastVisibleNode = enemyComponent.getTargetLastVisibleNode();
@@ -472,7 +471,8 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			Entity target = ComponentsMapper.character.get(enemy).getTarget();
 			Vector2 targetPos = ComponentsMapper.characterDecal.get(target).getNodePosition(auxVector2_2);
 			ComponentsMapper.enemy.get(enemy).setTargetLastVisibleNode(getSystemsCommonData().getMap().getNode(targetPos));
-			if (enemyPos.dst2(targetPos) <= Math.pow(MAX_SIGHT, 2)) {
+			int maxDistance = ComponentsMapper.enemy.get(enemy).getEnemyDefinition().getSight().getMaxDistance();
+			if (enemyPos.dst2(targetPos) <= Math.pow(maxDistance, 2)) {
 				awakeEnemy(enemy);
 			}
 		}

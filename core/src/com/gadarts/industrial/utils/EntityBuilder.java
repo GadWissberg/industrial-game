@@ -322,10 +322,11 @@ public class EntityBuilder {
 	public EntityBuilder addCharacterComponent(CharacterSpriteData characterSpriteData,
 											   CharacterSoundData characterSoundData,
 											   CharacterSkillsParameters skills,
-											   WeaponsDefinitions primaryAttack) {
+											   WeaponsDefinitions primaryAttack,
+											   float shadowRadius) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		CharacterComponent charComponent = engine.createComponent(CharacterComponent.class);
-		charComponent.init(characterSpriteData, characterSoundData, skills, primaryAttack);
+		charComponent.init(characterSpriteData, characterSoundData, skills, primaryAttack, shadowRadius);
 		currentEntity.add(charComponent);
 		return instance;
 	}

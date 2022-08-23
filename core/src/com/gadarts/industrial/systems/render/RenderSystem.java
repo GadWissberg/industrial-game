@@ -54,7 +54,7 @@ import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.shaders.DepthMapShader;
-import com.gadarts.industrial.systems.render.shaders.MainShaderProvider;
+import com.gadarts.industrial.systems.render.shaders.ModelsShaderProvider;
 import com.gadarts.industrial.systems.render.shaders.ShadowMapShader;
 
 import java.util.ArrayList;
@@ -85,7 +85,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private static final Circle auxCircle = new Circle();
 	private static final Rectangle auxRect = new Rectangle();
 	private final Environment environment;
-	private final MainShaderProvider shaderProvider;
+	private final ModelsShaderProvider shaderProvider;
 	private final GameFrameBuffer shadowFrameBuffer;
 	private ModelBatch depthModelBatch;
 	private ModelBatch modelBatchShadows;
@@ -107,7 +107,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 						GameLifeCycleHandler lifeCycleHandler) {
 		super(systemsCommonData, assetsManager, lifeCycleHandler);
 		shadowFrameBuffer = new GameFrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-		shaderProvider = new MainShaderProvider(getAssetsManager(), shadowFrameBuffer);
+		shaderProvider = new ModelsShaderProvider(getAssetsManager(), shadowFrameBuffer);
 		createBatches();
 		environment = createEnvironment();
 		getSystemsCommonData().setDrawFlags(new DrawFlags());

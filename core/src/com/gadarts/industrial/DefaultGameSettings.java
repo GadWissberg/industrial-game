@@ -23,6 +23,6 @@ public final class DefaultGameSettings {
 	public static final PlayerWeaponsDefinitions STARTING_WEAPON = PlayerWeaponsDefinitions.COLT;
 
 	public static final boolean ALLOW_STATIC_SHADOWS = true;
-	public static final boolean DISABLE_FOW = true;
+	public static final boolean DISABLE_FOW = false;
 	public static final boolean PARALYZED_ENEMIES = false;
 }

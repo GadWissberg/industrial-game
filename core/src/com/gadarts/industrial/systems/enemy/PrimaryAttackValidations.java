@@ -9,9 +9,10 @@ import com.gadarts.industrial.utils.GameUtils;
 import java.util.List;
 
 import static com.gadarts.industrial.systems.enemy.EnemyAiStatus.DODGING;
+import static com.gadarts.industrial.systems.enemy.EnemyAiStatus.RUNNING_TO_LAST_SEEN_POSITION;
 
-public class PrimaryAttackValidations {
-	public static List<PrimaryAttackValidation> primaryAttackValidations = List.of(
+final public class PrimaryAttackValidations {
+	public final static List<PrimaryAttackValidation> primaryAttackValidations = List.of(
 			new PrimaryAttackValidation(
 					(entity, enemySystem) -> {
 						EnemyComponent enemyComp = ComponentsMapper.enemy.get(entity);
@@ -41,7 +42,17 @@ public class PrimaryAttackValidations {
 						Enemies enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDefinition();
 						WeaponsDefinitions primaryAttack = enemyDefinition.getPrimaryAttack();
 						float disToTarget = GameUtils.calculateDistanceToTarget(entity);
-						return primaryAttack.isMelee() ? disToTarget <= 1 : enemySystem.checkIfWayIsClearToTarget(entity);
+						return !primaryAttack.isMelee() || disToTarget <= 1;
+					},
+					(entity, enemySystem) -> {
+						ComponentsMapper.enemy.get(entity).setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
+						enemySystem.invokeEnemyTurn(entity);
+					}),
+			new PrimaryAttackValidation(
+					(entity, enemySystem) -> {
+						Enemies enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDefinition();
+						WeaponsDefinitions primaryAttack = enemyDefinition.getPrimaryAttack();
+						return primaryAttack.isMelee() || enemySystem.checkIfWayIsClearToTarget(entity);
 					},
 					(entity, enemySystem) -> {
 						ComponentsMapper.enemy.get(entity).setAiStatus(DODGING);
