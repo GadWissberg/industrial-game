@@ -92,6 +92,12 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		pathPlanner = new PathPlanHandler(getAssetsManager(), getSystemsCommonData().getMap());
 	}
 
+	private static void consumeEngineEnergy(Entity character) {
+		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
+		WeaponsDefinitions primaryAttack = enemyComp.getEnemyDefinition().getPrimaryAttack();
+		enemyComp.setEngineEnergy(Math.max(enemyComp.getEngineEnergy() - primaryAttack.getEngineConsumption(), 0));
+	}
+
 	@Override
 	public void onFrameChanged(final Entity entity, final float deltaTime, final TextureAtlas.AtlasRegion newFrame) {
 		SpriteType spriteType = ComponentsMapper.character.get(entity).getCharacterSpriteData().getSpriteType();
@@ -132,12 +138,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			blocked = checkIfFloorNodesContainObjects(nodes, enemy);
 		}
 		return !blocked;
-	}
-
-	private static void consumeEngineEnergy(Entity character) {
-		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
-		WeaponsDefinitions primaryAttack = enemyComp.getEnemyDefinition().getPrimaryAttack();
-		enemyComp.setEngineEnergy(Math.max(enemyComp.getEngineEnergy() - primaryAttack.getEngineConsumption(), 0));
 	}
 
 	private void onFrameChangedOfRun(final Entity entity) {
@@ -304,8 +304,10 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	@Override
 	public void onCharacterDies(final Entity character) {
 		if (ComponentsMapper.enemy.has(character)) {
-			createSmoke(character);
-			createFlyingMetalParts(character);
+			if (!ComponentsMapper.enemy.get(character).getEnemyDefinition().isHuman()) {
+				createSmoke(character);
+				createFlyingMetalParts(character);
+			}
 			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(character);
 			if (enemyComponent.getAiStatus() != IDLE) {
 				enemyComponent.setAiStatus(IDLE);

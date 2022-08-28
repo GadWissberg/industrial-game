@@ -18,7 +18,6 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.animation.AnimationComponent;
 import com.gadarts.industrial.components.character.*;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
-import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
@@ -174,9 +173,16 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		CharacterComponent characterComponent = character.get(attacked);
 		characterComponent.dealDamage(damage);
 		handleDeath(attacked);
-		if (ComponentsMapper.player.has(attacked)) {
+		if (ComponentsMapper.player.has(attacked) || ComponentsMapper.enemy.get(attacked).getEnemyDefinition().isHuman()) {
 			addSplatterEffect(bulletModelInstanceComponent);
 		}
+	}
+
+	private void addRicochet(final ParticleEffect effect, final Vector3 pos) {
+		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
+				.addParticleEffectComponent(effect, pos)
+				.finishAndAddToEngine();
+		getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.SMALL_EXP);
 	}
 
 	private void addSplatterEffect(final ModelInstanceComponent bulletModelInstanceComponent) {
@@ -233,7 +239,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	private void createExplosionOnCharacterDeath(Entity character) {
-		if (ComponentsMapper.enemy.has(character)) {
+		if (ComponentsMapper.enemy.has(character) && !ComponentsMapper.enemy.get(character).getEnemyDefinition().isHuman()) {
 			Decal decal = ComponentsMapper.characterDecal.get(character).getDecal();
 			MapGraphNode node = getSystemsCommonData().getMap().getNode(decal.getPosition());
 			float height = ComponentsMapper.enemy.get(character).getEnemyDefinition().getHeight();
