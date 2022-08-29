@@ -179,9 +179,10 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		Camera camera = systemsCommonData.getCamera();
 
 		Vector3 ray = GameUtils.calculateGridPositionFromMouse(camera, screenX, screenY, auxVector3_2);
+
 		ArrayDeque<Coord3D> nodes = (ArrayDeque<Coord3D>) Bresenham.line3D(
-				(int) camera.position.x, (int) (camera.position.y), (int) camera.position.z,
-				(int) ray.x, 0, (int) ray.z);
+				(int) Math.round((double) camera.position.x), (int) Math.round((double) camera.position.y), (int) Math.round((double) camera.position.z),
+				(int) Math.round((double) ray.x), 0, (int) Math.round((double) ray.z));
 
 		return findNearestNodeOnCameraLineOfSight(map, nodes);
 	}
@@ -190,7 +191,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 															ArrayDeque<Coord3D> nodes) {
 		for (Coord3D coord : nodes) {
 			MapGraphNode node = map.getNode(coord.x, coord.z);
-			if (node != null && coord.getY() < node.getHeight() && node.getEntity() != null) {
+			if (node != null && (coord.getY() < node.getHeight() || coord.y == 0) && node.getEntity() != null) {
 				MapNodesTypes nodeType = ComponentsMapper.floor.get(node.getEntity()).getNode().getType();
 				if (nodeType == MapNodesTypes.PASSABLE_NODE) {
 					return node;
@@ -231,7 +232,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	public void touchDown(final int screenX, final int screenY, final int button) {
 		if (isTouchDisabled()) return;
 		SystemsCommonData data = getSystemsCommonData();
-		if (button == Input.Buttons.LEFT ) {
+		if (button == Input.Buttons.LEFT) {
 			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(data.getCursor()).getModelInstance();
 			Vector3 cursorPos = modelInstance.transform.getTranslation(auxVector3_2);
 			MapGraphNode node = data.getMap().getNode(cursorPos);

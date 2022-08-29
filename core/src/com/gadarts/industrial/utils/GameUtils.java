@@ -66,7 +66,7 @@ public class GameUtils {
 														 final Vector3 output) {
 		Ray ray = camera.getPickRay(screenX, screenY);
 		Intersector.intersectRayPlane(ray, floorPlane, output);
-		return alignPositionToGrid(output);
+		return output;
 	}
 
 	/**
@@ -170,7 +170,7 @@ public class GameUtils {
 		return GameUtils.calculateAngbandDistance(src, dst);
 	}
 
-	private static int calculateAngbandDistance(Vector2 src, Vector2 dst) {
+	public static int calculateAngbandDistance(Vector2 src, Vector2 dst) {
 		float xAxis = Math.abs(src.x - dst.x);
 		float zAxis = Math.abs(src.y - dst.y);
 		float longAxis = Math.max(xAxis, zAxis);
