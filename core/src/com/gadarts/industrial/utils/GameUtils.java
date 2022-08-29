@@ -161,12 +161,20 @@ public class GameUtils {
 		}
 	}
 
-	public static float calculateDistanceToTarget(Entity character) {
+	public static float calculateAngbandDistanceToTarget(Entity character) {
 		Entity target = ComponentsMapper.character.get(character).getTarget();
 		Vector3 targetPosition = ComponentsMapper.characterDecal.get(target).getDecal().getPosition();
 		Vector3 position = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
-		Vector2 src = auxVector2_1.set(position.x, position.z);
-		Vector2 dst = auxVector2_2.set(targetPosition.x, targetPosition.z);
-		return GameUtils.findAllNodesBetweenNodes(src, dst, true, bresenhamOutput).size() - 1;
+		Vector2 src = auxVector2_1.set((int) position.x, (int) position.z);
+		Vector2 dst = auxVector2_2.set((int) targetPosition.x, (int) targetPosition.z);
+		return GameUtils.calculateAngbandDistance(src, dst);
+	}
+
+	private static int calculateAngbandDistance(Vector2 src, Vector2 dst) {
+		float xAxis = Math.abs(src.x - dst.x);
+		float zAxis = Math.abs(src.y - dst.y);
+		float longAxis = Math.max(xAxis, zAxis);
+		float shortAxis = Math.min(xAxis, zAxis);
+		return (int) (longAxis + shortAxis / 2F);
 	}
 }

@@ -33,7 +33,7 @@ final public class PrimaryAttackValidations {
 			new PrimaryAttackValidation(
 					(entity, enemySystem) -> {
 						Enemies enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDefinition();
-						float disToTarget = GameUtils.calculateDistanceToTarget(entity);
+						float disToTarget = GameUtils.calculateAngbandDistanceToTarget(entity);
 						return disToTarget <= enemyDefinition.getSight().getMaxDistance();
 					},
 					null),
@@ -41,7 +41,7 @@ final public class PrimaryAttackValidations {
 					(entity, enemySystem) -> {
 						Enemies enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDefinition();
 						WeaponsDefinitions primaryAttack = enemyDefinition.getPrimaryAttack();
-						float disToTarget = GameUtils.calculateDistanceToTarget(entity);
+						float disToTarget = GameUtils.calculateAngbandDistanceToTarget(entity);
 						return !primaryAttack.isMelee() || disToTarget <= 1;
 					},
 					(entity, enemySystem) -> {
