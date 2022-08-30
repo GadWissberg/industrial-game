@@ -13,7 +13,7 @@ public interface UserInterfaceSystemEventsSubscriber extends SystemEventsSubscri
 
 	}
 
-	default void onUserSelectedNodeToApplyTurn(final MapGraphNode node, AttackNodesHandler attackNodesHandler) {
+	default void onUserSelectedNodeToApplyTurn(MapGraphNode node) {
 
 	}
 

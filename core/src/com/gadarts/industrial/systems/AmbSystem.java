@@ -27,7 +27,7 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements 
 	private static final Matrix4 auxMatrix = new Matrix4();
 	public static final float DOOR_OPEN_OFFSET = 1F;
 	public static final float DOOR_MOVE_INTER_COEF = 0.03F;
-	private static final int DOOR_OPEN_DURATION = 1;
+	private static final int DOOR_OPEN_DURATION = 3;
 	private static final float DOOR_OPEN_OFFSET_EPSILON = 3 * EPSILON;
 	private static final float DOOR_CLOSED_OFFSET_EPSILON = 0.003f;
 	private ImmutableArray<Entity> doorEntities;

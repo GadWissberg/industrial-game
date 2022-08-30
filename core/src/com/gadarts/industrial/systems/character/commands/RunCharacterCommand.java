@@ -8,6 +8,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.DoorComponent;
+import com.gadarts.industrial.components.DoorComponent.DoorStates;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphConnection;
@@ -15,6 +17,7 @@ import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.map.MapGraphPath;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.model.characters.CharacterTypes;
+import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 
@@ -30,6 +33,7 @@ public class RunCharacterCommand extends CharacterCommand {
 	private final static Vector3 auxVector3_1 = new Vector3();
 	private final static Vector3 auxVector3_2 = new Vector3();
 	private static final float MOVEMENT_EPSILON = 0.02F;
+	private static final float OPEN_DOOR_TIME_CONSUME = 1F;
 	private final MapGraphPath path = new MapGraphPath();
 	private MapGraphNode nextNode;
 	private SystemsCommonData systemsCommonData;
@@ -73,7 +77,16 @@ public class RunCharacterCommand extends CharacterCommand {
 		if (path.nodes.isEmpty()) return true;
 
 		playStepSound(systemsCommonData, character, newFrame);
-		return applyMovement(systemsCommonData, character, subscribers);
+		return updateCommand(systemsCommonData, character, subscribers);
+	}
+
+	private void handleDoor(Entity character, Entity door) {
+		DoorComponent doorComponent = ComponentsMapper.door.get(door);
+		if (doorComponent.getState() == DoorStates.CLOSED) {
+			ComponentsMapper.character.get(character).getCharacterSpriteData().setSpriteType(SpriteType.IDLE);
+			doorComponent.setState(DoorStates.OPENING);
+			consumeTurnTime(character, OPEN_DOOR_TIME_CONSUME);
+		}
 	}
 
 	private void playStepSound(SystemsCommonData systemsCommonData, Entity character, AtlasRegion newFrame) {
@@ -83,8 +96,7 @@ public class RunCharacterCommand extends CharacterCommand {
 		}
 	}
 
-
-	private boolean applyMovement(SystemsCommonData systemsCommonData,
+	private boolean updateCommand(SystemsCommonData systemsCommonData,
 								  Entity character,
 								  List<CharacterSystemEventsSubscriber> subscribers) {
 		Decal decal = ComponentsMapper.characterDecal.get(character).getDecal();
@@ -94,9 +106,20 @@ public class RunCharacterCommand extends CharacterCommand {
 			done = reachedNodeOfPath(nextNode, subscribers, character);
 		}
 		if (!done) {
-			takeStep(character, systemsCommonData);
+			done = applyMovementToNextNode(systemsCommonData, character);
 		}
 		return done;
+	}
+
+	private boolean applyMovementToNextNode(SystemsCommonData systemsCommonData, Entity character) {
+		boolean commandDone = false;
+		if (nextNode.getDoor() != null && ComponentsMapper.door.get(nextNode.getDoor()).getState() != DoorStates.OPEN) {
+			handleDoor(character, nextNode.getDoor());
+			commandDone = true;
+		} else {
+			takeStep(character, systemsCommonData);
+		}
+		return commandDone;
 	}
 
 	private void takeStep(Entity entity,
@@ -129,18 +152,14 @@ public class RunCharacterCommand extends CharacterCommand {
 		nextNode = path.getNextOf(nextNode);
 		setDestinationNode(nextNode);
 		consumeTurnTime(character, ComponentsMapper.character.get(character).getSkills().getAgility());
-		return isReachedEndOfPath(systemsCommonData.getMap().findConnection(node, nextNode), systemsCommonData);
+		return isReachedEndOfPath(systemsCommonData.getMap().findConnection(node, nextNode));
 	}
 
 
-	private boolean isReachedEndOfPath(MapGraphConnection connection,
-									   SystemsCommonData systemsCommonData) {
-		MapGraph map = systemsCommonData.getMap();
-
+	private boolean isReachedEndOfPath(MapGraphConnection connection) {
 		return nextNode == null
 				|| connection == null
-				|| connection.getCost() != CLEAN.getCostValue()
-				|| !map.checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(nextNode, null);
+				|| connection.getCost() != CLEAN.getCostValue();
 	}
 
 	private void translateCharacter(CharacterDecalComponent characterDecalComponent, SystemsCommonData systemsCommonData) {

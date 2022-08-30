@@ -127,9 +127,11 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	@Override
 	public void update(float deltaTime) {
 		super.update(deltaTime);
-		CharacterCommand currentCommand = character.get(getSystemsCommonData().getTurnsQueue().first()).getCommand();
-		if (currentCommand != null) {
-			handleCurrentCommand(currentCommand);
+		if (character.has(getSystemsCommonData().getTurnsQueue().first())) {
+			CharacterCommand currentCommand = character.get(getSystemsCommonData().getTurnsQueue().first()).getCommand();
+			if (currentCommand != null) {
+				handleCurrentCommand(currentCommand);
+			}
 		}
 		updateCharacters();
 	}

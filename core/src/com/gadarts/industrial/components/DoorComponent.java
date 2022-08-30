@@ -21,6 +21,7 @@ public class DoorComponent implements GameComponent {
 
 	public void init(MapGraphNode node) {
 		this.node = node;
+		this.state = DoorStates.CLOSED;
 	}
 
 	public enum DoorStates {

@@ -3,7 +3,6 @@ package com.gadarts.industrial.systems.player;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.GridPoint2;
@@ -11,6 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pools;
+import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -40,7 +40,6 @@ import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
-import com.gadarts.industrial.systems.ui.AttackNodesHandler;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
 import com.gadarts.industrial.utils.GameUtils;
 
@@ -262,45 +261,29 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	@Override
-	public void onUserSelectedNodeToApplyTurn(MapGraphNode node, AttackNodesHandler attackNodesHandler) {
-		applyPlayerTurn(node, attackNodesHandler);
+	public void onUserSelectedNodeToApplyTurn(MapGraphNode node) {
+		applyPlayerTurn(node);
 	}
 
-	private void applyPlayerTurn(final MapGraphNode cursorNode, AttackNodesHandler attackNodesHandler) {
+	private void applyPlayerTurn(final MapGraphNode cursorNode) {
 		MapGraphPath currentPath = playerPathPlanner.getCurrentPath();
-		planPath(cursorNode, attackNodesHandler);
+		planPath(cursorNode);
 		int pathSize = currentPath.getCount();
 		if (!currentPath.nodes.isEmpty() && currentPath.get(pathSize - 1).equals(cursorNode)) {
-			applyPlayerCommandAccordingToPlan(cursorNode, attackNodesHandler);
+			applyPlayerCommandAccordingToPlan(cursorNode);
 		}
 	}
 
-	private void planPath(final MapGraphNode cursorNode, AttackNodesHandler attackNodesHandler) {
+	private void planPath(final MapGraphNode cursorNode) {
 		Entity enemyAtNode = getSystemsCommonData().getMap().fetchAliveEnemyFromNode(cursorNode);
 		if (!calculatePathAccordingToSelection(cursorNode, enemyAtNode)) return;
 
-		MapGraphNode selectedAttackNode = attackNodesHandler.getSelectedAttackNode();
-		SystemsCommonData commonData = getSystemsCommonData();
-		Entity highLightedPickup = commonData.getCurrentHighLightedPickup();
-		if (highLightedPickup != null || isSelectedAttackNodeIsNotInAvailableNodes(cursorNode, selectedAttackNode)) {
-			attackNodesHandler.reset();
-		}
-		pathHasCreated(cursorNode, enemyAtNode, attackNodesHandler);
+		pathHasCreated(cursorNode, enemyAtNode);
 	}
 
-	private boolean isSelectedAttackNodeIsNotInAvailableNodes(MapGraphNode cursorNode, MapGraphNode selectedAttackNode) {
-		MapGraph map = getSystemsCommonData().getMap();
-		return selectedAttackNode != null
-				&& !isNodeInAvailableNodes(cursorNode, map.getAvailableNodesAroundNode(selectedAttackNode));
-	}
-
-	private void enemySelected(final MapGraphNode node, final Entity enemyAtNode, final AttackNodesHandler attackNodesHandler) {
+	private void enemySelected(MapGraphNode node) {
 		Weapon selectedWeapon = getSystemsCommonData().getStorage().getSelectedWeapon();
-		if (selectedWeapon.isMelee()) {
-			List<MapGraphNode> availableNodes = getSystemsCommonData().getMap().getAvailableNodesAroundNode(node);
-			attackNodesHandler.setSelectedAttackNode(node);
-			activateAttackMode(enemyAtNode, availableNodes);
-		} else {
+		if (!selectedWeapon.isMelee()) {
 			playerPathPlanner.resetPlan();
 			enemySelectedWithRangeWeapon(node);
 		}
@@ -317,16 +300,9 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		}
 	}
 
-	private void activateAttackMode(final Entity enemyAtNode, final List<MapGraphNode> availableNodes) {
-		character.get(getSystemsCommonData().getPlayer()).setTarget(enemyAtNode);
-		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onAttackModeActivated(availableNodes);
-		}
-	}
-
-	private void pathHasCreated(MapGraphNode destination, Entity enemyAtNode, AttackNodesHandler attackNodesHandler) {
+	private void pathHasCreated(MapGraphNode destination, Entity enemyAtNode) {
 		if (enemyAtNode != null) {
-			enemySelected(destination, enemyAtNode, attackNodesHandler);
+			enemySelected(destination);
 		}
 		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onPlayerPathCreated(destination);
@@ -385,16 +361,11 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				plannedPath);
 	}
 
-	private void applyPlayerCommandAccordingToPlan(MapGraphNode destination, AttackNodesHandler attackNodesHandler) {
-		playerPathPlanner.hideAllArrows();
+	private void applyPlayerCommandAccordingToPlan(MapGraphNode destination) {
 		SystemsCommonData commonData = getSystemsCommonData();
 		CharacterDecalComponent charDecalComp = characterDecal.get(commonData.getPlayer());
 		MapGraphNode playerNode = commonData.getMap().getNode(charDecalComp.getNodePosition(auxVector2_1));
-		if (attackNodesHandler.getSelectedAttackNode() == null) {
-			applyCommandWhenNoAttackNodeSelected(commonData, playerNode, destination);
-		} else {
-			applyPlayerMeleeCommand(destination, playerNode, attackNodesHandler);
-		}
+		applyCommandWhenNoAttackNodeSelected(commonData, playerNode, destination);
 	}
 
 	private void applyCommandWhenNoAttackNodeSelected(SystemsCommonData commonData,
@@ -402,10 +373,8 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 													  MapGraphNode destination) {
 		if (commonData.getItemToPickup() != null || isPickupAndPlayerOnSameNode(commonData.getMap(), playerNode)) {
 			applyPlayerCommand(PICKUP, commonData.getItemToPickup(), destination);
-		} else if (destination.getDoor() != null) {
-			applyPlayerCommand(OPEN_DOOR, null, destination);
 		} else {
-			applyGoToCommand(playerPathPlanner.getCurrentPath());
+			applyRunCommand(playerPathPlanner.getCurrentPath());
 		}
 	}
 
@@ -420,31 +389,10 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		return result;
 	}
 
-	private void applyPlayerMeleeCommand(final MapGraphNode targetNode,
-										 final MapGraphNode playerNode,
-										 final AttackNodesHandler attackNodesHandler) {
-		MapGraphNode attackNode = attackNodesHandler.getSelectedAttackNode();
-		boolean result = targetNode.equals(attackNode);
-		MapGraph map = getSystemsCommonData().getMap();
-		result |= isNodeInAvailableNodes(targetNode, map.getAvailableNodesAroundNode(attackNode));
-		result |= targetNode.equals(attackNode) && playerNode.isConnectedNeighbour(attackNode);
-		if (result) {
-			calculatePathToMelee(targetNode, map);
-		}
-		deactivateAttackMode(attackNodesHandler);
-	}
-
 	private void calculatePathToMelee(MapGraphNode targetNode, MapGraph map) {
 		if (map.fetchAliveEnemyFromNode(targetNode) != null) {
 			Array<MapGraphNode> nodes = playerPathPlanner.getCurrentPath().nodes;
 			nodes.removeIndex(nodes.size - 1);
-		}
-	}
-
-	private void deactivateAttackMode(AttackNodesHandler attackNodesHandler) {
-		attackNodesHandler.setSelectedAttackNode(null);
-		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onAttackModeDeactivated();
 		}
 	}
 
@@ -457,6 +405,11 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	private void applyPlayerCommand(CharacterCommandsDefinitions commandDefinition,
+									MapGraphNode destinationNode) {
+		applyPlayerCommand(commandDefinition, null, destinationNode);
+	}
+
+	private void applyPlayerCommand(CharacterCommandsDefinitions commandDefinition,
 									Object additionalData,
 									MapGraphNode destinationNode) {
 		Entity player = getSystemsCommonData().getPlayer();
@@ -465,7 +418,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		subscribers.forEach(sub -> sub.onPlayerAppliedCommand(command));
 	}
 
-	private void applyGoToCommand(final MapGraphPath path) {
+	private void applyRunCommand(final MapGraphPath path) {
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		MapGraph map = systemsCommonData.getMap();
 		Entity player = systemsCommonData.getPlayer();
@@ -478,9 +431,23 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	private void shrinkRunCommandInBattle( ) {
 		Array<MapGraphNode> nodes = playerPathPlanner.getCurrentPath().nodes;
-		if (nodes.size > 2 && getSystemsCommonData().getTurnsQueue().size > 1) {
+		if (nodes.size > 2 && isTurnsQueueHasEnemies()) {
 			nodes.removeRange(2, nodes.size - 1);
 		}
+	}
+
+	private boolean isTurnsQueueHasEnemies( ) {
+		Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
+		if (turnsQueue.size <= 1) return false;
+
+		boolean result = false;
+		for (int i = 0; i < turnsQueue.size; i++) {
+			if (enemy.has(turnsQueue.get(i))) {
+				result = true;
+				break;
+			}
+		}
+		return result;
 	}
 
 	@Override
@@ -490,8 +457,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	@Override
 	public void initializeData( ) {
-		playerPathPlanner = new PathPlanHandler(getAssetsManager(), getSystemsCommonData().getMap());
-		playerPathPlanner.init((PooledEngine) getEngine());
+		playerPathPlanner = new PathPlanHandler(getSystemsCommonData().getMap());
 		if (!getLifeCycleHandler().isInGame()) {
 			changePlayerStatus(true);
 		}

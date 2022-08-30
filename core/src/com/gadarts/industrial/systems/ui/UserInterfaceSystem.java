@@ -32,7 +32,6 @@ import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
-import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
@@ -45,12 +44,10 @@ import squidpony.squidmath.Bresenham;
 import squidpony.squidmath.Coord3D;
 
 import java.util.ArrayDeque;
-import java.util.List;
 
 import static com.badlogic.gdx.Application.LOG_DEBUG;
 import static com.gadarts.industrial.DefaultGameSettings.FULL_SCREEN;
 import static com.gadarts.industrial.Industrial.*;
-import static com.gadarts.industrial.components.ComponentsMapper.character;
 import static com.gadarts.industrial.systems.SystemsCommonData.TABLE_NAME_HUD;
 
 public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSubscriber> implements
@@ -61,7 +58,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final String BUTTON_NAME_STORAGE = "button_storage";
 	private static final float BUTTON_PADDING = 40;
-	private final AttackNodesHandler attackNodesHandler = new AttackNodesHandler();
 	private boolean showBorders = DefaultGameSettings.DISPLAY_HUD_OUTLINES;
 	@Getter
 	private MenuHandler menuHandler;
@@ -94,16 +90,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	@Override
 	public void onItemAddedToStorage(Item item) {
 		getSystemsCommonData().getUiStage().onItemAddedToStorage(item);
-	}
-
-	@Override
-	public void onAttackModeActivated(List<MapGraphNode> availableNodes) {
-		attackNodesHandler.onAttackModeActivated(availableNodes);
-	}
-
-	@Override
-	public void onAttackModeDeactivated( ) {
-		attackNodesHandler.onAttackModeDeactivated();
 	}
 
 	@Override
@@ -220,7 +206,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		getSystemsCommonData().setCursor(createAndAdd3dCursor());
 		cursorHandler = new CursorHandler(getSystemsCommonData());
 		cursorHandler.init();
-		attackNodesHandler.init(getEngine());
 		menuHandler = new MenuHandlerImpl(getSystemsCommonData(), getSubscribers(), getAssetsManager());
 		menuHandler.init(addTable(), getAssetsManager(), getSystemsCommonData());
 		toolTipHandler = new ToolTipHandler(getSystemsCommonData().getUiStage());
@@ -262,7 +247,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 		MapGraphNode cursorNode = cursorHandler.getCursorNode();
 		for (UserInterfaceSystemEventsSubscriber sub : subscribers) {
-			sub.onUserSelectedNodeToApplyTurn(cursorNode, attackNodesHandler);
+			sub.onUserSelectedNodeToApplyTurn(cursorNode);
 		}
 	}
 
@@ -277,7 +262,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	@Override
 	public void dispose( ) {
 		cursorHandler.dispose();
-		attackNodesHandler.dispose();
 		toolTipHandler.dispose();
 	}
 

@@ -89,7 +89,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 					   GameAssetsManager assetsManager,
 					   GameLifeCycleHandler lifeCycleHandler) {
 		super(systemsCommonData, assetsManager, lifeCycleHandler);
-		pathPlanner = new PathPlanHandler(getAssetsManager(), getSystemsCommonData().getMap());
+		pathPlanner = new PathPlanHandler(getSystemsCommonData().getMap());
 	}
 
 	private static void consumeEngineEnergy(Entity character) {

@@ -24,13 +24,6 @@ public interface PlayerSystemEventsSubscriber extends SystemEventsSubscriber {
 
 	}
 
-	default void onAttackModeDeactivated( ) {
-
-	}
-
-	default void onAttackModeActivated(List<MapGraphNode> availableNodes) {
-	}
-
 	default void onPlayerStatusChanged(boolean status) {
 
 	}
