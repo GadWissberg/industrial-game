@@ -168,14 +168,7 @@ public class ModelsShader extends DefaultShader {
 	public void render(Renderable renderable) {
 		Entity entity = (Entity) renderable.userData;
 		insertAdditionalRenderData(renderable, entity);
-		boolean isWall = wall.has(entity);
-		if (isWall) {
-			Gdx.gl.glDisable(GL20.GL_CULL_FACE);
-		}
 		super.render(renderable);
-		if (isWall) {
-			Gdx.gl.glEnable(GL20.GL_CULL_FACE);
-		}
 	}
 
 	private void insertAdditionalRenderData(Renderable renderable,

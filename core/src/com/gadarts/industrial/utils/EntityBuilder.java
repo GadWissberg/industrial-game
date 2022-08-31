@@ -131,9 +131,9 @@ public class EntityBuilder {
 											  final Vector2 bottomRight,
 											  final EnvironmentObjectDefinition type) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
-		ObstacleComponent obstacleComponent = engine.createComponent(ObstacleComponent.class);
-		obstacleComponent.init(topLeft, bottomRight, type);
-		currentEntity.add(obstacleComponent);
+		EnvironmentObjectComponent environmentObjectComponent = engine.createComponent(EnvironmentObjectComponent.class);
+		environmentObjectComponent.init(topLeft, bottomRight, type);
+		currentEntity.add(environmentObjectComponent);
 		return instance;
 	}
 

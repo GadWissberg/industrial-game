@@ -243,11 +243,12 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	}
 
 	private void onUserSelectedNodeToApplyTurn( ) {
-		if (!ComponentsMapper.player.has(getSystemsCommonData().getTurnsQueue().first())) return;
-
-		MapGraphNode cursorNode = cursorHandler.getCursorNode();
-		for (UserInterfaceSystemEventsSubscriber sub : subscribers) {
-			sub.onUserSelectedNodeToApplyTurn(cursorNode);
+		Entity currentChar = getSystemsCommonData().getTurnsQueue().first();
+		if (ComponentsMapper.player.has(currentChar) && ComponentsMapper.character.get(currentChar).getCommand() == null) {
+			MapGraphNode cursorNode = cursorHandler.getCursorNode();
+			for (UserInterfaceSystemEventsSubscriber sub : subscribers) {
+				sub.onUserSelectedNodeToApplyTurn(cursorNode);
+			}
 		}
 	}
 

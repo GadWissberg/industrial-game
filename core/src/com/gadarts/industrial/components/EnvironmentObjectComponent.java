@@ -5,7 +5,7 @@ import com.gadarts.industrial.shared.model.env.EnvironmentObjectDefinition;
 import lombok.Getter;
 
 @Getter
-public class ObstacleComponent implements GameComponent {
+public class EnvironmentObjectComponent implements GameComponent {
 	private int topLeftX;
 	private int topLeftY;
 	private int bottomRightX;

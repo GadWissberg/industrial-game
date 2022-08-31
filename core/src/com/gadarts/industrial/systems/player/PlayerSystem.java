@@ -3,6 +3,7 @@ package com.gadarts.industrial.systems.player;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.GridPoint2;
@@ -15,6 +16,7 @@ import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
+import com.gadarts.industrial.components.EnvironmentObjectComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterAnimation;
 import com.gadarts.industrial.components.character.CharacterAnimations;
@@ -46,7 +48,6 @@ import com.gadarts.industrial.utils.GameUtils;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import static com.gadarts.industrial.components.ComponentsMapper.*;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.shared.model.characters.Direction.*;
 import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.*;
@@ -65,9 +66,11 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Vector2 auxVector2_3 = new Vector2();
 	private static final CalculatePathRequest request = new CalculatePathRequest();
-	private static final Vector3 auxVector3 = new Vector3();
+	private static final Vector3 auxVector3_1 = new Vector3();
+	private static final Vector3 auxVector3_2 = new Vector3();
 	private final static LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
 	private PathPlanHandler playerPathPlanner;
+	private ImmutableArray<Entity> ambObjects;
 
 	public PlayerSystem(SystemsCommonData systemsCommonData,
 						GameAssetsManager assetsManager,
@@ -77,11 +80,11 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	@Override
 	public void onCommandInitialized( ) {
-		CharacterCommand command = character.get(getSystemsCommonData().getTurnsQueue().first()).getCommand();
-		if (!player.has(command.getCharacter())) return;
+		CharacterCommand command = ComponentsMapper.character.get(getSystemsCommonData().getTurnsQueue().first()).getCommand();
+		if (!ComponentsMapper.player.has(command.getCharacter())) return;
 
 		for (Entity entity : getSystemsCommonData().getTurnsQueue()) {
-			if (enemy.has(entity) && enemy.get(entity).getAiStatus() == EnemyAiStatus.ATTACKING) {
+			if (ComponentsMapper.enemy.has(entity) && ComponentsMapper.enemy.get(entity).getAiStatus() == EnemyAiStatus.ATTACKING) {
 				command.onInFight();
 				return;
 			}
@@ -105,7 +108,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	@Override
 	public void onCharacterNodeChanged(Entity entity, MapGraphNode oldNode, MapGraphNode newNode) {
-		if (player.has(entity)) {
+		if (ComponentsMapper.player.has(entity)) {
 			refreshFogOfWar();
 			notifyPlayerFinishedTurn();
 		}
@@ -113,7 +116,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	private void refreshFogOfWar( ) {
 		MapGraph map = getSystemsCommonData().getMap();
-		Vector3 playerPos = characterDecal.get(getSystemsCommonData().getPlayer()).getNodePosition(auxVector3);
+		Vector3 playerPos = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer()).getNodePosition(auxVector3_1);
 		MapGraphNode playerNode = map.getNode(playerPos);
 		clearFlatColorAndFowSignatureForRegionOfNodes(playerNode);
 		for (int dir = 0; dir < 360; dir += LOS_CHECK_DELTA) {
@@ -133,8 +136,8 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			for (int col = (int) Math.max(playerCol - LOS_MAX, 0); col < Math.min(playerCol + LOS_MAX, width); col++) {
 				Entity floorEntity = map.getNode(col, row).getEntity();
 				if (floorEntity != null) {
-					floor.get(floorEntity).setRevealCalculated(false);
-					floor.get(floorEntity).setFogOfWarSignature(16);
+					ComponentsMapper.floor.get(floorEntity).setRevealCalculated(false);
+					ComponentsMapper.floor.get(floorEntity).setFogOfWarSignature(16);
 				}
 			}
 		}
@@ -153,7 +156,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 						calculateFogOfWarSignature(nearbyNode.getEntity());
 					} else {
 						int northWest = NORTH.getMask() | WEST.getMask() | NORTH_EAST.getMask() | SOUTH_WEST.getMask();
-						floor.get(nearbyNode.getEntity()).setFogOfWarSignature(northWest);
+						ComponentsMapper.floor.get(nearbyNode.getEntity()).setFogOfWarSignature(northWest);
 					}
 				}
 			}
@@ -171,12 +174,12 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	private int calculateFogOfWarForNode(Entity entity, int total, int colOffset, int rowOffset, int mask) {
-		MapGraphNode node = floor.get(entity).getNode();
+		MapGraphNode node = ComponentsMapper.floor.get(entity).getNode();
 		MapGraph map = getSystemsCommonData().getMap();
 		MapGraphNode nearbyNode = map.getNode(node.getCol() + colOffset, node.getRow() + rowOffset);
 		boolean result = true;
 		if (nearbyNode != null && nearbyNode.getEntity() != null) {
-			result = !DefaultGameSettings.DISABLE_FOW && modelInstance.get(nearbyNode.getEntity()).getFlatColor() != null;
+			result = !DefaultGameSettings.DISABLE_FOW && ComponentsMapper.modelInstance.get(nearbyNode.getEntity()).getFlatColor() != null;
 		}
 		total |= result ? mask : 0;
 		return total;
@@ -200,18 +203,47 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private boolean applyLineOfSightOnNode(MapGraph map, MapGraphNode playerNode, boolean blocked, GridPoint2 nodeCoord) {
 		MapGraphNode currentNode = map.getNode(nodeCoord.x, nodeCoord.y);
 		if (currentNode != null && currentNode.getEntity() != null) {
-			FloorComponent floorComponent = floor.get(currentNode.getEntity());
-			ModelInstanceComponent modelInstanceComponent = modelInstance.get(currentNode.getEntity());
+			FloorComponent floorComponent = ComponentsMapper.floor.get(currentNode.getEntity());
+			ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(currentNode.getEntity());
 			if (!floorComponent.isRevealCalculated()) {
 				modelInstanceComponent.setFlatColor(!DefaultGameSettings.DISABLE_FOW && blocked ? Color.BLACK : null);
 				floorComponent.setFogOfWarSignature(blocked ? 16 : 0);
 				floorComponent.setRevealCalculated(true);
 			}
-			if (!blocked && checkIfNodeBlocks(playerNode, currentNode)) {
-				blocked = true;
+			if (!blocked) {
+				if (checkIfNodeBlocks(playerNode, currentNode) || checkIfAnyEnvironmentObjectBlocks(playerNode, currentNode)) {
+					blocked = true;
+				}
 			}
 		}
 		return blocked;
+	}
+
+	private boolean checkIfAnyEnvironmentObjectBlocks(MapGraphNode playerNode, MapGraphNode currentNode) {
+		boolean result = false;
+		for (Entity environmentObject : ambObjects) {
+			if (checkIfEnvironmentObjectBlocks(playerNode, currentNode, environmentObject)) {
+				result = true;
+				break;
+			}
+		}
+		return result;
+	}
+
+	private boolean checkIfEnvironmentObjectBlocks(MapGraphNode playerNode,
+												   MapGraphNode currentNode,
+												   Entity environmentObject) {
+		float height = ComponentsMapper.environmentObject.get(environmentObject).getType().getHeight();
+		if (height > 0) {
+			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(environmentObject).getModelInstance();
+			Vector3 position = modelInstance.transform.getTranslation(auxVector3_2);
+			MapGraphNode node = getSystemsCommonData().getMap().getNode(position);
+			float thingTopSide = position.y + height;
+			if (thingTopSide >= playerNode.getHeight() + PlayerComponent.PLAYER_HEIGHT && currentNode.equals(node)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean checkIfNodeBlocks(MapGraphNode playerNode, MapGraphNode currentNode) {
@@ -226,9 +258,9 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		PlayerWeaponsDefinitions definition = (PlayerWeaponsDefinitions) selectedWeapon.getDefinition();
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		Entity player = systemsCommonData.getPlayer();
-		CharacterDecalComponent cdc = characterDecal.get(player);
+		CharacterDecalComponent cdc = ComponentsMapper.characterDecal.get(player);
 		CharacterAnimations animations = getAssetsManager().get(Assets.Atlases.findByRelatedWeapon(definition).name());
-		cdc.init(animations, cdc.getSpriteType(), cdc.getDirection(), auxVector3.set(cdc.getDecal().getPosition()));
+		cdc.init(animations, cdc.getSpriteType(), cdc.getDirection(), auxVector3_1.set(cdc.getDecal().getPosition()));
 		CharacterAnimation animation = animations.get(cdc.getSpriteType(), cdc.getDirection());
 		ComponentsMapper.animation.get(player).init(cdc.getSpriteType().getFrameDuration(), animation);
 		if (selectedWeapon != systemsCommonData.getStorage().getSelectedWeapon()) {
@@ -238,7 +270,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	@Override
 	public void onCharacterCommandDone(final Entity character, final CharacterCommand executedCommand) {
-		if (player.has(character)) {
+		if (ComponentsMapper.player.has(character)) {
 			notifyPlayerFinishedTurn();
 		}
 	}
@@ -251,7 +283,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	@Override
 	public void onItemPickedUp(final Entity itemPickedUp) {
-		Item item = pickup.get(itemPickedUp).getItem();
+		Item item = ComponentsMapper.pickup.get(itemPickedUp).getItem();
 		if (getSystemsCommonData().getStorage().addItem(item)) {
 			for (PlayerSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onItemAddedToStorage(item);
@@ -291,7 +323,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	private void enemySelectedWithRangeWeapon(final MapGraphNode node) {
 		Entity player = getSystemsCommonData().getPlayer();
-		CharacterComponent charComp = character.get(player);
+		CharacterComponent charComp = ComponentsMapper.character.get(player);
 		Entity targetNode = getSystemsCommonData().getMap().fetchAliveEnemyFromNode(node);
 		charComp.setTarget(targetNode);
 		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
@@ -314,7 +346,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 											boolean avoidCharactersInCalculation,
 											MapGraphConnectionCosts maxCostPerNodeConnection) {
 		playerPathPlanner.getCurrentPath().clear();
-		CharacterDecalComponent characterDecalComponent = characterDecal.get(character);
+		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(character);
 		Vector2 cellPosition = characterDecalComponent.getNodePosition(auxVector2_1);
 		MapGraphNode destNode = getSystemsCommonData().getMap().getNode((int) cellPosition.x, (int) cellPosition.y);
 		initializePathPlanRequest(sourceNode, destNode, maxCostPerNodeConnection, avoidCharactersInCalculation, playerPathPlanner.getCurrentPath());
@@ -335,7 +367,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	private boolean calculatePathAccordingToSelection(final MapGraphNode cursorNode, Entity enemyAtNode) {
-		CharacterDecalComponent charDecalComp = characterDecal.get(getSystemsCommonData().getPlayer());
+		CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer());
 		MapGraphPath plannedPath = playerPathPlanner.getCurrentPath();
 		initializePathPlanRequest(cursorNode, charDecalComp, plannedPath);
 		Vector2 cellPosition = charDecalComp.getNodePosition(auxVector2_1);
@@ -346,7 +378,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	private boolean calculatePathToEnemy(Entity enemyAtNode, MapGraphNode playerNode) {
 		return enemyAtNode != null
-				&& character.get(enemyAtNode).getSkills().getHealthData().getHp() > 0
+				&& ComponentsMapper.character.get(enemyAtNode).getSkills().getHealthData().getHp() > 0
 				&& calculatePathToCharacter(playerNode, enemyAtNode, true, CLEAN);
 	}
 
@@ -363,7 +395,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	private void applyPlayerCommandAccordingToPlan(MapGraphNode destination) {
 		SystemsCommonData commonData = getSystemsCommonData();
-		CharacterDecalComponent charDecalComp = characterDecal.get(commonData.getPlayer());
+		CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(commonData.getPlayer());
 		MapGraphNode playerNode = commonData.getMap().getNode(charDecalComp.getNodePosition(auxVector2_1));
 		applyCommandWhenNoAttackNodeSelected(commonData, playerNode, destination);
 	}
@@ -400,7 +432,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		if (getSystemsCommonData().getCurrentHighLightedPickup() == null) return false;
 		Entity p = getSystemsCommonData().getCurrentHighLightedPickup();
 		GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(p).getModelInstance();
-		Vector3 pickupPosition = modelInstance.transform.getTranslation(auxVector3);
+		Vector3 pickupPosition = modelInstance.transform.getTranslation(auxVector3_1);
 		return map.getNode(pickupPosition).equals(playerNode);
 	}
 
@@ -422,7 +454,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		MapGraph map = systemsCommonData.getMap();
 		Entity player = systemsCommonData.getPlayer();
-		MapGraphNode playerNode = map.getNode(characterDecal.get(player).getDecal().getPosition());
+		MapGraphNode playerNode = map.getNode(ComponentsMapper.characterDecal.get(player).getDecal().getPosition());
 		if (path.getCount() > 0 && !playerNode.equals(path.get(path.getCount() - 1))) {
 			shrinkRunCommandInBattle();
 			applyPlayerCommand(RUN, playerPathPlanner.getCurrentPath(), path.get(1));
@@ -442,7 +474,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 		boolean result = false;
 		for (int i = 0; i < turnsQueue.size; i++) {
-			if (enemy.has(turnsQueue.get(i))) {
+			if (ComponentsMapper.enemy.has(turnsQueue.get(i))) {
 				result = true;
 				break;
 			}
@@ -476,6 +508,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		getSystemsCommonData().setPlayer(getEngine().getEntitiesFor(Family.all(PlayerComponent.class).get()).first());
 		Weapon weapon = initializeStartingWeapon();
 		getSystemsCommonData().getStorage().setSelectedWeapon(weapon);
+		ambObjects = engine.getEntitiesFor(Family.all(EnvironmentObjectComponent.class).exclude(DoorComponent.class).get());
 	}
 
 	private Weapon initializeStartingWeapon( ) {

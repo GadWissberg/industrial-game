@@ -16,7 +16,7 @@ import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.shared.model.Coords;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.ObstacleComponent;
+import com.gadarts.industrial.components.EnvironmentObjectComponent;
 import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
@@ -59,7 +59,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 	public MapGraph(Dimension mapSize, PooledEngine engine, float ambient) {
 		this.ambient = ambient;
 		this.characterEntities = engine.getEntitiesFor(Family.all(CharacterComponent.class).get());
-		this.obstacleEntities = engine.getEntitiesFor(Family.all(ObstacleComponent.class).get());
+		this.obstacleEntities = engine.getEntitiesFor(Family.all(EnvironmentObjectComponent.class).get());
 		this.enemiesEntities = engine.getEntitiesFor(Family.all(EnemyComponent.class).get());
 		this.mapSize = mapSize;
 		this.nodes = new Array<>(mapSize.width * mapSize.height);

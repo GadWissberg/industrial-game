@@ -23,13 +23,12 @@ public class ComponentsMapper {
 	public static final ComponentMapper<SimpleDecalComponent> simpleDecal = ComponentMapper.getFor(SimpleDecalComponent.class);
 	public static final ComponentMapper<PickUpComponent> pickup = ComponentMapper.getFor(PickUpComponent.class);
 	public static final ComponentMapper<EnemyComponent> enemy = ComponentMapper.getFor(EnemyComponent.class);
-	public static final ComponentMapper<FlowerIconComponent> flowerIcon = ComponentMapper.getFor(FlowerIconComponent.class);
 	public static final ComponentMapper<BulletComponent> bullet = ComponentMapper.getFor(BulletComponent.class);
 	public static final ComponentMapper<ParticleEffectComponent> particleEffect = ComponentMapper.getFor(ParticleEffectComponent.class);
 	public static final ComponentMapper<ParticleEffectParentComponent> particleParent = ComponentMapper.getFor(ParticleEffectParentComponent.class);
 	public static final ComponentMapper<ShadowlessLightComponent> shadowlessLight = ComponentMapper.getFor(ShadowlessLightComponent.class);
 	public static final ComponentMapper<StaticLightComponent> staticLight = ComponentMapper.getFor(StaticLightComponent.class);
-	public static final ComponentMapper<ObstacleComponent> obstacle = ComponentMapper.getFor(ObstacleComponent.class);
+	public static final ComponentMapper<EnvironmentObjectComponent> environmentObject = ComponentMapper.getFor(EnvironmentObjectComponent.class);
 	public static final ComponentMapper<WallComponent> wall = ComponentMapper.getFor(WallComponent.class);
 	public static final ComponentMapper<AppendixModelInstanceComponent> appendixModelInstance = ComponentMapper.getFor(AppendixModelInstanceComponent.class);
 	public static final ComponentMapper<DoorComponent> door = ComponentMapper.getFor(DoorComponent.class);

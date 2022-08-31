@@ -339,7 +339,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		return (!miComp.isVisible())
 				|| !isVisible(camera, miComp)
 				|| ComponentsMapper.floor.has(entity) && !drawFlags.isDrawGround()
-				|| ComponentsMapper.obstacle.has(entity) && !drawFlags.isDrawEnv()
+				|| ComponentsMapper.environmentObject.has(entity) && !drawFlags.isDrawEnv()
 				|| getSystemsCommonData().getCursor() == entity && !drawFlags.isDrawCursor()
 				|| isInFow(entity, miComp.getModelInstance().transform.getTranslation(auxVector3_1));
 	}
