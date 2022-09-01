@@ -181,166 +181,166 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">../sprites/player/melee/attack_east_0.png</key>
-            <key type="filename">../sprites/player/melee/attack_east_1.png</key>
-            <key type="filename">../sprites/player/melee/attack_east_2.png</key>
-            <key type="filename">../sprites/player/melee/attack_east_3.png</key>
-            <key type="filename">../sprites/player/melee/attack_east_4.png</key>
-            <key type="filename">../sprites/player/melee/attack_north_0.png</key>
-            <key type="filename">../sprites/player/melee/attack_north_1.png</key>
-            <key type="filename">../sprites/player/melee/attack_north_2.png</key>
-            <key type="filename">../sprites/player/melee/attack_north_3.png</key>
-            <key type="filename">../sprites/player/melee/attack_north_4.png</key>
-            <key type="filename">../sprites/player/melee/attack_north_east_0.png</key>
-            <key type="filename">../sprites/player/melee/attack_north_east_1.png</key>
-            <key type="filename">../sprites/player/melee/attack_north_east_2.png</key>
-            <key type="filename">../sprites/player/melee/attack_north_east_3.png</key>
-            <key type="filename">../sprites/player/melee/attack_north_east_4.png</key>
-            <key type="filename">../sprites/player/melee/attack_north_west_0.png</key>
-            <key type="filename">../sprites/player/melee/attack_north_west_1.png</key>
-            <key type="filename">../sprites/player/melee/attack_north_west_2.png</key>
-            <key type="filename">../sprites/player/melee/attack_north_west_3.png</key>
-            <key type="filename">../sprites/player/melee/attack_north_west_4.png</key>
-            <key type="filename">../sprites/player/melee/attack_south_0.png</key>
-            <key type="filename">../sprites/player/melee/attack_south_1.png</key>
-            <key type="filename">../sprites/player/melee/attack_south_2.png</key>
-            <key type="filename">../sprites/player/melee/attack_south_3.png</key>
-            <key type="filename">../sprites/player/melee/attack_south_4.png</key>
-            <key type="filename">../sprites/player/melee/attack_south_east_0.png</key>
-            <key type="filename">../sprites/player/melee/attack_south_east_1.png</key>
-            <key type="filename">../sprites/player/melee/attack_south_east_2.png</key>
-            <key type="filename">../sprites/player/melee/attack_south_east_3.png</key>
-            <key type="filename">../sprites/player/melee/attack_south_east_4.png</key>
-            <key type="filename">../sprites/player/melee/attack_south_west_0.png</key>
-            <key type="filename">../sprites/player/melee/attack_south_west_1.png</key>
-            <key type="filename">../sprites/player/melee/attack_south_west_2.png</key>
-            <key type="filename">../sprites/player/melee/attack_south_west_3.png</key>
-            <key type="filename">../sprites/player/melee/attack_south_west_4.png</key>
-            <key type="filename">../sprites/player/melee/attack_west_0.png</key>
-            <key type="filename">../sprites/player/melee/attack_west_1.png</key>
-            <key type="filename">../sprites/player/melee/attack_west_2.png</key>
-            <key type="filename">../sprites/player/melee/attack_west_3.png</key>
-            <key type="filename">../sprites/player/melee/attack_west_4.png</key>
-            <key type="filename">../sprites/player/melee/idle_east_0.png</key>
-            <key type="filename">../sprites/player/melee/idle_east_1.png</key>
-            <key type="filename">../sprites/player/melee/idle_east_2.png</key>
-            <key type="filename">../sprites/player/melee/idle_east_3.png</key>
-            <key type="filename">../sprites/player/melee/idle_north_0.png</key>
-            <key type="filename">../sprites/player/melee/idle_north_1.png</key>
-            <key type="filename">../sprites/player/melee/idle_north_2.png</key>
-            <key type="filename">../sprites/player/melee/idle_north_3.png</key>
-            <key type="filename">../sprites/player/melee/idle_north_east_0.png</key>
-            <key type="filename">../sprites/player/melee/idle_north_east_1.png</key>
-            <key type="filename">../sprites/player/melee/idle_north_east_2.png</key>
-            <key type="filename">../sprites/player/melee/idle_north_east_3.png</key>
-            <key type="filename">../sprites/player/melee/idle_north_west_0.png</key>
-            <key type="filename">../sprites/player/melee/idle_north_west_1.png</key>
-            <key type="filename">../sprites/player/melee/idle_north_west_2.png</key>
-            <key type="filename">../sprites/player/melee/idle_north_west_3.png</key>
-            <key type="filename">../sprites/player/melee/idle_south_0.png</key>
-            <key type="filename">../sprites/player/melee/idle_south_1.png</key>
-            <key type="filename">../sprites/player/melee/idle_south_2.png</key>
-            <key type="filename">../sprites/player/melee/idle_south_3.png</key>
-            <key type="filename">../sprites/player/melee/idle_south_east_0.png</key>
-            <key type="filename">../sprites/player/melee/idle_south_east_1.png</key>
-            <key type="filename">../sprites/player/melee/idle_south_east_2.png</key>
-            <key type="filename">../sprites/player/melee/idle_south_east_3.png</key>
-            <key type="filename">../sprites/player/melee/idle_south_west_0.png</key>
-            <key type="filename">../sprites/player/melee/idle_south_west_1.png</key>
-            <key type="filename">../sprites/player/melee/idle_south_west_2.png</key>
-            <key type="filename">../sprites/player/melee/idle_south_west_3.png</key>
-            <key type="filename">../sprites/player/melee/idle_west_0.png</key>
-            <key type="filename">../sprites/player/melee/idle_west_1.png</key>
-            <key type="filename">../sprites/player/melee/idle_west_2.png</key>
-            <key type="filename">../sprites/player/melee/idle_west_3.png</key>
-            <key type="filename">../sprites/player/melee/pain_east_0.png</key>
-            <key type="filename">../sprites/player/melee/pain_east_1.png</key>
-            <key type="filename">../sprites/player/melee/pain_east_2.png</key>
-            <key type="filename">../sprites/player/melee/pain_north_0.png</key>
-            <key type="filename">../sprites/player/melee/pain_north_1.png</key>
-            <key type="filename">../sprites/player/melee/pain_north_2.png</key>
-            <key type="filename">../sprites/player/melee/pain_north_east_0.png</key>
-            <key type="filename">../sprites/player/melee/pain_north_east_1.png</key>
-            <key type="filename">../sprites/player/melee/pain_north_east_2.png</key>
-            <key type="filename">../sprites/player/melee/pain_north_west_0.png</key>
-            <key type="filename">../sprites/player/melee/pain_north_west_1.png</key>
-            <key type="filename">../sprites/player/melee/pain_north_west_2.png</key>
-            <key type="filename">../sprites/player/melee/pain_south_0.png</key>
-            <key type="filename">../sprites/player/melee/pain_south_1.png</key>
-            <key type="filename">../sprites/player/melee/pain_south_2.png</key>
-            <key type="filename">../sprites/player/melee/pain_south_east_0.png</key>
-            <key type="filename">../sprites/player/melee/pain_south_east_1.png</key>
-            <key type="filename">../sprites/player/melee/pain_south_east_2.png</key>
-            <key type="filename">../sprites/player/melee/pain_south_west_0.png</key>
-            <key type="filename">../sprites/player/melee/pain_south_west_1.png</key>
-            <key type="filename">../sprites/player/melee/pain_south_west_2.png</key>
-            <key type="filename">../sprites/player/melee/pain_west_0.png</key>
-            <key type="filename">../sprites/player/melee/pain_west_1.png</key>
-            <key type="filename">../sprites/player/melee/pain_west_2.png</key>
-            <key type="filename">../sprites/player/melee/run_east_0.png</key>
-            <key type="filename">../sprites/player/melee/run_east_1.png</key>
-            <key type="filename">../sprites/player/melee/run_east_2.png</key>
-            <key type="filename">../sprites/player/melee/run_east_3.png</key>
-            <key type="filename">../sprites/player/melee/run_east_4.png</key>
-            <key type="filename">../sprites/player/melee/run_east_5.png</key>
-            <key type="filename">../sprites/player/melee/run_east_6.png</key>
-            <key type="filename">../sprites/player/melee/run_east_7.png</key>
-            <key type="filename">../sprites/player/melee/run_north_0.png</key>
-            <key type="filename">../sprites/player/melee/run_north_1.png</key>
-            <key type="filename">../sprites/player/melee/run_north_2.png</key>
-            <key type="filename">../sprites/player/melee/run_north_3.png</key>
-            <key type="filename">../sprites/player/melee/run_north_4.png</key>
-            <key type="filename">../sprites/player/melee/run_north_5.png</key>
-            <key type="filename">../sprites/player/melee/run_north_6.png</key>
-            <key type="filename">../sprites/player/melee/run_north_7.png</key>
-            <key type="filename">../sprites/player/melee/run_north_east_0.png</key>
-            <key type="filename">../sprites/player/melee/run_north_east_1.png</key>
-            <key type="filename">../sprites/player/melee/run_north_east_2.png</key>
-            <key type="filename">../sprites/player/melee/run_north_east_3.png</key>
-            <key type="filename">../sprites/player/melee/run_north_east_4.png</key>
-            <key type="filename">../sprites/player/melee/run_north_east_5.png</key>
-            <key type="filename">../sprites/player/melee/run_north_east_6.png</key>
-            <key type="filename">../sprites/player/melee/run_north_east_7.png</key>
-            <key type="filename">../sprites/player/melee/run_north_west_0.png</key>
-            <key type="filename">../sprites/player/melee/run_north_west_1.png</key>
-            <key type="filename">../sprites/player/melee/run_north_west_2.png</key>
-            <key type="filename">../sprites/player/melee/run_north_west_3.png</key>
-            <key type="filename">../sprites/player/melee/run_north_west_4.png</key>
-            <key type="filename">../sprites/player/melee/run_north_west_5.png</key>
-            <key type="filename">../sprites/player/melee/run_north_west_6.png</key>
-            <key type="filename">../sprites/player/melee/run_north_west_7.png</key>
-            <key type="filename">../sprites/player/melee/run_south_0.png</key>
-            <key type="filename">../sprites/player/melee/run_south_1.png</key>
-            <key type="filename">../sprites/player/melee/run_south_2.png</key>
-            <key type="filename">../sprites/player/melee/run_south_3.png</key>
-            <key type="filename">../sprites/player/melee/run_south_4.png</key>
-            <key type="filename">../sprites/player/melee/run_south_5.png</key>
-            <key type="filename">../sprites/player/melee/run_south_6.png</key>
-            <key type="filename">../sprites/player/melee/run_south_7.png</key>
-            <key type="filename">../sprites/player/melee/run_south_east_0.png</key>
-            <key type="filename">../sprites/player/melee/run_south_east_1.png</key>
-            <key type="filename">../sprites/player/melee/run_south_east_2.png</key>
-            <key type="filename">../sprites/player/melee/run_south_east_3.png</key>
-            <key type="filename">../sprites/player/melee/run_south_east_4.png</key>
-            <key type="filename">../sprites/player/melee/run_south_east_5.png</key>
-            <key type="filename">../sprites/player/melee/run_south_east_6.png</key>
-            <key type="filename">../sprites/player/melee/run_south_east_7.png</key>
-            <key type="filename">../sprites/player/melee/run_south_west_0.png</key>
-            <key type="filename">../sprites/player/melee/run_south_west_1.png</key>
-            <key type="filename">../sprites/player/melee/run_south_west_2.png</key>
-            <key type="filename">../sprites/player/melee/run_south_west_3.png</key>
-            <key type="filename">../sprites/player/melee/run_south_west_4.png</key>
-            <key type="filename">../sprites/player/melee/run_south_west_5.png</key>
-            <key type="filename">../sprites/player/melee/run_south_west_6.png</key>
-            <key type="filename">../sprites/player/melee/run_south_west_7.png</key>
-            <key type="filename">../sprites/player/melee/run_west_0.png</key>
-            <key type="filename">../sprites/player/melee/run_west_1.png</key>
-            <key type="filename">../sprites/player/melee/run_west_2.png</key>
-            <key type="filename">../sprites/player/melee/run_west_3.png</key>
-            <key type="filename">../sprites/player/melee/run_west_4.png</key>
-            <key type="filename">../sprites/player/melee/run_west_5.png</key>
-            <key type="filename">../sprites/player/melee/run_west_6.png</key>
-            <key type="filename">../sprites/player/melee/run_west_7.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_east_0.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_east_1.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_east_2.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_east_3.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_east_4.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_north_0.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_north_1.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_north_2.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_north_3.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_north_4.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_north_east_0.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_north_east_1.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_north_east_2.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_north_east_3.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_north_east_4.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_north_west_0.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_north_west_1.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_north_west_2.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_north_west_3.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_north_west_4.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_south_0.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_south_1.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_south_2.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_south_3.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_south_4.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_south_east_0.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_south_east_1.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_south_east_2.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_south_east_3.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_south_east_4.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_south_west_0.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_south_west_1.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_south_west_2.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_south_west_3.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_south_west_4.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_west_0.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_west_1.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_west_2.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_west_3.png</key>
+            <key type="filename">../sprites/player/hammer/attack_primary_west_4.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_east_0.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_east_1.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_east_2.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_east_3.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_north_0.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_north_1.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_north_2.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_north_3.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_north_east_0.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_north_east_1.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_north_east_2.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_north_east_3.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_north_west_0.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_north_west_1.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_north_west_2.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_north_west_3.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_south_0.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_south_1.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_south_2.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_south_3.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_south_east_0.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_south_east_1.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_south_east_2.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_south_east_3.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_south_west_0.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_south_west_1.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_south_west_2.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_south_west_3.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_west_0.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_west_1.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_west_2.png</key>
+            <key type="filename">../sprites/player/hammer/idle_0_west_3.png</key>
+            <key type="filename">../sprites/player/hammer/pain_east_0.png</key>
+            <key type="filename">../sprites/player/hammer/pain_east_1.png</key>
+            <key type="filename">../sprites/player/hammer/pain_east_2.png</key>
+            <key type="filename">../sprites/player/hammer/pain_north_0.png</key>
+            <key type="filename">../sprites/player/hammer/pain_north_1.png</key>
+            <key type="filename">../sprites/player/hammer/pain_north_2.png</key>
+            <key type="filename">../sprites/player/hammer/pain_north_east_0.png</key>
+            <key type="filename">../sprites/player/hammer/pain_north_east_1.png</key>
+            <key type="filename">../sprites/player/hammer/pain_north_east_2.png</key>
+            <key type="filename">../sprites/player/hammer/pain_north_west_0.png</key>
+            <key type="filename">../sprites/player/hammer/pain_north_west_1.png</key>
+            <key type="filename">../sprites/player/hammer/pain_north_west_2.png</key>
+            <key type="filename">../sprites/player/hammer/pain_south_0.png</key>
+            <key type="filename">../sprites/player/hammer/pain_south_1.png</key>
+            <key type="filename">../sprites/player/hammer/pain_south_2.png</key>
+            <key type="filename">../sprites/player/hammer/pain_south_east_0.png</key>
+            <key type="filename">../sprites/player/hammer/pain_south_east_1.png</key>
+            <key type="filename">../sprites/player/hammer/pain_south_east_2.png</key>
+            <key type="filename">../sprites/player/hammer/pain_south_west_0.png</key>
+            <key type="filename">../sprites/player/hammer/pain_south_west_1.png</key>
+            <key type="filename">../sprites/player/hammer/pain_south_west_2.png</key>
+            <key type="filename">../sprites/player/hammer/pain_west_0.png</key>
+            <key type="filename">../sprites/player/hammer/pain_west_1.png</key>
+            <key type="filename">../sprites/player/hammer/pain_west_2.png</key>
+            <key type="filename">../sprites/player/hammer/run_east_0.png</key>
+            <key type="filename">../sprites/player/hammer/run_east_1.png</key>
+            <key type="filename">../sprites/player/hammer/run_east_2.png</key>
+            <key type="filename">../sprites/player/hammer/run_east_3.png</key>
+            <key type="filename">../sprites/player/hammer/run_east_4.png</key>
+            <key type="filename">../sprites/player/hammer/run_east_5.png</key>
+            <key type="filename">../sprites/player/hammer/run_east_6.png</key>
+            <key type="filename">../sprites/player/hammer/run_east_7.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_0.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_1.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_2.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_3.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_4.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_5.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_6.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_7.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_east_0.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_east_1.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_east_2.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_east_3.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_east_4.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_east_5.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_east_6.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_east_7.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_west_0.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_west_1.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_west_2.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_west_3.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_west_4.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_west_5.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_west_6.png</key>
+            <key type="filename">../sprites/player/hammer/run_north_west_7.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_0.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_1.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_2.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_3.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_4.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_5.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_6.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_7.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_east_0.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_east_1.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_east_2.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_east_3.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_east_4.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_east_5.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_east_6.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_east_7.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_west_0.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_west_1.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_west_2.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_west_3.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_west_4.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_west_5.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_west_6.png</key>
+            <key type="filename">../sprites/player/hammer/run_south_west_7.png</key>
+            <key type="filename">../sprites/player/hammer/run_west_0.png</key>
+            <key type="filename">../sprites/player/hammer/run_west_1.png</key>
+            <key type="filename">../sprites/player/hammer/run_west_2.png</key>
+            <key type="filename">../sprites/player/hammer/run_west_3.png</key>
+            <key type="filename">../sprites/player/hammer/run_west_4.png</key>
+            <key type="filename">../sprites/player/hammer/run_west_5.png</key>
+            <key type="filename">../sprites/player/hammer/run_west_6.png</key>
+            <key type="filename">../sprites/player/hammer/run_west_7.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -358,166 +358,166 @@
         </map>
         <key>fileList</key>
         <array>
-            <filename>../sprites/player/melee/attack_east_0.png</filename>
-            <filename>../sprites/player/melee/attack_east_1.png</filename>
-            <filename>../sprites/player/melee/attack_east_2.png</filename>
-            <filename>../sprites/player/melee/attack_east_3.png</filename>
-            <filename>../sprites/player/melee/attack_east_4.png</filename>
-            <filename>../sprites/player/melee/attack_north_0.png</filename>
-            <filename>../sprites/player/melee/attack_north_1.png</filename>
-            <filename>../sprites/player/melee/attack_north_2.png</filename>
-            <filename>../sprites/player/melee/attack_north_3.png</filename>
-            <filename>../sprites/player/melee/attack_north_4.png</filename>
-            <filename>../sprites/player/melee/attack_north_east_0.png</filename>
-            <filename>../sprites/player/melee/attack_north_east_1.png</filename>
-            <filename>../sprites/player/melee/attack_north_east_2.png</filename>
-            <filename>../sprites/player/melee/attack_north_east_3.png</filename>
-            <filename>../sprites/player/melee/attack_north_east_4.png</filename>
-            <filename>../sprites/player/melee/attack_north_west_0.png</filename>
-            <filename>../sprites/player/melee/attack_north_west_1.png</filename>
-            <filename>../sprites/player/melee/attack_north_west_2.png</filename>
-            <filename>../sprites/player/melee/attack_north_west_3.png</filename>
-            <filename>../sprites/player/melee/attack_north_west_4.png</filename>
-            <filename>../sprites/player/melee/attack_south_0.png</filename>
-            <filename>../sprites/player/melee/attack_south_1.png</filename>
-            <filename>../sprites/player/melee/attack_south_2.png</filename>
-            <filename>../sprites/player/melee/attack_south_3.png</filename>
-            <filename>../sprites/player/melee/attack_south_4.png</filename>
-            <filename>../sprites/player/melee/attack_south_east_0.png</filename>
-            <filename>../sprites/player/melee/attack_south_east_1.png</filename>
-            <filename>../sprites/player/melee/attack_south_east_2.png</filename>
-            <filename>../sprites/player/melee/attack_south_east_3.png</filename>
-            <filename>../sprites/player/melee/attack_south_east_4.png</filename>
-            <filename>../sprites/player/melee/attack_south_west_0.png</filename>
-            <filename>../sprites/player/melee/attack_south_west_1.png</filename>
-            <filename>../sprites/player/melee/attack_south_west_2.png</filename>
-            <filename>../sprites/player/melee/attack_south_west_3.png</filename>
-            <filename>../sprites/player/melee/attack_south_west_4.png</filename>
-            <filename>../sprites/player/melee/attack_west_0.png</filename>
-            <filename>../sprites/player/melee/attack_west_1.png</filename>
-            <filename>../sprites/player/melee/attack_west_2.png</filename>
-            <filename>../sprites/player/melee/attack_west_3.png</filename>
-            <filename>../sprites/player/melee/attack_west_4.png</filename>
-            <filename>../sprites/player/melee/idle_east_0.png</filename>
-            <filename>../sprites/player/melee/idle_east_1.png</filename>
-            <filename>../sprites/player/melee/idle_east_2.png</filename>
-            <filename>../sprites/player/melee/idle_east_3.png</filename>
-            <filename>../sprites/player/melee/idle_north_0.png</filename>
-            <filename>../sprites/player/melee/idle_north_1.png</filename>
-            <filename>../sprites/player/melee/idle_north_2.png</filename>
-            <filename>../sprites/player/melee/idle_north_3.png</filename>
-            <filename>../sprites/player/melee/idle_north_east_0.png</filename>
-            <filename>../sprites/player/melee/idle_north_east_1.png</filename>
-            <filename>../sprites/player/melee/idle_north_east_2.png</filename>
-            <filename>../sprites/player/melee/idle_north_east_3.png</filename>
-            <filename>../sprites/player/melee/idle_north_west_0.png</filename>
-            <filename>../sprites/player/melee/idle_north_west_1.png</filename>
-            <filename>../sprites/player/melee/idle_north_west_2.png</filename>
-            <filename>../sprites/player/melee/idle_north_west_3.png</filename>
-            <filename>../sprites/player/melee/idle_south_0.png</filename>
-            <filename>../sprites/player/melee/idle_south_1.png</filename>
-            <filename>../sprites/player/melee/idle_south_2.png</filename>
-            <filename>../sprites/player/melee/idle_south_3.png</filename>
-            <filename>../sprites/player/melee/idle_south_east_0.png</filename>
-            <filename>../sprites/player/melee/idle_south_east_1.png</filename>
-            <filename>../sprites/player/melee/idle_south_east_2.png</filename>
-            <filename>../sprites/player/melee/idle_south_east_3.png</filename>
-            <filename>../sprites/player/melee/idle_south_west_0.png</filename>
-            <filename>../sprites/player/melee/idle_south_west_1.png</filename>
-            <filename>../sprites/player/melee/idle_south_west_2.png</filename>
-            <filename>../sprites/player/melee/idle_south_west_3.png</filename>
-            <filename>../sprites/player/melee/idle_west_0.png</filename>
-            <filename>../sprites/player/melee/idle_west_1.png</filename>
-            <filename>../sprites/player/melee/idle_west_2.png</filename>
-            <filename>../sprites/player/melee/idle_west_3.png</filename>
-            <filename>../sprites/player/melee/pain_east_0.png</filename>
-            <filename>../sprites/player/melee/pain_east_1.png</filename>
-            <filename>../sprites/player/melee/pain_east_2.png</filename>
-            <filename>../sprites/player/melee/pain_north_0.png</filename>
-            <filename>../sprites/player/melee/pain_north_1.png</filename>
-            <filename>../sprites/player/melee/pain_north_2.png</filename>
-            <filename>../sprites/player/melee/pain_north_east_0.png</filename>
-            <filename>../sprites/player/melee/pain_north_east_1.png</filename>
-            <filename>../sprites/player/melee/pain_north_east_2.png</filename>
-            <filename>../sprites/player/melee/pain_north_west_0.png</filename>
-            <filename>../sprites/player/melee/pain_north_west_1.png</filename>
-            <filename>../sprites/player/melee/pain_north_west_2.png</filename>
-            <filename>../sprites/player/melee/pain_south_0.png</filename>
-            <filename>../sprites/player/melee/pain_south_1.png</filename>
-            <filename>../sprites/player/melee/pain_south_2.png</filename>
-            <filename>../sprites/player/melee/pain_south_east_0.png</filename>
-            <filename>../sprites/player/melee/pain_south_east_1.png</filename>
-            <filename>../sprites/player/melee/pain_south_east_2.png</filename>
-            <filename>../sprites/player/melee/pain_south_west_0.png</filename>
-            <filename>../sprites/player/melee/pain_south_west_1.png</filename>
-            <filename>../sprites/player/melee/pain_south_west_2.png</filename>
-            <filename>../sprites/player/melee/pain_west_0.png</filename>
-            <filename>../sprites/player/melee/pain_west_1.png</filename>
-            <filename>../sprites/player/melee/pain_west_2.png</filename>
-            <filename>../sprites/player/melee/run_east_0.png</filename>
-            <filename>../sprites/player/melee/run_east_1.png</filename>
-            <filename>../sprites/player/melee/run_east_2.png</filename>
-            <filename>../sprites/player/melee/run_east_3.png</filename>
-            <filename>../sprites/player/melee/run_east_4.png</filename>
-            <filename>../sprites/player/melee/run_east_5.png</filename>
-            <filename>../sprites/player/melee/run_east_6.png</filename>
-            <filename>../sprites/player/melee/run_east_7.png</filename>
-            <filename>../sprites/player/melee/run_north_0.png</filename>
-            <filename>../sprites/player/melee/run_north_1.png</filename>
-            <filename>../sprites/player/melee/run_north_2.png</filename>
-            <filename>../sprites/player/melee/run_north_3.png</filename>
-            <filename>../sprites/player/melee/run_north_4.png</filename>
-            <filename>../sprites/player/melee/run_north_5.png</filename>
-            <filename>../sprites/player/melee/run_north_6.png</filename>
-            <filename>../sprites/player/melee/run_north_7.png</filename>
-            <filename>../sprites/player/melee/run_north_east_0.png</filename>
-            <filename>../sprites/player/melee/run_north_east_1.png</filename>
-            <filename>../sprites/player/melee/run_north_east_2.png</filename>
-            <filename>../sprites/player/melee/run_north_east_3.png</filename>
-            <filename>../sprites/player/melee/run_north_east_4.png</filename>
-            <filename>../sprites/player/melee/run_north_east_5.png</filename>
-            <filename>../sprites/player/melee/run_north_east_6.png</filename>
-            <filename>../sprites/player/melee/run_north_east_7.png</filename>
-            <filename>../sprites/player/melee/run_north_west_0.png</filename>
-            <filename>../sprites/player/melee/run_north_west_1.png</filename>
-            <filename>../sprites/player/melee/run_north_west_2.png</filename>
-            <filename>../sprites/player/melee/run_north_west_3.png</filename>
-            <filename>../sprites/player/melee/run_north_west_4.png</filename>
-            <filename>../sprites/player/melee/run_north_west_5.png</filename>
-            <filename>../sprites/player/melee/run_north_west_6.png</filename>
-            <filename>../sprites/player/melee/run_north_west_7.png</filename>
-            <filename>../sprites/player/melee/run_south_0.png</filename>
-            <filename>../sprites/player/melee/run_south_1.png</filename>
-            <filename>../sprites/player/melee/run_south_2.png</filename>
-            <filename>../sprites/player/melee/run_south_3.png</filename>
-            <filename>../sprites/player/melee/run_south_4.png</filename>
-            <filename>../sprites/player/melee/run_south_5.png</filename>
-            <filename>../sprites/player/melee/run_south_6.png</filename>
-            <filename>../sprites/player/melee/run_south_7.png</filename>
-            <filename>../sprites/player/melee/run_south_east_0.png</filename>
-            <filename>../sprites/player/melee/run_south_east_1.png</filename>
-            <filename>../sprites/player/melee/run_south_east_2.png</filename>
-            <filename>../sprites/player/melee/run_south_east_3.png</filename>
-            <filename>../sprites/player/melee/run_south_east_4.png</filename>
-            <filename>../sprites/player/melee/run_south_east_5.png</filename>
-            <filename>../sprites/player/melee/run_south_east_6.png</filename>
-            <filename>../sprites/player/melee/run_south_east_7.png</filename>
-            <filename>../sprites/player/melee/run_south_west_0.png</filename>
-            <filename>../sprites/player/melee/run_south_west_1.png</filename>
-            <filename>../sprites/player/melee/run_south_west_2.png</filename>
-            <filename>../sprites/player/melee/run_south_west_3.png</filename>
-            <filename>../sprites/player/melee/run_south_west_4.png</filename>
-            <filename>../sprites/player/melee/run_south_west_5.png</filename>
-            <filename>../sprites/player/melee/run_south_west_6.png</filename>
-            <filename>../sprites/player/melee/run_south_west_7.png</filename>
-            <filename>../sprites/player/melee/run_west_0.png</filename>
-            <filename>../sprites/player/melee/run_west_1.png</filename>
-            <filename>../sprites/player/melee/run_west_2.png</filename>
-            <filename>../sprites/player/melee/run_west_3.png</filename>
-            <filename>../sprites/player/melee/run_west_4.png</filename>
-            <filename>../sprites/player/melee/run_west_5.png</filename>
-            <filename>../sprites/player/melee/run_west_6.png</filename>
-            <filename>../sprites/player/melee/run_west_7.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_east_0.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_east_1.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_east_2.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_east_3.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_east_4.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_north_0.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_north_1.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_north_2.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_north_3.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_north_4.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_north_east_0.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_north_east_1.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_north_east_2.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_north_east_3.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_north_east_4.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_north_west_0.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_north_west_1.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_north_west_2.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_north_west_3.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_north_west_4.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_south_0.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_south_1.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_south_2.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_south_3.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_south_4.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_south_east_0.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_south_east_1.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_south_east_2.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_south_east_3.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_south_east_4.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_south_west_0.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_south_west_1.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_south_west_2.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_south_west_3.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_south_west_4.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_west_0.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_west_1.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_west_2.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_west_3.png</filename>
+            <filename>../sprites/player/hammer/attack_primary_west_4.png</filename>
+            <filename>../sprites/player/hammer/idle_0_east_0.png</filename>
+            <filename>../sprites/player/hammer/idle_0_east_1.png</filename>
+            <filename>../sprites/player/hammer/idle_0_east_2.png</filename>
+            <filename>../sprites/player/hammer/idle_0_east_3.png</filename>
+            <filename>../sprites/player/hammer/idle_0_north_0.png</filename>
+            <filename>../sprites/player/hammer/idle_0_north_1.png</filename>
+            <filename>../sprites/player/hammer/idle_0_north_2.png</filename>
+            <filename>../sprites/player/hammer/idle_0_north_3.png</filename>
+            <filename>../sprites/player/hammer/idle_0_north_east_0.png</filename>
+            <filename>../sprites/player/hammer/idle_0_north_east_1.png</filename>
+            <filename>../sprites/player/hammer/idle_0_north_east_2.png</filename>
+            <filename>../sprites/player/hammer/idle_0_north_east_3.png</filename>
+            <filename>../sprites/player/hammer/idle_0_north_west_0.png</filename>
+            <filename>../sprites/player/hammer/idle_0_north_west_1.png</filename>
+            <filename>../sprites/player/hammer/idle_0_north_west_2.png</filename>
+            <filename>../sprites/player/hammer/idle_0_north_west_3.png</filename>
+            <filename>../sprites/player/hammer/idle_0_south_0.png</filename>
+            <filename>../sprites/player/hammer/idle_0_south_1.png</filename>
+            <filename>../sprites/player/hammer/idle_0_south_2.png</filename>
+            <filename>../sprites/player/hammer/idle_0_south_3.png</filename>
+            <filename>../sprites/player/hammer/idle_0_south_east_0.png</filename>
+            <filename>../sprites/player/hammer/idle_0_south_east_1.png</filename>
+            <filename>../sprites/player/hammer/idle_0_south_east_2.png</filename>
+            <filename>../sprites/player/hammer/idle_0_south_east_3.png</filename>
+            <filename>../sprites/player/hammer/idle_0_south_west_0.png</filename>
+            <filename>../sprites/player/hammer/idle_0_south_west_1.png</filename>
+            <filename>../sprites/player/hammer/idle_0_south_west_2.png</filename>
+            <filename>../sprites/player/hammer/idle_0_south_west_3.png</filename>
+            <filename>../sprites/player/hammer/idle_0_west_0.png</filename>
+            <filename>../sprites/player/hammer/idle_0_west_1.png</filename>
+            <filename>../sprites/player/hammer/idle_0_west_2.png</filename>
+            <filename>../sprites/player/hammer/idle_0_west_3.png</filename>
+            <filename>../sprites/player/hammer/pain_east_0.png</filename>
+            <filename>../sprites/player/hammer/pain_east_1.png</filename>
+            <filename>../sprites/player/hammer/pain_east_2.png</filename>
+            <filename>../sprites/player/hammer/pain_north_0.png</filename>
+            <filename>../sprites/player/hammer/pain_north_1.png</filename>
+            <filename>../sprites/player/hammer/pain_north_2.png</filename>
+            <filename>../sprites/player/hammer/pain_north_east_0.png</filename>
+            <filename>../sprites/player/hammer/pain_north_east_1.png</filename>
+            <filename>../sprites/player/hammer/pain_north_east_2.png</filename>
+            <filename>../sprites/player/hammer/pain_north_west_0.png</filename>
+            <filename>../sprites/player/hammer/pain_north_west_1.png</filename>
+            <filename>../sprites/player/hammer/pain_north_west_2.png</filename>
+            <filename>../sprites/player/hammer/pain_south_0.png</filename>
+            <filename>../sprites/player/hammer/pain_south_1.png</filename>
+            <filename>../sprites/player/hammer/pain_south_2.png</filename>
+            <filename>../sprites/player/hammer/pain_south_east_0.png</filename>
+            <filename>../sprites/player/hammer/pain_south_east_1.png</filename>
+            <filename>../sprites/player/hammer/pain_south_east_2.png</filename>
+            <filename>../sprites/player/hammer/pain_south_west_0.png</filename>
+            <filename>../sprites/player/hammer/pain_south_west_1.png</filename>
+            <filename>../sprites/player/hammer/pain_south_west_2.png</filename>
+            <filename>../sprites/player/hammer/pain_west_0.png</filename>
+            <filename>../sprites/player/hammer/pain_west_1.png</filename>
+            <filename>../sprites/player/hammer/pain_west_2.png</filename>
+            <filename>../sprites/player/hammer/run_east_0.png</filename>
+            <filename>../sprites/player/hammer/run_east_1.png</filename>
+            <filename>../sprites/player/hammer/run_east_2.png</filename>
+            <filename>../sprites/player/hammer/run_east_3.png</filename>
+            <filename>../sprites/player/hammer/run_east_4.png</filename>
+            <filename>../sprites/player/hammer/run_east_5.png</filename>
+            <filename>../sprites/player/hammer/run_east_6.png</filename>
+            <filename>../sprites/player/hammer/run_east_7.png</filename>
+            <filename>../sprites/player/hammer/run_north_0.png</filename>
+            <filename>../sprites/player/hammer/run_north_1.png</filename>
+            <filename>../sprites/player/hammer/run_north_2.png</filename>
+            <filename>../sprites/player/hammer/run_north_3.png</filename>
+            <filename>../sprites/player/hammer/run_north_4.png</filename>
+            <filename>../sprites/player/hammer/run_north_5.png</filename>
+            <filename>../sprites/player/hammer/run_north_6.png</filename>
+            <filename>../sprites/player/hammer/run_north_7.png</filename>
+            <filename>../sprites/player/hammer/run_north_east_0.png</filename>
+            <filename>../sprites/player/hammer/run_north_east_1.png</filename>
+            <filename>../sprites/player/hammer/run_north_east_2.png</filename>
+            <filename>../sprites/player/hammer/run_north_east_3.png</filename>
+            <filename>../sprites/player/hammer/run_north_east_4.png</filename>
+            <filename>../sprites/player/hammer/run_north_east_5.png</filename>
+            <filename>../sprites/player/hammer/run_north_east_6.png</filename>
+            <filename>../sprites/player/hammer/run_north_east_7.png</filename>
+            <filename>../sprites/player/hammer/run_north_west_0.png</filename>
+            <filename>../sprites/player/hammer/run_north_west_1.png</filename>
+            <filename>../sprites/player/hammer/run_north_west_2.png</filename>
+            <filename>../sprites/player/hammer/run_north_west_3.png</filename>
+            <filename>../sprites/player/hammer/run_north_west_4.png</filename>
+            <filename>../sprites/player/hammer/run_north_west_5.png</filename>
+            <filename>../sprites/player/hammer/run_north_west_6.png</filename>
+            <filename>../sprites/player/hammer/run_north_west_7.png</filename>
+            <filename>../sprites/player/hammer/run_south_0.png</filename>
+            <filename>../sprites/player/hammer/run_south_1.png</filename>
+            <filename>../sprites/player/hammer/run_south_2.png</filename>
+            <filename>../sprites/player/hammer/run_south_3.png</filename>
+            <filename>../sprites/player/hammer/run_south_4.png</filename>
+            <filename>../sprites/player/hammer/run_south_5.png</filename>
+            <filename>../sprites/player/hammer/run_south_6.png</filename>
+            <filename>../sprites/player/hammer/run_south_7.png</filename>
+            <filename>../sprites/player/hammer/run_south_east_0.png</filename>
+            <filename>../sprites/player/hammer/run_south_east_1.png</filename>
+            <filename>../sprites/player/hammer/run_south_east_2.png</filename>
+            <filename>../sprites/player/hammer/run_south_east_3.png</filename>
+            <filename>../sprites/player/hammer/run_south_east_4.png</filename>
+            <filename>../sprites/player/hammer/run_south_east_5.png</filename>
+            <filename>../sprites/player/hammer/run_south_east_6.png</filename>
+            <filename>../sprites/player/hammer/run_south_east_7.png</filename>
+            <filename>../sprites/player/hammer/run_south_west_0.png</filename>
+            <filename>../sprites/player/hammer/run_south_west_1.png</filename>
+            <filename>../sprites/player/hammer/run_south_west_2.png</filename>
+            <filename>../sprites/player/hammer/run_south_west_3.png</filename>
+            <filename>../sprites/player/hammer/run_south_west_4.png</filename>
+            <filename>../sprites/player/hammer/run_south_west_5.png</filename>
+            <filename>../sprites/player/hammer/run_south_west_6.png</filename>
+            <filename>../sprites/player/hammer/run_south_west_7.png</filename>
+            <filename>../sprites/player/hammer/run_west_0.png</filename>
+            <filename>../sprites/player/hammer/run_west_1.png</filename>
+            <filename>../sprites/player/hammer/run_west_2.png</filename>
+            <filename>../sprites/player/hammer/run_west_3.png</filename>
+            <filename>../sprites/player/hammer/run_west_4.png</filename>
+            <filename>../sprites/player/hammer/run_west_5.png</filename>
+            <filename>../sprites/player/hammer/run_west_6.png</filename>
+            <filename>../sprites/player/hammer/run_west_7.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
