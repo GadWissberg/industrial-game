@@ -623,7 +623,7 @@ public class MapBuilder implements Disposable {
 			PlayerWeaponsDefinitions type = PlayerWeaponsDefinitions.valueOf(pickJsonObject.get(TYPE).getAsString());
 			TextureAtlas.AtlasRegion bulletRegion = null;
 			if (!type.isMelee()) {
-				bulletRegion = assetsManager.getAtlas(findByRelatedWeapon(type)).findRegion(REGION_NAME_BULLET);
+				bulletRegion = assetsManager.getAtlas(type.getRelatedAtlas()).findRegion(REGION_NAME_BULLET);
 			}
 			inflatePickupEntity(pickJsonObject, type, bulletRegion, mapGraph);
 		});
@@ -675,7 +675,7 @@ public class MapBuilder implements Disposable {
 				Direction.values()[characterJsonObject.get(DIRECTION).getAsInt()],
 				skills,
 				auxCharacterSoundData);
-		Atlases atlas = findByRelatedWeapon(DefaultGameSettings.STARTING_WEAPON);
+		Atlases atlas = DefaultGameSettings.STARTING_WEAPON.getRelatedAtlas();
 
 		addCharBaseComponents(
 				builder,

@@ -259,7 +259,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		Entity player = systemsCommonData.getPlayer();
 		CharacterDecalComponent cdc = ComponentsMapper.characterDecal.get(player);
-		CharacterAnimations animations = getAssetsManager().get(Assets.Atlases.findByRelatedWeapon(definition).name());
+		CharacterAnimations animations = getAssetsManager().get(definition.getRelatedAtlas().name());
 		cdc.init(animations, cdc.getSpriteType(), cdc.getDirection(), auxVector3_1.set(cdc.getDecal().getPosition()));
 		CharacterAnimation animation = animations.get(cdc.getSpriteType(), cdc.getDirection());
 		ComponentsMapper.animation.get(player).init(cdc.getSpriteType().getFrameDuration(), animation);
@@ -513,7 +513,9 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	private Weapon initializeStartingWeapon( ) {
 		Weapon weapon = Pools.obtain(Weapon.class);
-		Texture image = getAssetsManager().getTexture(DefaultGameSettings.STARTING_WEAPON.getSymbol());
+		Assets.UiTextures symbol = DefaultGameSettings.STARTING_WEAPON.getSymbol();
+		GameAssetsManager am = getAssetsManager();
+		Texture image = DefaultGameSettings.STARTING_WEAPON.getSymbol() != null ? am.getTexture(symbol) : null;
 		weapon.init(DefaultGameSettings.STARTING_WEAPON, 0, 0, image);
 		return weapon;
 	}
