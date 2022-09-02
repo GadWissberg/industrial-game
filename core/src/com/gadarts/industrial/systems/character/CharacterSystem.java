@@ -37,11 +37,9 @@ import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.utils.EntityBuilder;
 import com.gadarts.industrial.utils.GameUtils;
 
-import java.util.Map;
-
 import static com.gadarts.industrial.components.ComponentsMapper.character;
-import static com.gadarts.industrial.components.player.PlayerComponent.*;
-import static com.gadarts.industrial.shared.model.characters.Direction.*;
+import static com.gadarts.industrial.components.player.PlayerComponent.PLAYER_HEIGHT;
+import static com.gadarts.industrial.shared.model.characters.Direction.findDirection;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.*;
 
 public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber> implements
@@ -50,6 +48,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		EnemySystemEventsSubscriber,
 		AttackSystemEventsSubscriber,
 		CharacterSystemEventsSubscriber {
+	public static final long MAX_IDLE_ANIMATION_INTERVAL = 10000L;
 	private static final int ROTATION_INTERVAL = 125;
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final Vector3 auxVector3_2 = new Vector3();
@@ -58,12 +57,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private static final Vector2 auxVector2_3 = new Vector2();
 	private static final long CHARACTER_PAIN_DURATION = 1000L;
 	private static final long MIN_IDLE_ANIMATION_INTERVAL = 2000L;
-	public static final long MAX_IDLE_ANIMATION_INTERVAL = 10000L;
-	private final Map<SpriteType, CharacterCommandsDefinitions> onFrameChangedEvents = Map.of(
-			RUN, CharacterCommandsDefinitions.RUN,
-			PICKUP, CharacterCommandsDefinitions.PICKUP,
-			ATTACK_PRIMARY, CharacterCommandsDefinitions.ATTACK_PRIMARY
-	);
 	private ParticleEffect bloodSplatterEffect;
 	private ImmutableArray<Entity> characters;
 	private ParticleEffect smallExpEffect;
@@ -321,8 +314,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 
-	private void handleAnimationReverse(Entity character,
-										AnimationComponent animationComponent,
+	private void handleAnimationReverse(Entity character, AnimationComponent animationComponent,
 										Animation<TextureAtlas.AtlasRegion> animation,
 										SpriteType spriteType) {
 		if (animationComponent.isDoingReverse()) {
@@ -404,24 +396,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		character.get(entity).getRotationData().setRotating(true);
 	}
 
-	private Direction calculateDirectionToTarget(final Entity character) {
-		Vector3 pos = auxVector3_1.set(ComponentsMapper.characterDecal.get(character).getDecal().getPosition());
-		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		Entity target = characterComponent.getTarget();
-		MapGraph map = getSystemsCommonData().getMap();
-		MapGraphNode targetNode = map.getNode(ComponentsMapper.characterDecal.get(target).getDecal().getPosition());
-		Vector2 destPos = targetNode.getCenterPosition(auxVector2_2);
-		Vector2 directionToDest = destPos.sub(pos.x, pos.z).nor();
-		return findDirection(directionToDest);
-	}
-
-	private void rotationDone(CharacterRotationData rotationData,
-							  CharacterSpriteData charSpriteData) {
-		rotationData.setRotating(false);
-		CharacterCommand command = character.get(getSystemsCommonData().getTurnsQueue().first()).getCommand();
-		charSpriteData.setSpriteType(command.getDefinition().getSpriteType());
-	}
-
 	@Override
 	public void dispose( ) {
 
@@ -442,19 +416,32 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		onCharacterAppliedCommand(command, getSystemsCommonData().getPlayer());
 	}
 
-	private void onCharacterAppliedCommand(CharacterCommand command, Entity character) {
-		applyCommand(command, character);
-	}
-
-	private void handlePickup(Entity character, TextureAtlas.AtlasRegion newFrame) {
-		if (newFrame.index == 1 && ComponentsMapper.animation.get(character).isDoingReverse()) {
-			Entity currentTurn = getSystemsCommonData().getTurnsQueue().first();
-			CharacterCommand currentCommand = ComponentsMapper.character.get(currentTurn).getCommand();
-			Entity itemPickedUp = (Entity) currentCommand.getAdditionalData();
-			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
-				subscriber.onItemPickedUp(itemPickedUp);
+	@Override
+	public void onFrameChanged(final Entity character, final float deltaTime, final TextureAtlas.AtlasRegion newFrame) {
+		SystemsCommonData commonData = getSystemsCommonData();
+		CharacterComponent characterComp = ComponentsMapper.character.get(character);
+		CharacterCommand currentCommand = characterComp.getCommand();
+		Entity turn = commonData.getTurnsQueue().first();
+		if (turn == character && currentCommand != null) {
+			if (currentCommand.reactToFrameChange(commonData, character, newFrame, subscribers)) {
+				commandDone(character);
+			}
+			CharacterCommandsDefinitions definition = currentCommand.getDefinition();
+			if (characterComp.getTurnTimeLeft() <= 0 && definition != CharacterCommandsDefinitions.ATTACK_PRIMARY) {
+				subscribers.forEach(subscriber -> subscriber.onCharacterFinishedTurn(character));
 			}
 		}
+	}
+
+	private void rotationDone(CharacterRotationData rotationData,
+							  CharacterSpriteData charSpriteData) {
+		rotationData.setRotating(false);
+		CharacterCommand command = character.get(getSystemsCommonData().getTurnsQueue().first()).getCommand();
+		charSpriteData.setSpriteType(command.getDefinition().getSpriteType());
+	}
+
+	private void onCharacterAppliedCommand(CharacterCommand command, Entity character) {
+		applyCommand(command, character);
 	}
 
 	@Override
@@ -462,27 +449,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (character.has(collidable)) {
 			ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(bullet);
 			applyDamageToCharacter(collidable, ComponentsMapper.bullet.get(bullet).getDamage(), modelInstanceComponent);
-		}
-	}
-
-	@Override
-	public void onFrameChanged(final Entity character, final float deltaTime, final TextureAtlas.AtlasRegion newFrame) {
-		CharacterSpriteData characterSpriteData = ComponentsMapper.character.get(character).getCharacterSpriteData();
-		CharacterCommandsDefinitions commandDef = onFrameChangedEvents.get(characterSpriteData.getSpriteType());
-		if (commandDef != null) {
-			SystemsCommonData commonData = getSystemsCommonData();
-			CharacterComponent characterComp = ComponentsMapper.character.get(character);
-			CharacterCommand currentCommand = characterComp.getCommand();
-			Entity turn = commonData.getTurnsQueue().first();
-			if (turn == character) {
-				if (currentCommand.reactToFrameChange(commonData, character, newFrame, subscribers)) {
-					commandDone(character);
-				}
-				CharacterCommandsDefinitions definition = currentCommand.getDefinition();
-				if (characterComp.getTurnTimeLeft() <= 0 && definition != CharacterCommandsDefinitions.ATTACK_PRIMARY) {
-					subscribers.forEach(subscriber -> subscriber.onCharacterFinishedTurn(character));
-				}
-			}
 		}
 	}
 

@@ -2,32 +2,22 @@ package com.gadarts.industrial.systems.character.commands;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.character.CharacterComponent;
-import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 
 import java.util.List;
 
-public class PickUpCharacterCommand extends CharacterCommand {
+public class PickupItemCharacterCommand extends CharacterCommand {
 
-	private final static Vector2 auxVector2 = new Vector2();
+	private Entity itemToPickup;
 
 	@Override
 	public void initialize(Entity character,
 						   SystemsCommonData commonData,
 						   Object additionalData,
 						   List<CharacterSystemEventsSubscriber> subscribers) {
-		Vector2 charPos = ComponentsMapper.characterDecal.get(character).getNodePosition(auxVector2);
-		MapGraph map = commonData.getMap();
-		Entity pickup = map.getPickupFromNode(map.getNode(charPos));
-		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		if (pickup != null) {
-			characterComponent.getRotationData().setRotating(true);
-		}
+		itemToPickup = (Entity) additionalData;
 	}
 
 	@Override
@@ -35,12 +25,23 @@ public class PickUpCharacterCommand extends CharacterCommand {
 									  Entity character,
 									  TextureAtlas.AtlasRegion newFrame,
 									  List<CharacterSystemEventsSubscriber> subscribers) {
+		handlePickup(character, newFrame, subscribers);
 		return false;
 	}
 
 	@Override
 	public void free( ) {
-		Pools.get(PickUpCharacterCommand.class).free(this);
+
+	}
+
+	private void handlePickup(Entity character,
+							  TextureAtlas.AtlasRegion newFrame,
+							  List<CharacterSystemEventsSubscriber> subscribers) {
+		if (newFrame.index == 1 && ComponentsMapper.animation.get(character).isDoingReverse()) {
+			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
+				subscriber.onItemPickedUp(itemToPickup);
+			}
+		}
 	}
 
 	@Override

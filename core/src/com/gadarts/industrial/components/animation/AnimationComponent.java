@@ -31,7 +31,7 @@ public class AnimationComponent implements GameComponent {
 		animation.setFrameDuration(frameDuration);
 	}
 
-	public TextureAtlas.AtlasRegion calculateFrame() {
+	public TextureAtlas.AtlasRegion calculateFrame( ) {
 		double frameDuration = animation.getFrameDuration();
 		boolean looping = animation.getPlayMode() == Animation.PlayMode.LOOP || animation.getPlayMode() == Animation.PlayMode.LOOP_PINGPONG;
 		TextureAtlas.AtlasRegion result = animation.getKeyFrame(stateTime, looping);

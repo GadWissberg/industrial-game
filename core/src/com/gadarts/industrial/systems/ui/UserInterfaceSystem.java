@@ -221,8 +221,16 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(data.getCursor()).getModelInstance();
 			Vector3 cursorPos = modelInstance.transform.getTranslation(auxVector3_2);
 			MapGraphNode node = data.getMap().getNode(cursorPos);
-			if (node.getEntity() != null && ComponentsMapper.modelInstance.get(node.getEntity()).getFlatColor() == null) {
-				onUserSelectedNodeToApplyTurn();
+			Vector3 playerPosition = ComponentsMapper.characterDecal.get(data.getPlayer()).getDecal().getPosition();
+			if (node.equals(data.getMap().getNode(playerPosition))) {
+				for (UserInterfaceSystemEventsSubscriber sub : subscribers) {
+					sub.onUserLeftClickedThePlayer(node);
+				}
+			} else {
+				Entity nodeEntity = node.getEntity();
+				if (nodeEntity != null && ComponentsMapper.modelInstance.get(nodeEntity).getFlatColor() == null) {
+					onUserSelectedNodeToApplyTurn();
+				}
 			}
 		}
 	}

@@ -17,6 +17,7 @@ import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.EnvironmentObjectComponent;
+import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterAnimation;
 import com.gadarts.industrial.components.character.CharacterAnimations;
@@ -46,7 +47,6 @@ import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
 import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.shared.model.characters.Direction.*;
@@ -71,11 +71,21 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private final static LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
 	private PathPlanHandler playerPathPlanner;
 	private ImmutableArray<Entity> ambObjects;
+	private ImmutableArray<Entity> pickups;
 
 	public PlayerSystem(SystemsCommonData systemsCommonData,
 						GameAssetsManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
 		super(systemsCommonData, assetsManager, lifeCycleHandler);
+	}
+
+	private static CharacterCommand initializeCommand(CharacterCommandsDefinitions commandDefinition,
+													  Entity player,
+													  Object additionalData,
+													  MapGraphNode destination) {
+		CharacterCommand command = Pools.get(commandDefinition.getCharacterCommandImplementation()).obtain();
+		command.set(commandDefinition, player, additionalData, destination);
+		return command;
 	}
 
 	@Override
@@ -239,9 +249,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			Vector3 position = modelInstance.transform.getTranslation(auxVector3_2);
 			MapGraphNode node = getSystemsCommonData().getMap().getNode(position);
 			float thingTopSide = position.y + height;
-			if (thingTopSide >= playerNode.getHeight() + PlayerComponent.PLAYER_HEIGHT && currentNode.equals(node)) {
-				return true;
-			}
+			return thingTopSide >= playerNode.getHeight() + PlayerComponent.PLAYER_HEIGHT && currentNode.equals(node);
 		}
 		return false;
 	}
@@ -251,7 +259,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		return playerNode.getHeight() + PlayerComponent.PLAYER_HEIGHT < currentNode.getHeight()
 				|| (door != null && ComponentsMapper.door.get(door).getState() != DoorComponent.DoorStates.OPEN);
 	}
-
 
 	@Override
 	public void onSelectedWeaponChanged(Weapon selectedWeapon) {
@@ -302,7 +309,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		planPath(cursorNode);
 		int pathSize = currentPath.getCount();
 		if (!currentPath.nodes.isEmpty() && currentPath.get(pathSize - 1).equals(cursorNode)) {
-			applyPlayerCommandAccordingToPlan(cursorNode);
+			applyCommand(RUN, playerPathPlanner.getCurrentPath(), playerPathPlanner.getCurrentPath().get(1));
 		}
 	}
 
@@ -353,6 +360,17 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		return playerPathPlanner.getPathFinder().searchNodePathBeforeCommand(playerPathPlanner.getHeuristic(), request);
 	}
 
+	@Override
+	public void onUserLeftClickedThePlayer(MapGraphNode playerNode) {
+		for (Entity pickup : pickups) {
+			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(pickup).getModelInstance();
+			Vector3 pickupPosition = modelInstance.transform.getTranslation(auxVector3_1);
+			if (getSystemsCommonData().getMap().getNode(pickupPosition).equals(playerNode)) {
+				applyCommand(PICKUP, pickup, playerNode);
+			}
+		}
+	}
+
 	private void initializePathPlanRequest(MapGraphNode sourceNode,
 										   MapGraphNode destinationNode,
 										   MapGraphConnectionCosts maxCostInclusive,
@@ -393,71 +411,17 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				plannedPath);
 	}
 
-	private void applyPlayerCommandAccordingToPlan(MapGraphNode destination) {
-		SystemsCommonData commonData = getSystemsCommonData();
-		CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(commonData.getPlayer());
-		MapGraphNode playerNode = commonData.getMap().getNode(charDecalComp.getNodePosition(auxVector2_1));
-		applyCommandWhenNoAttackNodeSelected(commonData, playerNode, destination);
-	}
-
-	private void applyCommandWhenNoAttackNodeSelected(SystemsCommonData commonData,
-													  MapGraphNode playerNode,
-													  MapGraphNode destination) {
-		if (commonData.getItemToPickup() != null || isPickupAndPlayerOnSameNode(commonData.getMap(), playerNode)) {
-			applyPlayerCommand(PICKUP, commonData.getItemToPickup(), destination);
-		} else {
-			applyRunCommand(playerPathPlanner.getCurrentPath());
-		}
-	}
-
-	private boolean isNodeInAvailableNodes(final MapGraphNode node, final List<MapGraphNode> availableNodes) {
-		boolean result = false;
-		for (MapGraphNode availableNode : availableNodes) {
-			if (availableNode.equals(node)) {
-				result = true;
-				break;
-			}
-		}
-		return result;
-	}
-
-	private void calculatePathToMelee(MapGraphNode targetNode, MapGraph map) {
-		if (map.fetchAliveEnemyFromNode(targetNode) != null) {
-			Array<MapGraphNode> nodes = playerPathPlanner.getCurrentPath().nodes;
-			nodes.removeIndex(nodes.size - 1);
-		}
-	}
-
-	private boolean isPickupAndPlayerOnSameNode(MapGraph map, MapGraphNode playerNode) {
-		if (getSystemsCommonData().getCurrentHighLightedPickup() == null) return false;
-		Entity p = getSystemsCommonData().getCurrentHighLightedPickup();
-		GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(p).getModelInstance();
-		Vector3 pickupPosition = modelInstance.transform.getTranslation(auxVector3_1);
-		return map.getNode(pickupPosition).equals(playerNode);
-	}
-
-	private void applyPlayerCommand(CharacterCommandsDefinitions commandDefinition,
-									MapGraphNode destinationNode) {
-		applyPlayerCommand(commandDefinition, null, destinationNode);
-	}
-
-	private void applyPlayerCommand(CharacterCommandsDefinitions commandDefinition,
-									Object additionalData,
-									MapGraphNode destinationNode) {
+	private void applyCommand(CharacterCommandsDefinitions commandDefinition,
+							  Object additionalData,
+							  MapGraphNode destinationNode) {
+		MapGraph map = getSystemsCommonData().getMap();
 		Entity player = getSystemsCommonData().getPlayer();
-		CharacterCommand command = Pools.get(commandDefinition.getCharacterCommandImplementation()).obtain();
-		command.set(commandDefinition, player, additionalData, destinationNode);
-		subscribers.forEach(sub -> sub.onPlayerAppliedCommand(command));
-	}
-
-	private void applyRunCommand(final MapGraphPath path) {
-		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		MapGraph map = systemsCommonData.getMap();
-		Entity player = systemsCommonData.getPlayer();
 		MapGraphNode playerNode = map.getNode(ComponentsMapper.characterDecal.get(player).getDecal().getPosition());
-		if (path.getCount() > 0 && !playerNode.equals(path.get(path.getCount() - 1))) {
+		MapGraphPath path = playerPathPlanner.getCurrentPath();
+		if (!commandDefinition.isRequiresMovement() || path.getCount() > 0 && !playerNode.equals(path.get(path.getCount() - 1))) {
 			shrinkRunCommandInBattle();
-			applyPlayerCommand(RUN, playerPathPlanner.getCurrentPath(), path.get(1));
+			CharacterCommand command = initializeCommand(commandDefinition, player, additionalData, destinationNode);
+			subscribers.forEach(sub -> sub.onPlayerAppliedCommand(command));
 		}
 	}
 
@@ -509,6 +473,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		Weapon weapon = initializeStartingWeapon();
 		getSystemsCommonData().getStorage().setSelectedWeapon(weapon);
 		ambObjects = engine.getEntitiesFor(Family.all(EnvironmentObjectComponent.class).exclude(DoorComponent.class).get());
+		pickups = engine.getEntitiesFor(Family.all(PickUpComponent.class).get());
 	}
 
 	private Weapon initializeStartingWeapon( ) {

@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
@@ -35,7 +36,9 @@ public class PlayerLayout extends ItemsTable {
 						SystemsCommonData systemsCommonData,
 						List<UserInterfaceSystemEventsSubscriber> subscribers) {
 		super(itemSelectionHandler);
-		this.weaponChoice = new ItemDisplay(weaponChoice, this.itemSelectionHandler, PlayerLayout.class);
+		if (weaponChoice.getImage() != null) {
+			this.weaponChoice = new ItemDisplay(weaponChoice, this.itemSelectionHandler, PlayerLayout.class);
+		}
 		setTouchable(Touchable.enabled);
 		setName(NAME);
 		setBackground(new TextureRegionDrawable(texture));
@@ -131,11 +134,13 @@ public class PlayerLayout extends ItemsTable {
 	@Override
 	protected void setParent(final Group parent) {
 		super.setParent(parent);
-		getParent().addActor(this.weaponChoice);
-		placeWeapon();
+		if (weaponChoice != null) {
+			getParent().addActor(this.weaponChoice);
+			placeWeapon();
+		}
 	}
 
-	private void placeWeapon() {
+	private void placeWeapon( ) {
 		Texture weaponImage = this.weaponChoice.getItem().getImage();
 		float weaponX = WEAPON_POSITION_PARENT_X - weaponImage.getWidth() / 2f;
 		float weaponY = WEAPON_POSITION_PARENT_Y - weaponImage.getHeight() / 2f;

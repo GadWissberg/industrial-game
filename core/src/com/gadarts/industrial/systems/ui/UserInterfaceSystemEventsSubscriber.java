@@ -17,7 +17,11 @@ public interface UserInterfaceSystemEventsSubscriber extends SystemEventsSubscri
 
 	}
 
-	default void onNewGameSelectedInMenu() {
-		
+	default void onNewGameSelectedInMenu( ) {
+
+	}
+
+	default void onUserLeftClickedThePlayer(MapGraphNode protagonistNode) {
+
 	}
 }

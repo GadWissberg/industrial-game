@@ -38,8 +38,6 @@ public class SystemsCommonData implements Disposable {
 	private int numberOfVisible;
 	private GameStage uiStage;
 	private boolean cameraIsRotating;
-	private Entity currentHighLightedPickup;
-	private Entity itemToPickup;
 	private long currentTurnId;
 	private Table menuTable;
 

@@ -8,6 +8,7 @@ import com.gadarts.industrial.systems.ui.window.OnEvent;
 import com.gadarts.industrial.systems.ui.window.WindowEventParameters;
 
 import java.util.List;
+import java.util.Optional;
 
 enum StorageWindowOnEvents {
 
@@ -43,11 +44,14 @@ enum StorageWindowOnEvents {
 	WINDOW_CLOSED(GameWindowEventType.WINDOW_CLOSED, (parameters) -> {
 		StorageWindow storageWindow = (StorageWindow) parameters.getTarget();
 		if (parameters.getWindowEvent().getTarget() == storageWindow) {
-			if (storageWindow.getPlayerLayout().getWeaponChoice() == null) {
+			PlayerLayout playerLayout = storageWindow.getPlayerLayout();
+			if (playerLayout.getWeaponChoice() == null) {
 				StorageGrid storageGrid = storageWindow.getStorageGrid();
-				ItemDisplay itemDisplay = storageGrid.findItemDisplay(PlayerWeaponsDefinitions.GLOCK.getId());
-				List<UserInterfaceSystemEventsSubscriber> subscribers = parameters.getSubscribers();
-				storageWindow.getPlayerLayout().applySelectionToSelectedWeapon(storageGrid, itemDisplay, subscribers);
+				Optional.ofNullable(storageGrid.findItemDisplay(PlayerWeaponsDefinitions.GLOCK.getId())).ifPresent(itemDisplay -> {
+							List<UserInterfaceSystemEventsSubscriber> subscribers = parameters.getSubscribers();
+							playerLayout.applySelectionToSelectedWeapon(storageGrid, itemDisplay, subscribers);
+						}
+				);
 			}
 		}
 		return false;
