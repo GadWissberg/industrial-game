@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Disposable;
 import com.gadarts.industrial.DefaultGameSettings;
+import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import lombok.Getter;
@@ -71,7 +72,8 @@ public class CursorHandler implements Disposable {
 
 	void colorizeCursor(MapGraphNode node) {
 		Entity nodeEntity = node.getEntity();
-		if (nodeEntity != null && modelInstance.get(nodeEntity).getFlatColor() == null) {
+		boolean hasModel = modelInstance.has(nodeEntity);
+		if (nodeEntity != null && (hasModel && modelInstance.get(nodeEntity).getFlatColor() == null)) {
 			setCursorOpacity(1F);
 			setCursorColor(CURSOR_REGULAR);
 		} else {

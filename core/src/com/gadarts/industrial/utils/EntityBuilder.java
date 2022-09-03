@@ -163,7 +163,7 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addFloorComponent(MapGraphNode node, Assets.SurfaceTextures definition) {
+	public EntityBuilder addFloorComponent(MapGraphNode node) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		FloorComponent floorComponent = engine.createComponent(FloorComponent.class);
 		floorComponent.init(node);

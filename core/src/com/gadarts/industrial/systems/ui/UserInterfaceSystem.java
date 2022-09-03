@@ -228,8 +228,11 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 				}
 			} else {
 				Entity nodeEntity = node.getEntity();
-				if (nodeEntity != null && ComponentsMapper.modelInstance.get(nodeEntity).getFlatColor() == null) {
-					onUserSelectedNodeToApplyTurn();
+				if (nodeEntity != null) {
+					boolean hasModel = ComponentsMapper.modelInstance.has(nodeEntity);
+					if (hasModel && ComponentsMapper.modelInstance.get(nodeEntity).getFlatColor() == null) {
+						onUserSelectedNodeToApplyTurn();
+					}
 				}
 			}
 		}

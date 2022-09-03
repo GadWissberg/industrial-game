@@ -159,16 +159,6 @@ public class MapBuilder implements Disposable {
 						inflateNode(row, col, currentValue, mapGraph.getNode(col, row));
 					}
 				}));
-		linkFloorEntitiesToNodes(mapGraph);
-	}
-
-	private void linkFloorEntitiesToNodes(MapGraph mapGraph) {
-		ImmutableArray<Entity> floorEntities = engine.getEntitiesFor(Family.all(FloorComponent.class).get());
-		floorEntities.forEach(entity -> {
-			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(entity).getModelInstance();
-			Vector3 pos = modelInstance.transform.getTranslation(auxVector3_1);
-			mapGraph.getNode(pos).setEntity(entity);
-		});
 	}
 
 	private MapGraphNode getNodeByJson(final MapGraph mapGraph, final JsonObject tileJsonObject) {
@@ -186,8 +176,10 @@ public class MapBuilder implements Disposable {
 				MapGraphNode node = getNodeByJson(mapGraph, tileJsonObject);
 				float height = tileJsonObject.get(HEIGHT).getAsFloat();
 				node.setHeight(height);
-				Optional.ofNullable(node.getEntity())
-						.ifPresent(e -> modelInstance.get(e).getModelInstance().transform.translate(0, height, 0));
+				Entity entity = node.getEntity();
+				if (entity != null && modelInstance.has(entity)) {
+					modelInstance.get(entity).getModelInstance().transform.translate(0, height, 0);
+				}
 			});
 			heights.forEach(jsonElement -> {
 				JsonObject tileJsonObject = jsonElement.getAsJsonObject();
@@ -820,20 +812,14 @@ public class MapBuilder implements Disposable {
 
 	private void inflateNode(final int row, final int col, final byte chr, MapGraphNode node) {
 		SurfaceTextures definition = SurfaceTextures.values()[chr - 1];
+		EntityBuilder entityBuilder = beginBuildingEntity(engine);
 		if (definition != MISSING) {
 			GameModelInstance mi = new GameModelInstance(floorModel);
 			defineNodeModelInstance(row, col, definition, mi);
-			if (definition == Assets.SurfaceTextures.BLANK) {
-				node.setType(OBSTACLE_KEY_DIAGONAL_FORBIDDEN);
-			}
-			inflateNodeEntity(node, definition, mi);
+			entityBuilder.addModelInstanceComponent(mi, true);
 		}
-	}
-
-	private void inflateNodeEntity(MapGraphNode node, SurfaceTextures definition, GameModelInstance mi) {
-		beginBuildingEntity(engine).addModelInstanceComponent(mi, true)
-				.addFloorComponent(node, definition)
-				.finishAndAddToEngine();
+		node.setType(definition == Assets.SurfaceTextures.BLANK ? OBSTACLE_KEY_DIAGONAL_FORBIDDEN : node.getType());
+		node.setEntity(entityBuilder.addFloorComponent(node).finishAndAddToEngine());
 	}
 
 	private void defineNodeModelInstance(int row,

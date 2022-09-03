@@ -309,7 +309,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		ModelInstanceComponent modelInstanceComp = ComponentsMapper.modelInstance.get(entity);
 		Entity nodeEntity = ComponentsMapper.wall.get(entity).getParentNode().getEntity();
 		modelInstanceComp.setFlatColor(null);
-		if (nodeEntity == null || ComponentsMapper.modelInstance.get(nodeEntity).getFlatColor() != null) {
+		boolean hasModel = ComponentsMapper.modelInstance.has(nodeEntity);
+		if (nodeEntity == null || (hasModel && ComponentsMapper.modelInstance.get(nodeEntity).getFlatColor() != null)) {
 			modelInstanceComp.setFlatColor(Color.BLACK);
 		}
 	}
@@ -344,16 +345,18 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 				|| isInFow(entity, miComp.getModelInstance().transform.getTranslation(auxVector3_1));
 	}
 
-	private boolean isInFow(Entity entity, Vector3 position) {
-		if (ComponentsMapper.floor.has(entity)
-				|| ComponentsMapper.wall.has(entity)
-				|| entity == getSystemsCommonData().getCursor()) return false;
+	private boolean isInFow(Entity modelEntity, Vector3 position) {
+		if (ComponentsMapper.floor.has(modelEntity)
+				|| ComponentsMapper.wall.has(modelEntity)
+				|| modelEntity == getSystemsCommonData().getCursor()) return false;
 
 		MapGraph map = getSystemsCommonData().getMap();
 		MapGraphNode node = map.getNode(position);
-		return node != null
-				&& node.getEntity() != null
-				&& ComponentsMapper.modelInstance.get(node.getEntity()).getFlatColor() != null;
+		if (node == null) return false;
+		Entity nodeEntity = node.getEntity();
+		return nodeEntity != null
+				&& ComponentsMapper.modelInstance.has(nodeEntity)
+				&& ComponentsMapper.modelInstance.get(nodeEntity).getFlatColor() != null;
 	}
 
 	@Override
