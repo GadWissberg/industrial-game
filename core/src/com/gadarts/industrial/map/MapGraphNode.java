@@ -24,13 +24,12 @@ public class MapGraphNode {
 	private int nodeAmbientOcclusionValue;
 	@Setter
 	private MapNodesTypes type;
-
-
 	@Setter
 	private float height;
-
 	@Setter
 	private Entity entity;
+	@Setter
+	private boolean reachable;
 
 	public MapGraphNode(final int col, final int row, final MapNodesTypes type, final int connections) {
 		this.col = col;

@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.player.Item;
 import com.gadarts.industrial.console.commands.ConsoleCommandResult;
@@ -178,8 +179,9 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		for (Coord3D coord : nodes) {
 			MapGraphNode node = map.getNode(coord.x, coord.z);
 			if (node != null && (coord.getY() < node.getHeight() || coord.y == 0) && node.getEntity() != null) {
-				MapNodesTypes nodeType = ComponentsMapper.floor.get(node.getEntity()).getNode().getType();
-				if (nodeType == MapNodesTypes.PASSABLE_NODE) {
+				FloorComponent floorComponent = ComponentsMapper.floor.get(node.getEntity());
+				MapNodesTypes nodeType = floorComponent.getNode().getType();
+				if (floorComponent.getNode().isReachable() && nodeType == MapNodesTypes.PASSABLE_NODE) {
 					return node;
 				}
 			}

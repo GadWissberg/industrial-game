@@ -260,7 +260,11 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 	}
 
 	private boolean checkIfConnectionPassable(final Connection<MapGraphNode> con) {
-		if (ComponentsMapper.player.has(currentCharacterPathPlanner) && !isNodeRevealed(con.getToNode())) return false;
+		if (currentCharacterPathPlanner != null
+				&& ComponentsMapper.player.has(currentCharacterPathPlanner)
+				&& !isNodeRevealed(con.getToNode()))
+			return false;
+
 		MapGraphNode fromNode = con.getFromNode();
 		MapGraphNode toNode = con.getToNode();
 		boolean result = fromNode.getType() == MapNodesTypes.PASSABLE_NODE && toNode.getType() == MapNodesTypes.PASSABLE_NODE;

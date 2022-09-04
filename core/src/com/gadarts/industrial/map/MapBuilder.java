@@ -3,7 +3,6 @@ package com.gadarts.industrial.map;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
-import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -28,7 +27,6 @@ import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.character.CharacterData;
 import com.gadarts.industrial.components.character.*;
-import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.components.sd.RelatedDecal;
@@ -67,8 +65,7 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
-import static com.gadarts.industrial.components.ComponentsMapper.character;
-import static com.gadarts.industrial.components.ComponentsMapper.modelInstance;
+import static com.gadarts.industrial.components.ComponentsMapper.*;
 import static com.gadarts.industrial.shared.assets.Assets.*;
 import static com.gadarts.industrial.shared.assets.Assets.Atlases.*;
 import static com.gadarts.industrial.shared.assets.Assets.SurfaceTextures.BLANK;
@@ -139,24 +136,36 @@ public class MapBuilder implements Disposable {
 		JsonObject mapJsonObj = gson.fromJson(Gdx.files.internal(format(MAP_PATH_TEMP, map)).reader(), JsonObject.class);
 		JsonObject tilesJsonObject = mapJsonObj.get(TILES).getAsJsonObject();
 		MapGraph mapGraph = createMapGraph(mapJsonObj);
+		inflateAllElements(mapJsonObj, mapGraph);
 		inflateNodes(tilesJsonObject, mapGraph);
 		inflateHeights(mapJsonObj, mapGraph);
-		inflateAllElements(mapJsonObj, mapGraph);
 		mapGraph.init();
+		markAllReachableNodes(mapGraph);
 		return mapGraph;
 	}
 
+	private void markAllReachableNodes(MapGraph mapGraph) {
+		Entity player = engine.getEntitiesFor(Family.all(PlayerComponent.class).get()).get(0);
+		MapGraphNode playerNode = mapGraph.getNode(characterDecal.get(player).getDecal().getPosition());
+		GameHeuristic heuristic = new GameHeuristic();
+		GamePathFinder auxPathPlanner = new GamePathFinder(mapGraph);
+		MapGraphPath auxGraphPath = new MapGraphPath();
+		mapGraph.setIncludeEnemiesInGetConnections(false);
+		mapGraph.setMaxConnectionCostInSearch(MapGraphConnectionCosts.CLEAN);
+		mapGraph.getNodes().forEach(node -> {
+			boolean reachable = auxPathPlanner.searchNodePath(playerNode, node, heuristic, auxGraphPath);
+			node.setReachable(reachable);
+		});
+	}
+
 	private void inflateNodes(JsonObject tilesJsonObject, MapGraph mapGraph) {
-		String matrix = tilesJsonObject.get(MATRIX).getAsString();
-		byte[] matrixByte = Base64.getDecoder().decode(matrix.getBytes());
-		floorModel.calculateBoundingBox(auxBoundingBox);
-		int width = mapGraph.getWidth();
-		int depth = mapGraph.getDepth();
-		IntStream.range(0, depth).forEach(row ->
-				IntStream.range(0, width).forEach(col -> {
-					byte currentValue = matrixByte[row * width + col % depth];
+		byte[] matrixByte = Base64.getDecoder().decode(tilesJsonObject.get(MATRIX).getAsString().getBytes());
+		IntStream.range(0, mapGraph.getDepth()).forEach(row ->
+				IntStream.range(0, mapGraph.getWidth()).forEach(col -> {
+					byte currentValue = matrixByte[row * mapGraph.getWidth() + col % mapGraph.getDepth()];
 					if (currentValue != 0) {
-						inflateNode(row, col, currentValue, mapGraph.getNode(col, row));
+						MapGraphNode node = mapGraph.getNode(col, row);
+						inflateNode(row, col, currentValue, node);
 					}
 				}));
 	}
