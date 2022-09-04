@@ -2,6 +2,7 @@ package com.gadarts.industrial.systems.character.commands;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
@@ -23,6 +24,10 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 	private final static Vector3 auxVector3_1 = new Vector3();
 
 	private final static Vector3 auxVector3_2 = new Vector3();
+
+	private static int randomNumberOfBullets(WeaponsDefinitions primary) {
+		return MathUtils.random(primary.getMinNumberOfBullets(), primary.getMaxNumberOfBullets());
+	}
 
 	@Override
 	public void reset( ) {
@@ -55,10 +60,6 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 	@Override
 	public void free( ) {
 		Pools.get(PrimaryAttackCharacterCommand.class).free(this);
-	}
-
-	private static int randomNumberOfBullets(WeaponsDefinitions primary) {
-		return MathUtils.random(primary.getMinNumberOfBullets(), primary.getMaxNumberOfBullets());
 	}
 
 	private Vector3 calculateDirectionToTarget(CharacterComponent characterComp,

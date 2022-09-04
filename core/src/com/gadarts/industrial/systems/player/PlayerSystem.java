@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -312,12 +313,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	private void applyPlayerTurn(final MapGraphNode cursorNode) {
-		MapGraphPath currentPath = playerPathPlanner.getCurrentPath();
 		planPath(cursorNode);
-		int pathSize = currentPath.getCount();
-		if (!currentPath.nodes.isEmpty() && currentPath.get(pathSize - 1).equals(cursorNode)) {
-			applyCommand(RUN, playerPathPlanner.getCurrentPath(), playerPathPlanner.getCurrentPath().get(1));
-		}
 	}
 
 	private void planPath(final MapGraphNode cursorNode) {
@@ -327,28 +323,46 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		pathHasCreated(cursorNode, enemyAtNode);
 	}
 
-	private void enemySelected(MapGraphNode node) {
-		Weapon selectedWeapon = getSystemsCommonData().getStorage().getSelectedWeapon();
-		if (!selectedWeapon.isMelee()) {
+	private void enemySelected(MapGraphNode targetNode, Entity enemyAtNode) {
+		ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).setTarget(enemyAtNode);
+		Entity targetCharacter = getSystemsCommonData().getMap().fetchAliveEnemyFromNode(targetNode);
+		Decal playerDecal = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer()).getDecal();
+		if (!getSystemsCommonData().getStorage().getSelectedWeapon().isMelee()) {
 			playerPathPlanner.resetPlan();
-			enemySelectedWithRangeWeapon(node);
+			selectedEnemyToAttack(targetNode, targetCharacter);
+		} else {
+			runToMelee(targetNode, targetCharacter, getSystemsCommonData().getMap().getNode(playerDecal.getPosition()));
 		}
 	}
 
-	private void enemySelectedWithRangeWeapon(final MapGraphNode node) {
+	private void runToMelee(MapGraphNode targetNode, Entity targetCharacter, MapGraphNode playerNode) {
+		calculatePathToEnemy(targetCharacter, playerNode);
+		MapGraphPath currentPath = playerPathPlanner.getCurrentPath();
+		int pathSize = currentPath.getCount();
+		if (!currentPath.nodes.isEmpty() && currentPath.get(pathSize - 1).equals(targetNode)) {
+			applyCommand(ATTACK_PRIMARY, playerPathPlanner.getCurrentPath(), playerPathPlanner.getCurrentPath().get(1));
+		}
+	}
+
+	private void selectedEnemyToAttack(final MapGraphNode node, Entity targetCharacter) {
 		Entity player = getSystemsCommonData().getPlayer();
 		CharacterComponent charComp = ComponentsMapper.character.get(player);
-		Entity targetNode = getSystemsCommonData().getMap().fetchAliveEnemyFromNode(node);
-		charComp.setTarget(targetNode);
+		charComp.setTarget(targetCharacter);
 		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
 			CharacterCommand command = Pools.get(ATTACK_PRIMARY.getCharacterCommandImplementation()).obtain();
-			subscriber.onPlayerAppliedCommand(command.set(ATTACK_PRIMARY, player, targetNode, node));
+			subscriber.onPlayerAppliedCommand(command.set(ATTACK_PRIMARY, player, targetCharacter, node));
 		}
 	}
 
 	private void pathHasCreated(MapGraphNode destination, Entity enemyAtNode) {
 		if (enemyAtNode != null) {
-			enemySelected(destination);
+			enemySelected(destination, enemyAtNode);
+		} else {
+			MapGraphPath currentPath = playerPathPlanner.getCurrentPath();
+			int pathSize = currentPath.getCount();
+			if (!currentPath.nodes.isEmpty() && currentPath.get(pathSize - 1).equals(destination)) {
+				applyCommand(RUN, playerPathPlanner.getCurrentPath(), playerPathPlanner.getCurrentPath().get(1));
+			}
 		}
 		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onPlayerPathCreated(destination);

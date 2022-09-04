@@ -70,7 +70,9 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		PlayerWeaponsDefinitions definition = (PlayerWeaponsDefinitions) selectedWeapon.getDefinition();
 		WeaponsDefinitions weaponDefinition = definition.getWeaponsDefinition();
 		getSystemsCommonData().getSoundPlayer().playSound(weaponDefinition.getEngageSound());
-		createBullet(character, direction, charPos, weaponDefinition, PlayerComponent.PLAYER_HEIGHT);
+		if (!weaponDefinition.isMelee()) {
+			createBullet(character, direction, charPos, weaponDefinition, PlayerComponent.PLAYER_HEIGHT);
+		}
 	}
 
 	private void enemyEngagesPrimaryAttack(final Entity character, final Vector3 direction, final Vector3 charPos) {
