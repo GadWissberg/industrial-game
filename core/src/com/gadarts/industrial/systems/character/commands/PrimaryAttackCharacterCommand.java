@@ -2,7 +2,6 @@ package com.gadarts.industrial.systems.character.commands;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
@@ -10,10 +9,8 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.character.OnGoingAttack;
-import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
-import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.utils.GameUtils;
@@ -35,10 +32,10 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 	}
 
 	@Override
-	public void initialize(Entity character,
-						   SystemsCommonData commonData,
-						   Object additionalData,
-						   List<CharacterSystemEventsSubscriber> subscribers) {
+	public boolean initialize(Entity character,
+							  SystemsCommonData commonData,
+							  Object additionalData,
+							  List<CharacterSystemEventsSubscriber> subscribers) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		if (characterComponent.getTarget() != null) {
 			characterComponent.getRotationData().setRotating(true);
@@ -47,6 +44,7 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 		WeaponsDefinitions primary = charComp.getPrimaryAttack();
 		int bulletsToShoot = primary.isMelee() ? 1 : randomNumberOfBullets(primary);
 		charComp.getOnGoingAttack().initialize(CharacterComponent.AttackType.PRIMARY, bulletsToShoot);
+		return false;
 	}
 
 	@Override

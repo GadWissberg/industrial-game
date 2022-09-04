@@ -361,7 +361,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 							  MapGraphNode destinationNode,
 							  Object additionalData) {
 		CharacterCommand command = Pools.get(commandDefinition.getCharacterCommandImplementation()).obtain();
-		command.set(commandDefinition, enemy, additionalData, destinationNode);
+		command.init(commandDefinition, enemy, additionalData, destinationNode);
 		subscribers.forEach(sub -> sub.onEnemyAppliedCommand(command, enemy));
 	}
 

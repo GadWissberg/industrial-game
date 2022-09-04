@@ -1,5 +1,6 @@
 package com.gadarts.industrial.systems.player;
 
+import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.components.player.Item;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.systems.SystemEventsSubscriber;
@@ -12,7 +13,7 @@ public interface PlayerSystemEventsSubscriber extends SystemEventsSubscriber {
 
 	}
 
-	default void onPlayerAppliedCommand(CharacterCommand command) {
+	default void onPlayerAppliedCommand(Queue<CharacterCommand> commands) {
 
 	}
 

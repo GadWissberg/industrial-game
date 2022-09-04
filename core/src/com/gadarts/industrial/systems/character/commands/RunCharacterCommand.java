@@ -46,15 +46,17 @@ public class RunCharacterCommand extends CharacterCommand {
 	}
 
 	@Override
-	public void initialize(Entity character,
-						   SystemsCommonData commonData,
-						   Object additionalData,
-						   List<CharacterSystemEventsSubscriber> subscribers) {
+	public boolean initialize(Entity character,
+							  SystemsCommonData commonData,
+							  Object additionalData,
+							  List<CharacterSystemEventsSubscriber> subscribers) {
 		systemsCommonData = commonData;
 		path.set((MapGraphPath) additionalData);
 		Array<MapGraphNode> nodes = path.nodes;
 		prevNode = nodes.removeIndex(0);
 		nextNode = nodes.get(0);
+		MapGraph map = commonData.getMap();
+		return isReachedEndOfPath(map.findConnection(prevNode, nextNode), map);
 	}
 
 	@Override
@@ -152,14 +154,16 @@ public class RunCharacterCommand extends CharacterCommand {
 		nextNode = path.getNextOf(nextNode);
 		setDestinationNode(nextNode);
 		consumeTurnTime(character, ComponentsMapper.character.get(character).getSkills().getAgility());
-		return isReachedEndOfPath(systemsCommonData.getMap().findConnection(node, nextNode));
+		MapGraph map = systemsCommonData.getMap();
+		return isReachedEndOfPath(map.findConnection(node, nextNode), map);
 	}
 
 
-	private boolean isReachedEndOfPath(MapGraphConnection connection) {
+	private boolean isReachedEndOfPath(MapGraphConnection connection, MapGraph map) {
 		return nextNode == null
 				|| connection == null
-				|| connection.getCost() != CLEAN.getCostValue();
+				|| connection.getCost() != CLEAN.getCostValue()
+				|| !map.checkIfNodeIsFreeOfAliveCharacters(nextNode);
 	}
 
 	private void translateCharacter(CharacterDecalComponent characterDecalComponent, SystemsCommonData systemsCommonData) {

@@ -190,16 +190,27 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		return auxConnectionsList;
 	}
 
+	public boolean checkIfNodeIsFreeOfAliveCharacters(MapGraphNode destinationNode) {
+		return checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(destinationNode, null, false);
+	}
+
 	public boolean checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(MapGraphNode destinationNode) {
-		return checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(destinationNode, null);
+		return checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(destinationNode, null, true);
 	}
 
 	public boolean checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(MapGraphNode destinationNode,
 																	MapGraphNode pathFinalNode) {
-		Entity door = destinationNode.getDoor();
+		return checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(destinationNode, pathFinalNode, true);
+	}
 
+	public boolean checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(MapGraphNode destinationNode,
+																	MapGraphNode pathFinalNode,
+																	boolean includeClosedDoors) {
+		Entity door = destinationNode.getDoor();
 		if (pathFinalNode != null && pathFinalNode.equals(destinationNode)) return true;
-		if (door != null && ComponentsMapper.door.get(door).getState() != DoorComponent.DoorStates.OPEN) return false;
+		if (includeClosedDoors
+				&& door != null
+				&& ComponentsMapper.door.get(door).getState() != DoorComponent.DoorStates.OPEN) return false;
 
 		for (Entity c : characterEntities) {
 			MapGraphNode node = getNode(ComponentsMapper.characterDecal.get(c).getNodePosition(auxVector2));

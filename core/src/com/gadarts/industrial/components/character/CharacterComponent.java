@@ -2,6 +2,7 @@ package com.gadarts.industrial.components.character;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.components.GameComponent;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
@@ -15,19 +16,25 @@ public class CharacterComponent implements GameComponent {
 	public final static float CHAR_RAD = 0.3f;
 
 	private static final Vector2 auxVector = new Vector2();
-
-	private CharacterCommand command;
+	@Setter(AccessLevel.NONE)
+	private Queue<CharacterCommand> commands = new Queue<>();
 	private Entity target;
 	private CharacterRotationData rotationData = new CharacterRotationData();
 	private CharacterSpriteData characterSpriteData;
 	private CharacterSoundData soundData = new CharacterSoundData();
 	private CharacterSkills skills = new CharacterSkills();
-
 	@Setter(AccessLevel.NONE)
 	private OnGoingAttack onGoingAttack = new OnGoingAttack();
 	private WeaponsDefinitions primaryAttack;
 	private float turnTimeLeft;
 	private float shadowRadius;
+
+	public void setCommands(Queue<CharacterCommand> commands) {
+		this.commands.clear();
+		for (CharacterCommand command : commands) {
+			this.commands.addLast(command);
+		}
+	}
 
 	@Override
 	public void reset( ) {

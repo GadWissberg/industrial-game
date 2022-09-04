@@ -21,26 +21,27 @@ public abstract class CharacterCommand implements Pool.Poolable {
 	@Setter
 	private MapGraphNode destinationNode;
 	@Setter
-	private boolean started;
+	private CommandStates state;
 
-	public abstract void initialize(Entity character,
-									SystemsCommonData commonData,
-									Object additionalData,
-									List<CharacterSystemEventsSubscriber> subscribers);
+	public abstract boolean initialize(Entity character,
+									   SystemsCommonData commonData,
+									   Object additionalData,
+									   List<CharacterSystemEventsSubscriber> subscribers);
 
 	public abstract boolean reactToFrameChange(SystemsCommonData systemsCommonData,
 											   Entity character,
 											   TextureAtlas.AtlasRegion newFrame,
 											   List<CharacterSystemEventsSubscriber> subscribers);
 
-	public CharacterCommand set(CharacterCommandsDefinitions type,
-								Entity character,
-								Object additionalData,
-								MapGraphNode destinationNode) {
+	public CharacterCommand init(CharacterCommandsDefinitions type,
+								 Entity character,
+								 Object additionalData,
+								 MapGraphNode destinationNode) {
 		this.definition = type;
 		this.character = character;
 		this.additionalData = additionalData;
 		this.destinationNode = destinationNode;
+		this.state = CommandStates.READY;
 		return this;
 	}
 

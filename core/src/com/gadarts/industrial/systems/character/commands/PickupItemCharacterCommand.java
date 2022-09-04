@@ -13,11 +13,12 @@ public class PickupItemCharacterCommand extends CharacterCommand {
 	private Entity itemToPickup;
 
 	@Override
-	public void initialize(Entity character,
-						   SystemsCommonData commonData,
-						   Object additionalData,
-						   List<CharacterSystemEventsSubscriber> subscribers) {
+	public boolean initialize(Entity character,
+							  SystemsCommonData commonData,
+							  Object additionalData,
+							  List<CharacterSystemEventsSubscriber> subscribers) {
 		itemToPickup = (Entity) additionalData;
+		return false;
 	}
 
 	@Override

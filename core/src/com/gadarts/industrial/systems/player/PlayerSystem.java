@@ -22,7 +22,6 @@ import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterAnimation;
 import com.gadarts.industrial.components.character.CharacterAnimations;
-import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
@@ -70,6 +69,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private final static LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
+	private static final Queue<CharacterCommand> auxCommandQueue = new Queue<>();
 	private PathPlanHandler playerPathPlanner;
 	private ImmutableArray<Entity> ambObjects;
 	private ImmutableArray<Entity> pickups;
@@ -80,18 +80,18 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		super(systemsCommonData, assetsManager, lifeCycleHandler);
 	}
 
-	private static CharacterCommand initializeCommand(CharacterCommandsDefinitions commandDefinition,
-													  Entity player,
-													  Object additionalData,
-													  MapGraphNode destination) {
+	private CharacterCommand initializeCommand(CharacterCommandsDefinitions commandDefinition,
+											   Object additionalData,
+											   MapGraphNode destination) {
 		CharacterCommand command = Pools.get(commandDefinition.getCharacterCommandImplementation()).obtain();
-		command.set(commandDefinition, player, additionalData, destination);
+		command.init(commandDefinition, getSystemsCommonData().getPlayer(), additionalData, destination);
 		return command;
 	}
 
 	@Override
 	public void onCommandInitialized( ) {
-		CharacterCommand command = ComponentsMapper.character.get(getSystemsCommonData().getTurnsQueue().first()).getCommand();
+		Entity currentCommand = getSystemsCommonData().getTurnsQueue().first();
+		CharacterCommand command = ComponentsMapper.character.get(currentCommand).getCommands().first();
 		if (!ComponentsMapper.player.has(command.getCharacter())) return;
 
 		for (Entity entity : getSystemsCommonData().getTurnsQueue()) {
@@ -110,11 +110,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	@Override
 	public void onDoorClosed(Entity doorEntity) {
 		refreshFogOfWar();
-	}
-
-	@Override
-	public void onNewTurn(Entity entity) {
-
 	}
 
 	@Override
@@ -262,12 +257,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		return false;
 	}
 
-	private boolean checkIfNodeBlocks(MapGraphNode playerNode, MapGraphNode currentNode) {
-		Entity door = currentNode.getDoor();
-		return playerNode.getHeight() + PlayerComponent.PLAYER_HEIGHT < currentNode.getHeight()
-				|| (door != null && ComponentsMapper.door.get(door).getState() != DoorComponent.DoorStates.OPEN);
-	}
-
 	@Override
 	public void onSelectedWeaponChanged(Weapon selectedWeapon) {
 		PlayerWeaponsDefinitions definition = (PlayerWeaponsDefinitions) selectedWeapon.getDefinition();
@@ -290,12 +279,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		}
 	}
 
-	private void notifyPlayerFinishedTurn( ) {
-		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onPlayerFinishedTurn();
-		}
-	}
-
 	@Override
 	public void onItemPickedUp(final Entity itemPickedUp) {
 		Item item = ComponentsMapper.pickup.get(itemPickedUp).getItem();
@@ -305,6 +288,18 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			}
 		}
 		getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.PICKUP);
+	}
+
+	private boolean checkIfNodeBlocks(MapGraphNode playerNode, MapGraphNode currentNode) {
+		Entity door = currentNode.getDoor();
+		return playerNode.getHeight() + PlayerComponent.PLAYER_HEIGHT < currentNode.getHeight()
+				|| (door != null && ComponentsMapper.door.get(door).getState() != DoorComponent.DoorStates.OPEN);
+	}
+
+	private void notifyPlayerFinishedTurn( ) {
+		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
+			subscriber.onPlayerFinishedTurn();
+		}
 	}
 
 	@Override
@@ -340,17 +335,21 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		MapGraphPath currentPath = playerPathPlanner.getCurrentPath();
 		int pathSize = currentPath.getCount();
 		if (!currentPath.nodes.isEmpty() && currentPath.get(pathSize - 1).equals(targetNode)) {
-			applyCommand(ATTACK_PRIMARY, playerPathPlanner.getCurrentPath(), playerPathPlanner.getCurrentPath().get(1));
+			auxCommandQueue.clear();
+			auxCommandQueue.addLast(initializeCommand(RUN, currentPath, currentPath.get(1)));
+			auxCommandQueue.addLast(initializeCommand(ATTACK_PRIMARY, targetCharacter, targetNode));
+			shrinkRunCommandInBattle();
+			subscribers.forEach(sub -> sub.onPlayerAppliedCommand(auxCommandQueue));
 		}
 	}
 
 	private void selectedEnemyToAttack(final MapGraphNode node, Entity targetCharacter) {
 		Entity player = getSystemsCommonData().getPlayer();
-		CharacterComponent charComp = ComponentsMapper.character.get(player);
-		charComp.setTarget(targetCharacter);
+		ComponentsMapper.character.get(player).setTarget(targetCharacter);
+		auxCommandQueue.clear();
+		auxCommandQueue.addLast(initializeCommand(ATTACK_PRIMARY, targetCharacter, node));
 		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
-			CharacterCommand command = Pools.get(ATTACK_PRIMARY.getCharacterCommandImplementation()).obtain();
-			subscriber.onPlayerAppliedCommand(command.set(ATTACK_PRIMARY, player, targetCharacter, node));
+			subscriber.onPlayerAppliedCommand(auxCommandQueue);
 		}
 	}
 
@@ -361,7 +360,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			MapGraphPath currentPath = playerPathPlanner.getCurrentPath();
 			int pathSize = currentPath.getCount();
 			if (!currentPath.nodes.isEmpty() && currentPath.get(pathSize - 1).equals(destination)) {
-				applyCommand(RUN, playerPathPlanner.getCurrentPath(), playerPathPlanner.getCurrentPath().get(1));
+				applySingleCommand(RUN, playerPathPlanner.getCurrentPath(), playerPathPlanner.getCurrentPath().get(1));
 			}
 		}
 		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
@@ -387,7 +386,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(pickup).getModelInstance();
 			Vector3 pickupPosition = modelInstance.transform.getTranslation(auxVector3_1);
 			if (getSystemsCommonData().getMap().getNode(pickupPosition).equals(playerNode)) {
-				applyCommand(PICKUP, pickup, playerNode);
+				applySingleCommand(PICKUP, pickup, playerNode);
 			}
 		}
 	}
@@ -432,17 +431,19 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				plannedPath);
 	}
 
-	private void applyCommand(CharacterCommandsDefinitions commandDefinition,
-							  Object additionalData,
-							  MapGraphNode destinationNode) {
+	private void applySingleCommand(CharacterCommandsDefinitions commandDefinition,
+									Object additionalData,
+									MapGraphNode destinationNode) {
 		MapGraph map = getSystemsCommonData().getMap();
 		Entity player = getSystemsCommonData().getPlayer();
 		MapGraphNode playerNode = map.getNode(ComponentsMapper.characterDecal.get(player).getDecal().getPosition());
 		MapGraphPath path = playerPathPlanner.getCurrentPath();
 		if (!commandDefinition.isRequiresMovement() || path.getCount() > 0 && !playerNode.equals(path.get(path.getCount() - 1))) {
+			CharacterCommand command = initializeCommand(commandDefinition, additionalData, destinationNode);
+			auxCommandQueue.clear();
+			auxCommandQueue.addLast(command);
 			shrinkRunCommandInBattle();
-			CharacterCommand command = initializeCommand(commandDefinition, player, additionalData, destinationNode);
-			subscribers.forEach(sub -> sub.onPlayerAppliedCommand(command));
+			subscribers.forEach(sub -> sub.onPlayerAppliedCommand(auxCommandQueue));
 		}
 	}
 
