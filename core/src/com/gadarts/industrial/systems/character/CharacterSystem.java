@@ -19,6 +19,7 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.animation.AnimationComponent;
 import com.gadarts.industrial.components.character.*;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
+import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
@@ -41,6 +42,7 @@ import com.gadarts.industrial.utils.EntityBuilder;
 import com.gadarts.industrial.utils.GameUtils;
 
 import static com.gadarts.industrial.components.ComponentsMapper.character;
+import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.components.player.PlayerComponent.PLAYER_HEIGHT;
 import static com.gadarts.industrial.shared.model.characters.Direction.findDirection;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.*;
@@ -85,8 +87,31 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		}
 	}
 
+	private static float getCharacterHeight(Entity character) {
+		float height;
+		if (ComponentsMapper.enemy.has(character)) {
+			height = ComponentsMapper.enemy.get(character).getEnemyDefinition().getHeight();
+		} else {
+			height = PLAYER_HEIGHT;
+		}
+		return height;
+	}
+
+	@Override
+	public void onCharacterStillHasTime(Entity character) {
+		Queue<CharacterCommand> commands = ComponentsMapper.character.get(character).getCommands();
+		freeEndedCommand(commands);
+		if (!commands.isEmpty()) {
+			CharacterCommand command = commands.first();
+			if (command.getState() == CommandStates.READY) {
+				beginProcessingCommand(character, command);
+			}
+		}
+	}
+
 	@Override
 	public void onNewTurn(Entity entity) {
+		ComponentsMapper.character.get(entity).setTurnTimeLeft(TURN_DURATION);
 		if (ComponentsMapper.player.has(entity)) {
 			freeEndedCommand(character.get(getSystemsCommonData().getPlayer()).getCommands());
 			Queue<CharacterCommand> commands = ComponentsMapper.character.get(entity).getCommands();
@@ -280,22 +305,43 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	@Override
 	public void onMeleeAttackAppliedOnTarget(Entity character, Entity target, WeaponsDefinitions primaryAttack) {
-		applyDamageToCharacter(target, primaryAttack.getDamage());
+		MapGraph map = getSystemsCommonData().getMap();
+		MapGraphNode srcNode = map.getNode(ComponentsMapper.characterDecal.get(character).getDecal().getPosition());
+		MapGraphNode targetNode = map.getNode(ComponentsMapper.characterDecal.get(target).getDecal().getPosition());
+		float height;
+		height = getCharacterHeight(character);
+		if (map.isNodesAdjacent(srcNode, targetNode, height / 2F)) {
+			applyDamageToCharacter(target, primaryAttack.getDamage());
+		}
 	}
 
-	public void commandDone(final Entity character) {
+	public void commandDone(Entity character) {
+		commandDone(character, true);
+	}
+
+	@Override
+	public void onBulletSetDestroyed(Entity bullet) {
+		commandDone(ComponentsMapper.bullet.get(bullet).getOwner());
+	}
+
+	public void commandDone(Entity character, boolean informTurnTimeLeftStatus) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
+		Queue<CharacterCommand> commands = characterComponent.getCommands();
+		if (commands.isEmpty()) return;
+
 		characterComponent.getCharacterSpriteData().setSpriteType(SpriteType.IDLE);
-		CharacterCommand lastCommand = characterComponent.getCommands().first();
+		CharacterCommand lastCommand = commands.first();
 		lastCommand.setState(CommandStates.ENDED);
 		characterComponent.getRotationData().setRotating(false);
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onCharacterCommandDone(character, lastCommand);
 		}
-		if (characterComponent.getTurnTimeLeft() > 0) {
-			subscribers.forEach(subscriber -> subscriber.onCharacterStillHasTime(character));
-		} else {
-			subscribers.forEach(subscriber -> subscriber.onCharacterFinishedTurn(character));
+		if (informTurnTimeLeftStatus) {
+			if (characterComponent.getTurnTimeLeft() > 0) {
+				subscribers.forEach(subscriber -> subscriber.onCharacterStillHasTime(character));
+			} else {
+				subscribers.forEach(subscriber -> subscriber.onCharacterFinishedTurn(character));
+			}
 		}
 	}
 
@@ -350,7 +396,9 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 										Animation<TextureAtlas.AtlasRegion> animation,
 										SpriteType spriteType) {
 		if (animationComponent.isDoingReverse()) {
-			commandDone(character);
+			if (spriteType.isCommandDoneOnReverseEnd()) {
+				commandDone(character);
+			}
 			animation.setPlayMode(Animation.PlayMode.NORMAL);
 			animationComponent.setDoingReverse(false);
 		} else {
@@ -492,7 +540,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	@Override
 	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
 		if (prevAiStatus == EnemyAiStatus.IDLE) {
-			commandDone(getSystemsCommonData().getPlayer());
+			commandDone(getSystemsCommonData().getPlayer(), false);
 		}
 	}
 }

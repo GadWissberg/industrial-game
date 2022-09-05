@@ -39,6 +39,7 @@ import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
+import com.gadarts.industrial.systems.character.commands.CommandStates;
 import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
@@ -267,13 +268,14 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		cdc.init(animations, cdc.getSpriteType(), cdc.getDirection(), auxVector3_1.set(cdc.getDecal().getPosition()));
 		CharacterAnimation animation = animations.get(cdc.getSpriteType(), cdc.getDirection());
 		ComponentsMapper.animation.get(player).init(cdc.getSpriteType().getFrameDuration(), animation);
+		ComponentsMapper.character.get(player).setPrimaryAttack(definition.getWeaponsDefinition());
 		if (selectedWeapon != systemsCommonData.getStorage().getSelectedWeapon()) {
 			systemsCommonData.getStorage().setSelectedWeapon(selectedWeapon);
 		}
 	}
 
 	@Override
-	public void onCharacterCommandDone(final Entity character, final CharacterCommand executedCommand) {
+	public void onCharacterFinishedTurn(Entity character) {
 		if (ComponentsMapper.player.has(character)) {
 			notifyPlayerFinishedTurn();
 		}

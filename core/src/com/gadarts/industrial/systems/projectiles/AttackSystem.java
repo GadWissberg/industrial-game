@@ -70,9 +70,7 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		PlayerWeaponsDefinitions definition = (PlayerWeaponsDefinitions) selectedWeapon.getDefinition();
 		WeaponsDefinitions weaponDefinition = definition.getWeaponsDefinition();
 		getSystemsCommonData().getSoundPlayer().playSound(weaponDefinition.getEngageSound());
-		if (!weaponDefinition.isMelee()) {
-			createBullet(character, direction, charPos, weaponDefinition, PlayerComponent.PLAYER_HEIGHT);
-		}
+		primaryAttackEngaged(character, direction, charPos, PlayerComponent.PLAYER_HEIGHT, weaponDefinition);
 	}
 
 	private void enemyEngagesPrimaryAttack(final Entity character, final Vector3 direction, final Vector3 charPos) {
@@ -80,6 +78,14 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.ATTACK_ENERGY_BALL);
 		float height = ComponentsMapper.enemy.get(character).getEnemyDefinition().getHeight();
 		WeaponsDefinitions primaryAttack = enemyComp.getEnemyDefinition().getPrimaryAttack();
+		primaryAttackEngaged(character, direction, charPos, height, primaryAttack);
+	}
+
+	private void primaryAttackEngaged(Entity character,
+									  Vector3 direction,
+									  Vector3 charPos,
+									  float height,
+									  WeaponsDefinitions primaryAttack) {
 		if (primaryAttack.isMelee()) {
 			subscribers.forEach(subscriber -> {
 				Entity target = ComponentsMapper.character.get(character).getTarget();
@@ -168,12 +174,16 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 
 	private void destroyBullet(final Entity bullet) {
 		WeaponsDefinitions weaponDefinition = ComponentsMapper.bullet.get(bullet).getWeaponDefinition();
+		if (bullets.size() == 1) {
+			for (AttackSystemEventsSubscriber subscriber : subscribers) {
+				subscriber.onBulletSetDestroyed(bullet);
+			}
+		}
 		bullet.remove(BulletComponent.class);
 		getEngine().removeEntity(bullet);
-		ParticleEffect effect = getAssetsManager().getParticleEffect(weaponDefinition.getParticleEffectOnDestroy());
 		GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(bullet).getModelInstance();
 		Vector3 pos = auxVector3_1.set(modelInstance.transform.getTranslation(auxVector3_1));
-		createExplosion(effect, pos);
+		createExplosion(getAssetsManager().getParticleEffect(weaponDefinition.getParticleEffectOnDestroy()), pos);
 	}
 
 	private void createExplosion(final ParticleEffect effect, final Vector3 pos) {

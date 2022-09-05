@@ -14,10 +14,11 @@ public interface AttackSystemEventsSubscriber extends SystemEventsSubscriber {
 
 	}
 
-	default void onHitScanCollisionWithAnotherEntity(WeaponsDefinitions definition, Entity collidable) {
+	default void onMeleeAttackAppliedOnTarget(Entity character, Entity target, WeaponsDefinitions primaryAttack) {
+
 	}
 
-	default void onMeleeAttackAppliedOnTarget(Entity character, Entity target, WeaponsDefinitions primaryAttack) {
+	default void onBulletSetDestroyed(Entity bullet) {
 
 	}
 }

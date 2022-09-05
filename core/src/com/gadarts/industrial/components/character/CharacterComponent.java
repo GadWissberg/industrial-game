@@ -14,7 +14,7 @@ import lombok.Setter;
 @Setter
 public class CharacterComponent implements GameComponent {
 	public final static float CHAR_RAD = 0.3f;
-
+	public static final float TURN_DURATION = 1F;
 	private static final Vector2 auxVector = new Vector2();
 	@Setter(AccessLevel.NONE)
 	private Queue<CharacterCommand> commands = new Queue<>();
@@ -52,6 +52,7 @@ public class CharacterComponent implements GameComponent {
 		this.soundData.set(soundData);
 		this.primaryAttack = primaryAttack;
 		this.shadowRadius = shadowRadius;
+		this.turnTimeLeft = TURN_DURATION;
 	}
 
 	public void dealDamage(final int damagePoints) {

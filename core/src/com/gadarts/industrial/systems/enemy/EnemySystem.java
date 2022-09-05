@@ -47,6 +47,7 @@ import java.util.List;
 import static com.badlogic.gdx.utils.TimeUtils.millis;
 import static com.badlogic.gdx.utils.TimeUtils.timeSinceMillis;
 import static com.gadarts.industrial.DefaultGameSettings.PARALYZED_ENEMIES;
+import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.HEIGHT_DIFF;
 import static com.gadarts.industrial.shared.assets.Assets.Sounds;
@@ -58,7 +59,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		TurnsSystemEventsSubscriber,
 		RenderSystemEventsSubscriber {
 	public static final float SKILL_FLOWER_HEIGHT_RELATIVE = 1F;
-	public static final float TURN_DURATION = 1F;
 	private static final long AMB_SOUND_INTERVAL_MIN = 10L;
 	private static final long AMB_SOUND_INTERVAL_MAX = 50L;
 	private final static Vector2 auxVector2_1 = new Vector2();
@@ -424,7 +424,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	@Override
 	public void onNewTurn(Entity entity) {
 		if (ComponentsMapper.enemy.has(entity)) {
-			ComponentsMapper.character.get(entity).setTurnTimeLeft(TURN_DURATION);
 			invokeEnemyTurn(entity);
 		}
 	}
