@@ -111,6 +111,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	@Override
 	public void onNewTurn(Entity entity) {
+		if (!character.has(entity)) return;
+
 		ComponentsMapper.character.get(entity).setTurnTimeLeft(TURN_DURATION);
 		if (ComponentsMapper.player.has(entity)) {
 			freeEndedCommand(character.get(getSystemsCommonData().getPlayer()).getCommands());
