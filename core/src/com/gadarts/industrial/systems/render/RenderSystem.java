@@ -719,9 +719,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 														AtlasRegion currentFrame) {
 		AtlasRegion newFrame = animationComponent.calculateFrame();
 		if (currentFrame.index != newFrame.index) {
-			if (ComponentsMapper.character.get(entity).getCharacterSpriteData().getSpriteType() == ATTACK_PRIMARY) {
-				Gdx.app.log("!", "" + newFrame.index + "," + ComponentsMapper.animation.get(entity).getAnimation().getPlayMode());
-			}
 			for (RenderSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onFrameChanged(entity, deltaTime, newFrame);
 			}
