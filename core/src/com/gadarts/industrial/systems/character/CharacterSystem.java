@@ -19,7 +19,6 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.animation.AnimationComponent;
 import com.gadarts.industrial.components.character.*;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
-import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
@@ -85,16 +84,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 				break;
 			}
 		}
-	}
-
-	private static float getCharacterHeight(Entity character) {
-		float height;
-		if (ComponentsMapper.enemy.has(character)) {
-			height = ComponentsMapper.enemy.get(character).getEnemyDefinition().getHeight();
-		} else {
-			height = PLAYER_HEIGHT;
-		}
-		return height;
 	}
 
 	@Override
@@ -233,13 +222,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		}
 	}
 
-	private void addRicochet(final ParticleEffect effect, final Vector3 pos) {
-		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-				.addParticleEffectComponent(effect, pos)
-				.finishAndAddToEngine();
-		getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.SMALL_EXP);
-	}
-
 	private void addSplatterEffect(final ModelInstanceComponent bulletModelInstanceComponent) {
 		Vector3 position = positionBloodSplatter(bulletModelInstanceComponent);
 		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
@@ -311,7 +293,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		MapGraphNode srcNode = map.getNode(ComponentsMapper.characterDecal.get(character).getDecal().getPosition());
 		MapGraphNode targetNode = map.getNode(ComponentsMapper.characterDecal.get(target).getDecal().getPosition());
 		float height;
-		height = getCharacterHeight(character);
+		height = GameUtils.calculateCharacterHeight(character);
 		if (map.isNodesAdjacent(srcNode, targetNode, height / 2F)) {
 			applyDamageToCharacter(target, primaryAttack.getDamage());
 		}
@@ -397,12 +379,11 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private void handleAnimationReverse(Entity character, AnimationComponent animationComponent,
 										Animation<TextureAtlas.AtlasRegion> animation,
 										SpriteType spriteType) {
-		if (animationComponent.isDoingReverse()) {
+		if (animationComponent.getAnimation().getPlayMode() == Animation.PlayMode.REVERSED) {
 			if (spriteType.isCommandDoneOnReverseEnd()) {
 				commandDone(character);
 			}
 			animation.setPlayMode(Animation.PlayMode.NORMAL);
-			animationComponent.setDoingReverse(false);
 		} else {
 			animation.setFrameDuration(spriteType.getFrameDuration());
 			applyAnimationToReverse(animationComponent);
@@ -412,7 +393,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private void applyAnimationToReverse(AnimationComponent animationComponent) {
 		animationComponent.getAnimation().setPlayMode(Animation.PlayMode.REVERSED);
 		animationComponent.resetStateTime();
-		animationComponent.setDoingReverse(true);
+		animationComponent.getAnimation().getPlayMode();
 	}
 
 	private void handleCurrentCommand(final CharacterCommand currentCommand) {

@@ -47,7 +47,6 @@ import java.util.List;
 import static com.badlogic.gdx.utils.TimeUtils.millis;
 import static com.badlogic.gdx.utils.TimeUtils.timeSinceMillis;
 import static com.gadarts.industrial.DefaultGameSettings.PARALYZED_ENEMIES;
-import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.HEIGHT_DIFF;
 import static com.gadarts.industrial.shared.assets.Assets.Sounds;
@@ -519,10 +518,15 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	private void updateEnemyStatusAccordingToPlayerNewNode(MapGraphNode oldNode, Entity enemy) {
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
-		EnemyAiStatus aiStatus = enemyComponent.getAiStatus();
-		if (aiStatus != ATTACKING) {
+		if (enemyComponent.getAiStatus() != ATTACKING) {
 			awakeEnemyIfTargetSpotted(enemy);
-		} else if (checkIfFloorNodesBlockSightToTarget(enemy)
+		} else if (enemyComponent.getAiStatus() != IDLE) {
+			tryToToSetToLastSeenPosition(oldNode, enemy, enemyComponent);
+		}
+	}
+
+	private void tryToToSetToLastSeenPosition(MapGraphNode oldNode, Entity enemy, EnemyComponent enemyComponent) {
+		if (checkIfFloorNodesBlockSightToTarget(enemy)
 				|| checkIfFloorNodesContainObjects(GameUtils.findAllNodesToTarget(enemy, bresenhamOutput), enemy)) {
 			enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
 			enemyComponent.setTargetLastVisibleNode(oldNode);

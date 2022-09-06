@@ -191,7 +191,11 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 	}
 
 	public boolean checkIfNodeIsFreeOfAliveCharacters(MapGraphNode destinationNode) {
-		return checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(destinationNode, null, false);
+		return checkIfNodeIsFreeOfAliveCharacters(destinationNode, null);
+	}
+
+	public boolean checkIfNodeIsFreeOfAliveCharacters(MapGraphNode destinationNode, MapGraphNode pathFinalNode) {
+		return checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(destinationNode, pathFinalNode, false);
 	}
 
 	public boolean checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(MapGraphNode destinationNode) {
@@ -230,7 +234,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 	private void checkIfConnectionIsAvailable(final Connection<MapGraphNode> connection) {
 		boolean available = true;
 		if (includeEnemiesInGetConnections) {
-			available = checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(connection.getToNode(), currentPathFinalDestination);
+			available = checkIfNodeIsFreeOfAliveCharacters(connection.getToNode(), currentPathFinalDestination);
 		}
 		boolean validCost = connection.getCost() <= maxConnectionCostInSearch.getCostValue();
 		if (available && validCost && checkIfConnectionPassable(connection)) {

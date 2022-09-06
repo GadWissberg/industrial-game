@@ -39,7 +39,6 @@ import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
-import com.gadarts.industrial.systems.character.commands.CommandStates;
 import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
@@ -451,23 +450,26 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	private void shrinkRunCommandInBattle( ) {
 		Array<MapGraphNode> nodes = playerPathPlanner.getCurrentPath().nodes;
-		if (nodes.size > 2 && isTurnsQueueHasEnemies()) {
+		if (nodes.size > 2 && isTurnsQueueHasVisibleEnemies()) {
 			nodes.removeRange(2, nodes.size - 1);
 		}
 	}
 
-	private boolean isTurnsQueueHasEnemies( ) {
+	private boolean isTurnsQueueHasVisibleEnemies( ) {
 		Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
 		if (turnsQueue.size <= 1) return false;
 
-		boolean result = false;
 		for (int i = 0; i < turnsQueue.size; i++) {
-			if (ComponentsMapper.enemy.has(turnsQueue.get(i))) {
-				result = true;
-				break;
+			Entity entity = turnsQueue.get(i);
+			if (ComponentsMapper.enemy.has(entity)) {
+				Decal decal = ComponentsMapper.characterDecal.get(entity).getDecal();
+				MapGraphNode enemyNode = getSystemsCommonData().getMap().getNode(decal.getPosition());
+				if ((ComponentsMapper.floor.get(enemyNode.getEntity()).getFogOfWarSignature() & 16) == 0) {
+					return true;
+				}
 			}
 		}
-		return result;
+		return false;
 	}
 
 	@Override

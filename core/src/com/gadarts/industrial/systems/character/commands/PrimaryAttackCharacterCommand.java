@@ -2,6 +2,7 @@ package com.gadarts.industrial.systems.character.commands;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
@@ -9,6 +10,7 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.character.OnGoingAttack;
+import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -36,6 +38,8 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 							  SystemsCommonData commonData,
 							  Object additionalData,
 							  List<CharacterSystemEventsSubscriber> subscribers) {
+		if (checkAdjacentForMelee(character, commonData)) return true;
+
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		if (characterComponent.getTarget() != null) {
 			characterComponent.getRotationData().setRotating(true);
@@ -45,6 +49,16 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 		int bulletsToShoot = primary.isMelee() ? 1 : randomNumberOfBullets(primary);
 		charComp.getOnGoingAttack().initialize(CharacterComponent.AttackType.PRIMARY, bulletsToShoot);
 		return false;
+	}
+
+	private boolean checkAdjacentForMelee(Entity character, SystemsCommonData commonData) {
+		if (!ComponentsMapper.character.get(character).getPrimaryAttack().isMelee()) return false;
+		Entity target = ComponentsMapper.character.get(character).getTarget();
+		Decal targetDecal = ComponentsMapper.characterDecal.get(target).getDecal();
+		MapGraph map = commonData.getMap();
+		MapGraphNode targetNode = map.getNode(targetDecal.getPosition());
+		MapGraphNode characterNode = map.getNode(ComponentsMapper.characterDecal.get(character).getDecal().getPosition());
+		return !map.isNodesAdjacent(characterNode, targetNode, GameUtils.calculateCharacterHeight(character) / 2F);
 	}
 
 	@Override

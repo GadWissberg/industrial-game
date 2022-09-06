@@ -20,6 +20,7 @@ import java.util.LinkedHashSet;
 
 import static com.gadarts.industrial.components.ComponentsMapper.character;
 import static com.gadarts.industrial.components.ComponentsMapper.characterDecal;
+import static com.gadarts.industrial.components.player.PlayerComponent.PLAYER_HEIGHT;
 
 public class GameUtils {
 	public static final float EPSILON = 0.025f;
@@ -27,7 +28,6 @@ public class GameUtils {
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Bresenham2 bresenham = new Bresenham2();
-	private static final LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
 
 	/**
 	 * Whether given contained is fully inside the container.
@@ -96,6 +96,16 @@ public class GameUtils {
 										GamePathFinder pathFinder,
 										GameHeuristic heuristic) {
 		return calculatePath(request, pathFinder, heuristic, 0);
+	}
+
+	public static float calculateCharacterHeight(Entity character) {
+		float height;
+		if (ComponentsMapper.enemy.has(character)) {
+			height = ComponentsMapper.enemy.get(character).getEnemyDefinition().getHeight();
+		} else {
+			height = PLAYER_HEIGHT;
+		}
+		return height;
 	}
 
 	public static boolean calculatePath(CalculatePathRequest request,

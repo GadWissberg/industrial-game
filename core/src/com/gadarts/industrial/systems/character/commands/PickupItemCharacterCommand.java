@@ -1,6 +1,7 @@
 package com.gadarts.industrial.systems.character.commands;
 
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -38,7 +39,7 @@ public class PickupItemCharacterCommand extends CharacterCommand {
 	private void handlePickup(Entity character,
 							  TextureAtlas.AtlasRegion newFrame,
 							  List<CharacterSystemEventsSubscriber> subscribers) {
-		if (newFrame.index == 1 && ComponentsMapper.animation.get(character).isDoingReverse()) {
+		if (newFrame.index == 1 && ComponentsMapper.animation.get(character).getAnimation().getPlayMode() == Animation.PlayMode.REVERSED) {
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onItemPickedUp(itemToPickup);
 			}

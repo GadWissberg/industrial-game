@@ -14,6 +14,7 @@ import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.BulletComponent;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.character.CharacterComponent;
+import com.gadarts.industrial.components.character.OnGoingAttack;
 import com.gadarts.industrial.components.collision.CollisionComponent;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
@@ -175,8 +176,12 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 	private void destroyBullet(final Entity bullet) {
 		WeaponsDefinitions weaponDefinition = ComponentsMapper.bullet.get(bullet).getWeaponDefinition();
 		if (bullets.size() == 1) {
-			for (AttackSystemEventsSubscriber subscriber : subscribers) {
-				subscriber.onBulletSetDestroyed(bullet);
+			Entity owner = ComponentsMapper.bullet.get(bullet).getOwner();
+			OnGoingAttack onGoingAttack = ComponentsMapper.character.get(owner).getOnGoingAttack();
+			if (onGoingAttack != null && onGoingAttack.isDone()) {
+				for (AttackSystemEventsSubscriber subscriber : subscribers) {
+					subscriber.onBulletSetDestroyed(bullet);
+				}
 			}
 		}
 		bullet.remove(BulletComponent.class);

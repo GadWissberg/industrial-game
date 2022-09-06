@@ -719,6 +719,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 														AtlasRegion currentFrame) {
 		AtlasRegion newFrame = animationComponent.calculateFrame();
 		if (currentFrame.index != newFrame.index) {
+			if (ComponentsMapper.character.get(entity).getCharacterSpriteData().getSpriteType() == ATTACK_PRIMARY) {
+				Gdx.app.log("!", "" + newFrame.index + "," + ComponentsMapper.animation.get(entity).getAnimation().getPlayMode());
+			}
 			for (RenderSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onFrameChanged(entity, deltaTime, newFrame);
 			}
@@ -751,13 +754,18 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 				direction = Direction.SOUTH;
 			}
 		}
-		CharacterAnimation animation;
-		animation = fetchCharacterAnimationByDirectionAndType(entity, direction, spriteType);
-		if (animation != null) {
+		Animation<AtlasRegion> oldAnimation = ComponentsMapper.animation.get(entity).getAnimation();
+		CharacterAnimation newAnimation = fetchCharacterAnimationByDirectionAndType(entity, direction, spriteType);
+		if (newAnimation != null) {
 			boolean isIdle = spriteType == IDLE;
-			animationComponent.init(isIdle ? 0 : spriteType.getFrameDuration(), animation);
+			animationComponent.init(isIdle ? 0 : spriteType.getFrameDuration(), newAnimation);
 			if (!sameSpriteType || isIdle) {
+				if (spriteType.getPlayMode() != Animation.PlayMode.LOOP) {
+					newAnimation.setPlayMode(Animation.PlayMode.NORMAL);
+				}
 				animationComponent.resetStateTime();
+			} else if (sameSpriteType && oldAnimation != newAnimation) {
+				newAnimation.setPlayMode(oldAnimation.getPlayMode());
 			}
 		}
 	}

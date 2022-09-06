@@ -10,10 +10,6 @@ import lombok.Setter;
 @Getter
 public class AnimationComponent implements GameComponent {
 
-	@Setter
-	@Getter
-	private boolean doingReverse;
-
 	private Animation<TextureAtlas.AtlasRegion> animation;
 
 	@Setter
@@ -22,7 +18,7 @@ public class AnimationComponent implements GameComponent {
 
 	@Override
 	public void reset( ) {
-		doingReverse = false;
+		animation.setPlayMode(Animation.PlayMode.NORMAL);
 		stateTime = 0;
 	}
 
