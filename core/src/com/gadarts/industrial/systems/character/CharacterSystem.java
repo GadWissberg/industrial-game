@@ -397,12 +397,13 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	private void handleCurrentCommand(final CharacterCommand currentCommand) {
-		CharacterComponent characterComponent = character.get(currentCommand.getCharacter());
+		Entity character = currentCommand.getCharacter();
+		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		SpriteType spriteType = characterComponent.getCharacterSpriteData().getSpriteType();
 		if (spriteType == PICKUP || spriteType == ATTACK_PRIMARY) {
-			handleModeWithNonLoopingAnimation(currentCommand.getCharacter());
+			handleModeWithNonLoopingAnimation(character);
 		} else {
-			handleRotation(currentCommand, characterComponent);
+			handleRotation(currentCommand, character);
 		}
 	}
 
@@ -416,7 +417,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 
 	private void handleRotation(CharacterCommand currentCommand,
-								CharacterComponent charComp) {
+								Entity character) {
+		CharacterComponent charComp = ComponentsMapper.character.get(character);
 		if (charComp.getCharacterSpriteData().getSpriteType() == PAIN) return;
 
 		CharacterRotationData rotData = charComp.getRotationData();
@@ -430,6 +432,10 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 				rotate(charComp, rotData, directionToDest, currentCommand.getCharacter());
 			}
 		} else {
+			Vector3 targetPosition = ComponentsMapper.characterDecal.get(charComp.getTarget()).getDecal().getPosition();
+			Vector3 characterPosition = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
+			Vector3 direction = auxVector3_1.set(targetPosition).sub(characterPosition).nor();
+			charComp.getCharacterSpriteData().setFacingDirection(findDirection(auxVector2_1.set(direction.x, direction.z)));
 			rotationDone(rotData, charComp.getCharacterSpriteData());
 		}
 	}

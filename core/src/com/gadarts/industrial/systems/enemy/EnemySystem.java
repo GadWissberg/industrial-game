@@ -18,7 +18,6 @@ import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
-import com.gadarts.industrial.components.character.CharacterHealthData;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.sd.RelatedDecal;
@@ -48,7 +47,6 @@ import static com.badlogic.gdx.utils.TimeUtils.millis;
 import static com.badlogic.gdx.utils.TimeUtils.timeSinceMillis;
 import static com.gadarts.industrial.DefaultGameSettings.PARALYZED_ENEMIES;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
-import static com.gadarts.industrial.map.MapGraphConnectionCosts.HEIGHT_DIFF;
 import static com.gadarts.industrial.shared.assets.Assets.Sounds;
 import static com.gadarts.industrial.shared.assets.Assets.UiTextures;
 import static com.gadarts.industrial.systems.enemy.EnemyAiStatus.*;
@@ -65,7 +63,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private static final float ENEMY_HALF_FOV_ANGLE = 95F;
 	private static final CalculatePathRequest request = new CalculatePathRequest();
 	private static final List<MapGraphNode> auxNodesList = new ArrayList<>();
-	private static final int NUMBER_OF_SKILL_FLOWER_LEAF = 8;
 	private static final float METAL_PART_FLY_AWAY_STRENGTH = 0.2F;
 	private static final float METAL_PART_FLY_AWAY_MIN_DEGREE = -45F;
 	private static final float METAL_PART_FLY_AWAY_MAX_DEGREE_TO_ADD = -90F;
@@ -290,16 +287,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 				.finishAndAddToEngine();
 	}
 
-	private void refreshSkillFlower(Entity enemy) {
-		List<RelatedDecal> relatedDecals = ComponentsMapper.simpleDecal.get(enemy).getRelatedDecals();
-		CharacterHealthData healthData = ComponentsMapper.character.get(enemy).getSkills().getHealthData();
-		float div = (((float) healthData.getHp()) / ((float) healthData.getInitialHp()));
-		int numberOfVisibleLeaf = (int) (div * NUMBER_OF_SKILL_FLOWER_LEAF);
-		for (int i = 0; i < relatedDecals.size(); i++) {
-			relatedDecals.get(i).setVisible(i < numberOfVisibleLeaf);
-		}
-	}
-
 	@Override
 	public void onCharacterDies(final Entity character) {
 		if (ComponentsMapper.enemy.has(character)) {
@@ -411,13 +398,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		} else {
 			enemyFinishedTurn();
 		}
-	}
-
-	private void tryToPlanThroughHeightDiff(Entity enemy,
-											CharacterDecalComponent characterDecalComp,
-											MapGraphNode targetLastVisibleNode) {
-		initializePathPlanRequest(targetLastVisibleNode, characterDecalComp, HEIGHT_DIFF, enemy);
-		GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic(), 2);
 	}
 
 	@Override
