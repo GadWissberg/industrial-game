@@ -66,6 +66,7 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 	@Override
 	public void onDoorClosed(Entity doorEntity) {
 		getSystemsCommonData().getTurnsQueue().removeFirst();
+		markCurrentTurnAsDone();
 	}
 
 	@Override
