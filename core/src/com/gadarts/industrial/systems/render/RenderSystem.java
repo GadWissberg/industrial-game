@@ -84,6 +84,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private static final int FLICKER_MAX_INTERVAL = 150;
 	private static final Circle auxCircle = new Circle();
 	private static final Rectangle auxRect = new Rectangle();
+	private static final Color PLAYER_OUTLINE_COLOR = Color.valueOf("#177331");
+	private static final Color ENEMY_OUTLINE_COLOR = Color.valueOf("#731717");
+	public static final float OUTLINE_ALPHA = 0.4F;
 	private final Environment environment;
 	private final ModelsShaderProvider shaderProvider;
 	private final GameFrameBuffer shadowFrameBuffer;
@@ -101,6 +104,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private ShaderProgram shadowsShaderProgram;
 	private boolean take;
 	private boolean frustumCull = !DefaultGameSettings.DISABLE_FRUSTUM_CULLING;
+	private GameCameraGroupStrategy regularDecalGroupStrategy;
+	private OutlineGroupStrategy outlineDecalGroupStrategy;
+	private Color ambientColor;
 
 	public RenderSystem(SystemsCommonData systemsCommonData,
 						GameAssetsManager assetsManager,
@@ -111,6 +117,22 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		createBatches();
 		environment = createEnvironment();
 		getSystemsCommonData().setDrawFlags(new DrawFlags());
+		float ambient = getSystemsCommonData().getMap().getAmbient();
+		ambientColor = new Color(ambient, ambient, ambient, 1F);
+	}
+
+	private static CharacterAnimation fetchCharacterAnimationByDirectionAndType(Entity entity,
+																				Direction direction,
+																				SpriteType sprType) {
+		int randomIndex = MathUtils.random(sprType.getVariations() - 1);
+		CharacterAnimation animation = null;
+		CharacterAnimations animations = ComponentsMapper.characterDecal.get(entity).getAnimations();
+		if (animations.contains(sprType)) {
+			animation = animations.get(sprType, randomIndex, direction);
+		} else if (ComponentsMapper.player.has(entity)) {
+			animation = ComponentsMapper.player.get(entity).getGeneralAnimations().get(sprType, randomIndex, direction);
+		}
+		return animation;
 	}
 
 	private void handleFrustumCullingCommand(final ConsoleCommandResult consoleCommandResult) {
@@ -182,14 +204,19 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	@Override
 	public void initializeData( ) {
 		modelInstanceEntities = getEngine().getEntitiesFor(Family.all(ModelInstanceComponent.class).get());
-		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		GameAssetsManager assetsManager = getAssetsManager();
-		GameCameraGroupStrategy strategy = new GameCameraGroupStrategy(systemsCommonData.getCamera(), assetsManager);
-		this.decalBatch = new DecalBatch(DECALS_POOL_SIZE, strategy);
+		createDecalBatch();
 		createShaderPrograms(assetsManager);
 		if (DefaultGameSettings.ALLOW_STATIC_SHADOWS) {
 			createShadowMaps();
 		}
+	}
+
+	private void createDecalBatch( ) {
+		GameAssetsManager assetsManager = getAssetsManager();
+		regularDecalGroupStrategy = new GameCameraGroupStrategy(getSystemsCommonData().getCamera(), assetsManager);
+		outlineDecalGroupStrategy = new OutlineGroupStrategy(getSystemsCommonData().getCamera(), assetsManager);
+		this.decalBatch = new DecalBatch(DECALS_POOL_SIZE, regularDecalGroupStrategy);
 	}
 
 	private void createShaderPrograms(GameAssetsManager assetsManager) {
@@ -309,8 +336,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		ModelInstanceComponent modelInstanceComp = ComponentsMapper.modelInstance.get(entity);
 		Entity nodeEntity = ComponentsMapper.wall.get(entity).getParentNode().getEntity();
 		modelInstanceComp.setFlatColor(null);
-		boolean hasModel = ComponentsMapper.modelInstance.has(nodeEntity);
-		if (nodeEntity == null || (hasModel && ComponentsMapper.modelInstance.get(nodeEntity).getFlatColor() != null)) {
+		if (nodeEntity == null
+				|| (ComponentsMapper.modelInstance.has(nodeEntity)
+				&& ComponentsMapper.modelInstance.get(nodeEntity).getFlatColor() != null)) {
 			modelInstanceComp.setFlatColor(Color.BLACK);
 		}
 	}
@@ -401,16 +429,28 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private void renderDecals(final float deltaTime) {
 		Gdx.gl.glDepthMask(false);
-		renderLiveCharacters(deltaTime);
+		renderCharactersOutline(deltaTime);
+		decalBatch.setGroupStrategy(regularDecalGroupStrategy);
 		renderSimpleDecals();
+		renderLiveCharacters(deltaTime, ambientColor, 1F);
+		decalBatch.flush();
 		Gdx.gl.glDepthMask(true);
+	}
+
+	private void renderCharactersOutline(float deltaTime) {
+		decalBatch.setGroupStrategy(outlineDecalGroupStrategy);
+		renderLiveCharacters(deltaTime, null, OUTLINE_ALPHA);
+		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+		Gdx.gl.glDepthFunc(GL20.GL_GREATER);
+		decalBatch.flush();
+		Gdx.gl.glDepthFunc(GL20.GL_LESS);
+		Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
 	}
 
 	private void renderSimpleDecals( ) {
 		for (Entity entity : simpleDecalsEntities) {
 			renderSimpleDecal(decalBatch, entity);
 		}
-		decalBatch.flush();
 	}
 
 	private void handleSimpleDecalAnimation(final Entity entity, final SimpleDecalComponent simpleDecalComponent) {
@@ -449,13 +489,13 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		}
 	}
 
-	private void renderLiveCharacters(final float deltaTime) {
+	private void renderLiveCharacters(final float deltaTime, Color color, float alpha) {
 		for (Entity entity : characterDecalsEntities) {
 			Vector3 position = ComponentsMapper.characterDecal.get(entity).getDecal().getPosition();
 			Entity floorEntity = getSystemsCommonData().getMap().getNode(position).getEntity();
 			initializeCharacterDecalForRendering(deltaTime, entity);
 			if (isNodeRevealed(floorEntity) && (shouldRenderPlayer(entity) || shouldRenderEnemy(entity))) {
-				renderCharacterDecal(entity);
+				renderCharacterDecal(entity, color, alpha);
 			}
 		}
 	}
@@ -600,13 +640,17 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		return minDistance;
 	}
 
-	private void renderCharacterDecal(final Entity entity) {
+	private void renderCharacterDecal(Entity entity, Color color, float alpha) {
 		Decal decal = ComponentsMapper.characterDecal.get(entity).getDecal();
 		Vector3 decalPosition = decal.getPosition();
 		Camera camera = getSystemsCommonData().getCamera();
-		float ambient = getSystemsCommonData().getMap().getAmbient();
-		decal.setColor(ambient, ambient, ambient, 1F);
-		setDecalColorAccordingToLights(entity);
+		if (color == null) {
+			color = ComponentsMapper.player.has(entity) ? PLAYER_OUTLINE_COLOR : ENEMY_OUTLINE_COLOR;
+			decal.setColor(color.r, color.g, color.b, alpha);
+		} else {
+			decal.setColor(color.r, color.g, color.b, alpha);
+			setDecalColorAccordingToLights(entity);
+		}
 		decal.lookAt(auxVector3_1.set(decalPosition).sub(camera.direction), camera.up);
 		decalBatch.add(decal);
 	}
@@ -765,20 +809,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 				newAnimation.setPlayMode(oldAnimation.getPlayMode());
 			}
 		}
-	}
-
-	private static CharacterAnimation fetchCharacterAnimationByDirectionAndType(Entity entity,
-																				Direction direction,
-																				SpriteType sprType) {
-		int randomIndex = MathUtils.random(sprType.getVariations() - 1);
-		CharacterAnimation animation = null;
-		CharacterAnimations animations = ComponentsMapper.characterDecal.get(entity).getAnimations();
-		if (animations.contains(sprType)) {
-			animation = animations.get(sprType, randomIndex, direction);
-		} else if (ComponentsMapper.player.has(entity)) {
-			animation = ComponentsMapper.player.get(entity).getGeneralAnimations().get(sprType, randomIndex, direction);
-		}
-		return animation;
 	}
 
 	@Override

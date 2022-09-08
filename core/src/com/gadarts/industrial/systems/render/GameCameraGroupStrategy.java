@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalMaterial;
 import com.badlogic.gdx.graphics.g3d.decals.GroupStrategy;
@@ -33,14 +32,14 @@ public class GameCameraGroupStrategy implements GroupStrategy, Disposable {
 	private final Comparator<Decal> cameraSorter;
 	private final Pool<Array<Decal>> arrayPool = new Pool<>(16) {
 		@Override
-		protected Array<Decal> newObject() {
+		protected Array<Decal> newObject( ) {
 			return new Array<>();
 		}
 	};
 	private final Array<Array<Decal>> usedArrays = new Array<>();
 	private final ObjectMap<DecalMaterial, Array<Decal>> materialGroups = new ObjectMap<>();
-	private Camera camera;
-	private ShaderProgram shader;
+	ShaderProgram shader;
+	Camera camera;
 
 	public GameCameraGroupStrategy(final Camera camera, final GameAssetsManager assetsManager) {
 		this(camera, assetsManager, (o1, o2) -> {
@@ -58,7 +57,7 @@ public class GameCameraGroupStrategy implements GroupStrategy, Disposable {
 		createDefaultShader(assetsManager);
 	}
 
-	public Camera getCamera() {
+	public Camera getCamera( ) {
 		return camera;
 	}
 
@@ -109,7 +108,7 @@ public class GameCameraGroupStrategy implements GroupStrategy, Disposable {
 	}
 
 	@Override
-	public void beforeGroups() {
+	public void beforeGroups( ) {
 		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 		shader.bind();
 		shader.setUniformMatrix("u_projectionViewMatrix", camera.combined);
@@ -123,11 +122,11 @@ public class GameCameraGroupStrategy implements GroupStrategy, Disposable {
 	}
 
 	@Override
-	public void afterGroups() {
+	public void afterGroups( ) {
 		Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
 	}
 
-	private void createDefaultShader(final GameAssetsManager assetsManager) {
+	void createDefaultShader(final GameAssetsManager assetsManager) {
 		String vertexShader = assetsManager.getShader(Assets.Shaders.DECAL_VERTEX);
 		String fragmentShader = assetsManager.getShader(Assets.Shaders.DECAL_FRAGMENT);
 		shader = new ShaderProgram(vertexShader, fragmentShader);
@@ -141,7 +140,7 @@ public class GameCameraGroupStrategy implements GroupStrategy, Disposable {
 	}
 
 	@Override
-	public void dispose() {
+	public void dispose( ) {
 		if (shader != null) shader.dispose();
 	}
 }
