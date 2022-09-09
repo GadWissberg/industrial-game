@@ -93,7 +93,6 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 		if (onGoingAttack.isDone()) return false;
 
 		int primaryAttackHitFrameIndex = GameUtils.getPrimaryAttackHitFrameIndexForCharacter(character, commonData);
-		boolean commandDone = false;
 		if (newFrame.index == primaryAttackHitFrameIndex) {
 			CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(character);
 			MapGraphNode positionNode = commonData.getMap().getNode(charDecalComp.getDecal().getPosition());
@@ -106,10 +105,9 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 			if (onGoingAttack.getBulletsToShoot() <= 0) {
 				WeaponsDefinitions primaryAttack = characterComponent.getPrimaryAttack();
 				consumeTurnTime(character, primaryAttack.getDuration());
-				commandDone = primaryAttack.isMelee();
 			}
 		}
-		return commandDone;
+		return false;
 	}
 
 }

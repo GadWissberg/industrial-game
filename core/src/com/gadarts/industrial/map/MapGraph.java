@@ -44,7 +44,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 	private final ImmutableArray<Entity> pickupEntities;
 	private final ImmutableArray<Entity> enemiesEntities;
 	private final ImmutableArray<Entity> characterEntities;
-	private final ImmutableArray<Entity> obstacleEntities;
+	private final ImmutableArray<Entity> environmentObjectsEntities;
 	@Setter(AccessLevel.PACKAGE)
 	@Getter(AccessLevel.PACKAGE)
 	MapGraphNode currentPathFinalDestination;
@@ -59,7 +59,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 	public MapGraph(Dimension mapSize, PooledEngine engine, float ambient) {
 		this.ambient = ambient;
 		this.characterEntities = engine.getEntitiesFor(Family.all(CharacterComponent.class).get());
-		this.obstacleEntities = engine.getEntitiesFor(Family.all(EnvironmentObjectComponent.class).get());
+		this.environmentObjectsEntities = engine.getEntitiesFor(Family.all(EnvironmentObjectComponent.class).get());
 		this.enemiesEntities = engine.getEntitiesFor(Family.all(EnemyComponent.class).get());
 		this.mapSize = mapSize;
 		this.nodes = new Array<>(mapSize.width * mapSize.height);
@@ -361,7 +361,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 
 	public Entity findObstacleByNode(final MapGraphNode node) {
 		Entity result = null;
-		for (Entity obstacle : obstacleEntities) {
+		for (Entity obstacle : environmentObjectsEntities) {
 			ModelInstance modelInstance = ComponentsMapper.modelInstance.get(obstacle).getModelInstance();
 			MapGraphNode pickupNode = getNode(modelInstance.transform.getTranslation(auxVector3));
 			if (pickupNode.equals(node)) {
@@ -374,7 +374,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 
 	public Entity fetchObstacleFromNode(MapGraphNode node) {
 		Entity result = null;
-		for (Entity obstacle : obstacleEntities) {
+		for (Entity obstacle : environmentObjectsEntities) {
 			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(obstacle).getModelInstance();
 			MapGraphNode obstacleNode = getNode(modelInstance.transform.getTranslation(auxVector3));
 			if (obstacleNode.equals(node)) {

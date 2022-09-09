@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
@@ -46,6 +47,7 @@ import java.util.List;
 import static com.badlogic.gdx.utils.TimeUtils.millis;
 import static com.badlogic.gdx.utils.TimeUtils.timeSinceMillis;
 import static com.gadarts.industrial.DefaultGameSettings.PARALYZED_ENEMIES;
+import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.shared.assets.Assets.Sounds;
 import static com.gadarts.industrial.shared.assets.Assets.UiTextures;
@@ -194,9 +196,15 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private boolean checkIfFloorNodesContainObjects(LinkedHashSet<GridPoint2> nodes, Entity enemyToCheckFor) {
+		return checkIfFloorNodesContainObjects(nodes, enemyToCheckFor, true);
+	}
+
+	private boolean checkIfFloorNodesContainObjects(LinkedHashSet<GridPoint2> nodes,
+													Entity enemyToCheckFor,
+													boolean includeCharacters) {
 		boolean result = false;
 		for (GridPoint2 point : nodes) {
-			if (checkIfNodeContainsObject(enemyToCheckFor, point)) {
+			if (checkIfNodeContainsObject(enemyToCheckFor, point, includeCharacters)) {
 				result = true;
 				break;
 			}
@@ -204,11 +212,13 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		return result;
 	}
 
-	private boolean checkIfNodeContainsObject(Entity enemyToCheckFor, GridPoint2 point) {
+	private boolean checkIfNodeContainsObject(Entity enemyToCheckFor, GridPoint2 point, boolean includeCharacters) {
 		MapGraphNode node = getSystemsCommonData().getMap().getNode(point.x, point.y);
-		Entity enemy = getSystemsCommonData().getMap().fetchAliveEnemyFromNode(node);
-		if (enemy != null && enemy != enemyToCheckFor) {
-			return true;
+		if (includeCharacters) {
+			Entity enemy = getSystemsCommonData().getMap().fetchAliveEnemyFromNode(node);
+			if (enemy != null && enemy != enemyToCheckFor) {
+				return true;
+			}
 		}
 		Entity obstacle = getSystemsCommonData().getMap().fetchObstacleFromNode(node);
 		return obstacle != null;
@@ -408,6 +418,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private void enemyFinishedTurn( ) {
+		ComponentsMapper.character.get(getSystemsCommonData().getTurnsQueue().first()).setTurnTimeLeft(TURN_DURATION);
 		for (EnemySystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onEnemyFinishedTurn();
 		}
@@ -435,27 +446,46 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private boolean checkIfFloorNodesBlockSightToTarget(Entity enemy, LinkedHashSet<GridPoint2> nodes) {
-		Vector2 pos = ComponentsMapper.characterDecal.get(enemy).getNodePosition(auxVector2_1);
+		Vector2 enemyPosition = ComponentsMapper.characterDecal.get(enemy).getNodePosition(auxVector2_1);
 		for (GridPoint2 n : nodes) {
 			MapGraph map = getSystemsCommonData().getMap();
-			if (map.getNode(n.x, n.y).getHeight() > map.getNode((int) pos.x, (int) pos.y).getHeight() + 1) {
+			MapGraphNode node = map.getNode(n.x, n.y);
+			Entity door = node.getDoor();
+			if (checkIfFloorNodeBlockSightToTarget(enemyPosition, map, node, door)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
+	private static boolean checkIfFloorNodeBlockSightToTarget(Vector2 enemyPosition,
+															  MapGraph map,
+															  MapGraphNode node,
+															  Entity door) {
+		return node.getHeight() > map.getNode((int) enemyPosition.x, (int) enemyPosition.y).getHeight() + 1
+				|| (door != null && ComponentsMapper.door.get(door).getState() == DoorComponent.DoorStates.CLOSED);
+	}
+
 	private void awakeEnemyIfTargetSpotted(final Entity enemy) {
-		if ((isTargetInFov(enemy) && !checkIfFloorNodesBlockSightToTarget(enemy))) {
-			Vector2 enemyPos = ComponentsMapper.characterDecal.get(enemy).getNodePosition(auxVector2_1);
-			Entity target = ComponentsMapper.character.get(enemy).getTarget();
-			Vector2 targetPos = ComponentsMapper.characterDecal.get(target).getNodePosition(auxVector2_2);
-			ComponentsMapper.enemy.get(enemy).setTargetLastVisibleNode(getSystemsCommonData().getMap().getNode(targetPos));
-			int maxDistance = ComponentsMapper.enemy.get(enemy).getEnemyDefinition().getSight().getMaxDistance();
-			if (enemyPos.dst2(targetPos) <= Math.pow(maxDistance, 2)) {
+		if (!isTargetInFov(enemy)) return;
+
+		LinkedHashSet<GridPoint2> nodes = GameUtils.findAllNodesToTarget(enemy, bresenhamOutput);
+		if (!checkIfFloorNodesBlockSightToTarget(enemy, nodes)) {
+			boolean targetIsClose = isTargetCloseEnough(enemy);
+			if (targetIsClose) {
 				awakeEnemy(enemy);
 			}
 		}
+	}
+
+	private boolean isTargetCloseEnough(Entity enemy) {
+		Vector2 enemyPos = ComponentsMapper.characterDecal.get(enemy).getNodePosition(auxVector2_1);
+		Entity target = ComponentsMapper.character.get(enemy).getTarget();
+		Vector2 targetPos = ComponentsMapper.characterDecal.get(target).getNodePosition(auxVector2_2);
+		ComponentsMapper.enemy.get(enemy).setTargetLastVisibleNode(getSystemsCommonData().getMap().getNode(targetPos));
+		int maxDistance = ComponentsMapper.enemy.get(enemy).getEnemyDefinition().getSight().getMaxDistance();
+		boolean targetIsClose = enemyPos.dst2(targetPos) <= Math.pow(maxDistance, 2);
+		return targetIsClose;
 	}
 
 	private void awakeEnemy(final Entity enemy) {

@@ -48,6 +48,7 @@ import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.LinkedHashSet;
 
+import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.shared.model.characters.Direction.*;
 import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.*;
@@ -298,6 +299,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	private void notifyPlayerFinishedTurn( ) {
+		ComponentsMapper.character.get(getSystemsCommonData().getTurnsQueue().first()).setTurnTimeLeft(TURN_DURATION);
 		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onPlayerFinishedTurn();
 		}

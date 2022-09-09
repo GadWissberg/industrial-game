@@ -102,7 +102,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	public void onNewTurn(Entity entity) {
 		if (!character.has(entity)) return;
 
-		ComponentsMapper.character.get(entity).setTurnTimeLeft(TURN_DURATION);
 		if (ComponentsMapper.player.has(entity)) {
 			freeEndedCommand(character.get(getSystemsCommonData().getPlayer()).getCommands());
 			Queue<CharacterCommand> commands = ComponentsMapper.character.get(entity).getCommands();
@@ -299,21 +298,23 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		}
 	}
 
-	public void commandDone(Entity character) {
-		commandDone(character, true);
-	}
-
 	@Override
 	public void onBulletSetDestroyed(Entity bullet) {
 		commandDone(ComponentsMapper.bullet.get(bullet).getOwner());
 	}
 
-	public void commandDone(Entity character, boolean informTurnTimeLeftStatus) {
+	public void commandDone(Entity character) {
+		commandDone(character, true, true);
+	}
+
+	public void commandDone(Entity character, boolean informTurnTimeLeftStatus, boolean setToIdleSprite) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		Queue<CharacterCommand> commands = characterComponent.getCommands();
 		if (commands.isEmpty()) return;
 
-		characterComponent.getCharacterSpriteData().setSpriteType(SpriteType.IDLE);
+		if (setToIdleSprite) {
+			characterComponent.getCharacterSpriteData().setSpriteType(SpriteType.IDLE);
+		}
 		CharacterCommand lastCommand = commands.first();
 		lastCommand.setState(CommandStates.ENDED);
 		characterComponent.getRotationData().setRotating(false);
@@ -365,6 +366,9 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 				if (!characterComp.getPrimaryAttack().isMelee()) {
 					animationComponent.setStateTime(0);
 					animation.setPlayMode(Animation.PlayMode.REVERSED);
+				} else {
+					animation.setPlayMode(Animation.PlayMode.NORMAL);
+					commandDone(character);
 				}
 			} else {
 				animationComponent.setStateTime((primaryAttackHitFrameIndex) * animation.getFrameDuration());
@@ -500,10 +504,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 					commandDone(character);
 				}
 			}
-			CharacterCommandsDefinitions definition = currentCommand.getDefinition();
-			if (characterComp.getTurnTimeLeft() <= 0 && definition != CharacterCommandsDefinitions.ATTACK_PRIMARY) {
-				subscribers.forEach(subscriber -> subscriber.onCharacterFinishedTurn(character));
-			}
 		}
 	}
 
@@ -523,13 +523,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (character.has(collidable)) {
 			ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(bullet);
 			applyDamageToCharacter(collidable, ComponentsMapper.bullet.get(bullet).getDamage(), modelInstanceComponent);
-		}
-	}
-
-	@Override
-	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
-		if (prevAiStatus == EnemyAiStatus.IDLE) {
-			commandDone(getSystemsCommonData().getPlayer(), false);
 		}
 	}
 }

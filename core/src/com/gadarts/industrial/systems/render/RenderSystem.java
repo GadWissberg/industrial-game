@@ -429,17 +429,17 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private void renderDecals(final float deltaTime) {
 		Gdx.gl.glDepthMask(false);
-		renderCharactersOutline(deltaTime);
 		decalBatch.setGroupStrategy(regularDecalGroupStrategy);
 		renderSimpleDecals();
 		renderLiveCharacters(deltaTime, ambientColor, 1F);
 		decalBatch.flush();
+		renderCharactersOutline(deltaTime);
 		Gdx.gl.glDepthMask(true);
 	}
 
 	private void renderCharactersOutline(float deltaTime) {
 		decalBatch.setGroupStrategy(outlineDecalGroupStrategy);
-		renderLiveCharacters(deltaTime, null, OUTLINE_ALPHA);
+		renderLiveCharacters(deltaTime, null, OUTLINE_ALPHA, false);
 		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 		Gdx.gl.glDepthFunc(GL20.GL_GREATER);
 		decalBatch.flush();
@@ -490,10 +490,16 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private void renderLiveCharacters(final float deltaTime, Color color, float alpha) {
+		renderLiveCharacters(deltaTime, color, alpha, true);
+	}
+
+	private void renderLiveCharacters(final float deltaTime, Color color, float alpha, boolean updateCharacterDecal) {
 		for (Entity entity : characterDecalsEntities) {
 			Vector3 position = ComponentsMapper.characterDecal.get(entity).getDecal().getPosition();
 			Entity floorEntity = getSystemsCommonData().getMap().getNode(position).getEntity();
-			initializeCharacterDecalForRendering(deltaTime, entity);
+			if (updateCharacterDecal) {
+				updateCharacterDecal(deltaTime, entity);
+			}
 			if (isNodeRevealed(floorEntity) && (shouldRenderPlayer(entity) || shouldRenderEnemy(entity))) {
 				renderCharacterDecal(entity, color, alpha);
 			}
@@ -689,7 +695,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		}
 	}
 
-	private void initializeCharacterDecalForRendering(float deltaTime, Entity entity) {
+	private void updateCharacterDecal(float deltaTime, Entity entity) {
 		Camera camera = getSystemsCommonData().getCamera();
 		CharacterSpriteData charSpriteData = ComponentsMapper.character.get(entity).getCharacterSpriteData();
 		Direction direction = CharacterUtils.calculateDirectionSeenFromCamera(camera, charSpriteData.getFacingDirection());
