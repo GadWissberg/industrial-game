@@ -239,7 +239,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		renderModels(modelBatch, null, true, getSystemsCommonData().getCamera());
 	}
 
-	private boolean isVisible(final Camera camera, ModelInstanceComponent modelInstanceComponent) {
+	private boolean isInFrustum(final Camera camera, ModelInstanceComponent modelInstanceComponent) {
 		if (!DefaultGameSettings.DISABLE_FRUSTUM_CULLING) return true;
 		Vector3 position = modelInstanceComponent.getModelInstance().transform.getTranslation(auxVector3_1);
 		AdditionalRenderData additionalRenderData = modelInstanceComponent.getModelInstance().getAdditionalRenderData();
@@ -273,14 +273,21 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		modelBatch.begin(camera);
 		for (Entity entity : modelInstanceEntities) {
 			if (exclude != entity) {
-				renderModel(modelBatch, camera, entity, renderLight, ComponentsMapper.modelInstance.get(entity));
-				if (ComponentsMapper.appendixModelInstance.has(entity)) {
-					AppendixModelInstanceComponent appendix = ComponentsMapper.appendixModelInstance.get(entity);
-					renderModel(modelBatch, camera, entity, true, appendix);
+				ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(entity);
+				boolean rendered = renderModel(modelBatch, camera, entity, renderLight, modelInstanceComponent);
+				if (rendered) {
+					renderAppendixModelInstance(modelBatch, camera, entity);
 				}
 			}
 		}
 		modelBatch.end();
+	}
+
+	private void renderAppendixModelInstance(ModelBatch modelBatch, Camera camera, Entity entity) {
+		if (ComponentsMapper.appendixModelInstance.has(entity)) {
+			AppendixModelInstanceComponent appendix = ComponentsMapper.appendixModelInstance.get(entity);
+			renderModel(modelBatch, camera, entity, true, appendix);
+		}
 	}
 
 	private void applyLightsOnModel(final ModelInstanceComponent mic) {
@@ -307,11 +314,11 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		}
 	}
 
-	private void renderModel(ModelBatch modelBatch,
-							 Camera camera,
-							 Entity entity,
-							 boolean renderLight,
-							 ModelInstanceComponent modelInstanceComponent) {
+	private boolean renderModel(ModelBatch modelBatch,
+								Camera camera,
+								Entity entity,
+								boolean renderLight,
+								ModelInstanceComponent modelInstanceComponent) {
 		if (!shouldSkipRenderModel(camera, entity, modelInstanceComponent)) {
 			modelBatch.render(modelInstanceComponent.getModelInstance(), environment);
 			getSystemsCommonData().setNumberOfVisible(getSystemsCommonData().getNumberOfVisible() + 1);
@@ -319,7 +326,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 			if (renderLight) {
 				applyLightsOnModel(modelInstanceComponent);
 			}
+			return true;
 		}
+		return false;
 	}
 
 	private void applySpecificRendering(Entity entity) {
@@ -366,7 +375,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 										  ModelInstanceComponent miComp) {
 		DrawFlags drawFlags = getSystemsCommonData().getDrawFlags();
 		return (!miComp.isVisible())
-				|| !isVisible(camera, miComp)
+				|| !isInFrustum(camera, miComp)
 				|| ComponentsMapper.floor.has(entity) && !drawFlags.isDrawGround()
 				|| ComponentsMapper.environmentObject.has(entity) && !drawFlags.isDrawEnv()
 				|| getSystemsCommonData().getCursor() == entity && !drawFlags.isDrawCursor()
@@ -382,9 +391,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		MapGraphNode node = map.getNode(position);
 		if (node == null) return false;
 		Entity nodeEntity = node.getEntity();
-		return nodeEntity != null
-				&& ComponentsMapper.modelInstance.has(nodeEntity)
-				&& ComponentsMapper.modelInstance.get(nodeEntity).getFlatColor() != null;
+		return nodeEntity == null || ((ComponentsMapper.floor.get(nodeEntity).getFogOfWarSignature() & 16) == 16);
 	}
 
 	@Override

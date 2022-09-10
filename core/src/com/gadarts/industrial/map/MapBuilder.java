@@ -496,11 +496,18 @@ public class MapBuilder implements Disposable {
 		Direction direction = Direction.values()[directionIndex];
 		modelInstance.transform.setTranslation(auxVector3_1.set(node.getCol() + 0.5f, 0, node.getRow() + 0.5f));
 		modelInstance.transform.rotate(Vector3.Y, -1 * direction.getDirection(auxVector2_1).angleDeg());
-		modelInstance.transform.translate(type.getOffset(auxVector3_1));
+		Vector3 offset = type.getOffset(auxVector3_1);
+		modelInstance.transform.translate(0, node.getHeight() + height, 0);
+		if (!offset.isZero()) {
+			modelInstance.nodes.forEach(n -> {
+				n.isAnimated = false;
+				n.translation.add(offset);
+			});
+			modelInstance.calculateTransforms();
+		}
 		if (type instanceof ThingsDefinitions) {
 			ThingsDefinitions.handleEvenSize((ThingsDefinitions) type, modelInstance, direction);
 		}
-		modelInstance.transform.translate(0, node.getHeight() + height, 0);
 		return modelInstance;
 	}
 
@@ -511,10 +518,10 @@ public class MapBuilder implements Disposable {
 		float height = envJsonObj.get(HEIGHT).getAsFloat();
 		GameModelInstance mi = inflateEnvironmentModelInstance(node, envJsonObj.get(DIRECTION).getAsInt(), type, height);
 		mi.getAdditionalRenderData().setColorWhenOutside(Color.WHITE);
-		GeneralUtils.applyExplicitModelTexture(type.getModelDefinition(), mi, assetsManager);
 		builder.addModelInstanceComponent(mi, true);
 		Optional.ofNullable(type.getAppendixModelDefinition())
 				.ifPresent(a -> {
+					GeneralUtils.applyExplicitModelTexture(type.getAppendixModelDefinition(), mi, assetsManager);
 					GameModelInstance appendixModelInstance = new GameModelInstance(assetsManager.getModel(a));
 					appendixModelInstance.transform.set(mi.transform);
 					builder.addAppendixModelInstanceComponent(appendixModelInstance);
@@ -555,7 +562,6 @@ public class MapBuilder implements Disposable {
 		if (type.getEnvironmentObjectType() == EnvironmentObjectType.DOOR) {
 			builder.addDoorComponent(node);
 			node.setDoor(EntityBuilder.getInstance().getCurrentEntity());
-
 		}
 	}
 

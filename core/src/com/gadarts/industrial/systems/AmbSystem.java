@@ -64,7 +64,7 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements 
 	}
 
 	private void handleDoorAction(Entity doorEntity, DoorComponent doorComponent, DoorStates targetState) {
-		GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(doorEntity).getModelInstance();
+		GameModelInstance modelInstance = ComponentsMapper.appendixModelInstance.get(doorEntity).getModelInstance();
 		Vector3 nodeCenterPosition = doorComponent.getNode().getCenterPosition(auxVector2);
 		float distance = nodeCenterPosition.dst2(modelInstance.transform.getTranslation(auxVector1));
 		boolean farEnough = distance > DOOR_OPEN_OFFSET - DOOR_OPEN_OFFSET_EPSILON;
