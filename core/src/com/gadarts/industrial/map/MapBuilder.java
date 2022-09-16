@@ -98,7 +98,7 @@ public class MapBuilder implements Disposable {
 	private static final String REGION_NAME_BULLET = "bullet";
 	private static final Matrix4 auxMatrix = new Matrix4();
 	private static final String KEY_LIGHTS = "lights";
-	private static final float INDEPENDENT_LIGHT_HEIGHT = 1F;
+	private static final float INDEPENDENT_LIGHT_HEIGHT = 2F;
 	private static final String KEY_ENVIRONMENT = "environment";
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
@@ -136,9 +136,9 @@ public class MapBuilder implements Disposable {
 		JsonObject mapJsonObj = gson.fromJson(Gdx.files.internal(format(MAP_PATH_TEMP, map)).reader(), JsonObject.class);
 		JsonObject tilesJsonObject = mapJsonObj.get(TILES).getAsJsonObject();
 		MapGraph mapGraph = createMapGraph(mapJsonObj);
-		inflateAllElements(mapJsonObj, mapGraph);
 		inflateNodes(tilesJsonObject, mapGraph);
 		inflateHeights(mapJsonObj, mapGraph);
+		inflateAllElements(mapJsonObj, mapGraph);
 		mapGraph.init();
 		markAllReachableNodes(mapGraph);
 		return mapGraph;
