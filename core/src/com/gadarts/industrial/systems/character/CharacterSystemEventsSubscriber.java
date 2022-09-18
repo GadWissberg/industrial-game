@@ -39,10 +39,6 @@ public interface CharacterSystemEventsSubscriber extends SystemEventsSubscriber 
 
 	}
 
-	default void onCharacterOpenedDoor(MapGraphNode doorNode) {
-
-	}
-
 	default void onCommandInitialized( ) {
 
 	}

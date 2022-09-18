@@ -27,7 +27,6 @@ public class CharacterComponent implements GameComponent {
 	private OnGoingAttack onGoingAttack = new OnGoingAttack();
 	private WeaponsDefinitions primaryAttack;
 	private float turnTimeLeft;
-	private float shadowRadius;
 
 	public void setCommands(Queue<CharacterCommand> commands) {
 		this.commands.clear();
@@ -45,13 +44,11 @@ public class CharacterComponent implements GameComponent {
 	public void init(CharacterSpriteData characterSpriteData,
 					 CharacterSoundData soundData,
 					 CharacterSkillsParameters skills,
-					 WeaponsDefinitions primaryAttack,
-					 float shadowRadius) {
+					 WeaponsDefinitions primaryAttack) {
 		this.characterSpriteData = characterSpriteData;
 		this.skills.applyParameters(skills);
 		this.soundData.set(soundData);
 		this.primaryAttack = primaryAttack;
-		this.shadowRadius = shadowRadius;
 		this.turnTimeLeft = TURN_DURATION;
 	}
 

@@ -31,6 +31,7 @@ import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.ModelInstancePools;
 import com.gadarts.industrial.systems.SystemsCommonData;
+import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
@@ -56,7 +57,8 @@ import static com.gadarts.industrial.systems.enemy.EnemyAiStatus.*;
 public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> implements
 		CharacterSystemEventsSubscriber,
 		TurnsSystemEventsSubscriber,
-		RenderSystemEventsSubscriber {
+		RenderSystemEventsSubscriber,
+		AmbSystemEventsSubscriber {
 	public static final float SKILL_FLOWER_HEIGHT_RELATIVE = 1F;
 	private static final long AMB_SOUND_INTERVAL_MIN = 10L;
 	private static final long AMB_SOUND_INTERVAL_MAX = 50L;
@@ -90,10 +92,25 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		pathPlanner = new PathPlanHandler(getSystemsCommonData().getMap());
 	}
 
+	@Override
+	public void onDoorOpened(Entity doorEntity) {
+		for (Entity enemy : enemies) {
+			awakeEnemyIfTargetSpotted(enemy);
+		}
+	}
+
 	private static void consumeEngineEnergy(Entity character) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
 		WeaponsDefinitions primaryAttack = enemyComp.getEnemyDefinition().getPrimaryAttack();
 		enemyComp.setEngineEnergy(Math.max(enemyComp.getEngineEnergy() - primaryAttack.getEngineConsumption(), 0));
+	}
+
+	private static boolean checkIfFloorNodeBlockSightToTarget(Vector2 enemyPosition,
+															  MapGraph map,
+															  MapGraphNode node,
+															  Entity door) {
+		return node.getHeight() > map.getNode((int) enemyPosition.x, (int) enemyPosition.y).getHeight() + 1
+				|| (door != null && ComponentsMapper.door.get(door).getState() == DoorComponent.DoorStates.CLOSED);
 	}
 
 	@Override
@@ -185,7 +202,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			enemyFinishedTurn();
 		}
 	}
-
 
 	private void engagePrimaryAttack(Entity enemy) {
 		Entity target = ComponentsMapper.character.get(enemy).getTarget();
@@ -456,14 +472,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			}
 		}
 		return false;
-	}
-
-	private static boolean checkIfFloorNodeBlockSightToTarget(Vector2 enemyPosition,
-															  MapGraph map,
-															  MapGraphNode node,
-															  Entity door) {
-		return node.getHeight() > map.getNode((int) enemyPosition.x, (int) enemyPosition.y).getHeight() + 1
-				|| (door != null && ComponentsMapper.door.get(door).getState() == DoorComponent.DoorStates.CLOSED);
 	}
 
 	private void awakeEnemyIfTargetSpotted(final Entity enemy) {

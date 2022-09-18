@@ -13,7 +13,7 @@ import java.util.List;
 public class FloorComponent implements GameComponent {
 
 	@Getter
-	private final List<Entity> nearbyCharacters = new ArrayList<>();
+	private final List<Entity> nearbySimpleShadows = new ArrayList<>();
 
 	@Setter
 	private int fogOfWarSignature;

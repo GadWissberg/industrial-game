@@ -25,6 +25,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.character.CharacterData;
 import com.gadarts.industrial.components.character.*;
 import com.gadarts.industrial.components.mi.GameModelInstance;
@@ -537,7 +538,7 @@ public class MapBuilder implements Disposable {
 			float degrees = Direction.values()[dirIndex].getDirection(auxVector2_1).angleDeg();
 			Vector3 relativePosition = l.getRelativePosition(auxVector3_2).rotate(Vector3.Y, degrees);
 			Vector3 position = mi.transform.getTranslation(auxVector3_1).add(relativePosition);
-			builder.addStaticLightComponent(position, l.getIntensity(), l.getRadius(), Color.WHITE);
+			builder.addStaticLightComponent(position, l.getIntensity(), l.getRadius());
 		});
 	}
 
@@ -619,7 +620,7 @@ public class MapBuilder implements Disposable {
 		Vector3 position = auxVector3_1.set(col + 0.5f, INDEPENDENT_LIGHT_HEIGHT, row + 0.5f);
 		position.add(0, mapGraph.getNode(col, row).getHeight(), 0);
 		EntityBuilder.beginBuildingEntity(engine)
-				.addStaticLightComponent(position, INDEPENDENT_LIGHT_INTENSITY, INDEPENDENT_LIGHT_RADIUS, Color.WHITE)
+				.addStaticLightComponent(position, INDEPENDENT_LIGHT_INTENSITY, INDEPENDENT_LIGHT_RADIUS)
 				.finishAndAddToEngine();
 	}
 
@@ -643,6 +644,7 @@ public class MapBuilder implements Disposable {
 		EntityBuilder builder = beginBuildingEntity(engine);
 		inflatePickupModel(builder, pickJsonObject, type, mapGraph);
 		builder.addPickUpComponentAsWeapon(type, assetsManager.getTexture(type.getSymbol()), bulletRegion)
+				.addSimpleShadowComponent(PickUpComponent.SIMPLE_SHADOW_RADIUS)
 				.finishAndAddToEngine();
 	}
 
@@ -712,9 +714,10 @@ public class MapBuilder implements Disposable {
 		Direction direction = data.getDirection();
 		float radius = def.getShadowRadius();
 		CharacterSoundData soundData = data.getSoundData();
-		entityBuilder.addCharacterComponent(characterSpriteData, soundData, data.getSkills(), primaryAttack, radius)
+		entityBuilder.addCharacterComponent(characterSpriteData, soundData, data.getSkills(), primaryAttack)
 				.addCharacterDecalComponent(assetsManager.get(atlasDefinition.name()), IDLE, direction, data.getPosition())
 				.addCollisionComponent()
+				.addSimpleShadowComponent(radius)
 				.addAnimationComponent();
 	}
 

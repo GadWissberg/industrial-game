@@ -44,10 +44,6 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements 
 	}
 
 	@Override
-	public void onCharacterOpenedDoor(MapGraphNode doorNode) {
-	}
-
-	@Override
 	public void addedToEngine(Engine engine) {
 		doorEntities = engine.getEntitiesFor(Family.all(DoorComponent.class).get());
 	}

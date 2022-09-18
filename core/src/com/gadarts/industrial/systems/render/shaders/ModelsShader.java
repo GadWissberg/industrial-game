@@ -3,7 +3,6 @@ package com.gadarts.industrial.systems.render.shaders;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
@@ -21,9 +20,10 @@ import static com.gadarts.industrial.components.ComponentsMapper.*;
 
 public class ModelsShader extends DefaultShader {
 
+	public static final int NEARBY_SIMPLE_SHADOW_VECTOR_SIZE = 3;
 	private static final String UNIFORM_AFFECTED_BY_LIGHT = "u_affectedByLight";
-	private static final String UNIFORM_NUMBER_OF_NEARBY_CHARACTERS = "u_numberOfNearbyCharacters";
-	private static final String UNIFORM_NEARBY_CHARACTERS_DATA = "u_nearbyCharactersData[0]";
+	private static final String UNIFORM_NUMBER_OF_NEARBY_SIMPLE_SHADOWS = "u_numberOfNearbySimpleShadows";
+	private static final String UNIFORM_NEARBY_SIMPLE_SHADOWS_DATA = "u_nearbySimpleShadowsData[0]";
 	private static final String UNIFORM_FLOOR_AMBIENT_OCCLUSION = "u_floorAmbientOcclusion";
 	private static final String UNIFORM_IS_WALL = "u_isWall";
 	private static final String UNIFORM_NUMBER_OF_SHADOWLESS_LIGHTS = "u_numberOfShadowlessLights";
@@ -44,14 +44,13 @@ public class ModelsShader extends DefaultShader {
 	private static final Color auxColor = new Color();
 	private static final int MAX_NEARBY_CHARACTERS = 2;
 	private static final BoundingBox auxBoundingBox = new BoundingBox();
-	public static final int NEARBY_CHAR_VECTOR_SIZE = 3;
 	private final float[] lightsPositions = new float[MAX_LIGHTS * 3];
 	private final float[] lightsExtraData = new float[MAX_LIGHTS * LIGHT_EXTRA_DATA_SIZE];
 	private final float[] lightsColors = new float[MAX_LIGHTS * 3];
-	private final float[] nearbyCharsData = new float[MAX_NEARBY_CHARACTERS * NEARBY_CHAR_VECTOR_SIZE];
+	private final float[] nearbySimpleShadowsData = new float[MAX_NEARBY_CHARACTERS * NEARBY_SIMPLE_SHADOW_VECTOR_SIZE];
 	private final FrameBuffer shadowFrameBuffer;
 	private int uniformLocAffectedByLight;
-	private int uniformLocNumberOfNearbyCharacters;
+	private int uniformLocNumberOfNearbySimpleShadows;
 	private int uniformLocNumberOfShadowlessLights;
 	private int uniformLocShadowlessLightsPositions;
 	private int uniformLocShadowlessLightsExtraData;
@@ -73,6 +72,16 @@ public class ModelsShader extends DefaultShader {
 		this.shadowFrameBuffer = shadowFrameBuffer;
 	}
 
+	private static Vector3 getNearbySimpleShadowPosition(Entity nearby) {
+		Vector3 pos;
+		if (ComponentsMapper.characterDecal.has(nearby)) {
+			pos = ComponentsMapper.characterDecal.get(nearby).getDecal().getPosition();
+		} else {
+			pos = ComponentsMapper.modelInstance.get(nearby).getModelInstance().transform.getTranslation(auxVector);
+		}
+		return pos;
+	}
+
 	@Override
 	public void init( ) {
 		super.init();
@@ -83,8 +92,8 @@ public class ModelsShader extends DefaultShader {
 		program.setUniformf("u_screenWidth", Gdx.graphics.getWidth());
 		program.setUniformf("u_screenHeight", Gdx.graphics.getHeight());
 		uniformLocAffectedByLight = program.getUniformLocation(UNIFORM_AFFECTED_BY_LIGHT);
-		uniformLocNumberOfNearbyCharacters = program.getUniformLocation(UNIFORM_NUMBER_OF_NEARBY_CHARACTERS);
-		uniformLocNearbyCharsData = program.getUniformLocation(UNIFORM_NEARBY_CHARACTERS_DATA);
+		uniformLocNumberOfNearbySimpleShadows = program.getUniformLocation(UNIFORM_NUMBER_OF_NEARBY_SIMPLE_SHADOWS);
+		uniformLocNearbyCharsData = program.getUniformLocation(UNIFORM_NEARBY_SIMPLE_SHADOWS_DATA);
 		uniformLocFloorAmbientOcclusion = program.getUniformLocation(UNIFORM_FLOOR_AMBIENT_OCCLUSION);
 		uniformLocIsWall = program.getUniformLocation(UNIFORM_IS_WALL);
 		uniformLocModelWidth = program.getUniformLocation(UNIFORM_MODEL_WIDTH);
@@ -237,28 +246,28 @@ public class ModelsShader extends DefaultShader {
 	private void insertDataForFloor(Renderable renderable) {
 		if (floor.has((Entity) renderable.userData)) {
 			FloorComponent floorComponent = floor.get((Entity) renderable.userData);
-			int size = floorComponent.getNearbyCharacters().size();
-			program.setUniformi(uniformLocNumberOfNearbyCharacters, size);
-			initializeNearbyCharactersPositions(renderable, size);
-			int length = size * NEARBY_CHAR_VECTOR_SIZE;
-			program.setUniform3fv(uniformLocNearbyCharsData, this.nearbyCharsData, 0, length);
+			int size = floorComponent.getNearbySimpleShadows().size();
+			program.setUniformi(uniformLocNumberOfNearbySimpleShadows, size);
+			initializeNearbySimpleShadowsPositions(renderable, size);
+			int length = size * NEARBY_SIMPLE_SHADOW_VECTOR_SIZE;
+			program.setUniform3fv(uniformLocNearbyCharsData, this.nearbySimpleShadowsData, 0, length);
 			program.setUniformi(uniformLocFloorAmbientOcclusion, floorComponent.getNode().getNodeAmbientOcclusionValue());
 			program.setUniformi(uniformLocFowSignature, floorComponent.getFogOfWarSignature());
 		} else {
-			program.setUniformi(uniformLocNumberOfNearbyCharacters, 0);
+			program.setUniformi(uniformLocNumberOfNearbySimpleShadows, 0);
 			program.setUniformi(uniformLocFloorAmbientOcclusion, 0);
 			program.setUniformi(uniformLocFowSignature, 0);
 		}
 	}
 
-	private void initializeNearbyCharactersPositions(Renderable renderable, int size) {
+	private void initializeNearbySimpleShadowsPositions(Renderable renderable, int size) {
 		for (int i = 0; i < size; i++) {
 			FloorComponent floorComponent = floor.get((Entity) renderable.userData);
-			Entity nearbyCharacter = floorComponent.getNearbyCharacters().get(i);
-			Vector3 position = characterDecal.get(nearbyCharacter).getDecal().getPosition();
-			nearbyCharsData[i * NEARBY_CHAR_VECTOR_SIZE] = position.x;
-			nearbyCharsData[i * NEARBY_CHAR_VECTOR_SIZE + 1] = position.z;
-			nearbyCharsData[i * NEARBY_CHAR_VECTOR_SIZE + 2] = character.get(nearbyCharacter).getShadowRadius();
+			Entity nearby = floorComponent.getNearbySimpleShadows().get(i);
+			Vector3 pos = getNearbySimpleShadowPosition(nearby);
+			nearbySimpleShadowsData[i * NEARBY_SIMPLE_SHADOW_VECTOR_SIZE] = pos.x;
+			nearbySimpleShadowsData[i * NEARBY_SIMPLE_SHADOW_VECTOR_SIZE + 1] = pos.z;
+			nearbySimpleShadowsData[i * NEARBY_SIMPLE_SHADOW_VECTOR_SIZE + 2] = simpleShadow.get(nearby).getRadius();
 		}
 	}
 }

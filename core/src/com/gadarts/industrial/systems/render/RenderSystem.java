@@ -1,9 +1,6 @@
 package com.gadarts.industrial.systems.render;
 
-import com.badlogic.ashley.core.Engine;
-import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -72,6 +69,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	public static final float FLICKER_RANDOM_MIN = 0.95F;
 	public static final float FLICKER_RANDOM_MAX = 1.05F;
 	public static final int DEPTH_MAP_SIZE = 1024;
+	public static final float OUTLINE_ALPHA = 0.4F;
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final Vector3 auxVector3_3 = new Vector3();
@@ -86,17 +84,16 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private static final Rectangle auxRect = new Rectangle();
 	private static final Color PLAYER_OUTLINE_COLOR = Color.valueOf("#177331");
 	private static final Color ENEMY_OUTLINE_COLOR = Color.valueOf("#731717");
-	public static final float OUTLINE_ALPHA = 0.4F;
 	private final Environment environment;
 	private final ModelsShaderProvider shaderProvider;
 	private final GameFrameBuffer shadowFrameBuffer;
+	private final Color ambientColor;
 	private ModelBatch depthModelBatch;
 	private ModelBatch modelBatchShadows;
 	private ImmutableArray<Entity> shadowlessLightsEntities;
 	private ModelBatch modelBatch;
 	private SpriteBatch spriteBatch;
 	private DecalBatch decalBatch;
-	private ImmutableArray<Entity> modelInstanceEntities;
 	private ImmutableArray<Entity> characterDecalsEntities;
 	private ImmutableArray<Entity> simpleDecalsEntities;
 	private ImmutableArray<Entity> staticLightsEntities;
@@ -106,7 +103,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private boolean frustumCull = !DefaultGameSettings.DISABLE_FRUSTUM_CULLING;
 	private GameCameraGroupStrategy regularDecalGroupStrategy;
 	private OutlineGroupStrategy outlineDecalGroupStrategy;
-	private Color ambientColor;
+	private ImmutableArray<Entity> modelEntitiesWithShadows;
+	private ImmutableArray<Entity> modelEntities;
+	private ImmutableArray<Entity> simpleShadowEntities;
 
 	public RenderSystem(SystemsCommonData systemsCommonData,
 						GameAssetsManager assetsManager,
@@ -194,6 +193,14 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		simpleDecalsEntities = engine.getEntitiesFor(Family.all(SimpleDecalComponent.class).get());
 		shadowlessLightsEntities = getEngine().getEntitiesFor(Family.all(ShadowlessLightComponent.class).get());
 		staticLightsEntities = getEngine().getEntitiesFor(Family.all(StaticLightComponent.class).get());
+		modelEntitiesWithShadows = engine.getEntitiesFor(Family.all(ModelInstanceComponent.class)
+				.exclude(PickUpComponent.class, StaticLightComponent.class)
+				.get());
+		modelEntities = engine.getEntitiesFor(
+				Family.all(ModelInstanceComponent.class)
+						.exclude(StaticLightComponent.class)
+						.get());
+		simpleShadowEntities = engine.getEntitiesFor(Family.one(SimpleShadowComponent.class).get());
 	}
 
 	@Override
@@ -203,7 +210,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	@Override
 	public void initializeData( ) {
-		modelInstanceEntities = getEngine().getEntitiesFor(Family.all(ModelInstanceComponent.class).get());
 		GameAssetsManager assetsManager = getAssetsManager();
 		createDecalBatch();
 		createShaderPrograms(assetsManager);
@@ -235,10 +241,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | sam);
 	}
 
-	private void renderModels(final ModelBatch modelBatch) {
-		renderModels(modelBatch, null, true, getSystemsCommonData().getCamera());
-	}
-
 	private boolean isInFrustum(final Camera camera, ModelInstanceComponent modelInstanceComponent) {
 		if (!DefaultGameSettings.DISABLE_FRUSTUM_CULLING) return true;
 		Vector3 position = modelInstanceComponent.getModelInstance().transform.getTranslation(auxVector3_1);
@@ -262,22 +264,15 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private void renderModels(ModelBatch modelBatch,
-							  Camera camera) {
-		renderModels(modelBatch, null, true, camera);
-	}
-
-	private void renderModels(ModelBatch modelBatch,
-							  Entity exclude,
+							  ImmutableArray<Entity> entitiesToRender,
 							  boolean renderLight,
 							  Camera camera) {
 		modelBatch.begin(camera);
-		for (Entity entity : modelInstanceEntities) {
-			if (exclude != entity) {
-				ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(entity);
-				boolean rendered = renderModel(modelBatch, camera, entity, renderLight, modelInstanceComponent);
-				if (rendered) {
-					renderAppendixModelInstance(modelBatch, camera, entity);
-				}
+		for (Entity entity : entitiesToRender) {
+			ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(entity);
+			boolean rendered = renderModel(modelBatch, camera, entity, renderLight, modelInstanceComponent);
+			if (rendered) {
+				renderAppendixModelInstance(modelBatch, camera, entity);
 			}
 		}
 		modelBatch.end();
@@ -333,7 +328,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private void applySpecificRendering(Entity entity) {
 		if (ComponentsMapper.floor.has(entity)) {
-			renderCharactersShadowsOnFloor(entity);
+			renderSimpleShadowsOnFloor(entity);
 		} else if (ComponentsMapper.wall.has(entity)) {
 			applySpecificRenderingForWall(entity);
 		}
@@ -352,17 +347,22 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		}
 	}
 
-	private void renderCharactersShadowsOnFloor(Entity entity) {
-		List<Entity> nearbyCharacters = ComponentsMapper.floor.get(entity).getNearbyCharacters();
+	private void renderSimpleShadowsOnFloor(Entity entity) {
+		List<Entity> nearbyCharacters = ComponentsMapper.floor.get(entity).getNearbySimpleShadows();
 		nearbyCharacters.clear();
-		for (Entity character : characterDecalsEntities) {
-			Vector3 position = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
-			auxCircle.set(position.x, position.z, CharacterComponent.CHAR_RAD * 3F);
+		for (Entity thing : simpleShadowEntities) {
+			Vector3 pos;
+			if (ComponentsMapper.characterDecal.has(thing)) {
+				pos = ComponentsMapper.characterDecal.get(thing).getDecal().getPosition();
+			} else {
+				pos = ComponentsMapper.modelInstance.get(thing).getModelInstance().transform.getTranslation(auxVector3_1);
+			}
+			auxCircle.set(pos.x, pos.z, CharacterComponent.CHAR_RAD * 3F);
 			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(entity).getModelInstance();
 			Vector3 floorPos = modelInstance.transform.getTranslation(auxVector3_1);
 			auxRect.set(floorPos.x, floorPos.z, 1F, 1F);
 			if (Intersector.overlaps(auxCircle, auxRect)) {
-				nearbyCharacters.add(character);
+				nearbyCharacters.add(thing);
 				if (nearbyCharacters.size() >= 2) {
 					return;
 				}
@@ -406,7 +406,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		shadowFrameBuffer.begin();
 		Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		renderModels(modelBatchShadows, getSystemsCommonData().getCamera());
+		renderModels(modelBatchShadows, modelEntitiesWithShadows, true, getSystemsCommonData().getCamera());
 		handleScreenshot(shadowFrameBuffer);
 		shadowFrameBuffer.end();
 	}
@@ -422,7 +422,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		getSystemsCommonData().setNumberOfVisible(0);
 		renderShadows();
 		resetDisplay(Color.BLACK);
-		renderModels(modelBatch);
+		renderModels(modelBatch, modelEntities, true, getSystemsCommonData().getCamera());
 		renderDecals(deltaTime);
 		renderParticleEffects();
 		getSystemsCommonData().getUiStage().draw();
@@ -624,7 +624,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 			renderModels(
 					depthModelBatch,
-					light,
+					modelEntitiesWithShadows,
 					false,
 					cameraLight);
 //			handleScreenshot(frameBuffer);

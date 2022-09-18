@@ -27,7 +27,6 @@ import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.components.sd.SimpleDecalComponent;
 import com.gadarts.industrial.map.MapGraphNode;
-import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
@@ -322,11 +321,10 @@ public class EntityBuilder {
 	public EntityBuilder addCharacterComponent(CharacterSpriteData characterSpriteData,
 											   CharacterSoundData characterSoundData,
 											   CharacterSkillsParameters skills,
-											   WeaponsDefinitions primaryAttack,
-											   float shadowRadius) {
+											   WeaponsDefinitions primaryAttack) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		CharacterComponent charComponent = engine.createComponent(CharacterComponent.class);
-		charComponent.init(characterSpriteData, characterSoundData, skills, primaryAttack, shadowRadius);
+		charComponent.init(characterSpriteData, characterSoundData, skills, primaryAttack);
 		currentEntity.add(charComponent);
 		return instance;
 	}
@@ -344,11 +342,7 @@ public class EntityBuilder {
 		this.currentEntity = engine.createEntity();
 	}
 
-	public EntityBuilder addShadowlessLightComponent(Vector3 position, float intensity, float radius) {
-		return addShadowlessLightComponent(position, intensity, radius, Color.WHITE, 0F, false);
-	}
-
-	public EntityBuilder addStaticLightComponent(Vector3 position, float intensity, float radius, Color color) {
+	public EntityBuilder addStaticLightComponent(Vector3 position, float intensity, float radius) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		StaticLightComponent lightComponent = engine.createComponent(StaticLightComponent.class);
 		lightComponent.init(position, intensity, radius);
@@ -381,6 +375,14 @@ public class EntityBuilder {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		FlyingParticleComponent component = engine.createComponent(FlyingParticleComponent.class);
 		component.init(nodeHeight, strength, deceleration, minimumDegree, maxDegreeToAdd);
+		currentEntity.add(component);
+		return instance;
+	}
+
+	public EntityBuilder addSimpleShadowComponent(float radius) {
+		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
+		SimpleShadowComponent component = engine.createComponent(SimpleShadowComponent.class);
+		component.init(radius);
 		currentEntity.add(component);
 		return instance;
 	}

@@ -101,7 +101,7 @@ uniform float u_affectedByLight;
 uniform vec3 u_shadowlessLightsColors[16];
 uniform vec3 u_shadowlessLightsExtraData[16];
 uniform vec3 u_shadowlessLightsPositions[16];
-uniform vec3 u_nearbyCharactersData[2];
+uniform vec3 u_nearbySimpleShadowsData[2];
 uniform int u_numberOfShadowlessLights;
 varying vec3 v_frag_pos;
 uniform float u_screenWidth;
@@ -112,7 +112,7 @@ uniform float u_modelDepth;
 uniform float u_modelX;
 uniform float u_modelY;
 uniform float u_modelZ;
-uniform int u_numberOfNearbyCharacters;
+uniform int u_numberOfNearbySimpleShadows;
 uniform int u_floorAmbientOcclusion;
 uniform int u_isWall;
 uniform sampler2D u_shadows;
@@ -209,12 +209,12 @@ void main() {
 
             float minDistToChar = 21390950.0;
             float shadowRadius = 1.0;
-            for (int i = 0; i< u_numberOfNearbyCharacters; i++){
-                vec2 sub = u_nearbyCharactersData[i].xy - v_frag_pos.xz;
+            for (int i = 0; i< u_numberOfNearbySimpleShadows; i++){
+                vec2 sub = u_nearbySimpleShadowsData[i].xy - v_frag_pos.xz;
                 float distance = length(sub);
                 if (distance < minDistToChar){
                     minDistToChar = distance;
-                    shadowRadius = u_nearbyCharactersData[i].z;
+                    shadowRadius = u_nearbySimpleShadowsData[i].z;
                 }
             }
 
