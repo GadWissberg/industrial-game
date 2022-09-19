@@ -509,6 +509,7 @@ public class MapBuilder implements Disposable {
 		if (type instanceof ThingsDefinitions) {
 			ThingsDefinitions.handleEvenSize((ThingsDefinitions) type, modelInstance, direction);
 		}
+		GeneralUtils.applyExplicitModelTexture(def, modelInstance, assetsManager);
 		return modelInstance;
 	}
 
@@ -522,7 +523,6 @@ public class MapBuilder implements Disposable {
 		builder.addModelInstanceComponent(mi, true);
 		Optional.ofNullable(type.getAppendixModelDefinition())
 				.ifPresent(a -> {
-					GeneralUtils.applyExplicitModelTexture(type.getAppendixModelDefinition(), mi, assetsManager);
 					GameModelInstance appendixModelInstance = new GameModelInstance(assetsManager.getModel(a));
 					appendixModelInstance.transform.set(mi.transform);
 					builder.addAppendixModelInstanceComponent(appendixModelInstance);
