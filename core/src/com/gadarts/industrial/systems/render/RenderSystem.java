@@ -525,28 +525,19 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		return ComponentsMapper.player.has(entity) && !ComponentsMapper.player.get(entity).isDisabled();
 	}
 
-	private boolean shouldApplyLightsOnDecal(final Entity entity,
-											 final CharacterSpriteData spriteData) {
+	private boolean shouldApplyLightsOnCharacterDecal(final Entity entity,
+													  final CharacterSpriteData spriteData) {
 		Decal decal = ComponentsMapper.characterDecal.get(entity).getDecal();
 		TextureAtlas.AtlasRegion textureRegion = (TextureAtlas.AtlasRegion) decal.getTextureRegion();
-		if (ComponentsMapper.enemy.has(entity)) {
-			return spriteData.getSpriteType() != ATTACK_PRIMARY;
-		} else {
-			return shouldApplyLightsOnPlayerDecal(spriteData, textureRegion);
-		}
-	}
-
-	private boolean shouldApplyLightsOnPlayerDecal(final CharacterSpriteData spriteData,
-												   final TextureAtlas.AtlasRegion textureRegion) {
-		boolean noInHitFrameIndex = textureRegion.index != spriteData.getPrimaryAttackHitFrameIndex();
-		boolean noPrimaryAttack = spriteData.getSpriteType() != ATTACK_PRIMARY || noInHitFrameIndex;
+		boolean notInHitFrameIndex = textureRegion.index != spriteData.getPrimaryAttackHitFrameIndex();
+		boolean noPrimaryAttack = spriteData.getSpriteType() != ATTACK_PRIMARY || notInHitFrameIndex;
 		boolean meleeWeapon = getSystemsCommonData().getStorage().getSelectedWeapon().isMelee();
 		return noPrimaryAttack || meleeWeapon;
 	}
 
 	void setDecalColorAccordingToLights(final Entity entity) {
 		Decal decal = ComponentsMapper.characterDecal.get(entity).getDecal();
-		if (shouldApplyLightsOnDecal(entity, ComponentsMapper.character.get(entity).getCharacterSpriteData())) {
+		if (shouldApplyLightsOnCharacterDecal(entity, ComponentsMapper.character.get(entity).getCharacterSpriteData())) {
 			findClosestLight(decal);
 			float ambient = getSystemsCommonData().getMap().getAmbient();
 			Color color = decal.getColor().add(auxColor.set(ambient, ambient, ambient, ambient));

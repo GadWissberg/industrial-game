@@ -39,6 +39,7 @@ import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
+import com.gadarts.industrial.systems.character.commands.CommandStates;
 import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
@@ -209,6 +210,21 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		boolean blocked = false;
 		for (GridPoint2 nodeCoord : nodes) {
 			blocked = applyLineOfSightOnNode(map, playerNode, blocked, nodeCoord);
+		}
+	}
+
+	@Override
+	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
+		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		Entity currentCharacter = systemsCommonData.getTurnsQueue().first();
+		if (ComponentsMapper.player.has(currentCharacter)) {
+			Queue<CharacterCommand> commands = ComponentsMapper.character.get(currentCharacter).getCommands();
+			if (!commands.isEmpty()) {
+				CharacterCommand currentCommand = commands.get(0);
+				if (currentCommand.getDefinition() == RUN) {
+					currentCommand.setState(CommandStates.ENDED);
+				}
+			}
 		}
 	}
 

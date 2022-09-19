@@ -11,6 +11,7 @@ import java.util.List;
 
 public class PickupItemCharacterCommand extends CharacterCommand {
 
+	private static final float PICKUP_CONSUME_TIME = 1F;
 	private Entity itemToPickup;
 
 	@Override
@@ -40,6 +41,7 @@ public class PickupItemCharacterCommand extends CharacterCommand {
 							  TextureAtlas.AtlasRegion newFrame,
 							  List<CharacterSystemEventsSubscriber> subscribers) {
 		if (newFrame.index == 1 && ComponentsMapper.animation.get(character).getAnimation().getPlayMode() == Animation.PlayMode.REVERSED) {
+			consumeTurnTime(character, PICKUP_CONSUME_TIME);
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onItemPickedUp(itemToPickup);
 			}
