@@ -85,12 +85,6 @@ public class ModelsShader extends DefaultShader {
 	@Override
 	public void init( ) {
 		super.init();
-		final int textureNum = 30;
-		shadowFrameBuffer.getColorBufferTexture().bind(textureNum);
-		program.bind();
-		program.setUniformi("u_shadows", textureNum);
-		program.setUniformf("u_screenWidth", Gdx.graphics.getWidth());
-		program.setUniformf("u_screenHeight", Gdx.graphics.getHeight());
 		uniformLocAffectedByLight = program.getUniformLocation(UNIFORM_AFFECTED_BY_LIGHT);
 		uniformLocNumberOfNearbySimpleShadows = program.getUniformLocation(UNIFORM_NUMBER_OF_NEARBY_SIMPLE_SHADOWS);
 		uniformLocNearbyCharsData = program.getUniformLocation(UNIFORM_NEARBY_SIMPLE_SHADOWS_DATA);
@@ -175,6 +169,11 @@ public class ModelsShader extends DefaultShader {
 
 	@Override
 	public void render(Renderable renderable) {
+		int textureNum = context.textureBinder.bind(shadowFrameBuffer.getColorBufferTexture());
+		program.bind();
+		program.setUniformi("u_shadows", textureNum);
+		program.setUniformf("u_screenWidth", Gdx.graphics.getWidth());
+		program.setUniformf("u_screenHeight", Gdx.graphics.getHeight());
 		Entity entity = (Entity) renderable.userData;
 		insertAdditionalRenderData(renderable, entity);
 		super.render(renderable);
