@@ -31,6 +31,7 @@ import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
+import com.gadarts.industrial.shared.model.env.DoorsDefinitions;
 import com.gadarts.industrial.shared.model.env.EnvironmentObjectDefinition;
 import com.gadarts.industrial.shared.model.pickups.ItemDefinition;
 import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
@@ -359,10 +360,10 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addDoorComponent(MapGraphNode node) {
+	public EntityBuilder addDoorComponent(MapGraphNode node, DoorsDefinitions type) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		DoorComponent doorComponent = engine.createComponent(DoorComponent.class);
-		doorComponent.init(node);
+		doorComponent.init(node, type);
 		currentEntity.add(doorComponent);
 		return instance;
 	}

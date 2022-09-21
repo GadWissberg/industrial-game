@@ -45,6 +45,7 @@ import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
 import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
+import com.gadarts.industrial.shared.model.env.DoorsDefinitions;
 import com.gadarts.industrial.shared.model.env.EnvironmentObjectDefinition;
 import com.gadarts.industrial.shared.model.env.EnvironmentObjectType;
 import com.gadarts.industrial.shared.model.env.ThingsDefinitions;
@@ -523,8 +524,10 @@ public class MapBuilder implements Disposable {
 		builder.addModelInstanceComponent(mi, true);
 		Optional.ofNullable(type.getAppendixModelDefinition())
 				.ifPresent(a -> {
+					Vector3 offset = type.getOffset(auxVector3_1);
 					GameModelInstance appendixModelInstance = new GameModelInstance(assetsManager.getModel(a));
 					appendixModelInstance.transform.set(mi.transform);
+					appendixModelInstance.transform.translate(offset);
 					builder.addAppendixModelInstanceComponent(appendixModelInstance);
 				});
 		return mi;
@@ -561,7 +564,7 @@ public class MapBuilder implements Disposable {
 							 EntityBuilder builder,
 							 MapGraphNode node) {
 		if (type.getEnvironmentObjectType() == EnvironmentObjectType.DOOR) {
-			builder.addDoorComponent(node);
+			builder.addDoorComponent(node, ((DoorsDefinitions) type));
 			node.setDoor(EntityBuilder.getInstance().getCurrentEntity());
 		}
 	}
