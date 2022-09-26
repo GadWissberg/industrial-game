@@ -529,6 +529,7 @@ public class MapBuilder implements Disposable {
 					appendixModelInstance.transform.set(mi.transform);
 					appendixModelInstance.transform.translate(offset);
 					builder.addAppendixModelInstanceComponent(appendixModelInstance);
+					GeneralUtils.applyExplicitModelTexture(a, appendixModelInstance, assetsManager);
 				});
 		return mi;
 	}
