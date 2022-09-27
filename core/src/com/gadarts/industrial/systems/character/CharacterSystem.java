@@ -140,6 +140,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	@SuppressWarnings("JavaDoc")
 	public void applyCommands(Queue<CharacterCommand> commands,
 							  Entity character) {
+		if (commands.isEmpty()) return;
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		characterComponent.setCommands(commands);
 		Entity currentTurn = getSystemsCommonData().getTurnsQueue().first();

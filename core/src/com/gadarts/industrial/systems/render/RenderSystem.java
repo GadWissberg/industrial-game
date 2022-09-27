@@ -648,6 +648,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private void renderCharacterDecal(Entity entity, Color color, float alpha) {
+		if (DefaultGameSettings.HIDE_CHARACTERS) return;
+
 		Decal decal = ComponentsMapper.characterDecal.get(entity).getDecal();
 		Vector3 decalPosition = decal.getPosition();
 		Camera camera = getSystemsCommonData().getCamera();

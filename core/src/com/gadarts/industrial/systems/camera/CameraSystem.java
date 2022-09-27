@@ -24,7 +24,7 @@ import static com.gadarts.industrial.DefaultGameSettings.FULL_SCREEN;
 import static com.gadarts.industrial.Industrial.*;
 
 public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> implements InputSystemEventsSubscriber {
-	public static final int CAMERA_HEIGHT = 15;
+	public static final int CAMERA_HEIGHT = 16;
 	private static final float INITIAL_CAMERA_ANGLE_AROUND_Y = 80;
 	private static final float FAR = 100f;
 	private static final float NEAR = 0.01f;
@@ -35,6 +35,7 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 	private static final Vector3 auxVector3_3 = new Vector3();
 	private static final float MENU_CAMERA_ROTATION = 0.1F;
 	private static final Vector2 auxVector2_1 = new Vector2();
+	public static final int CAMERA_ROTATION_AROUND_X = -55;
 	private final Vector2 lastMousePosition = new Vector2();
 	private final Vector2 lastRightPressMousePosition = new Vector2();
 
@@ -142,7 +143,7 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 		Entity player = getSystemsCommonData().getPlayer();
 		Vector2 nodePosition = ComponentsMapper.characterDecal.get(player).getNodePosition(auxVector2_1);
 		cam.position.set(nodePosition.x + START_OFFSET, CAMERA_HEIGHT, nodePosition.y + START_OFFSET);
-		cam.direction.rotate(Vector3.X, -45);
+		cam.direction.rotate(Vector3.X, CAMERA_ROTATION_AROUND_X);
 		cam.direction.rotate(Vector3.Y, INITIAL_CAMERA_ANGLE_AROUND_Y);
 		cam.update();
 	}
