@@ -170,7 +170,7 @@ public class RunCharacterCommand extends CharacterCommand {
 		Vector3 decalPos = characterDecalComponent.getDecal().getPosition();
 		Entity floorEntity = systemsCommonData.getMap().getNode(decalPos).getEntity();
 		Decal decal = characterDecalComponent.getDecal();
-		if ((ComponentsMapper.floor.get(floorEntity).getFogOfWarSignature() & 16) == 0) {
+		if (floorEntity != null && (ComponentsMapper.floor.get(floorEntity).getFogOfWarSignature() & 16) == 0) {
 			Vector2 velocity = auxVector2_2.sub(auxVector2_1.set(decal.getX(), decal.getZ())).nor().scl(CHAR_STEP_SIZE);
 			decal.translate(auxVector3_1.set(velocity.x, 0, velocity.y));
 		} else {

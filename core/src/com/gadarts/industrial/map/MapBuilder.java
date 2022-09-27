@@ -100,7 +100,7 @@ public class MapBuilder implements Disposable {
 	private static final String REGION_NAME_BULLET = "bullet";
 	private static final Matrix4 auxMatrix = new Matrix4();
 	private static final String KEY_LIGHTS = "lights";
-	private static final float INDEPENDENT_LIGHT_HEIGHT = 2F;
+	private static final float INDEPENDENT_LIGHT_HEIGHT = 1.9F;
 	private static final String KEY_ENVIRONMENT = "environment";
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();

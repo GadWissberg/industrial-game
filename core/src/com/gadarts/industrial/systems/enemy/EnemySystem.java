@@ -92,13 +92,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		pathPlanner = new PathPlanHandler(getSystemsCommonData().getMap());
 	}
 
-	@Override
-	public void onDoorOpened(Entity doorEntity) {
-		for (Entity enemy : enemies) {
-			awakeEnemyIfTargetSpotted(enemy);
-		}
-	}
-
 	private static void consumeEngineEnergy(Entity character) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
 		WeaponsDefinitions primaryAttack = enemyComp.getEnemyDefinition().getPrimaryAttack();
@@ -111,6 +104,13 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 															  Entity door) {
 		return node.getHeight() > map.getNode((int) enemyPosition.x, (int) enemyPosition.y).getHeight() + 1
 				|| (door != null && ComponentsMapper.door.get(door).getState() == DoorComponent.DoorStates.CLOSED);
+	}
+
+	@Override
+	public void onDoorOpened(Entity doorEntity) {
+		for (Entity enemy : enemies) {
+			awakeEnemyIfTargetSpotted(enemy);
+		}
 	}
 
 	@Override
@@ -147,10 +147,10 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	boolean checkIfWayIsClearToTarget(final Entity enemy) {
-		LinkedHashSet<GridPoint2> nodes = GameUtils.findAllNodesToTarget(enemy, bresenhamOutput);
+		LinkedHashSet<GridPoint2> nodes = GameUtils.findAllNodesToTarget(enemy, bresenhamOutput, true);
 		boolean blocked = checkIfFloorNodesBlockSightToTarget(enemy, nodes);
 		if (!blocked) {
-			blocked = checkIfFloorNodesContainObjects(nodes, enemy);
+			blocked = checkIfFloorNodesContainObjects(nodes);
 		}
 		return !blocked;
 	}
@@ -211,33 +211,16 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		applyCommand(enemy, CharacterCommandsDefinitions.ATTACK_PRIMARY, targetNode);
 	}
 
-	private boolean checkIfFloorNodesContainObjects(LinkedHashSet<GridPoint2> nodes, Entity enemyToCheckFor) {
-		return checkIfFloorNodesContainObjects(nodes, enemyToCheckFor, true);
-	}
-
-	private boolean checkIfFloorNodesContainObjects(LinkedHashSet<GridPoint2> nodes,
-													Entity enemyToCheckFor,
-													boolean includeCharacters) {
+	private boolean checkIfFloorNodesContainObjects(LinkedHashSet<GridPoint2> nodes) {
 		boolean result = false;
 		for (GridPoint2 point : nodes) {
-			if (checkIfNodeContainsObject(enemyToCheckFor, point, includeCharacters)) {
+			MapGraph map = getSystemsCommonData().getMap();
+			if (!map.checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(point)) {
 				result = true;
 				break;
 			}
 		}
 		return result;
-	}
-
-	private boolean checkIfNodeContainsObject(Entity enemyToCheckFor, GridPoint2 point, boolean includeCharacters) {
-		MapGraphNode node = getSystemsCommonData().getMap().getNode(point.x, point.y);
-		if (includeCharacters) {
-			Entity enemy = getSystemsCommonData().getMap().fetchAliveEnemyFromNode(node);
-			if (enemy != null && enemy != enemyToCheckFor) {
-				return true;
-			}
-		}
-		Entity obstacle = getSystemsCommonData().getMap().fetchObstacleFromNode(node);
-		return obstacle != null;
 	}
 
 	private void addAsPossibleNodeToLookIn(final MapGraphNode enemyNode, final MapGraphNode node, Entity enemy) {
@@ -458,7 +441,8 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private boolean checkIfFloorNodesBlockSightToTarget(final Entity enemy) {
-		return checkIfFloorNodesBlockSightToTarget(enemy, GameUtils.findAllNodesToTarget(enemy, bresenhamOutput));
+		LinkedHashSet<GridPoint2> allNodesToTarget = GameUtils.findAllNodesToTarget(enemy, bresenhamOutput, true);
+		return checkIfFloorNodesBlockSightToTarget(enemy, allNodesToTarget);
 	}
 
 	private boolean checkIfFloorNodesBlockSightToTarget(Entity enemy, LinkedHashSet<GridPoint2> nodes) {
@@ -477,7 +461,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private void awakeEnemyIfTargetSpotted(final Entity enemy) {
 		if (!isTargetInFov(enemy)) return;
 
-		LinkedHashSet<GridPoint2> nodes = GameUtils.findAllNodesToTarget(enemy, bresenhamOutput);
+		LinkedHashSet<GridPoint2> nodes = GameUtils.findAllNodesToTarget(enemy, bresenhamOutput, true);
 		if (!checkIfFloorNodesBlockSightToTarget(enemy, nodes)) {
 			boolean targetIsClose = isTargetCloseEnough(enemy);
 			if (targetIsClose) {
@@ -545,7 +529,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	private void tryToToSetToLastSeenPosition(MapGraphNode oldNode, Entity enemy, EnemyComponent enemyComponent) {
 		if (checkIfFloorNodesBlockSightToTarget(enemy)
-				|| checkIfFloorNodesContainObjects(GameUtils.findAllNodesToTarget(enemy, bresenhamOutput), enemy)) {
+				|| checkIfFloorNodesContainObjects(GameUtils.findAllNodesToTarget(enemy, bresenhamOutput, true))) {
 			enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
 			enemyComponent.setTargetLastVisibleNode(oldNode);
 		}

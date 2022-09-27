@@ -6,21 +6,19 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedGraph;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.gadarts.industrial.components.DoorComponent;
-import com.gadarts.industrial.components.mi.GameModelInstance;
-import com.gadarts.industrial.shared.model.Coords;
-import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.EnvironmentObjectComponent;
 import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
-import com.gadarts.industrial.utils.GameUtils;
+import com.gadarts.industrial.shared.model.Coords;
+import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -137,12 +135,6 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		return result;
 	}
 
-	public MapGraphNode getRayNode(final int screenX, final int screenY, final Camera camera) {
-		Vector3 output = GameUtils.calculateGridPositionFromMouse(camera, screenX, screenY, auxVector3);
-		output.set(Math.max(output.x, 0), Math.max(output.y, 0), Math.max(output.z, 0));
-		return getNode(output);
-	}
-
 	public MapGraphNode getNode(final Vector3 position) {
 		return getNode((int) position.x, (int) position.z);
 	}
@@ -198,13 +190,13 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		return checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(destinationNode, pathFinalNode, false);
 	}
 
-	public boolean checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(MapGraphNode destinationNode) {
-		return checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(destinationNode, null, true);
+	public boolean checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(GridPoint2 destinationNode) {
+		MapGraphNode node = getNode(destinationNode);
+		return checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(node, null, true);
 	}
 
-	public boolean checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(MapGraphNode destinationNode,
-																	MapGraphNode pathFinalNode) {
-		return checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(destinationNode, pathFinalNode, true);
+	public boolean checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(MapGraphNode destinationNode) {
+		return checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(destinationNode, null, true);
 	}
 
 	public boolean checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(MapGraphNode destinationNode,
@@ -295,6 +287,10 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		return getNode(coord.getCol(), coord.getRow());
 	}
 
+	public MapGraphNode getNode(GridPoint2 coord) {
+		return getNode(coord.x, coord.y);
+	}
+
 	private boolean isDiagonalBlockedWithEastOrWest(final MapGraphNode source, final int col) {
 		float east = getNode(col, source.getRow()).getHeight();
 		return Math.abs(source.getHeight() - east) > PASSABLE_MAX_HEIGHT_DIFF;
@@ -365,19 +361,6 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 			ModelInstance modelInstance = ComponentsMapper.modelInstance.get(obstacle).getModelInstance();
 			MapGraphNode pickupNode = getNode(modelInstance.transform.getTranslation(auxVector3));
 			if (pickupNode.equals(node)) {
-				result = obstacle;
-				break;
-			}
-		}
-		return result;
-	}
-
-	public Entity fetchObstacleFromNode(MapGraphNode node) {
-		Entity result = null;
-		for (Entity obstacle : environmentObjectsEntities) {
-			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(obstacle).getModelInstance();
-			MapGraphNode obstacleNode = getNode(modelInstance.transform.getTranslation(auxVector3));
-			if (obstacleNode.equals(node)) {
 				result = obstacle;
 				break;
 			}
