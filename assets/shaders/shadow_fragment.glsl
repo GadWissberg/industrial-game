@@ -43,7 +43,7 @@ void main()
     }
 
     if (lenDepthMap>lenToLight-0.005 && lenToLight < u_radius*0.1){
-        float attenuation = 8.0 / ((128.0*lenToLight) + (256.0*lenToLight*lenToLight) + (128.0*lenToLight*lenToLight*lenToLight));
+        float attenuation = 16.0 / ((128.0*lenToLight) + (256.0*lenToLight*lenToLight) + (128.0*lenToLight*lenToLight*lenToLight));
         intensity += attenuation;
     }
 
