@@ -204,7 +204,6 @@ void main() {
             c.x/=u_screenWidth;
             c.y/=u_screenHeight;
             vec4 color=texture2D(u_shadows, c);
-            color.rgba *= color.a*2.0;
             gl_FragColor.rgb+=vec3(gl_FragColor.r*color.a, gl_FragColor.g*color.a, gl_FragColor.b*color.a);
 
             float minDistToChar = 21390950.0;
