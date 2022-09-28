@@ -371,6 +371,15 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			MapGraph map = getSystemsCommonData().getMap();
 			Decal decal = ComponentsMapper.characterDecal.get(enemy).getDecal();
 			List<MapGraphNode> availableNodes = map.getAvailableNodesAroundNode(map.getNode(decal.getPosition()));
+			for (int i = 0; i < availableNodes.size(); i++) {
+				Vector3 enemyPosition = ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition();
+				float enemyNodeHeight = getSystemsCommonData().getMap().getNode(enemyPosition).getHeight();
+				float height = availableNodes.get(i).getHeight();
+				if (Math.abs(enemyNodeHeight - height) > CharacterComponent.PASSABLE_MAX_HEIGHT_DIFF) {
+					availableNodes.remove(i);
+					i--;
+				}
+			}
 			int count = availableNodes.size();
 			MapGraphNode dst = count > 0 ? availableNodes.get(MathUtils.random(count - 1)) : null;
 			goAttackAtGivenLocation(enemy, dst, CharacterCommandsDefinitions.DODGE);

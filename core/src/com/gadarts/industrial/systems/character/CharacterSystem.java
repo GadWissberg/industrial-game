@@ -456,7 +456,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			int side = auxVector2_3.set(1, 0).setAngleDeg(diff).angleDeg() > 180 ? -1 : 1;
 			Vector3 charPos = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
 			Entity floorEntity = getSystemsCommonData().getMap().getNode(charPos).getEntity();
-			int fogOfWarSig = ComponentsMapper.floor.get(floorEntity).getFogOfWarSignature();
+			int fogOfWarSig = floorEntity != null ? ComponentsMapper.floor.get(floorEntity).getFogOfWarSignature() : 0;
 			boolean isNodeHidden = (fogOfWarSig & 16) == 16;
 			Direction newDir = isNodeHidden ? directionToDest : findDirection(currentDirVec.rotateDeg(45f * side));
 			characterSpriteData.setFacingDirection(newDir);

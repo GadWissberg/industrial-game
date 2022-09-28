@@ -7,7 +7,7 @@ import static com.badlogic.gdx.Application.LOG_DEBUG;
 public final class DefaultGameSettings {
 	public static final boolean HIDE_GROUND = false;
 	public static final boolean HIDE_ENEMIES = false;
-	public static final boolean HIDE_CHARACTERS = true;
+	public static final boolean HIDE_CHARACTERS = false;
 	public static final boolean HIDE_ENVIRONMENT_OBJECTS = false;
 	public static final boolean HIDE_CURSOR = false;
 	public static final boolean MENU_ON_STARTUP = true;

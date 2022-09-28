@@ -151,7 +151,7 @@ public class GameUtils {
 		output.clear();
 
 		Array<GridPoint2> srcToDst = bresenham.line((int) src.x, (int) src.y, (int) dst.x, (int) dst.y);
-		if (removeEdgeNodes) {
+		if (srcToDst.size > 1 && removeEdgeNodes) {
 			srcToDst.removeIndex(0);
 			srcToDst.removeIndex(srcToDst.size - 1);
 		}
@@ -160,7 +160,7 @@ public class GameUtils {
 
 		if (!srcToDstOnly) {
 			dstToSrc = bresenham.line((int) dst.x, (int) dst.y, (int) src.x, (int) src.y);
-			if (removeEdgeNodes) {
+			if (dstToSrc.size > 1 && removeEdgeNodes) {
 				dstToSrc.removeIndex(0);
 				dstToSrc.removeIndex(dstToSrc.size - 1);
 			}

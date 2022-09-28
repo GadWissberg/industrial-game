@@ -27,10 +27,11 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.gadarts.industrial.components.character.CharacterComponent.PASSABLE_MAX_HEIGHT_DIFF;
+
 public class MapGraph implements IndexedGraph<MapGraphNode> {
 	private static final Vector3 auxVector3 = new Vector3();
 	private static final Array<Connection<MapGraphNode>> auxConnectionsList = new Array<>();
-	private static final float PASSABLE_MAX_HEIGHT_DIFF = 0.3f;
 	private final static Vector2 auxVector2 = new Vector2();
 	private static final List<MapGraphNode> auxNodesList_1 = new ArrayList<>();
 	private static final List<MapGraphNode> auxNodesList_2 = new ArrayList<>();

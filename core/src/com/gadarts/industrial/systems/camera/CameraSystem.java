@@ -35,7 +35,7 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 	private static final Vector3 auxVector3_3 = new Vector3();
 	private static final float MENU_CAMERA_ROTATION = 0.1F;
 	private static final Vector2 auxVector2_1 = new Vector2();
-	public static final int CAMERA_ROTATION_AROUND_X = -55;
+	public static final int CAMERA_ROTATION_AROUND_X = -45;
 	private final Vector2 lastMousePosition = new Vector2();
 	private final Vector2 lastRightPressMousePosition = new Vector2();
 

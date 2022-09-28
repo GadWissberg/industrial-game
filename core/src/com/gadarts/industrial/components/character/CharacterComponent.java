@@ -15,6 +15,7 @@ import lombok.Setter;
 public class CharacterComponent implements GameComponent {
 	public final static float CHAR_RAD = 0.3f;
 	public static final float TURN_DURATION = 1F;
+	public static final float PASSABLE_MAX_HEIGHT_DIFF = 0.3f;
 	private static final Vector2 auxVector = new Vector2();
 	@Setter(AccessLevel.NONE)
 	private Queue<CharacterCommand> commands = new Queue<>();

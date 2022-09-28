@@ -482,8 +482,10 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			if (ComponentsMapper.enemy.has(entity)) {
 				Decal decal = ComponentsMapper.characterDecal.get(entity).getDecal();
 				MapGraphNode enemyNode = getSystemsCommonData().getMap().getNode(decal.getPosition());
-				if ((ComponentsMapper.floor.get(enemyNode.getEntity()).getFogOfWarSignature() & 16) == 0) {
-					return true;
+				if (enemyNode.getEntity() != null) {
+					if ((ComponentsMapper.floor.get(enemyNode.getEntity()).getFogOfWarSignature() & 16) == 0) {
+						return true;
+					}
 				}
 			}
 		}
