@@ -270,12 +270,19 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private void renderModels(ModelBatch modelBatch,
 							  ImmutableArray<Entity> entitiesToRender,
 							  boolean renderLight,
+							  Camera camera) {
+		renderModels(modelBatch, entitiesToRender, renderLight, camera, true);
+	}
+
+	private void renderModels(ModelBatch modelBatch,
+							  ImmutableArray<Entity> entitiesToRender,
+							  boolean renderLight,
 							  Camera camera,
-							  float bias) {
+							  boolean considerFow) {
 		modelBatch.begin(camera);
 		for (Entity entity : entitiesToRender) {
 			ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(entity);
-			boolean rendered = renderModel(modelBatch, camera, entity, renderLight, modelInstanceComponent, bias);
+			boolean rendered = renderModel(modelBatch, camera, entity, renderLight, modelInstanceComponent, considerFow);
 			if (rendered) {
 				renderAppendixModelInstance(modelBatch, camera, entity);
 			}
@@ -286,7 +293,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private void renderAppendixModelInstance(ModelBatch modelBatch, Camera camera, Entity entity) {
 		if (ComponentsMapper.appendixModelInstance.has(entity)) {
 			AppendixModelInstanceComponent appendix = ComponentsMapper.appendixModelInstance.get(entity);
-			renderModel(modelBatch, camera, entity, true, appendix, 0F);
+			renderModel(modelBatch, camera, entity, true, appendix);
 		}
 	}
 
@@ -318,17 +325,19 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 								Camera camera,
 								Entity entity,
 								boolean renderLight,
-								ModelInstanceComponent modelInstanceComponent, float bias) {
-		if (!shouldSkipRenderModel(camera, entity, modelInstanceComponent)) {
+								ModelInstanceComponent modelInstanceComponent) {
+		return renderModel(modelBatch, camera, entity, renderLight, modelInstanceComponent, true);
+	}
+
+	private boolean renderModel(ModelBatch modelBatch,
+								Camera camera,
+								Entity entity,
+								boolean renderLight,
+								ModelInstanceComponent modelInstanceComponent,
+								boolean considerFow) {
+		if (!shouldSkipRenderModel(camera, entity, modelInstanceComponent, considerFow)) {
 			GameModelInstance modelInstance = modelInstanceComponent.getModelInstance();
-			if (bias != 0 && ComponentsMapper.environmentObject.has(entity)) {
-				auxMatrix.set(modelInstance.transform);
-				modelInstance.transform.trn(0F, bias, 0F);
-			}
 			modelBatch.render(modelInstance, environment);
-			if (bias != 0 && ComponentsMapper.environmentObject.has(entity)) {
-				modelInstance.transform.set(auxMatrix);
-			}
 			getSystemsCommonData().setNumberOfVisible(getSystemsCommonData().getNumberOfVisible() + 1);
 			applySpecificRendering(entity);
 			if (renderLight) {
@@ -385,14 +394,15 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private boolean shouldSkipRenderModel(Camera camera,
 										  Entity entity,
-										  ModelInstanceComponent miComp) {
+										  ModelInstanceComponent miComp,
+										  boolean considerFow) {
 		DrawFlags drawFlags = getSystemsCommonData().getDrawFlags();
 		return (!miComp.isVisible())
 				|| !isInFrustum(camera, miComp)
 				|| ComponentsMapper.floor.has(entity) && !drawFlags.isDrawGround()
 				|| ComponentsMapper.environmentObject.has(entity) && !drawFlags.isDrawEnv()
 				|| getSystemsCommonData().getCursor() == entity && !drawFlags.isDrawCursor()
-				|| isInFow(entity, miComp.getModelInstance().transform.getTranslation(auxVector3_1));
+				|| considerFow && isInFow(entity, miComp.getModelInstance().transform.getTranslation(auxVector3_1));
 	}
 
 	private boolean isInFow(Entity modelEntity, Vector3 position) {
@@ -418,7 +428,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		if (!DefaultGameSettings.ALLOW_STATIC_SHADOWS) return;
 		shadowFrameBuffer.begin();
 		resetDisplay(Color.BLACK);
-		renderModels(modelBatchShadows, modelEntitiesWithShadows, false, getSystemsCommonData().getCamera(), 0F);
+		renderModels(modelBatchShadows, modelEntitiesWithShadows, false, getSystemsCommonData().getCamera());
 		handleScreenshot(shadowFrameBuffer);
 		shadowFrameBuffer.end();
 	}
@@ -434,7 +444,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		getSystemsCommonData().setNumberOfVisible(0);
 		renderShadows();
 		resetDisplay(Color.BLACK);
-		renderModels(modelBatch, modelEntities, true, getSystemsCommonData().getCamera(), 0F);
+		renderModels(modelBatch, modelEntities, true, getSystemsCommonData().getCamera());
 		renderDecals(deltaTime);
 		renderParticleEffects();
 		getSystemsCommonData().getUiStage().draw();
@@ -629,7 +639,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 					depthModelBatch,
 					modelEntitiesWithShadows,
 					false,
-					cameraLight, 0.03F);
+					cameraLight,
+					false);
 //			handleScreenshot(frameBuffer);
 
 		}
