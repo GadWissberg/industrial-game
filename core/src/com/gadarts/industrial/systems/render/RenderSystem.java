@@ -87,6 +87,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private static final Rectangle auxRect = new Rectangle();
 	private static final Color PLAYER_OUTLINE_COLOR = Color.valueOf("#177331");
 	private static final Color ENEMY_OUTLINE_COLOR = Color.valueOf("#731717");
+	private final static Matrix4 auxMatrix = new Matrix4();
 	private final Environment environment;
 	private final ModelsShaderProvider shaderProvider;
 	private final GameFrameBuffer shadowFrameBuffer;
@@ -109,7 +110,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private ImmutableArray<Entity> modelEntitiesWithShadows;
 	private ImmutableArray<Entity> modelEntities;
 	private ImmutableArray<Entity> simpleShadowEntities;
-	private Matrix4 auxMatrix = new Matrix4();
 
 	public RenderSystem(SystemsCommonData systemsCommonData,
 						GameAssetsManager assetsManager,
@@ -270,11 +270,12 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private void renderModels(ModelBatch modelBatch,
 							  ImmutableArray<Entity> entitiesToRender,
 							  boolean renderLight,
-							  Camera camera) {
+							  Camera camera,
+							  float bias) {
 		modelBatch.begin(camera);
 		for (Entity entity : entitiesToRender) {
 			ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(entity);
-			boolean rendered = renderModel(modelBatch, camera, entity, renderLight, modelInstanceComponent);
+			boolean rendered = renderModel(modelBatch, camera, entity, renderLight, modelInstanceComponent, bias);
 			if (rendered) {
 				renderAppendixModelInstance(modelBatch, camera, entity);
 			}
@@ -285,7 +286,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private void renderAppendixModelInstance(ModelBatch modelBatch, Camera camera, Entity entity) {
 		if (ComponentsMapper.appendixModelInstance.has(entity)) {
 			AppendixModelInstanceComponent appendix = ComponentsMapper.appendixModelInstance.get(entity);
-			renderModel(modelBatch, camera, entity, true, appendix);
+			renderModel(modelBatch, camera, entity, true, appendix, 0F);
 		}
 	}
 
@@ -317,10 +318,17 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 								Camera camera,
 								Entity entity,
 								boolean renderLight,
-								ModelInstanceComponent modelInstanceComponent) {
+								ModelInstanceComponent modelInstanceComponent, float bias) {
 		if (!shouldSkipRenderModel(camera, entity, modelInstanceComponent)) {
 			GameModelInstance modelInstance = modelInstanceComponent.getModelInstance();
+			if (bias != 0 && ComponentsMapper.environmentObject.has(entity)) {
+				auxMatrix.set(modelInstance.transform);
+				modelInstance.transform.trn(0F, bias, 0F);
+			}
 			modelBatch.render(modelInstance, environment);
+			if (bias != 0 && ComponentsMapper.environmentObject.has(entity)) {
+				modelInstance.transform.set(auxMatrix);
+			}
 			getSystemsCommonData().setNumberOfVisible(getSystemsCommonData().getNumberOfVisible() + 1);
 			applySpecificRendering(entity);
 			if (renderLight) {
@@ -409,9 +417,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private void renderShadows( ) {
 		if (!DefaultGameSettings.ALLOW_STATIC_SHADOWS) return;
 		shadowFrameBuffer.begin();
-		Gdx.gl.glClearColor(0F, 0F, 0F, 0F);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		renderModels(modelBatchShadows, modelEntitiesWithShadows, true, getSystemsCommonData().getCamera());
+		resetDisplay(Color.BLACK);
+		renderModels(modelBatchShadows, modelEntitiesWithShadows, false, getSystemsCommonData().getCamera(), 0F);
 		handleScreenshot(shadowFrameBuffer);
 		shadowFrameBuffer.end();
 	}
@@ -427,7 +434,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		getSystemsCommonData().setNumberOfVisible(0);
 		renderShadows();
 		resetDisplay(Color.BLACK);
-		renderModels(modelBatch, modelEntities, true, getSystemsCommonData().getCamera());
+		renderModels(modelBatch, modelEntities, true, getSystemsCommonData().getCamera(), 0F);
 		renderDecals(deltaTime);
 		renderParticleEffects();
 		getSystemsCommonData().getUiStage().draw();
@@ -607,8 +614,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		cameraLight.rotate(Vector3.Y, 0);
 		cameraLight.update();
 		StaticLightComponent lightComponent = ComponentsMapper.staticLight.get(light);
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		resetDisplay(Color.BLACK);
 		depthShaderProgram.bind();
 		depthShaderProgram.setUniformf("u_cameraFar", cameraLight.far);
 		depthShaderProgram.setUniformf("u_lightPosition", cameraLight.position);
@@ -616,13 +622,14 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 			Cubemap.CubemapSide side = Cubemap.CubemapSide.values()[s];
 			frameBuffer.begin();
 			frameBuffer.bindSide(side, cameraLight);
-			Gdx.gl.glClearColor(0, 0, 0, 1);
-			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+			int sam = Gdx.graphics.getBufferFormat().coverageSampling ? GL20.GL_COVERAGE_BUFFER_BIT_NV : 0;
+			Gdx.gl.glClearColor(0F, 0F, 0F, 1);
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | sam);
 			renderModels(
 					depthModelBatch,
 					modelEntitiesWithShadows,
 					false,
-					cameraLight);
+					cameraLight, 0.03F);
 //			handleScreenshot(frameBuffer);
 
 		}
