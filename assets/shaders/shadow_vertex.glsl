@@ -17,10 +17,17 @@ uniform mat4 u_lightTrans;
 varying vec4 v_positionLightTrans;
 varying vec4 v_position;
 
+attribute vec3 a_normal;
+uniform mat3 u_normalMatrix;
+varying vec3 v_normal;
 
 
 void main()
 {
+
+    vec3 normal = normalize(u_normalMatrix * a_normal);
+    v_normal = normal;
+
     // Vertex position after transformation
     v_position = u_worldTrans * vec4(a_position, 1.0);
     // Vertex position in the light perspective

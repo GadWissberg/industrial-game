@@ -16,6 +16,7 @@ uniform vec3 u_lightPosition;
 uniform float u_type;
 uniform float u_radius;
 
+varying vec3 v_normal;
 
 varying vec4 v_position;
 varying vec4 v_positionLightTrans;
@@ -42,7 +43,8 @@ void main()
         lenDepthMap = textureCube(u_depthMapCube, lightDirection).a;
     }
 
-    if (lenDepthMap>lenToLight-0.005 && lenToLight < u_radius*0.1){
+    float bias = max(0.003 * (1.0 - dot(v_normal, lightDirection)), 0.0001);
+    if (lenDepthMap>lenToLight - bias && lenToLight < u_radius*0.1){
         float attenuation = 16.0 / ((128.0*lenToLight) + (256.0*lenToLight*lenToLight) + (128.0*lenToLight*lenToLight*lenToLight));
         intensity += attenuation;
     }
