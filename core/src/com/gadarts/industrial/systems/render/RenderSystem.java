@@ -53,7 +53,7 @@ import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
-import com.gadarts.industrial.systems.render.shaders.DepthMapShader;
+import com.gadarts.industrial.systems.render.shaders.ShadowMapDepthMapShader;
 import com.gadarts.industrial.systems.render.shaders.ModelsShaderProvider;
 import com.gadarts.industrial.systems.render.shaders.ShadowMapShader;
 
@@ -109,6 +109,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private ImmutableArray<Entity> modelEntitiesWithShadows;
 	private ImmutableArray<Entity> modelEntities;
 	private ImmutableArray<Entity> simpleShadowEntities;
+	private Matrix4 auxMatrix = new Matrix4();
 
 	public RenderSystem(SystemsCommonData systemsCommonData,
 						GameAssetsManager assetsManager,
@@ -167,7 +168,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 			depthModelBatch = new ModelBatch(new DefaultShaderProvider() {
 				@Override
 				protected Shader createShader(final Renderable renderable) {
-					return new DepthMapShader(renderable, depthShaderProgram);
+					return new ShadowMapDepthMapShader(renderable, depthShaderProgram);
 				}
 			});
 			modelBatchShadows = new ModelBatch(new DefaultShaderProvider() {
@@ -318,7 +319,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 								boolean renderLight,
 								ModelInstanceComponent modelInstanceComponent) {
 		if (!shouldSkipRenderModel(camera, entity, modelInstanceComponent)) {
-			modelBatch.render(modelInstanceComponent.getModelInstance(), environment);
+			GameModelInstance modelInstance = modelInstanceComponent.getModelInstance();
+			modelBatch.render(modelInstance, environment);
 			getSystemsCommonData().setNumberOfVisible(getSystemsCommonData().getNumberOfVisible() + 1);
 			applySpecificRendering(entity);
 			if (renderLight) {
@@ -584,7 +586,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private void createShadowMaps( ) {
 		PerspectiveCamera cameraLight = new PerspectiveCamera(90f, DEPTH_MAP_SIZE, DEPTH_MAP_SIZE);
-		cameraLight.near = 0.0001F;
+		cameraLight.near = 0.1F;
 		cameraLight.far = CAMERA_LIGHT_FAR;
 		for (Entity light : staticLightsEntities) {
 			createShadowMapForLight(light, cameraLight);

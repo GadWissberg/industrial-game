@@ -1,6 +1,8 @@
 package com.gadarts.industrial.systems.render.shaders;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Attributes;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
@@ -12,20 +14,20 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 
 import static com.badlogic.gdx.graphics.GL20.*;
 
-public class DepthMapShader extends BaseShader {
+public class ShadowMapDepthMapShader extends BaseShader {
 	public Renderable renderable;
 
-	public DepthMapShader(final Renderable renderable, final ShaderProgram shaderProgramModelBorder) {
+	public ShadowMapDepthMapShader(final Renderable renderable, final ShaderProgram shaderProgramModelBorder) {
 		this.renderable = renderable;
 		this.program = shaderProgramModelBorder;
 		register(DefaultShader.Inputs.worldTrans, DefaultShader.Setters.worldTrans);
 		register(DefaultShader.Inputs.projViewTrans, DefaultShader.Setters.projViewTrans);
 		register(DefaultShader.Inputs.normalMatrix, DefaultShader.Setters.normalMatrix);
-
 	}
 
 	@Override
 	public void end( ) {
+		Gdx.gl.glEnable(GL_CULL_FACE);
 		super.end();
 	}
 
@@ -33,7 +35,7 @@ public class DepthMapShader extends BaseShader {
 	public void begin(final Camera camera, final RenderContext context) {
 		super.begin(camera, context);
 		context.setDepthTest(GL_LEQUAL);
-		context.setCullFace(GL_BACK);
+		Gdx.gl.glDisable(GL_CULL_FACE);
 	}
 
 	@Override
