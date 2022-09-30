@@ -24,8 +24,12 @@ public class ShadowMapShader extends BaseShader {
 	public static final String UNIFORM_LIGHT_POSITION = "u_lightPosition";
 	private static final Vector3 auxVector = new Vector3();
 	private static final String UNIFORM_RADIUS = "u_radius";
+	private static final String UNIFORM_MAX_BIAS = "u_maxBias";
+	private static final String UNIFORM_MIN_BIAS = "u_minBias";
 	private static final int CUBE_MAP_TEXTURE_NUMBER = 8;
 	private final ImmutableArray<Entity> lights;
+	private final int uniformLocMaxBias;
+	private final int uniformLocMinBias;
 	public Renderable renderable;
 
 	public ShadowMapShader(final Renderable renderable,
@@ -37,7 +41,8 @@ public class ShadowMapShader extends BaseShader {
 		register(DefaultShader.Inputs.worldTrans, DefaultShader.Setters.worldTrans);
 		register(DefaultShader.Inputs.projViewTrans, DefaultShader.Setters.projViewTrans);
 		register(DefaultShader.Inputs.normalMatrix, DefaultShader.Setters.normalMatrix);
-
+		uniformLocMaxBias = program.getUniformLocation(UNIFORM_MAX_BIAS);
+		uniformLocMinBias = program.getUniformLocation(UNIFORM_MIN_BIAS);
 	}
 
 	@Override
@@ -79,14 +84,25 @@ public class ShadowMapShader extends BaseShader {
 									  boolean firstCall,
 									  int lightIndex) {
 		initializeLightForRendering(lightIndex);
+		setBias((Entity) renderable.userData);
 		if (firstCall) {
 			context.setDepthTest(GL20.GL_LEQUAL);
 			context.setBlending(false, GL20.GL_ONE, GL20.GL_ONE);
 		} else {
 			context.setBlending(true, GL20.GL_ONE, GL20.GL_ONE);
-//			renderable.meshPart.render(program);
 		}
-			super.render(renderable, combinedAttributes);
+		super.render(renderable, combinedAttributes);
+	}
+
+	private void setBias(Entity entity) {
+		float maxBias = 0.0014F;
+		float minBias = 0F;
+		if (ComponentsMapper.wall.has(entity)) {
+			minBias = 0.1F;
+			maxBias = 0.0075F;
+		}
+		program.setUniformf(uniformLocMinBias, minBias);
+		program.setUniformf(uniformLocMaxBias, maxBias);
 	}
 
 	private void initializeLightForRendering(int lightIndex) {

@@ -20,7 +20,8 @@ varying vec3 v_normal;
 
 varying vec4 v_position;
 varying vec4 v_positionLightTrans;
-
+uniform float u_maxBias;
+uniform float u_minBias;
 void main()
 {
     // Default is to not add any color
@@ -44,7 +45,7 @@ void main()
         lenDepthMap = textureCube(u_depthMapCube, lightDirection).a;
     }
 
-    float bias = max(0.0014 * (1.0 - dot(v_normal, lightDirection)), 0.0);
+    float bias = max(u_maxBias * (1.0 - dot(v_normal, lightDirection)), u_minBias);
     if (lenDepthMap>lenToLight - bias && lenToLight < u_radius*0.1){
         float attenuation = 16.0 / ((128.0*lenToLight) + (256.0*lenToLight*lenToLight) + (128.0*lenToLight*lenToLight*lenToLight));
         intensity += attenuation;
