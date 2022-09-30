@@ -603,7 +603,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private void createShadowMaps( ) {
 		PerspectiveCamera cameraLight = new PerspectiveCamera(90f, DEPTH_MAP_SIZE, DEPTH_MAP_SIZE);
-		cameraLight.near = 0.1F;
+		cameraLight.near = 0.01F;
 		cameraLight.far = CAMERA_LIGHT_FAR;
 		for (Entity light : staticLightsEntities) {
 			createShadowMapForLight(light, cameraLight);
