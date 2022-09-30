@@ -25,7 +25,7 @@ uniform float u_minBias;
 void main()
 {
     // Default is to not add any color
-    float intensity=0.0;
+    float intensity=0.08;
     // Vector light-current position
     vec3 lightDirection=v_position.xyz-u_lightPosition;
     float lenToLight=length(lightDirection)/u_cameraFar;
