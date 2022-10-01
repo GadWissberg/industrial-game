@@ -27,6 +27,11 @@ public class ShadowMapShader extends BaseShader {
 	private static final String UNIFORM_MAX_BIAS = "u_maxBias";
 	private static final String UNIFORM_MIN_BIAS = "u_minBias";
 	private static final int CUBE_MAP_TEXTURE_NUMBER = 8;
+	public static final float BIAS_MIN_WALL = 0.0008F;
+	public static final float BIAS_MAX_WALL = 0.0014F;
+	public static final float BIAS_MAX_GENERAL = 0.0014F;
+	public static final float BIAS_MIN_GENERAL = 0F;
+	private static final float BIAS_MAX_FLOOR = 0.00155F;
 	private final ImmutableArray<Entity> lights;
 	private final int uniformLocMaxBias;
 	private final int uniformLocMinBias;
@@ -95,11 +100,13 @@ public class ShadowMapShader extends BaseShader {
 	}
 
 	private void setBias(Entity entity) {
-		float maxBias = 0.0014F;
-		float minBias = 0F;
+		float maxBias = BIAS_MAX_GENERAL;
+		float minBias = BIAS_MIN_GENERAL;
 		if (ComponentsMapper.wall.has(entity)) {
-			minBias = 0.1F;
-			maxBias = 0.0075F;
+			minBias = BIAS_MIN_WALL;
+			maxBias = BIAS_MAX_WALL;
+		}else if (ComponentsMapper.floor.has(entity)){
+			maxBias = BIAS_MAX_FLOOR;
 		}
 		program.setUniformf(uniformLocMinBias, minBias);
 		program.setUniformf(uniformLocMaxBias, maxBias);
