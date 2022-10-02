@@ -238,10 +238,14 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 				assetsManager.getShader(SHADOW_FRAGMENT));
 	}
 
-	private void resetDisplay(@SuppressWarnings("SameParameterValue") final Color color) {
+	private void resetDisplay(Color color) {
+		resetDisplay(color, 1F);
+	}
+
+	private void resetDisplay(Color color, float alpha) {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		int sam = Gdx.graphics.getBufferFormat().coverageSampling ? GL20.GL_COVERAGE_BUFFER_BIT_NV : 0;
-		Gdx.gl.glClearColor(color.r, color.g, color.b, 1);
+		Gdx.gl.glClearColor(color.r, color.g, color.b, alpha);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | sam);
 	}
 
@@ -427,7 +431,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private void renderShadows( ) {
 		if (!DefaultGameSettings.ALLOW_STATIC_SHADOWS) return;
 		shadowFrameBuffer.begin();
-		resetDisplay(Color.BLACK);
+		resetDisplay(Color.BLACK, 0F);
 		renderModels(modelBatchShadows, modelEntitiesWithShadows, false, getSystemsCommonData().getCamera());
 		handleScreenshot(shadowFrameBuffer);
 		shadowFrameBuffer.end();

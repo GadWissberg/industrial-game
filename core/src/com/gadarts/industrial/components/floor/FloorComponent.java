@@ -30,4 +30,8 @@ public class FloorComponent implements GameComponent {
 	public void init(MapGraphNode node) {
 		this.node = node;
 	}
+
+	public boolean isRevealed( ) {
+		return (getFogOfWarSignature() & 16) == 0;
+	}
 }

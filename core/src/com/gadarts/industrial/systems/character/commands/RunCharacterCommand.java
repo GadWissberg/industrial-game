@@ -102,15 +102,24 @@ public class RunCharacterCommand extends CharacterCommand {
 								  Entity character,
 								  List<CharacterSystemEventsSubscriber> subscribers) {
 		Decal decal = ComponentsMapper.characterDecal.get(character).getDecal();
-		Vector2 characterPosition = auxVector2_1.set(decal.getX(), decal.getZ());
 		boolean done = false;
+		placeCharacterInNextNodeIfCloseEnough(decal);
+		Vector2 characterPosition = auxVector2_3.set(decal.getX(), decal.getZ());
 		if (nextNode == null || characterPosition.dst2(nextNode.getCenterPosition(auxVector2_2)) < MOVEMENT_EPSILON) {
-			done = reachedNodeOfPath(nextNode, subscribers, character);
+			done = reachedNodeOfPath(subscribers, character);
 		}
 		if (!done) {
 			done = applyMovementToNextNode(systemsCommonData, character);
 		}
 		return done;
+	}
+
+	private void placeCharacterInNextNodeIfCloseEnough(Decal decal) {
+		Vector3 decalPos = decal.getPosition();
+		float distanceToNextNode = nextNode.getCenterPosition(auxVector2_1).dst2(decalPos.x, decalPos.z);
+		if (distanceToNextNode < CHAR_STEP_SIZE) {
+			placeCharacterInTheNextNode(decal);
+		}
 	}
 
 	private boolean applyMovementToNextNode(SystemsCommonData systemsCommonData, Entity character) {
@@ -144,8 +153,7 @@ public class RunCharacterCommand extends CharacterCommand {
 		decal.setPosition(position.x, newNodeHeight + CharacterTypes.BILLBOARD_Y, position.z);
 	}
 
-	private boolean reachedNodeOfPath(MapGraphNode node,
-									  List<CharacterSystemEventsSubscriber> subscribers,
+	private boolean reachedNodeOfPath(List<CharacterSystemEventsSubscriber> subscribers,
 									  Entity character) {
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onCharacterNodeChanged(character, prevNode, nextNode);
@@ -155,7 +163,7 @@ public class RunCharacterCommand extends CharacterCommand {
 		setDestinationNode(nextNode);
 		consumeTurnTime(character, ComponentsMapper.character.get(character).getSkills().getAgility());
 		MapGraph map = systemsCommonData.getMap();
-		return isReachedEndOfPath(map.findConnection(node, nextNode), map);
+		return isReachedEndOfPath(map.findConnection(prevNode, nextNode), map);
 	}
 
 
@@ -170,12 +178,16 @@ public class RunCharacterCommand extends CharacterCommand {
 		Vector3 decalPos = characterDecalComponent.getDecal().getPosition();
 		Entity floorEntity = systemsCommonData.getMap().getNode(decalPos).getEntity();
 		Decal decal = characterDecalComponent.getDecal();
-		if (floorEntity != null && (ComponentsMapper.floor.get(floorEntity).getFogOfWarSignature() & 16) == 0) {
+		if (floorEntity != null && (ComponentsMapper.floor.get(floorEntity).isRevealed())) {
 			Vector2 velocity = auxVector2_2.sub(auxVector2_1.set(decal.getX(), decal.getZ())).nor().scl(CHAR_STEP_SIZE);
 			decal.translate(auxVector3_1.set(velocity.x, 0, velocity.y));
 		} else {
-			Vector3 centerPos = nextNode.getCenterPosition(auxVector3_1);
-			decal.setPosition(auxVector3_2.set(centerPos.x, centerPos.y + CharacterTypes.BILLBOARD_Y, centerPos.z));
+			placeCharacterInTheNextNode(decal);
 		}
+	}
+
+	private void placeCharacterInTheNextNode(Decal decal) {
+		Vector3 centerPos = nextNode.getCenterPosition(auxVector3_1);
+		decal.setPosition(auxVector3_2.set(centerPos.x, centerPos.y + CharacterTypes.BILLBOARD_Y, centerPos.z));
 	}
 }
