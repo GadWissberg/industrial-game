@@ -43,6 +43,9 @@ import java.util.Optional;
 
 import static com.gadarts.industrial.shared.model.characters.CharacterTypes.BILLBOARD_SCALE;
 
+/**
+ * A builder to create an entity instance and append it components.
+ */
 public class EntityBuilder {
 	public static final String MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST = "Call beginBuildingEntity() first!";
 
@@ -55,6 +58,12 @@ public class EntityBuilder {
 	@Getter
 	private Entity currentEntity;
 
+	/**
+	 * Create an entity instance to start adding it components.
+	 *
+	 * @param engine
+	 * @return The EntityBuilder singleton for chaining.
+	 */
 	public static EntityBuilder beginBuildingEntity(final PooledEngine engine) {
 		instance.init(engine);
 		return instance;
@@ -108,14 +117,6 @@ public class EntityBuilder {
 													 final float intensity,
 													 final float radius,
 													 final Color color,
-													 final boolean flicker) {
-		return addShadowlessLightComponent(position, intensity, radius, color, 0F, flicker);
-	}
-
-	public EntityBuilder addShadowlessLightComponent(final Vector3 position,
-													 final float intensity,
-													 final float radius,
-													 final Color color,
 													 final float duration,
 													 final boolean flicker) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
@@ -135,18 +136,6 @@ public class EntityBuilder {
 		environmentObjectComponent.init(topLeft, bottomRight, type);
 		currentEntity.add(environmentObjectComponent);
 		return instance;
-	}
-
-	private Item addPickUpComponent(final Class<? extends Item> type,
-									final ItemDefinition definition,
-									final Texture displayImage) {
-		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
-		Item pickup = Pools.obtain(type);
-		pickup.init(definition, 0, 0, displayImage);
-		PickUpComponent pickupComponent = engine.createComponent(PickUpComponent.class);
-		pickupComponent.setItem(pickup);
-		currentEntity.add(pickupComponent);
-		return pickup;
 	}
 
 	public EntityBuilder addModelInstanceComponent(GameModelInstance modelInstance) {
@@ -201,15 +190,6 @@ public class EntityBuilder {
 		return result;
 	}
 
-	private void reset( ) {
-		engine = null;
-		currentEntity = null;
-	}
-
-	public EntityBuilder addSimpleDecalComponent(final Vector3 position, final Texture texture, final boolean visible) {
-		return addSimpleDecalComponent(position, texture, visible, false);
-	}
-
 	public EntityBuilder addSimpleDecalComponent(final Vector3 position,
 												 final Texture texture,
 												 final boolean visible,
@@ -244,18 +224,6 @@ public class EntityBuilder {
 		initializeSimpleDecal(position, rotationAroundAxis, decal);
 		currentEntity.add(simpleDecalComponent);
 		return instance;
-	}
-
-	private void initializeSimpleDecal(final Vector3 position, final Vector3 rotationAroundAxis, final Decal decal) {
-		decal.setPosition(position);
-		decal.setScale(BILLBOARD_SCALE);
-		rotateSimpleDecal(decal, rotationAroundAxis);
-	}
-
-	private void rotateSimpleDecal(final Decal decal, final Vector3 rotationAroundAxis) {
-		if (!rotationAroundAxis.isZero()) {
-			decal.setRotation(rotationAroundAxis.y, rotationAroundAxis.x, rotationAroundAxis.z);
-		}
 	}
 
 	public EntityBuilder addAnimationComponent( ) {
@@ -294,16 +262,8 @@ public class EntityBuilder {
 													final Entity parent) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		ParticleEffect effect = originalEffect.copy();
+		addParticleEffectParentComponentIfNeeded(engine, parent);
 		ParticleEffectComponent particleEffectComponent = engine.createComponent(ParticleEffectComponent.class);
-		if (parent != null) {
-			ParticleEffectParentComponent particleComponentParent;
-			if (!ComponentsMapper.particleParent.has(parent)) {
-				particleComponentParent = engine.createComponent(ParticleEffectParentComponent.class);
-			} else {
-				particleComponentParent = ComponentsMapper.particleParent.get(parent);
-			}
-			particleComponentParent.getChildren().add(currentEntity);
-		}
 		particleEffectComponent.init(effect, parent);
 		effect.translate(position);
 		currentEntity.add(particleEffectComponent);
@@ -336,11 +296,6 @@ public class EntityBuilder {
 		playerComponent.init(general);
 		currentEntity.add(playerComponent);
 		return instance;
-	}
-
-	private void init(final PooledEngine engine) {
-		this.engine = engine;
-		this.currentEntity = engine.createEntity();
 	}
 
 	public EntityBuilder addStaticLightComponent(Vector3 position, float intensity, float radius) {
@@ -386,5 +341,51 @@ public class EntityBuilder {
 		component.init(radius);
 		currentEntity.add(component);
 		return instance;
+	}
+
+	private void init(final PooledEngine engine) {
+		this.engine = engine;
+		this.currentEntity = engine.createEntity();
+	}
+
+	private Item addPickUpComponent(final Class<? extends Item> type,
+									final ItemDefinition definition,
+									final Texture displayImage) {
+		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
+		Item pickup = Pools.obtain(type);
+		pickup.init(definition, 0, 0, displayImage);
+		PickUpComponent pickupComponent = engine.createComponent(PickUpComponent.class);
+		pickupComponent.setItem(pickup);
+		currentEntity.add(pickupComponent);
+		return pickup;
+	}
+
+	private void reset( ) {
+		engine = null;
+		currentEntity = null;
+	}
+
+	private void initializeSimpleDecal(final Vector3 position, final Vector3 rotationAroundAxis, final Decal decal) {
+		decal.setPosition(position);
+		decal.setScale(BILLBOARD_SCALE);
+		rotateSimpleDecal(decal, rotationAroundAxis);
+	}
+
+	private void rotateSimpleDecal(final Decal decal, final Vector3 rotationAroundAxis) {
+		if (!rotationAroundAxis.isZero()) {
+			decal.setRotation(rotationAroundAxis.y, rotationAroundAxis.x, rotationAroundAxis.z);
+		}
+	}
+
+	private void addParticleEffectParentComponentIfNeeded(PooledEngine engine, Entity parent) {
+		if (parent != null) {
+			ParticleEffectParentComponent particleComponentParent;
+			if (!ComponentsMapper.particleParent.has(parent)) {
+				particleComponentParent = engine.createComponent(ParticleEffectParentComponent.class);
+			} else {
+				particleComponentParent = ComponentsMapper.particleParent.get(parent);
+			}
+			particleComponentParent.getChildren().add(currentEntity);
+		}
 	}
 }

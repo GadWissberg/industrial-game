@@ -24,7 +24,6 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 		CharacterSystemEventsSubscriber,
 		TurnsSystemEventsSubscriber {
 	private static final Vector3 auxVector1 = new Vector3();
-	private static final Vector3 auxVector2 = new Vector3();
 	private static final int DOOR_OPEN_DURATION = 3;
 	private ImmutableArray<Entity> doorEntities;
 
@@ -57,7 +56,7 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 
 	private void handleDoorAction(Entity doorEntity, DoorComponent doorComponent, DoorStates targetState) {
 		GameModelInstance modelInstance = ComponentsMapper.appendixModelInstance.get(doorEntity).getModelInstance();
-		Vector3 nodeCenterPosition = doorComponent.getNode().getCenterPosition(auxVector2);
+		Vector3 nodeCenterPosition = doorComponent.getNode().getCenterPosition(auxVector1);
 		DoorTypes doorType = doorComponent.getDefinition().getType();
 		DoorAnimation doorAnimation = DoorsAnimations.animations.get(doorType);
 		if (doorAnimation.isAnimationEnded(targetState, nodeCenterPosition, doorEntity)) {

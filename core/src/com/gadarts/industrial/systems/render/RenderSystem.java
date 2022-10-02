@@ -87,7 +87,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private static final Rectangle auxRect = new Rectangle();
 	private static final Color PLAYER_OUTLINE_COLOR = Color.valueOf("#177331");
 	private static final Color ENEMY_OUTLINE_COLOR = Color.valueOf("#731717");
-	private final static Matrix4 auxMatrix = new Matrix4();
 	private final Environment environment;
 	private final ModelsShaderProvider shaderProvider;
 	private final GameFrameBuffer shadowFrameBuffer;

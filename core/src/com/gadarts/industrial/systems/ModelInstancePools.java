@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ModelInstancePools {
-	private Map<Assets.Models, Pool<GameModelInstance>> pools = new HashMap<>();
+	private final Map<Assets.Models, Pool<GameModelInstance>> pools = new HashMap<>();
 
 	private void createPoolForModelInstanceIfNotExists(GameAssetsManager assetsManager, Assets.Models modelDefinition) {
 		if (!pools.containsKey(modelDefinition)) {

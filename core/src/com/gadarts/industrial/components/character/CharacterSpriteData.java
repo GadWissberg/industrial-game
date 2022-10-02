@@ -21,10 +21,6 @@ public class CharacterSpriteData implements Pool.Poolable {
 		frameIndexNotAffectedByLight = -1;
 	}
 
-	public boolean isSingleDeathAnimation( ) {
-		return singleDeathAnimation;
-	}
-
 	public void init(final Direction direction,
 					 final SpriteType spriteType,
 					 final int primaryAttackHitFrameIndex,

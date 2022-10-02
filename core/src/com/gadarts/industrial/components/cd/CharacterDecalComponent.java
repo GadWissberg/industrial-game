@@ -45,11 +45,6 @@ public class CharacterDecalComponent implements GameComponent {
 		decal.setPosition(position);
 	}
 
-
-	public void initializeSprite(final SpriteType type) {
-		initializeSprite(type, direction);
-	}
-
 	public void initializeSprite(final SpriteType type, final Direction direction) {
 		this.spriteType = type;
 		this.direction = direction;

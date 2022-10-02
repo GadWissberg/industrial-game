@@ -19,15 +19,6 @@ public class CharacterAnimations {
 		animations.get(type).get(variationIndex).put(dir, animation);
 	}
 
-	public void clear( ) {
-		Set<Map.Entry<SpriteType, List<Map<Direction, CharacterAnimation>>>> entrySet = animations.entrySet();
-		for (Map.Entry<SpriteType, List<Map<Direction, CharacterAnimation>>> entry : entrySet) {
-			List<Map<Direction, CharacterAnimation>> variations = entry.getValue();
-			variations.forEach(map -> map.clear());
-			variations.clear();
-		}
-	}
-
 	public CharacterAnimation get(final SpriteType type, final Direction direction) {
 		return get(type, 0, direction);
 	}
