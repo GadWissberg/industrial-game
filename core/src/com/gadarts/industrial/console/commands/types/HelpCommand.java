@@ -40,7 +40,7 @@ public class HelpCommand extends ConsoleCommand {
 			}
 			builder.append(": ").append(command.getDescription()).append("\n");
 		});
-		output = String.format("Welcome to necronemes v%s. The command pattern is '<COMMAND_NAME> " +
+		output = String.format("Welcome to Terror Effector v%s. The command pattern is '<COMMAND_NAME> " +
 				"-<PARAMETER_1> <PARAMETER_1_VALUE>'. The following commands are available:\n%s", versionName, builder);
 	}
 }
