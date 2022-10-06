@@ -128,9 +128,9 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addObstacleComponent(final Vector2 topLeft,
-											  final Vector2 bottomRight,
-											  final EnvironmentObjectDefinition type) {
+	public EntityBuilder addEnvironmentObjectComponent(final Vector2 topLeft,
+													   final Vector2 bottomRight,
+													   final EnvironmentObjectDefinition type) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		EnvironmentObjectComponent environmentObjectComponent = engine.createComponent(EnvironmentObjectComponent.class);
 		environmentObjectComponent.init(topLeft, bottomRight, type);
@@ -299,9 +299,13 @@ public class EntityBuilder {
 	}
 
 	public EntityBuilder addStaticLightComponent(Vector3 position, float intensity, float radius) {
+		return addStaticLightComponent(position, intensity, radius, Color.WHITE);
+	}
+
+	public EntityBuilder addStaticLightComponent(Vector3 position, float intensity, float radius, Color color) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		StaticLightComponent lightComponent = engine.createComponent(StaticLightComponent.class);
-		lightComponent.init(position, intensity, radius);
+		lightComponent.init(position, intensity, radius, color);
 		currentEntity.add(lightComponent);
 		return instance;
 	}

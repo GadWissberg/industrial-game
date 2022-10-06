@@ -35,9 +35,13 @@ public abstract class LightComponent implements GameComponent {
 	}
 
 	void init(Vector3 position, float intensity, float radius) {
+		init(position, intensity, radius, Color.WHITE);
+	}
+
+	void init(Vector3 position, float intensity, float radius, Color color) {
 		this.position.set(position);
 		this.intensity = intensity;
 		this.radius = radius;
-		color.set(Color.WHITE);
+		this.color.set(color);
 	}
 }

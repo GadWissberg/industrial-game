@@ -86,8 +86,9 @@ public class MapBuilder implements Disposable {
 	public static final int PLAYER_HEALTH = 100;
 
 	public static final String MAP_PATH_TEMP = "assets/maps/%s.json";
-	public static final float INDEPENDENT_LIGHT_RADIUS = 2f;
+	public static final float INDEPENDENT_LIGHT_RADIUS = 4f;
 	public static final float INDEPENDENT_LIGHT_INTENSITY = 1f;
+	private static final float INDEPENDENT_LIGHT_HEIGHT = 1.9F;
 	public static final String BOUNDING_BOX_PREFIX = "box_";
 	private static final CharacterSoundData auxCharacterSoundData = new CharacterSoundData();
 	private static final Vector3 auxVector3_1 = new Vector3();
@@ -100,7 +101,6 @@ public class MapBuilder implements Disposable {
 	private static final String REGION_NAME_BULLET = "bullet";
 	private static final Matrix4 auxMatrix = new Matrix4();
 	private static final String KEY_LIGHTS = "lights";
-	private static final float INDEPENDENT_LIGHT_HEIGHT = 1.9F;
 	private static final String KEY_ENVIRONMENT = "environment";
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
@@ -469,10 +469,10 @@ public class MapBuilder implements Disposable {
 		inflatePickups(mapJsonObject, mapGraph);
 	}
 
-	private void inflateEnvObstacleComponent(final Coords coord,
-											 final EnvironmentObjectDefinition type,
-											 final EntityBuilder builder,
-											 final Direction facingDirection) {
+	private void inflateEnvObjectComponent(final Coords coord,
+										   final EnvironmentObjectDefinition type,
+										   final EntityBuilder builder,
+										   final Direction facingDirection) {
 		int col = coord.getCol();
 		int row = coord.getRow();
 		int halfWidth = type.getWidth() / 2;
@@ -484,7 +484,7 @@ public class MapBuilder implements Disposable {
 		}
 		Vector2 topLeft = auxVector2_1.set(col - halfWidth, row - halfDepth);
 		Vector2 bottomRight = auxVector2_2.set(col + Math.max(halfWidth, 1) - 1, row + Math.max(halfDepth, 1) - 1);
-		builder.addObstacleComponent(topLeft, bottomRight, type);
+		builder.addEnvironmentObjectComponent(topLeft, bottomRight, type);
 	}
 
 	private GameModelInstance inflateEnvironmentModelInstance(final MapGraphNode node,
@@ -542,7 +542,7 @@ public class MapBuilder implements Disposable {
 			float degrees = Direction.values()[dirIndex].getDirection(auxVector2_1).angleDeg();
 			Vector3 relativePosition = l.getRelativePosition(auxVector3_2).rotate(Vector3.Y, degrees);
 			Vector3 position = mi.transform.getTranslation(auxVector3_1).add(relativePosition);
-			builder.addStaticLightComponent(position, l.getIntensity(), l.getRadius());
+			builder.addStaticLightComponent(position, l.getIntensity(), l.getRadius(), l.getColor());
 		});
 	}
 
@@ -552,7 +552,7 @@ public class MapBuilder implements Disposable {
 									  JsonObject jsonObject,
 									  Coords coord) {
 		int dirIndex = jsonObject.get(DIRECTION).getAsInt();
-		inflateEnvObstacleComponent(coord, type, builder, Direction.values()[dirIndex]);
+		inflateEnvObjectComponent(coord, type, builder, Direction.values()[dirIndex]);
 		MapGraphNode node = mapGraph.getNode(coord.getCol(), coord.getRow());
 		GameModelInstance mi = inflateEnvModelInstanceComponent(node, jsonObject, type, builder);
 		inflateEnvLightComponent(builder, type, mi, dirIndex);

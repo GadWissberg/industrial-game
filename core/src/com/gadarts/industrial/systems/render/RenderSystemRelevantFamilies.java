@@ -31,10 +31,7 @@ public class RenderSystemRelevantFamilies {
 		modelEntitiesWithShadows = engine.getEntitiesFor(Family.all(ModelInstanceComponent.class)
 				.exclude(PickUpComponent.class, StaticLightComponent.class)
 				.get());
-		modelEntities = engine.getEntitiesFor(
-				Family.all(ModelInstanceComponent.class)
-						.exclude(StaticLightComponent.class)
-						.get());
+		modelEntities = engine.getEntitiesFor(Family.all(ModelInstanceComponent.class).get());
 		simpleShadowEntities = engine.getEntitiesFor(Family.one(SimpleShadowComponent.class).get());
 	}
 }

@@ -199,13 +199,11 @@ void main() {
                 }
                 gl_FragColor.rgb += emissive.rgb;
             }
-            gl_FragColor.rgb += (diffuse.rgb * v_lightDiffuse) + emissive.rgb;
             vec2 c= gl_FragCoord.xy;
             c.x/=u_screenWidth;
             c.y/=u_screenHeight;
-            vec4 color=texture2D(u_shadows, c);
-            color *= 2.0;
-            gl_FragColor.rgb+=vec3(gl_FragColor.r*color.a, gl_FragColor.g*color.a, gl_FragColor.b*color.a);
+            vec4 staticLightsColor=texture2D(u_shadows, c);
+            gl_FragColor.rgb += (diffuse.rgb * (v_lightDiffuse + staticLightsColor.rgb)) + emissive.rgb;
 
             float minDistToChar = 21390950.0;
             float shadowRadius = 1.0;

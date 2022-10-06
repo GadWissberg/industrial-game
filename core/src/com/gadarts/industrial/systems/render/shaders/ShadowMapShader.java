@@ -3,6 +3,7 @@ package com.gadarts.industrial.systems.render.shaders;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Attributes;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -22,32 +23,47 @@ public class ShadowMapShader extends BaseShader {
 	public static final String UNIFORM_DEPTH_MAP_CUBE = "u_depthMapCube";
 	public static final String UNIFORM_CAMERA_FAR = "u_cameraFar";
 	public static final String UNIFORM_LIGHT_POSITION = "u_lightPosition";
+	public static final float BIAS_MIN_WALL = 0.0021F;
+	public static final float BIAS_MAX_WALL = 0.0022F;
+	public static final float BIAS_MAX_GENERAL = 0.0014F;
+	public static final float BIAS_MIN_GENERAL = 0F;
+	private static final String UNIFORM_LIGHTS_COLORS = "u_lightColor";
 	private static final Vector3 auxVector = new Vector3();
 	private static final String UNIFORM_RADIUS = "u_radius";
 	private static final String UNIFORM_MAX_BIAS = "u_maxBias";
 	private static final String UNIFORM_MIN_BIAS = "u_minBias";
 	private static final int CUBE_MAP_TEXTURE_NUMBER = 8;
-	public static final float BIAS_MIN_WALL = 0.0008F;
-	public static final float BIAS_MAX_WALL = 0.0014F;
-	public static final float BIAS_MAX_GENERAL = 0.0014F;
-	public static final float BIAS_MIN_GENERAL = 0F;
 	private static final float BIAS_MAX_FLOOR = 0.00155F;
+	private static final Color auxColor = new Color();
 	private final ImmutableArray<Entity> lights;
-	private final int uniformLocMaxBias;
-	private final int uniformLocMinBias;
+	private final float[] lightColor = new float[3];
 	public Renderable renderable;
+	private int uniformLocMaxBias;
+	private int uniformLocMinBias;
+	private int uniformLocLightColor;
 
 	public ShadowMapShader(final Renderable renderable,
 						   final ShaderProgram shaderProgramModelBorder,
-						   final ImmutableArray<Entity> lights) {
-		this.lights = lights;
+						   final ImmutableArray<Entity> staticLights) {
+		this.lights = staticLights;
 		this.renderable = renderable;
 		this.program = shaderProgramModelBorder;
 		register(DefaultShader.Inputs.worldTrans, DefaultShader.Setters.worldTrans);
 		register(DefaultShader.Inputs.projViewTrans, DefaultShader.Setters.projViewTrans);
 		register(DefaultShader.Inputs.normalMatrix, DefaultShader.Setters.normalMatrix);
+		fetchUniformsLocations();
+	}
+
+	private void fillStaticLightColorArray(Color color) {
+			lightColor[0] = color.r;
+			lightColor[1] = color.g;
+			lightColor[2] = color.b;
+	}
+
+	private void fetchUniformsLocations( ) {
 		uniformLocMaxBias = program.getUniformLocation(UNIFORM_MAX_BIAS);
 		uniformLocMinBias = program.getUniformLocation(UNIFORM_MIN_BIAS);
+		uniformLocLightColor = program.getUniformLocation(UNIFORM_LIGHTS_COLORS);
 	}
 
 	@Override
@@ -105,7 +121,7 @@ public class ShadowMapShader extends BaseShader {
 		if (ComponentsMapper.wall.has(entity)) {
 			minBias = BIAS_MIN_WALL;
 			maxBias = BIAS_MAX_WALL;
-		}else if (ComponentsMapper.floor.has(entity)){
+		} else if (ComponentsMapper.floor.has(entity)) {
 			maxBias = BIAS_MAX_FLOOR;
 		}
 		program.setUniformf(uniformLocMinBias, minBias);
@@ -114,6 +130,7 @@ public class ShadowMapShader extends BaseShader {
 
 	private void initializeLightForRendering(int lightIndex) {
 		StaticLightComponent lightComponent = ComponentsMapper.staticLight.get(lights.get(lightIndex));
+		fillStaticLightColorArray(lightComponent.getColor(auxColor));
 		lightComponent.getShadowFrameBuffer().getColorBufferTexture().bind(CUBE_MAP_TEXTURE_NUMBER);
 		setUniforms(lightComponent);
 	}
@@ -124,6 +141,7 @@ public class ShadowMapShader extends BaseShader {
 		program.setUniformf(UNIFORM_CAMERA_FAR, CAMERA_LIGHT_FAR);
 		program.setUniformf(UNIFORM_LIGHT_POSITION, lightComponent.getPosition(auxVector));
 		program.setUniformf(UNIFORM_RADIUS, lightComponent.getRadius());
+		program.setUniform3fv(uniformLocLightColor, lightColor, 0, 3);
 	}
 
 	private enum StaticLightTypes {

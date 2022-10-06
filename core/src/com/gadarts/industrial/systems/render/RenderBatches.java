@@ -27,7 +27,8 @@ public class RenderBatches implements Disposable {
 
 	void createBatches(ModelsShaderProvider shaderProvider,
 					   StaticShadowsData staticShadowsData,
-					   ImmutableArray<Entity> staticLightsEntities, GameCameraGroupStrategy regularDecalGroupStrategy) {
+					   ImmutableArray<Entity> staticLightsEntities,
+					   GameCameraGroupStrategy regularDecalGroupStrategy) {
 		this.modelBatch = new ModelBatch(shaderProvider);
 		this.spriteBatch = new SpriteBatch();
 		if (DefaultGameSettings.ALLOW_STATIC_SHADOWS) {
@@ -40,7 +41,8 @@ public class RenderBatches implements Disposable {
 			modelBatchShadows = new ModelBatch(new DefaultShaderProvider() {
 				@Override
 				protected Shader createShader(final Renderable renderable) {
-					return new ShadowMapShader(renderable, staticShadowsData.getShadowsShaderProgram(), staticLightsEntities);
+					ShaderProgram shadowsShaderProgram = staticShadowsData.getShadowsShaderProgram();
+					return new ShadowMapShader(renderable, shadowsShaderProgram, staticLightsEntities);
 				}
 			});
 		}

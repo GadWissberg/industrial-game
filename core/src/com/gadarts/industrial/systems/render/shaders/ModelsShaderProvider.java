@@ -14,8 +14,8 @@ public class ModelsShaderProvider extends DefaultShaderProvider {
 
 	public ModelsShaderProvider(final GameAssetsManager assetsManager, FrameBuffer shadowFrameBuffer) {
 		shaderConfig = new DefaultShader.Config();
-		shaderConfig.vertexShader = assetsManager.getShader(Assets.Shaders.VERTEX);
-		shaderConfig.fragmentShader = assetsManager.getShader(Assets.Shaders.FRAGMENT);
+		shaderConfig.vertexShader = assetsManager.getShader(Assets.Shaders.MODEL_VERTEX);
+		shaderConfig.fragmentShader = assetsManager.getShader(Assets.Shaders.MODEL_FRAGMENT);
 		this.shadowFrameBuffer = shadowFrameBuffer;
 	}
 

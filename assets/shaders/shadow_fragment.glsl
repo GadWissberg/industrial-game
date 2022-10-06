@@ -15,17 +15,18 @@ uniform float u_cameraFar;
 uniform vec3 u_lightPosition;
 uniform float u_type;
 uniform float u_radius;
-
-varying vec3 v_normal;
-
-varying vec4 v_position;
-varying vec4 v_positionLightTrans;
 uniform float u_maxBias;
 uniform float u_minBias;
+uniform vec3 u_lightColor;
+
+varying vec3 v_normal;
+varying vec4 v_position;
+varying vec4 v_positionLightTrans;
+
 void main()
 {
     // Default is to not add any color
-    float intensity=0.08;
+    float intensity=0.00;
     // Vector light-current position
     vec3 lightDirection=v_position.xyz-u_lightPosition;
     float lenToLight=length(lightDirection)/u_cameraFar;
@@ -45,13 +46,13 @@ void main()
         lenDepthMap = textureCube(u_depthMapCube, lightDirection).a;
     }
 
+    vec3 color = vec3(1.0);
     float bias = max(u_maxBias * (1.0 - dot(v_normal, lightDirection)), u_minBias);
-    if (lenDepthMap>lenToLight - bias && lenToLight < u_radius*0.1){
-        float attenuation = 16.0 / ((128.0*lenToLight) + (256.0*lenToLight*lenToLight) + (128.0*lenToLight*lenToLight*lenToLight));
-        intensity += attenuation;
+    if (lenDepthMap>lenToLight - bias){
+        intensity=0.3*(1.0-((lenToLight)/(u_radius/u_cameraFar)));
+        color = u_lightColor;
     }
-
-    gl_FragColor     = vec4(intensity);
+    gl_FragColor = vec4(color.r*intensity,color.g*intensity,color.b*intensity,intensity);
 
 }
 
