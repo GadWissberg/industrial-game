@@ -26,6 +26,7 @@ import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.PickUpComponent;
+import com.gadarts.industrial.components.TriggerComponent;
 import com.gadarts.industrial.components.character.CharacterData;
 import com.gadarts.industrial.components.character.*;
 import com.gadarts.industrial.components.mi.GameModelInstance;
@@ -101,6 +102,7 @@ public class MapBuilder implements Disposable {
 	private static final String REGION_NAME_BULLET = "bullet";
 	private static final Matrix4 auxMatrix = new Matrix4();
 	private static final String KEY_LIGHTS = "lights";
+	private static final String KEY_TRIGGERS = "triggers";
 	private static final String KEY_ENVIRONMENT = "environment";
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
@@ -465,6 +467,7 @@ public class MapBuilder implements Disposable {
 	private void inflateAllElements(final JsonObject mapJsonObject, final MapGraph mapGraph) {
 		inflateCharacters(mapJsonObject, mapGraph);
 		inflateLights(mapJsonObject, mapGraph);
+		inflateTriggers(mapJsonObject, mapGraph);
 		inflateEnvironment(mapJsonObject, mapGraph);
 		inflatePickups(mapJsonObject, mapGraph);
 	}
@@ -617,6 +620,11 @@ public class MapBuilder implements Disposable {
 		lights.forEach(element -> inflateLight(mapGraph, element));
 	}
 
+	private void inflateTriggers(JsonObject mapJsonObject, MapGraph mapGraph) {
+		JsonArray triggers = mapJsonObject.getAsJsonArray(KEY_TRIGGERS);
+		triggers.forEach(element -> inflateTrigger(mapGraph, element));
+	}
+
 	private void inflateLight(final MapGraph mapGraph, final JsonElement element) {
 		JsonObject lightJsonObject = element.getAsJsonObject();
 		int row = lightJsonObject.get(ROW).getAsInt();
@@ -626,6 +634,14 @@ public class MapBuilder implements Disposable {
 		EntityBuilder.beginBuildingEntity(engine)
 				.addStaticLightComponent(position, INDEPENDENT_LIGHT_INTENSITY, INDEPENDENT_LIGHT_RADIUS)
 				.finishAndAddToEngine();
+	}
+
+	private void inflateTrigger(final MapGraph mapGraph, final JsonElement element) {
+		JsonObject triggerJsonObject = element.getAsJsonObject();
+		int row = triggerJsonObject.get(ROW).getAsInt();
+		int col = triggerJsonObject.get(COL).getAsInt();
+		TriggerComponent component = engine.createComponent(TriggerComponent.class);
+		mapGraph.getNode(col, row).getEntity().add(component);
 	}
 
 	private void inflatePickups(final JsonObject mapJsonObject, final MapGraph mapGraph) {

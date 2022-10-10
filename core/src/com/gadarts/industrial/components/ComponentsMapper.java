@@ -34,5 +34,6 @@ public class ComponentsMapper {
 	public static final ComponentMapper<AppendixModelInstanceComponent> appendixModelInstance = ComponentMapper.getFor(AppendixModelInstanceComponent.class);
 	public static final ComponentMapper<DoorComponent> door = ComponentMapper.getFor(DoorComponent.class);
 	public static final ComponentMapper<FlyingParticleComponent> flyingParticles = ComponentMapper.getFor(FlyingParticleComponent.class);
+	public static final ComponentMapper<TriggerComponent> trigger = ComponentMapper.getFor(TriggerComponent.class);
 }
 

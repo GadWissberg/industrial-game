@@ -283,4 +283,9 @@ public class GeneralHandler implements
 	public boolean isInGame( ) {
 		return inGame;
 	}
+
+	@Override
+	public void restartGame( ) {
+		onNewGameSelectedInMenu();
+	}
 }

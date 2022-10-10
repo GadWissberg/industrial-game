@@ -15,10 +15,7 @@ import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
-import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.DoorComponent;
-import com.gadarts.industrial.components.EnvironmentObjectComponent;
-import com.gadarts.industrial.components.PickUpComponent;
+import com.gadarts.industrial.components.*;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterAnimation;
 import com.gadarts.industrial.components.character.CharacterAnimations;
@@ -75,6 +72,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private PathPlanHandler playerPathPlanner;
 	private ImmutableArray<Entity> ambObjects;
 	private ImmutableArray<Entity> pickups;
+	private ImmutableArray<Entity> triggers;
 
 	public PlayerSystem(SystemsCommonData systemsCommonData,
 						GameAssetsManager assetsManager,
@@ -117,8 +115,12 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	@Override
 	public void onCharacterNodeChanged(Entity entity, MapGraphNode oldNode, MapGraphNode newNode) {
 		if (ComponentsMapper.player.has(entity)) {
-			refreshFogOfWar();
-			notifyPlayerFinishedTurn();
+			if (ComponentsMapper.trigger.has(newNode.getEntity())) {
+				getLifeCycleHandler().restartGame();
+			} else {
+				refreshFogOfWar();
+				notifyPlayerFinishedTurn();
+			}
 		}
 	}
 
@@ -520,6 +522,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		getSystemsCommonData().getStorage().setSelectedWeapon(weapon);
 		ambObjects = engine.getEntitiesFor(Family.all(EnvironmentObjectComponent.class).exclude(DoorComponent.class).get());
 		pickups = engine.getEntitiesFor(Family.all(PickUpComponent.class).get());
+		triggers = engine.getEntitiesFor(Family.all(TriggerComponent.class).get());
 	}
 
 	private Weapon initializeStartingWeapon( ) {
