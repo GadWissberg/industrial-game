@@ -14,6 +14,7 @@ import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.model.CameraUtils;
 import com.gadarts.industrial.shared.model.GeneralUtils;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -22,20 +23,17 @@ import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 import static com.gadarts.industrial.DefaultGameSettings.DEBUG_INPUT;
 import static com.gadarts.industrial.DefaultGameSettings.FULL_SCREEN;
 import static com.gadarts.industrial.Industrial.*;
+import static com.gadarts.industrial.shared.model.CameraUtils.*;
 
 public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> implements InputSystemEventsSubscriber {
-	public static final int CAMERA_HEIGHT = 16;
-	private static final float INITIAL_CAMERA_ANGLE_AROUND_Y = 80;
 	private static final float FAR = 100f;
 	private static final float NEAR = 0.01f;
-	private static final float START_OFFSET = 7;
 	private static final float EXTRA_LEVEL_PADDING = 16;
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final Vector3 auxVector3_3 = new Vector3();
 	private static final float MENU_CAMERA_ROTATION = 0.1F;
 	private static final Vector2 auxVector2_1 = new Vector2();
-	public static final int CAMERA_ROTATION_AROUND_X = -45;
 	private final Vector2 lastMousePosition = new Vector2();
 	private final Vector2 lastRightPressMousePosition = new Vector2();
 
@@ -142,9 +140,8 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 	private void initCamera(OrthographicCamera cam) {
 		Entity player = getSystemsCommonData().getPlayer();
 		Vector2 nodePosition = ComponentsMapper.characterDecal.get(player).getNodePosition(auxVector2_1);
-		cam.position.set(nodePosition.x + START_OFFSET, CAMERA_HEIGHT, nodePosition.y + START_OFFSET);
-		cam.direction.rotate(Vector3.X, CAMERA_ROTATION_AROUND_X);
-		cam.direction.rotate(Vector3.Y, INITIAL_CAMERA_ANGLE_AROUND_Y);
+		cam.position.set(nodePosition.x + START_OFFSET_X, CAMERA_HEIGHT, nodePosition.y + START_OFFSET_Z);
+		CameraUtils.initializeCameraAngle(cam);
 		cam.update();
 	}
 
