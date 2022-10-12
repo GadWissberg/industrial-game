@@ -41,7 +41,6 @@ public class StaticShadowsData implements Disposable {
 		if (!DefaultGameSettings.ALLOW_STATIC_SHADOWS) return;
 		depthShaderProgram.dispose();
 		shadowsShaderProgram.dispose();
-		shadowsShaderProgram.dispose();
 		shadowFrameBuffer.dispose();
 		for (Entity light : staticLightsEntities) {
 			ComponentsMapper.staticLight.get(light).getShadowFrameBuffer().dispose();

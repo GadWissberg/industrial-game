@@ -3,10 +3,10 @@ package com.gadarts.industrial.screens;
 import com.badlogic.gdx.Screen;
 import com.gadarts.industrial.GeneralHandler;
 
-public class BattleScreen implements Screen {
+public class InGameScreen implements Screen {
 	private final GeneralHandler generalHandler;
 
-	public BattleScreen(GeneralHandler generalHandler) {
+	public InGameScreen(GeneralHandler generalHandler) {
 		this.generalHandler = generalHandler;
 	}
 

@@ -2,7 +2,7 @@ package com.gadarts.industrial;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.gadarts.industrial.screens.BattleScreen;
+import com.gadarts.industrial.screens.InGameScreen;
 
 public class Industrial extends Game {
 	public static final String TITLE = "PyroShock";
@@ -26,7 +26,7 @@ public class Industrial extends Game {
 		}
 		Gdx.app.setLogLevel(DefaultGameSettings.LOG_LEVEL);
 		generalHandler.init();
-		setScreen(new BattleScreen(generalHandler));
+		setScreen(new InGameScreen(generalHandler));
 	}
 
 	@Override
