@@ -30,6 +30,7 @@ public class ShadowMapShader extends BaseShader {
 	private static final String UNIFORM_LIGHTS_COLORS = "u_lightColor";
 	private static final Vector3 auxVector = new Vector3();
 	private static final String UNIFORM_RADIUS = "u_radius";
+	private static final String UNIFORM_INTENSITY = "u_intensity";
 	private static final String UNIFORM_MAX_BIAS = "u_maxBias";
 	private static final String UNIFORM_MIN_BIAS = "u_minBias";
 	private static final int CUBE_MAP_TEXTURE_NUMBER = 8;
@@ -41,6 +42,12 @@ public class ShadowMapShader extends BaseShader {
 	private int uniformLocMaxBias;
 	private int uniformLocMinBias;
 	private int uniformLocLightColor;
+	private int uniformLocType;
+	private int uniformLocCameraFar;
+	private int uniformLocDepthMapCube;
+	private int uniformLocLightPosition;
+	private int uniformLocRadius;
+	private int uniformLocIntensity;
 
 	public ShadowMapShader(final Renderable renderable,
 						   final ShaderProgram shaderProgramModelBorder,
@@ -55,15 +62,21 @@ public class ShadowMapShader extends BaseShader {
 	}
 
 	private void fillStaticLightColorArray(Color color) {
-			lightColor[0] = color.r;
-			lightColor[1] = color.g;
-			lightColor[2] = color.b;
+		lightColor[0] = color.r;
+		lightColor[1] = color.g;
+		lightColor[2] = color.b;
 	}
 
 	private void fetchUniformsLocations( ) {
 		uniformLocMaxBias = program.getUniformLocation(UNIFORM_MAX_BIAS);
 		uniformLocMinBias = program.getUniformLocation(UNIFORM_MIN_BIAS);
 		uniformLocLightColor = program.getUniformLocation(UNIFORM_LIGHTS_COLORS);
+		uniformLocType = program.getUniformLocation(UNIFORM_TYPE);
+		uniformLocCameraFar = program.getUniformLocation(UNIFORM_CAMERA_FAR);
+		uniformLocDepthMapCube = program.getUniformLocation(UNIFORM_DEPTH_MAP_CUBE);
+		uniformLocLightPosition = program.getUniformLocation(UNIFORM_LIGHT_POSITION);
+		uniformLocRadius = program.getUniformLocation(UNIFORM_RADIUS);
+		uniformLocIntensity = program.getUniformLocation(UNIFORM_INTENSITY);
 	}
 
 	@Override
@@ -136,12 +149,13 @@ public class ShadowMapShader extends BaseShader {
 	}
 
 	private void setUniforms(StaticLightComponent lightComponent) {
-		program.setUniformf(UNIFORM_TYPE, StaticLightTypes.POINT.ordinal());
-		program.setUniformi(UNIFORM_DEPTH_MAP_CUBE, CUBE_MAP_TEXTURE_NUMBER);
-		program.setUniformf(UNIFORM_CAMERA_FAR, CAMERA_LIGHT_FAR);
-		program.setUniformf(UNIFORM_LIGHT_POSITION, lightComponent.getPosition(auxVector));
-		program.setUniformf(UNIFORM_RADIUS, lightComponent.getRadius());
+		program.setUniformf(uniformLocType, StaticLightTypes.POINT.ordinal());
+		program.setUniformi(uniformLocDepthMapCube, CUBE_MAP_TEXTURE_NUMBER);
+		program.setUniformf(uniformLocCameraFar, CAMERA_LIGHT_FAR);
+		program.setUniformf(uniformLocLightPosition, lightComponent.getPosition(auxVector));
+		program.setUniformf(uniformLocRadius, lightComponent.getRadius());
 		program.setUniform3fv(uniformLocLightColor, lightColor, 0, 3);
+		program.setUniformf(uniformLocIntensity, lightComponent.getIntensity());
 	}
 
 	private enum StaticLightTypes {

@@ -45,7 +45,7 @@ public class ModelsShader extends DefaultShader {
 	private static final int MAX_NEARBY_CHARACTERS = 2;
 	private static final BoundingBox auxBoundingBox = new BoundingBox();
 	private final float[] lightsPositions = new float[MAX_LIGHTS * 3];
-	private final float[] lightsExtraData = new float[MAX_LIGHTS * LIGHT_EXTRA_DATA_SIZE];
+	private final float[] shadowlessLightsExtraData = new float[MAX_LIGHTS * LIGHT_EXTRA_DATA_SIZE];
 	private final float[] lightsColors = new float[MAX_LIGHTS * 3];
 	private final float[] nearbySimpleShadowsData = new float[MAX_NEARBY_CHARACTERS * NEARBY_SIMPLE_SHADOW_VECTOR_SIZE];
 	private final FrameBuffer shadowFrameBuffer;
@@ -124,7 +124,7 @@ public class ModelsShader extends DefaultShader {
 		int size = renderData.getNearbyLights().size();
 		program.setUniform3fv(uniformLocShadowlessLightsPositions, lightsPositions, 0, size * 3);
 		int extraDataLength = size * LIGHT_EXTRA_DATA_SIZE;
-		program.setUniform3fv(uniformLocShadowlessLightsExtraData, lightsExtraData, 0, extraDataLength);
+		program.setUniform3fv(uniformLocShadowlessLightsExtraData, shadowlessLightsExtraData, 0, extraDataLength);
 		program.setUniform3fv(uniformLocShadowlessLightsColors, this.lightsColors, 0, size * 3);
 	}
 
@@ -160,10 +160,10 @@ public class ModelsShader extends DefaultShader {
 		int extraDataInd = i * LIGHT_EXTRA_DATA_SIZE;
 		float intensity = lightComponent.getIntensity();
 		float radius = lightComponent.getRadius();
-		lightsExtraData[extraDataInd] = intensity;
-		lightsExtraData[extraDataInd + 1] = radius;
+		shadowlessLightsExtraData[extraDataInd] = intensity;
+		shadowlessLightsExtraData[extraDataInd + 1] = radius;
 		boolean notWhite = lightComponent.getColor(auxColor).equals(Color.WHITE);
-		lightsExtraData[extraDataInd + 2] = notWhite ? differentColorIndex : -1F;
+		shadowlessLightsExtraData[extraDataInd + 2] = notWhite ? differentColorIndex : -1F;
 		return notWhite;
 	}
 

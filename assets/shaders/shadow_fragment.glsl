@@ -18,6 +18,7 @@ uniform float u_radius;
 uniform float u_maxBias;
 uniform float u_minBias;
 uniform vec3 u_lightColor;
+uniform float u_intensity;
 
 varying vec3 v_normal;
 varying vec4 v_position;
@@ -26,7 +27,7 @@ varying vec4 v_positionLightTrans;
 void main()
 {
     // Default is to not add any color
-    float intensity=0.00;
+    float final_intensity=0.00;
     // Vector light-current position
     vec3 lightDirection=v_position.xyz-u_lightPosition;
     float lenToLight=length(lightDirection)/u_cameraFar;
@@ -49,10 +50,10 @@ void main()
     vec3 color = vec3(1.0);
     float bias = max(u_maxBias * (1.0 - dot(v_normal, lightDirection)), u_minBias);
     if (lenDepthMap>lenToLight - bias){
-        intensity=0.3*(1.0-((lenToLight)/(u_radius/u_cameraFar)));
+        final_intensity=u_intensity*(1.0-((lenToLight)/(u_radius/u_cameraFar)));
         color = u_lightColor;
     }
-    gl_FragColor = vec4(color.r*intensity,color.g*intensity,color.b*intensity,intensity);
+    gl_FragColor = vec4(color.r*final_intensity, color.g*final_intensity, color.b*final_intensity, final_intensity);
 
 }
 

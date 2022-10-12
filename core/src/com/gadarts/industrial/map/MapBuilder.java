@@ -88,7 +88,7 @@ public class MapBuilder implements Disposable {
 
 	public static final String MAP_PATH_TEMP = "assets/maps/%s.json";
 	public static final float INDEPENDENT_LIGHT_RADIUS = 4f;
-	public static final float INDEPENDENT_LIGHT_INTENSITY = 1f;
+	public static final float INDEPENDENT_LIGHT_INTENSITY = 0.3f;
 	private static final float INDEPENDENT_LIGHT_HEIGHT = 1.9F;
 	public static final String BOUNDING_BOX_PREFIX = "box_";
 	private static final CharacterSoundData auxCharacterSoundData = new CharacterSoundData();
