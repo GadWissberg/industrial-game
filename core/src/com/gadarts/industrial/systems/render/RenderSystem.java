@@ -226,18 +226,18 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		modelBatch.begin(camera);
 		for (Entity entity : entitiesToRender) {
 			ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(entity);
-			boolean rendered = renderModel(modelBatch, camera, entity, renderLight, modelInstanceComponent, considerFow);
+			boolean rendered = tryRenderingModel(modelBatch, camera, entity, renderLight, modelInstanceComponent, considerFow);
 			if (rendered) {
-				renderAppendixModelInstance(modelBatch, camera, entity);
+				renderAppendixModelInstance(modelBatch, entity);
 			}
 		}
 		modelBatch.end();
 	}
 
-	private void renderAppendixModelInstance(ModelBatch modelBatch, Camera camera, Entity entity) {
+	private void renderAppendixModelInstance(ModelBatch modelBatch, Entity entity) {
 		if (ComponentsMapper.appendixModelInstance.has(entity)) {
 			AppendixModelInstanceComponent appendix = ComponentsMapper.appendixModelInstance.get(entity);
-			renderModel(modelBatch, camera, entity, true, appendix);
+			renderModel(modelBatch, entity, true, appendix);
 		}
 	}
 
@@ -265,31 +265,28 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		}
 	}
 
-	private boolean renderModel(ModelBatch modelBatch,
-								Camera camera,
-								Entity entity,
-								boolean renderLight,
-								ModelInstanceComponent modelInstanceComponent) {
-		return renderModel(modelBatch, camera, entity, renderLight, modelInstanceComponent, true);
+	private boolean tryRenderingModel(ModelBatch modelBatch,
+									  Camera camera,
+									  Entity entity,
+									  boolean renderLight,
+									  ModelInstanceComponent modelInstanceComponent,
+									  boolean considerFow) {
+		if (shouldSkipRenderModel(camera, entity, modelInstanceComponent, considerFow)) return false;
+		renderModel(modelBatch, entity, renderLight, modelInstanceComponent);
+		return true;
 	}
 
-	private boolean renderModel(ModelBatch modelBatch,
-								Camera camera,
-								Entity entity,
-								boolean renderLight,
-								ModelInstanceComponent modelInstanceComponent,
-								boolean considerFow) {
-		if (!shouldSkipRenderModel(camera, entity, modelInstanceComponent, considerFow)) {
-			GameModelInstance modelInstance = modelInstanceComponent.getModelInstance();
-			modelBatch.render(modelInstance, environment);
-			getSystemsCommonData().setNumberOfVisible(getSystemsCommonData().getNumberOfVisible() + 1);
-			applySpecificRendering(entity);
-			if (renderLight) {
-				applyLightsOnModel(modelInstanceComponent);
-			}
-			return true;
+	private void renderModel(ModelBatch modelBatch,
+							 Entity entity,
+							 boolean renderLight,
+							 ModelInstanceComponent modelInstanceComponent) {
+		GameModelInstance modelInstance = modelInstanceComponent.getModelInstance();
+		modelBatch.render(modelInstance, environment);
+		getSystemsCommonData().setNumberOfVisible(getSystemsCommonData().getNumberOfVisible() + 1);
+		applySpecificRendering(entity);
+		if (renderLight) {
+			applyLightsOnModel(modelInstanceComponent);
 		}
-		return false;
 	}
 
 	private void applySpecificRendering(Entity entity) {
