@@ -334,11 +334,13 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private void painDone(Entity character, CharacterSpriteData spriteData) {
 		spriteData.setSpriteType(IDLE);
 		Entity currentTurn = getSystemsCommonData().getTurnsQueue().first();
-		Queue<CharacterCommand> commands = ComponentsMapper.character.get(currentTurn).getCommands();
-		if (!commands.isEmpty()) {
-			CharacterCommand command = commands.first();
-			if (command.getState() == CommandStates.READY) {
-				beginProcessingCommand(character, command);
+		if (ComponentsMapper.character.has(currentTurn)) {
+			Queue<CharacterCommand> commands = ComponentsMapper.character.get(currentTurn).getCommands();
+			if (!commands.isEmpty()) {
+				CharacterCommand command = commands.first();
+				if (command.getState() == CommandStates.READY) {
+					beginProcessingCommand(character, command);
+				}
 			}
 		}
 	}
