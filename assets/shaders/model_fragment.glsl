@@ -1,4 +1,3 @@
-#extension GL_EXT_gpu_shader4 : enable
 #ifdef GL_ES
 #define LOWP lowp
 #define MED mediump

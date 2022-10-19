@@ -65,7 +65,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private final static Vector2 auxVector2_1 = new Vector2();
 	private final static Vector2 auxVector2_2 = new Vector2();
 	private static final float ENEMY_HALF_FOV_ANGLE = 95F;
-	private static final CalculatePathRequest request = new CalculatePathRequest();
 	private static final List<MapGraphNode> auxNodesList = new ArrayList<>();
 	private static final float METAL_PART_FLY_AWAY_STRENGTH = 0.2F;
 	private static final float METAL_PART_FLY_AWAY_MIN_DEGREE = -45F;
@@ -77,6 +76,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final float SMOKE_HEIGHT_BIAS = 0.4F;
 	private final static LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
+	private static final CalculatePathRequest request = new CalculatePathRequest();
 	private final List<Sounds> ambSounds = List.of(Sounds.AMB_CHAINS, Sounds.AMB_SIGH, Sounds.AMB_LAUGH);
 	private final PathPlanHandler pathPlanner;
 	private ImmutableArray<Entity> enemies;
