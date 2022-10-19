@@ -29,9 +29,7 @@ import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
-import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
 import com.gadarts.industrial.systems.character.commands.CommandStates;
-import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
 import com.gadarts.industrial.systems.projectiles.AttackSystemEventsSubscriber;
@@ -41,7 +39,6 @@ import com.gadarts.industrial.utils.EntityBuilder;
 import com.gadarts.industrial.utils.GameUtils;
 
 import static com.gadarts.industrial.components.ComponentsMapper.character;
-import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.components.player.PlayerComponent.PLAYER_HEIGHT;
 import static com.gadarts.industrial.shared.model.characters.Direction.findDirection;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.*;

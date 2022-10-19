@@ -67,13 +67,58 @@ public class StorageWindow extends GameWindow {
 		initializeListeners(soundPlayer, systemsCommonData, subscribers);
 	}
 
+	/**
+	 * Initializes the storage grid.
+	 */
+	public void initialize() {
+		storageGrid.initialize();
+	}
+
+	@Override
+	public void draw(final Batch batch, final float parentAlpha) {
+		super.draw(batch, parentAlpha);
+		if (selectedItem.getSelection() != null) {
+			drawSelectedItemOnCursor(batch);
+		}
+	}
+
+	void applySelectedItem(final ItemDisplay itemDisplay) {
+		if (itemDisplay != null) {
+			itemDisplay.clearActions();
+		}
+		selectedItem.setSelection(itemDisplay);
+		if (itemDisplay != null) {
+			itemDisplay.applyFlickerAction();
+		}
+		closeButton.setDisabled(true);
+	}
+
+	void clearSelectedItem() {
+		if (selectedItem.getSelection() != null) {
+			closeButton.setDisabled(false);
+			selectedItem.setSelection(null);
+		}
+	}
+
+	public void onItemAddedToStorage(Item item) {
+		storageGrid.onItemAddedToStorage(item);
+	}
+
+	boolean onRightClick() {
+		boolean result = false;
+		if (selectedItem.getSelection() != null) {
+			clearSelectedItem();
+			result = true;
+		}
+		return result;
+	}
+
 	private void initializeListeners(SoundPlayer soundPlayer,
 									 SystemsCommonData commonData,
 									 List<UserInterfaceSystemEventsSubscriber> subscribers) {
 		addListener(event -> {
 			boolean result = false;
-			if (event instanceof GameWindowEvent) {
-				GameWindowEvent windowEvent = (GameWindowEvent) event;
+			if (event instanceof GameWindowEvent windowEvent) {
 				initializeWindowEventParameters(soundPlayer, commonData, subscribers, windowEvent);
 				result = execute(auxWindowEventParameters);
 			}
@@ -123,22 +168,16 @@ public class StorageWindow extends GameWindow {
 		});
 	}
 
-	private void initializeWindowEventParameters(SoundPlayer soundPlayer, SystemsCommonData commonData, List<UserInterfaceSystemEventsSubscriber> subscribers, GameWindowEvent windowEvent) {
+	private void initializeWindowEventParameters(SoundPlayer soundPlayer,
+												 SystemsCommonData commonData,
+												 List<UserInterfaceSystemEventsSubscriber> subscribers,
+												 GameWindowEvent windowEvent) {
 		auxWindowEventParameters.setWindowEvent(windowEvent);
 		auxWindowEventParameters.setSoundPlayer(soundPlayer);
 		auxWindowEventParameters.setSelectedItem(selectedItem);
 		auxWindowEventParameters.setTarget(StorageWindow.this);
 		auxWindowEventParameters.setSystemsCommonData(commonData);
 		auxWindowEventParameters.setSubscribers(subscribers);
-	}
-
-	boolean onRightClick() {
-		boolean result = false;
-		if (selectedItem.getSelection() != null) {
-			clearSelectedItem();
-			result = true;
-		}
-		return result;
 	}
 
 	private void addPlayerLayout(GameAssetsManager assetsManager,
@@ -178,14 +217,6 @@ public class StorageWindow extends GameWindow {
 		return gridTexture;
 	}
 
-	@Override
-	public void draw(final Batch batch, final float parentAlpha) {
-		super.draw(batch, parentAlpha);
-		if (selectedItem.getSelection() != null) {
-			drawSelectedItemOnCursor(batch);
-		}
-	}
-
 
 	private void drawSelectedItemOnCursor(final Batch batch) {
 		Texture image = selectedItem.getSelection().getItem().getImage();
@@ -196,38 +227,9 @@ public class StorageWindow extends GameWindow {
 		batch.setColor(1f, 1f, 1f, 1f);
 	}
 
-	void applySelectedItem(final ItemDisplay itemDisplay) {
-		if (itemDisplay != null) {
-			itemDisplay.clearActions();
-		}
-		selectedItem.setSelection(itemDisplay);
-		if (itemDisplay != null) {
-			itemDisplay.applyFlickerAction();
-		}
-		closeButton.setDisabled(true);
-	}
-
 	private void addStorageGrid(SystemsCommonData systemsCommonData) {
 		storageGrid = new StorageGrid(gridTexture, systemsCommonData, gridCellTexture, selectedItem);
 		add(storageGrid);
-	}
-
-	void clearSelectedItem() {
-		if (selectedItem.getSelection() != null) {
-			closeButton.setDisabled(false);
-			selectedItem.setSelection(null);
-		}
-	}
-
-	/**
-	 * Initializes the storage grid.
-	 */
-	public void initialize() {
-		storageGrid.initialize();
-	}
-
-	public void onItemAddedToStorage(Item item) {
-		storageGrid.onItemAddedToStorage(item);
 	}
 }
 

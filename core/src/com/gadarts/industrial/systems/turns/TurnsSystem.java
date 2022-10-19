@@ -1,10 +1,8 @@
 package com.gadarts.industrial.systems.turns;
 
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.GameLifeCycleHandler;
-import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;

@@ -25,11 +25,22 @@ import com.gadarts.industrial.utils.GameUtils;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-
-@SuppressWarnings("SameParameterValue")
+/**
+ * Responsible for handling the storage bag display.
+ */
 public class StorageGrid extends ItemsTable {
+
+	/**
+	 * Size of the grid in pixels.
+	 */
 	public static final int GRID_SIZE = 256;
+	/**
+	 * Size of a grid cell size in pixels.
+	 */
 	public static final int GRID_CELL_SIZE = 32;
+	/**
+	 * Name of this actor.
+	 */
 	static final String NAME = "storage_grid";
 	private static final Rectangle auxRectangle_1 = new Rectangle();
 	private static final Rectangle selectedItemRectangle = new Rectangle();
@@ -53,50 +64,25 @@ public class StorageGrid extends ItemsTable {
 		this.gridCellTexture = gridCellTexture;
 		this.systemsCommonData = systemsCommonData;
 		addListener(event -> {
-			boolean result = false;
-			if (event instanceof GameWindowEvent) {
-				GameWindowEvent gameWindowEvent = (GameWindowEvent) event;
-				GameWindowEventType type = gameWindowEvent.getType();
-				if (type == GameWindowEventType.ITEM_PLACED) {
-					ItemsTable itemsTable = (ItemsTable) event.getTarget();
-					ItemDisplay selectedItem = itemSelectionHandler.getSelection();
-					if (itemsTable instanceof StorageGrid) {
-						calculateSelectedItemRectangle();
-						itemsTable.removeItem(selectedItem);
-						selectedItem.setLocatedIn(StorageGrid.class);
-						Item item = selectedItem.getItem();
-						PlayerStorage storage = systemsCommonData.getStorage();
-						storage.getItems().add(item);
-						int cellsInRow = GRID_SIZE / GRID_CELL_SIZE;
-						int numberOfCells = cellsInRow * cellsInRow;
-						int minRow = Integer.MAX_VALUE;
-						int minCol = Integer.MAX_VALUE;
-						for (int i = 0; i < numberOfCells; i++) {
-							if ((checkIfCellIsBehindSelection(i, auxCoords))) {
-								storage.getStorageMap()[auxCoords.row * cellsInRow + auxCoords.col] = item.getDefinition().getId();
-								minRow = Math.min(auxCoords.row, minRow);
-								minCol = Math.min(auxCoords.col, minCol);
-							}
-						}
-						item.setRow(minRow);
-						item.setCol(minCol);
-						selectedItem.setPosition(
-								getX() + item.getCol() * GRID_CELL_SIZE,
-								getY() + item.getRow() * GRID_CELL_SIZE
-						);
-						selectedItem.toFront();
-						selectedItem.clearActions();
+			if (event instanceof GameWindowEvent gameWindowEvent) {
+				if (gameWindowEvent.getType() == GameWindowEventType.ITEM_PLACED) {
+					if (event.getTarget() instanceof StorageGrid) {
+						handleItemPlaced((ItemsTable) event.getTarget(), itemSelectionHandler.getSelection());
 					} else {
-						removeItem(selectedItem);
+						removeItem(itemSelectionHandler.getSelection());
 					}
-					result = true;
+					return true;
 				}
 			}
-			return result;
+			return false;
 		});
 		addListener(new ClickListener() {
 			@Override
-			public boolean touchDown(final InputEvent event, final float x, final float y, final int pointer, final int button) {
+			public boolean touchDown(InputEvent event,
+									 float x,
+									 float y,
+									 int pointer,
+									 int button) {
 				boolean result = super.touchDown(event, x, y, pointer, button);
 				if (button == Input.Buttons.LEFT) {
 					result |= onLeftClick();
@@ -106,11 +92,38 @@ public class StorageGrid extends ItemsTable {
 				}
 				return result;
 			}
-
 		});
 	}
 
-	private boolean onLeftClick() {
+	private void handleItemPlaced(ItemsTable itemsTable, ItemDisplay selectedItem) {
+		calculateSelectedItemRectangle();
+		itemsTable.removeItem(selectedItem);
+		selectedItem.setLocatedIn(StorageGrid.class);
+		Item item = selectedItem.getItem();
+		PlayerStorage storage = systemsCommonData.getStorage();
+		storage.getItems().add(item);
+		int cellsInRow = GRID_SIZE / GRID_CELL_SIZE;
+		int numberOfCells = cellsInRow * cellsInRow;
+		int minRow = Integer.MAX_VALUE;
+		int minCol = Integer.MAX_VALUE;
+		for (int i = 0; i < numberOfCells; i++) {
+			if ((checkIfCellIsBehindSelection(i, auxCoords))) {
+				storage.getStorageMap()[auxCoords.row * cellsInRow + auxCoords.col] = item.getDefinition().getId();
+				minRow = Math.min(auxCoords.row, minRow);
+				minCol = Math.min(auxCoords.col, minCol);
+			}
+		}
+		item.setRow(minRow);
+		item.setCol(minCol);
+		selectedItem.setPosition(
+				getX() + item.getCol() * GRID_CELL_SIZE,
+				getY() + item.getRow() * GRID_CELL_SIZE
+		);
+		selectedItem.toFront();
+		selectedItem.clearActions();
+	}
+
+	private boolean onLeftClick( ) {
 		boolean result = false;
 		if (!invalidLocation && itemSelectionHandler.getSelection() != null) {
 			fire(new GameWindowEvent(StorageGrid.this, GameWindowEventType.ITEM_PLACED));
@@ -140,7 +153,7 @@ public class StorageGrid extends ItemsTable {
 		}
 	}
 
-	private void calculateSelectedItemRectangle() {
+	private void calculateSelectedItemRectangle( ) {
 		ItemDisplay selection = itemSelectionHandler.getSelection();
 		float prefWidth = selection.getPrefWidth();
 		float prefHeight = selection.getPrefHeight();
@@ -210,7 +223,10 @@ public class StorageGrid extends ItemsTable {
 		return output.set(cellX, cellY);
 	}
 
-	public void initialize() {
+	/**
+	 * Adds all the existing items to this actor.
+	 */
+	public void initialize( ) {
 		systemsCommonData.getStorage().getItems().forEach(this::addItemToStorage);
 	}
 
@@ -227,6 +243,10 @@ public class StorageGrid extends ItemsTable {
 		systemsCommonData.getStorage().removeItem(item.getItem().getDefinition().getId());
 	}
 
+	/**
+	 * @param id The index of the item.
+	 * @return The given item whether it exists in this actor.
+	 */
 	public ItemDisplay findItemDisplay(final int id) {
 		Actor[] items = StorageGrid.this.getParent().getChildren().items;
 		Optional<ItemDisplay> item = IntStream.range(0, items.length)
@@ -239,6 +259,11 @@ public class StorageGrid extends ItemsTable {
 		return item.orElse(null);
 	}
 
+	/**
+	 * Called when an item was added.
+	 *
+	 * @param item The added item.
+	 */
 	public void onItemAddedToStorage(Item item) {
 		addItemToStorage(item);
 	}

@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Disposable;
-import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.systems.player.PlayerStorage;

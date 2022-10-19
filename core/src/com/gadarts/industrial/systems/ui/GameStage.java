@@ -32,8 +32,7 @@ public class GameStage extends Stage {
 		this.soundPlayer = soundPlayer;
 		addListener(event -> {
 			boolean result = false;
-			if (event instanceof GameWindowEvent) {
-				GameWindowEvent gameWindowEvent = (GameWindowEvent) event;
+			if (event instanceof GameWindowEvent gameWindowEvent) {
 				if (gameWindowEvent.getType() == GameWindowEventType.WINDOW_CLOSED) {
 					Actor window = gameWindowEvent.getTarget();
 					window.setVisible(false);

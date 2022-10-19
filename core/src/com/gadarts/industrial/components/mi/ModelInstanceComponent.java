@@ -3,7 +3,6 @@ package com.gadarts.industrial.components.mi;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Vector3;
-import com.gadarts.industrial.DefaultGameSettings;
 import com.gadarts.industrial.components.GameComponent;
 import lombok.Getter;
 import lombok.Setter;

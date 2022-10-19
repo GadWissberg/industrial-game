@@ -718,7 +718,7 @@ public class MapBuilder implements Disposable {
 
 	private CharacterSpriteData createCharacterSpriteData(final CharacterData data, final CharacterDefinition def) {
 		CharacterSpriteData characterSpriteData = Pools.obtain(CharacterSpriteData.class);
-		characterSpriteData.init(data.getDirection(),
+		characterSpriteData.init(data.direction(),
 				IDLE,
 				def.getPrimaryAttackHitFrameIndex(),
 				def.isSingleDeathAnimation());
@@ -731,11 +731,11 @@ public class MapBuilder implements Disposable {
 									   final Atlases atlasDefinition,
 									   WeaponsDefinitions primaryAttack) {
 		CharacterSpriteData characterSpriteData = createCharacterSpriteData(data, def);
-		Direction direction = data.getDirection();
+		Direction direction = data.direction();
 		float radius = def.getShadowRadius();
-		CharacterSoundData soundData = data.getSoundData();
-		entityBuilder.addCharacterComponent(characterSpriteData, soundData, data.getSkills(), primaryAttack)
-				.addCharacterDecalComponent(assetsManager.get(atlasDefinition.name()), IDLE, direction, data.getPosition())
+		CharacterSoundData soundData = data.soundData();
+		entityBuilder.addCharacterComponent(characterSpriteData, soundData, data.skills(), primaryAttack)
+				.addCharacterDecalComponent(assetsManager.get(atlasDefinition.name()), IDLE, direction, data.position())
 				.addCollisionComponent()
 				.addSimpleShadowComponent(radius)
 				.addAnimationComponent();
