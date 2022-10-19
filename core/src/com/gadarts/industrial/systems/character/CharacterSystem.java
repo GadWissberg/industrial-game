@@ -417,7 +417,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private Direction calculateDirectionToDestination(CharacterCommand currentCommand) {
 		Entity character = currentCommand.getCharacter();
 		Vector3 characterPos = auxVector3_1.set(ComponentsMapper.characterDecal.get(character).getDecal().getPosition());
-		Vector2 destPos = currentCommand.getDestinationNode().getCenterPosition(auxVector2_2);
+		Vector2 destPos = currentCommand.getNextNode().getCenterPosition(auxVector2_2);
 		Vector2 directionToDest = destPos.sub(characterPos.x, characterPos.z).nor();
 		return findDirection(directionToDest);
 	}

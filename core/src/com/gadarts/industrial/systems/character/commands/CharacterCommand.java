@@ -22,6 +22,18 @@ public abstract class CharacterCommand implements Pool.Poolable {
 	private MapGraphNode destinationNode;
 	@Setter
 	private CommandStates state;
+	@Setter
+	private MapGraphNode nextNode;
+
+	@Override
+	public void reset( ) {
+		destinationNode = null;
+		state = CommandStates.READY;
+		definition = null;
+		character = null;
+		additionalData = null;
+		nextNode = null;
+	}
 
 	public abstract boolean initialize(Entity character,
 									   SystemsCommonData commonData,
@@ -41,6 +53,7 @@ public abstract class CharacterCommand implements Pool.Poolable {
 		this.character = character;
 		this.additionalData = additionalData;
 		this.destinationNode = destinationNode;
+		this.nextNode = destinationNode;
 		this.state = CommandStates.READY;
 		return this;
 	}

@@ -8,8 +8,7 @@ import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.List;
 
-import static com.gadarts.industrial.systems.enemy.EnemyAiStatus.DODGING;
-import static com.gadarts.industrial.systems.enemy.EnemyAiStatus.RUNNING_TO_LAST_SEEN_POSITION;
+import static com.gadarts.industrial.systems.enemy.EnemyAiStatus.*;
 
 final public class PrimaryAttackValidations {
 	public final static List<PrimaryAttackValidation> primaryAttackValidations = List.of(
@@ -55,7 +54,7 @@ final public class PrimaryAttackValidations {
 						return primaryAttack.isMelee() || enemySystem.checkIfWayIsClearToTarget(entity);
 					},
 					(entity, enemySystem) -> {
-						ComponentsMapper.enemy.get(entity).setAiStatus(DODGING);
+						ComponentsMapper.enemy.get(entity).setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
 						enemySystem.invokeEnemyTurn(entity);
 					}));
 }

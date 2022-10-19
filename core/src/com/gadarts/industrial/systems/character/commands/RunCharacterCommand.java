@@ -35,13 +35,11 @@ public class RunCharacterCommand extends CharacterCommand {
 	private static final float MOVEMENT_EPSILON = 0.02F;
 	private static final float OPEN_DOOR_TIME_CONSUME = 1F;
 	private final MapGraphPath path = new MapGraphPath();
-	private MapGraphNode nextNode;
 	private SystemsCommonData systemsCommonData;
 	private MapGraphNode prevNode;
 
 	@Override
 	public void reset( ) {
-		nextNode = null;
 		prevNode = null;
 	}
 
@@ -54,9 +52,9 @@ public class RunCharacterCommand extends CharacterCommand {
 		path.set((MapGraphPath) additionalData);
 		Array<MapGraphNode> nodes = path.nodes;
 		prevNode = nodes.removeIndex(0);
-		nextNode = nodes.get(0);
+		setNextNode(nodes.get(0));
 		MapGraph map = commonData.getMap();
-		return isReachedEndOfPath(map.findConnection(prevNode, nextNode), map);
+		return isReachedEndOfPath(map.findConnection(prevNode, getNextNode()), map);
 	}
 
 	@Override
@@ -105,6 +103,7 @@ public class RunCharacterCommand extends CharacterCommand {
 		boolean done = false;
 		placeCharacterInNextNodeIfCloseEnough(decal);
 		Vector2 characterPosition = auxVector2_3.set(decal.getX(), decal.getZ());
+		MapGraphNode nextNode = getNextNode();
 		if (nextNode == null || characterPosition.dst2(nextNode.getCenterPosition(auxVector2_2)) < MOVEMENT_EPSILON) {
 			done = reachedNodeOfPath(subscribers, character);
 		}
@@ -116,7 +115,7 @@ public class RunCharacterCommand extends CharacterCommand {
 
 	private void placeCharacterInNextNodeIfCloseEnough(Decal decal) {
 		Vector3 decalPos = decal.getPosition();
-		float distanceToNextNode = nextNode.getCenterPosition(auxVector2_1).dst2(decalPos.x, decalPos.z);
+		float distanceToNextNode = getNextNode().getCenterPosition(auxVector2_1).dst2(decalPos.x, decalPos.z);
 		if (distanceToNextNode < CHAR_STEP_SIZE) {
 			placeCharacterInTheNextNode(decal);
 		}
@@ -124,6 +123,7 @@ public class RunCharacterCommand extends CharacterCommand {
 
 	private boolean applyMovementToNextNode(SystemsCommonData systemsCommonData, Entity character) {
 		boolean commandDone = false;
+		MapGraphNode nextNode = getNextNode();
 		if (nextNode.getDoor() != null && ComponentsMapper.door.get(nextNode.getDoor()).getState() != DoorStates.OPEN) {
 			handleDoor(character, nextNode.getDoor());
 			commandDone = true;
@@ -156,22 +156,22 @@ public class RunCharacterCommand extends CharacterCommand {
 	private boolean reachedNodeOfPath(List<CharacterSystemEventsSubscriber> subscribers,
 									  Entity character) {
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onCharacterNodeChanged(character, prevNode, nextNode);
+			subscriber.onCharacterNodeChanged(character, prevNode, getNextNode());
 		}
-		prevNode = nextNode;
-		nextNode = path.getNextOf(nextNode);
-		setDestinationNode(nextNode);
+		prevNode = getNextNode();
+		setNextNode(path.getNextOf(getNextNode()));
+		setDestinationNode(getNextNode());
 		consumeTurnTime(character, ComponentsMapper.character.get(character).getSkills().getAgility());
 		MapGraph map = systemsCommonData.getMap();
-		return isReachedEndOfPath(map.findConnection(prevNode, nextNode), map);
+		return isReachedEndOfPath(map.findConnection(prevNode, getNextNode()), map);
 	}
 
 
 	private boolean isReachedEndOfPath(MapGraphConnection connection, MapGraph map) {
-		return nextNode == null
+		return getNextNode() == null
 				|| connection == null
 				|| connection.getCost() != CLEAN.getCostValue()
-				|| !map.checkIfNodeIsFreeOfAliveCharacters(nextNode);
+				|| !map.checkIfNodeIsFreeOfAliveCharacters(getNextNode());
 	}
 
 	private void translateCharacter(CharacterDecalComponent characterDecalComponent, SystemsCommonData systemsCommonData) {
@@ -187,7 +187,7 @@ public class RunCharacterCommand extends CharacterCommand {
 	}
 
 	private void placeCharacterInTheNextNode(Decal decal) {
-		Vector3 centerPos = nextNode.getCenterPosition(auxVector3_1);
+		Vector3 centerPos = getNextNode().getCenterPosition(auxVector3_1);
 		decal.setPosition(auxVector3_2.set(centerPos.x, centerPos.y + CharacterTypes.BILLBOARD_Y, centerPos.z));
 	}
 }
