@@ -6,11 +6,9 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
@@ -31,8 +29,6 @@ import com.gadarts.industrial.components.character.CharacterData;
 import com.gadarts.industrial.components.character.*;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.player.PlayerComponent;
-import com.gadarts.industrial.components.sd.RelatedDecal;
-import com.gadarts.industrial.components.sd.SimpleDecalComponent;
 import com.gadarts.industrial.shared.WallCreator;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
@@ -54,7 +50,6 @@ import com.gadarts.industrial.shared.model.map.MapNodeData;
 import com.gadarts.industrial.shared.model.map.NodeWalls;
 import com.gadarts.industrial.shared.model.map.Wall;
 import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
-import com.gadarts.industrial.systems.enemy.EnemySystem;
 import com.gadarts.industrial.utils.EntityBuilder;
 import com.gadarts.industrial.utils.GameUtils;
 import com.google.gson.Gson;
@@ -63,17 +58,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.awt.*;
-import java.util.List;
 import java.util.*;
 import java.util.stream.IntStream;
 
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
 import static com.gadarts.industrial.components.ComponentsMapper.*;
 import static com.gadarts.industrial.shared.assets.Assets.*;
-import static com.gadarts.industrial.shared.assets.Assets.Atlases.*;
-import static com.gadarts.industrial.shared.assets.Assets.SurfaceTextures.BLANK;
+import static com.gadarts.industrial.shared.assets.Assets.Atlases.GUARD_BOT;
+import static com.gadarts.industrial.shared.assets.Assets.Atlases.PLAYER_GENERIC;
 import static com.gadarts.industrial.shared.assets.Assets.SurfaceTextures.MISSING;
-import static com.gadarts.industrial.shared.assets.Assets.UiTextures.*;
 import static com.gadarts.industrial.shared.assets.MapJsonKeys.*;
 import static com.gadarts.industrial.shared.model.characters.CharacterTypes.*;
 import static com.gadarts.industrial.shared.model.characters.Direction.NORTH;
@@ -749,44 +742,8 @@ public class MapBuilder implements Disposable {
 		Vector3 position = inflateCharacterPosition(charJsonObject, mapGraph);
 		CharacterData data = inflateCharData(charJsonObject, type, position);
 		addCharBaseComponents(b, data, type, type.getAtlasDefinition(), type.getPrimaryAttack());
-		addEnemySkillFlower(type, b, position, mapGraph);
-		initializeEnemy(position, b.finishAndAddToEngine());
-	}
-
-	private void initializeEnemy(Vector3 position, Entity enemy) {
-		character.get(enemy).setTarget(engine.getEntitiesFor(Family.all(PlayerComponent.class).get()).first());
-		initializeEnemyFlower(position, enemy);
-	}
-
-	private void addEnemySkillFlower(Enemies type, EntityBuilder builder, Vector3 position, MapGraph mapGraph) {
-		Texture skillFlowerTexture = assetsManager.getTexture(SKILL_FLOWER_CENTER_IDLE);
-		MapGraphNode node = mapGraph.getNode(position);
-		position.y = node.getHeight() + type.getHeight() + EnemySystem.SKILL_FLOWER_HEIGHT_RELATIVE;
-		builder.addSimpleDecalComponent(position, skillFlowerTexture, true, true);
-		builder.addFlowerIconComponent();
-	}
-
-	private void initializeEnemyFlower(Vector3 position, Entity enemy) {
-		SimpleDecalComponent simpleDecalComponent = enemy.getComponent(SimpleDecalComponent.class);
-		List.of(SKILL_FLOWER_1,
-				SKILL_FLOWER_2,
-				SKILL_FLOWER_3,
-				SKILL_FLOWER_4,
-				SKILL_FLOWER_5,
-				SKILL_FLOWER_6,
-				SKILL_FLOWER_7,
-				SKILL_FLOWER_8,
-				ICON_IDLE).forEach(flower -> addFlowerRelatedDecal(simpleDecalComponent, flower, position));
-	}
-
-	private void addFlowerRelatedDecal(final SimpleDecalComponent simpleDecalComponent,
-									   final UiTextures skillFlower,
-									   final Vector3 position) {
-		TextureRegion textureRegion = new TextureRegion(assetsManager.getTexture(skillFlower));
-		RelatedDecal skillFlowerDecal = RelatedDecal.newDecal(textureRegion, true);
-		skillFlowerDecal.setScale(BILLBOARD_SCALE);
-		skillFlowerDecal.setPosition(position);
-		simpleDecalComponent.addRelatedDecal(skillFlowerDecal);
+		Entity entity = b.finishAndAddToEngine();
+		character.get(entity).setTarget(engine.getEntitiesFor(Family.all(PlayerComponent.class).get()).first());
 	}
 
 	private CharacterData inflateCharData(JsonObject characterJsonObject, Enemies type, Vector3 pos) {

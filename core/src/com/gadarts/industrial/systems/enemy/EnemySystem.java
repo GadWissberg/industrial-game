@@ -6,7 +6,6 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.GridPoint2;
@@ -21,7 +20,6 @@ import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
-import com.gadarts.industrial.components.sd.RelatedDecal;
 import com.gadarts.industrial.components.sd.SimpleDecalComponent;
 import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.shared.assets.Assets;
@@ -51,7 +49,6 @@ import static com.gadarts.industrial.DefaultGameSettings.PARALYZED_ENEMIES;
 import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.shared.assets.Assets.Sounds;
-import static com.gadarts.industrial.shared.assets.Assets.UiTextures;
 import static com.gadarts.industrial.systems.enemy.EnemyAiStatus.*;
 
 public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> implements
@@ -59,7 +56,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		TurnsSystemEventsSubscriber,
 		RenderSystemEventsSubscriber,
 		AmbSystemEventsSubscriber {
-	public static final float SKILL_FLOWER_HEIGHT_RELATIVE = 1F;
 	private static final long AMB_SOUND_INTERVAL_MIN = 10L;
 	private static final long AMB_SOUND_INTERVAL_MAX = 50L;
 	private final static Vector2 auxVector2_1 = new Vector2();
@@ -81,8 +77,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private final PathPlanHandler pathPlanner;
 	private ImmutableArray<Entity> enemies;
 	private long nextAmbSoundTime;
-	private TextureRegion iconAttack;
-	private TextureRegion iconSearching;
 	private ParticleEffect smokeEffect;
 
 	public EnemySystem(SystemsCommonData systemsCommonData,
@@ -159,23 +153,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(entity);
 		Vector3 position = characterDecalComponent.getDecal().getPosition();
 		SimpleDecalComponent simpleDecalComponent = ComponentsMapper.simpleDecal.get(entity);
-		updateFlowerPosition(entity, characterDecalComponent, position, simpleDecalComponent);
-	}
-
-	private void updateFlowerPosition(Entity entity,
-									  CharacterDecalComponent characterDecalComponent,
-									  Vector3 position,
-									  SimpleDecalComponent simpleDecalComponent) {
-		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		MapGraphNode node = systemsCommonData.getMap().getNode(characterDecalComponent.getNodePosition(auxVector2_1));
-		float height = ComponentsMapper.enemy.get(entity).getEnemyDefinition().getHeight() + node.getHeight();
-		simpleDecalComponent.getDecal().setPosition(position.x, height + SKILL_FLOWER_HEIGHT_RELATIVE, position.z);
-		List<RelatedDecal> relatedDecals = simpleDecalComponent.getRelatedDecals();
-		for (RelatedDecal decal : relatedDecals) {
-			if (decal.isVisible()) {
-				decal.setPosition(position.x, height + SKILL_FLOWER_HEIGHT_RELATIVE, position.z);
-			}
-		}
 	}
 
 	private void invokeEnemyAttackBehaviour(final Entity enemy) {
@@ -233,7 +210,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private void applySearchingModeOnEnemy(final Entity enemy) {
-		updateStatusIcon(enemy, iconSearching);
 		MapGraph map = getSystemsCommonData().getMap();
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		enemyComponent.setAiStatus(SEARCHING);
@@ -496,17 +472,9 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		EnemyAiStatus prevAiStatus = enemyComponent.getAiStatus();
 		enemyComponent.setAiStatus(ATTACKING);
 		getSystemsCommonData().getSoundPlayer().playSound(enemyComponent.getEnemyDefinition().getAwakeSound());
-		updateStatusIcon(enemy, iconAttack);
 		for (EnemySystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onEnemyAwaken(enemy, prevAiStatus);
 		}
-	}
-
-	private void updateStatusIcon(Entity enemy, TextureRegion iconTexture) {
-		if (ComponentsMapper.character.get(enemy).getSkills().getHealthData().getHp() <= 0) return;
-		SimpleDecalComponent simpleDecalComponent = ComponentsMapper.simpleDecal.get(enemy);
-		List<RelatedDecal> relatedDecals = simpleDecalComponent.getRelatedDecals();
-		relatedDecals.get(relatedDecals.size() - 1).setTextureRegion(iconTexture);
 	}
 
 	@Override
@@ -583,8 +551,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	@Override
 	public void initializeData( ) {
-		iconAttack = new TextureRegion(getAssetsManager().getTexture(UiTextures.ICON_ATTACK));
-		iconSearching = new TextureRegion(getAssetsManager().getTexture(UiTextures.ICON_LOOKING_FOR));
 		smokeEffect = getAssetsManager().getParticleEffect(Assets.ParticleEffects.SMOKE);
 	}
 

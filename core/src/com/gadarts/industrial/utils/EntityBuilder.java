@@ -81,14 +81,6 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addFlowerIconComponent( ) {
-		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
-		FlowerIconComponent component = engine.createComponent(FlowerIconComponent.class);
-		component.init(TimeUtils.millis());
-		currentEntity.add(component);
-		return instance;
-	}
-
 	public EntityBuilder addAnimationComponent(final float frameDuration,
 											   final Animation<TextureAtlas.AtlasRegion> animation) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
