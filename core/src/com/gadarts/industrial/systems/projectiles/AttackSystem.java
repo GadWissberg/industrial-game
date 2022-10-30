@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.BulletComponent;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -17,15 +18,15 @@ import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.character.OnGoingAttack;
 import com.gadarts.industrial.components.collision.CollisionComponent;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
+import com.gadarts.industrial.components.mi.AdditionalRenderData;
 import com.gadarts.industrial.components.mi.GameModelInstance;
-import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.model.characters.CharacterTypes;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
-import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.ModelInstancePools;
@@ -45,6 +46,8 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 	private static final float JACKET_FLY_AWAY_MIN_DEGREE = 45F;
 	private static final float JACKET_FLY_AWAY_MAX_DEGREE_TO_ADD = 90F;
 	private static final float JACKET_FLY_AWAY_DEC = 0.9F;
+	private static final BoundingBox auxBoundingBox1 = new BoundingBox();
+	private static final BoundingBox auxBoundingBox2 = new BoundingBox();
 	private ImmutableArray<Entity> bullets;
 	private ImmutableArray<Entity> collidables;
 
@@ -71,21 +74,26 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		PlayerWeaponsDefinitions definition = (PlayerWeaponsDefinitions) selectedWeapon.getDefinition();
 		WeaponsDefinitions weaponDefinition = definition.getWeaponsDefinition();
 		getSystemsCommonData().getSoundPlayer().playSound(weaponDefinition.getEngageSound());
-		primaryAttackEngaged(character, direction, charPos, PlayerComponent.PLAYER_HEIGHT, weaponDefinition);
+		primaryAttackEngaged(
+				character,
+				direction,
+				charPos,
+				CharacterTypes.PLAYER.getDefinitions()[0].getBulletCreationHeight(),
+				weaponDefinition);
 	}
 
 	private void enemyEngagesPrimaryAttack(final Entity character, final Vector3 direction, final Vector3 charPos) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
 		getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.ATTACK_ENERGY_BALL);
-		float height = ComponentsMapper.enemy.get(character).getEnemyDefinition().getHeight();
+		float bulletCreationHeight = ComponentsMapper.enemy.get(character).getEnemyDefinition().getBulletCreationHeight();
 		WeaponsDefinitions primaryAttack = enemyComp.getEnemyDefinition().getPrimaryAttack();
-		primaryAttackEngaged(character, direction, charPos, height, primaryAttack);
+		primaryAttackEngaged(character, direction, charPos, bulletCreationHeight, primaryAttack);
 	}
 
 	private void primaryAttackEngaged(Entity character,
 									  Vector3 direction,
 									  Vector3 charPos,
-									  float height,
+									  float bulletCreationHeight,
 									  WeaponsDefinitions primaryAttack) {
 		if (primaryAttack.isMelee()) {
 			subscribers.forEach(subscriber -> {
@@ -93,7 +101,7 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 				subscriber.onMeleeAttackAppliedOnTarget(character, target, primaryAttack);
 			});
 		} else {
-			createBullet(character, direction, charPos, primaryAttack, height);
+			createBullet(character, direction, charPos, primaryAttack, bulletCreationHeight);
 		}
 	}
 
@@ -101,8 +109,8 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 							  Vector3 direction,
 							  Vector3 charPos,
 							  WeaponsDefinitions weaponDefinition,
-							  float characterHeight) {
-		charPos.y += characterHeight / 2F;
+							  float bulletCreationHeight) {
+		charPos.y += bulletCreationHeight;
 		Integer damagePoints = weaponDefinition.getDamage();
 		GameAssetsManager assetsManager = getAssetsManager();
 		Assets.Models modelDefinition = weaponDefinition.getModelDefinition();
@@ -158,8 +166,7 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		if (pos.x < 0 || pos.x >= map.getWidth() || pos.z < 0 || pos.z >= map.getDepth()) return true;
 
 		MapGraphNode node = map.getNode(pos);
-		MapNodesTypes nodeType = node.getType();
-		if (nodeType != MapNodesTypes.PASSABLE_NODE || node.getHeight() >= pos.y) {
+		if (node.getHeight() >= pos.y) {
 			onCollisionWithWall(bullet, node);
 			return true;
 		}
@@ -209,8 +216,19 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 	private boolean checkCollision(GameModelInstance gameModelInstance, Entity collidable) {
 		if (ComponentsMapper.characterDecal.has(collidable)) {
 			return checkCollisionWithCharacter(gameModelInstance, collidable);
+		} else if (ComponentsMapper.environmentObject.has(collidable)) {
+			return checkCollisionWithEnvObject(gameModelInstance, collidable);
 		}
 		return false;
+	}
+
+	private boolean checkCollisionWithEnvObject(GameModelInstance gameModelInstance, Entity collidable) {
+		GameModelInstance envModelInstance = ComponentsMapper.modelInstance.get(collidable).getModelInstance();
+		AdditionalRenderData envRenderData = envModelInstance.getAdditionalRenderData();
+		BoundingBox collidableBoundingBox = envRenderData.getBoundingBox(auxBoundingBox1).mul(envModelInstance.transform);
+		AdditionalRenderData bulletRenderData = gameModelInstance.getAdditionalRenderData();
+		BoundingBox bulletBoundingBox = bulletRenderData.getBoundingBox(auxBoundingBox2).mul(gameModelInstance.transform);
+		return collidableBoundingBox.intersects(bulletBoundingBox);
 	}
 
 	private void handleCollisionsWithOtherEntities(GameModelInstance gameModelInstance, Entity bullet) {
