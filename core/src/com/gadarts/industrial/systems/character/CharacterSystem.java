@@ -320,7 +320,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			subscriber.onCharacterCommandDone(character, lastCommand);
 		}
 		if (informTurnTimeLeftStatus) {
-			if (characterComponent.getTurnTimeLeft() > 0) {
+			if (characterComponent.getTurnTimeLeft() > 0 && characterComponent.getSkills().getHealthData().getHp() > 0) {
 				subscribers.forEach(subscriber -> subscriber.onCharacterStillHasTime(character));
 			} else {
 				subscribers.forEach(subscriber -> subscriber.onCharacterFinishedTurn(character));

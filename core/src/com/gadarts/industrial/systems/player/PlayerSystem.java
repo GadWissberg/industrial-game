@@ -13,7 +13,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.Queue;
-import com.gadarts.industrial.DefaultGameSettings;
+import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.*;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
@@ -39,6 +39,7 @@ import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefini
 import com.gadarts.industrial.systems.character.commands.CommandStates;
 import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
+import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
@@ -58,7 +59,8 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		RenderSystemEventsSubscriber,
 		AmbSystemEventsSubscriber,
 		TurnsSystemEventsSubscriber,
-		EnemySystemEventsSubscriber {
+		EnemySystemEventsSubscriber,
+		InputSystemEventsSubscriber {
 	public static final float LOS_MAX = 24F;
 	public static final int LOS_CHECK_DELTA = 5;
 	private static final Vector2 auxVector2_1 = new Vector2();
@@ -72,7 +74,13 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private PathPlanHandler playerPathPlanner;
 	private ImmutableArray<Entity> ambObjects;
 	private ImmutableArray<Entity> pickups;
-	private ImmutableArray<Entity> triggers;
+
+	@Override
+	public void spaceKeyPressed( ) {
+		if (ComponentsMapper.player.has(getSystemsCommonData().getTurnsQueue().first())) {
+			notifyPlayerFinishedTurn();
+		}
+	}
 
 	public PlayerSystem(SystemsCommonData systemsCommonData,
 						GameAssetsManager assetsManager,
@@ -191,7 +199,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		if (nearbyNode != null) {
 			Entity nearbyNodeEntity = nearbyNode.getEntity();
 			if (nearbyNodeEntity != null) {
-				result = !DefaultGameSettings.DISABLE_FOW
+				result = !DebugSettings.DISABLE_FOW
 						&& ComponentsMapper.modelInstance.has(nearbyNodeEntity)
 						&& ComponentsMapper.modelInstance.get(nearbyNodeEntity).getFlatColor() != null;
 			}
@@ -237,7 +245,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(currentNode.getEntity());
 			if (!floorComponent.isRevealCalculated()) {
 				if (modelInstanceComponent != null) {
-					modelInstanceComponent.setFlatColor(!DefaultGameSettings.DISABLE_FOW && blocked ? Color.BLACK : null);
+					modelInstanceComponent.setFlatColor(!DebugSettings.DISABLE_FOW && blocked ? Color.BLACK : null);
 				}
 				floorComponent.setFogOfWarSignature(blocked ? 16 : 0);
 				floorComponent.setRevealCalculated(true);
@@ -522,15 +530,14 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		getSystemsCommonData().getStorage().setSelectedWeapon(weapon);
 		ambObjects = engine.getEntitiesFor(Family.all(EnvironmentObjectComponent.class).exclude(DoorComponent.class).get());
 		pickups = engine.getEntitiesFor(Family.all(PickUpComponent.class).get());
-		triggers = engine.getEntitiesFor(Family.all(TriggerComponent.class).get());
 	}
 
 	private Weapon initializeStartingWeapon( ) {
 		Weapon weapon = Pools.obtain(Weapon.class);
-		Assets.UiTextures symbol = DefaultGameSettings.STARTING_WEAPON.getSymbol();
+		Assets.UiTextures symbol = DebugSettings.STARTING_WEAPON.getSymbol();
 		GameAssetsManager am = getAssetsManager();
-		Texture image = DefaultGameSettings.STARTING_WEAPON.getSymbol() != null ? am.getTexture(symbol) : null;
-		weapon.init(DefaultGameSettings.STARTING_WEAPON, 0, 0, image);
+		Texture image = DebugSettings.STARTING_WEAPON.getSymbol() != null ? am.getTexture(symbol) : null;
+		weapon.init(DebugSettings.STARTING_WEAPON, 0, 0, image);
 		return weapon;
 	}
 

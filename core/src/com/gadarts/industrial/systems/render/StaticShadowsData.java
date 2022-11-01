@@ -7,7 +7,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
-import com.gadarts.industrial.DefaultGameSettings;
+import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import lombok.Getter;
@@ -38,7 +38,7 @@ public class StaticShadowsData implements Disposable {
 
 	@Override
 	public void dispose( ) {
-		if (!DefaultGameSettings.ALLOW_STATIC_SHADOWS) return;
+		if (!DebugSettings.ALLOW_STATIC_SHADOWS) return;
 		depthShaderProgram.dispose();
 		shadowsShaderProgram.dispose();
 		shadowFrameBuffer.dispose();

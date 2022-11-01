@@ -187,22 +187,31 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		return checkIfNodeIsFreeOfAliveCharacters(destinationNode, null);
 	}
 
+	public boolean checkIfNodeIsFreeOfCharacters(MapGraphNode destinationNode) {
+		return checkIfNodeIsFreeOfCharactersAndClosedDoors(
+				destinationNode,
+				null,
+				false,
+				false);
+	}
+
 	public boolean checkIfNodeIsFreeOfAliveCharacters(MapGraphNode destinationNode, MapGraphNode pathFinalNode) {
-		return checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(destinationNode, pathFinalNode, false);
+		return checkIfNodeIsFreeOfCharactersAndClosedDoors(destinationNode, pathFinalNode, false, true);
 	}
 
 	public boolean checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(GridPoint2 destinationNode) {
 		MapGraphNode node = getNode(destinationNode);
-		return checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(node, null, true);
+		return checkIfNodeIsFreeOfCharactersAndClosedDoors(node, null, true, true);
 	}
 
 	public boolean checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(MapGraphNode destinationNode) {
-		return checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(destinationNode, null, true);
+		return checkIfNodeIsFreeOfCharactersAndClosedDoors(destinationNode, null, true, true);
 	}
 
-	public boolean checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(MapGraphNode destinationNode,
-																	MapGraphNode pathFinalNode,
-																	boolean includeClosedDoors) {
+	public boolean checkIfNodeIsFreeOfCharactersAndClosedDoors(MapGraphNode destinationNode,
+															   MapGraphNode pathFinalNode,
+															   boolean includeClosedDoors,
+															   boolean alive) {
 		Entity door = destinationNode.getDoor();
 		if (pathFinalNode != null && pathFinalNode.equals(destinationNode)) return true;
 		if (includeClosedDoors
@@ -212,7 +221,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		for (Entity c : characterEntities) {
 			MapGraphNode node = getNode(ComponentsMapper.characterDecal.get(c).getNodePosition(auxVector2));
 			int hp = ComponentsMapper.character.get(c).getSkills().getHealthData().getHp();
-			if (hp > 0 && node.equals(destinationNode)) {
+			if ((!alive || hp > 0) && node.equals(destinationNode)) {
 				return false;
 			}
 		}

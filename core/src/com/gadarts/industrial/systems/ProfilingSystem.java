@@ -11,7 +11,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.StringBuilder;
-import com.gadarts.industrial.DefaultGameSettings;
+import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.console.commands.ConsoleCommandParameter;
@@ -110,7 +110,7 @@ public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 	}
 
 	private void setGlProfiler( ) {
-		if (Gdx.app.getLogLevel() == Application.LOG_DEBUG && DefaultGameSettings.SHOW_GL_PROFILING) {
+		if (Gdx.app.getLogLevel() == Application.LOG_DEBUG && DebugSettings.SHOW_GL_PROFILING) {
 			glProfiler.enable();
 		}
 	}

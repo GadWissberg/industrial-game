@@ -17,7 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.gadarts.industrial.DefaultGameSettings;
+import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.floor.FloorComponent;
@@ -47,7 +47,7 @@ import squidpony.squidmath.Coord3D;
 import java.util.ArrayDeque;
 
 import static com.badlogic.gdx.Application.LOG_DEBUG;
-import static com.gadarts.industrial.DefaultGameSettings.FULL_SCREEN;
+import static com.gadarts.industrial.DebugSettings.FULL_SCREEN;
 import static com.gadarts.industrial.Industrial.*;
 import static com.gadarts.industrial.systems.SystemsCommonData.TABLE_NAME_HUD;
 
@@ -59,7 +59,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final String BUTTON_NAME_STORAGE = "button_storage";
 	private static final float BUTTON_PADDING = 40;
-	private boolean showBorders = DefaultGameSettings.DISPLAY_HUD_OUTLINES;
+	private boolean showBorders = DebugSettings.DISPLAY_HUD_OUTLINES;
 	@Getter
 	private MenuHandler menuHandler;
 	private CursorHandler cursorHandler;
@@ -144,7 +144,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		GameStage stage;
 		stage = new GameStage(new FitViewport(width, height), getSystemsCommonData().getSoundPlayer());
 		getSystemsCommonData().setUiStage(stage);
-		stage.setDebugAll(DefaultGameSettings.DISPLAY_HUD_OUTLINES);
+		stage.setDebugAll(DebugSettings.DISPLAY_HUD_OUTLINES);
 	}
 
 	@Override

@@ -10,7 +10,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Disposable;
-import com.gadarts.industrial.DefaultGameSettings;
+import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import lombok.Getter;
@@ -35,7 +35,7 @@ public class CursorHandler implements Disposable {
 
 	public CursorHandler(SystemsCommonData systemsCommonData) {
 		this.systemsCommonData = systemsCommonData;
-		if (DefaultGameSettings.DISPLAY_CURSOR_POSITION) {
+		if (DebugSettings.DISPLAY_CURSOR_POSITION) {
 			cursorCellPositionLabelFont = new BitmapFont();
 			Label.LabelStyle style = new Label.LabelStyle(cursorCellPositionLabelFont, POSITION_LABEL_COLOR);
 			cursorCellPositionLabel = new Label(null, style);

@@ -21,7 +21,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.gadarts.industrial.DefaultGameSettings;
+import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.*;
 import com.gadarts.industrial.components.animation.AnimationComponent;
@@ -84,7 +84,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private final Environment environment;
 	private final Color ambientColor;
 	private ModelsShaderProvider shaderProvider;
-	private boolean frustumCull = !DefaultGameSettings.DISABLE_FRUSTUM_CULLING;
+	private boolean frustumCull = !DebugSettings.DISABLE_FRUSTUM_CULLING;
 	private GameCameraGroupStrategy regularDecalGroupStrategy;
 	private OutlineGroupStrategy outlineDecalGroupStrategy;
 	private boolean take;
@@ -167,7 +167,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 				shaderProvider,
 				staticShadowsData, families.getStaticLightsEntities(),
 				regularDecalGroupStrategy);
-		if (DefaultGameSettings.ALLOW_STATIC_SHADOWS) {
+		if (DebugSettings.ALLOW_STATIC_SHADOWS) {
 			createShadowMaps();
 		}
 	}
@@ -190,7 +190,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private boolean isInFrustum(final Camera camera, ModelInstanceComponent modelInstanceComponent) {
-		if (!DefaultGameSettings.DISABLE_FRUSTUM_CULLING) return true;
+		if (!DebugSettings.DISABLE_FRUSTUM_CULLING) return true;
 		Vector3 position = modelInstanceComponent.getModelInstance().transform.getTranslation(auxVector3_1);
 		AdditionalRenderData additionalRenderData = modelInstanceComponent.getModelInstance().getAdditionalRenderData();
 		BoundingBox boundingBox = additionalRenderData.getBoundingBox(auxBoundingBox);
@@ -244,7 +244,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private void applyLightsOnModel(final ModelInstanceComponent mic) {
 		List<Entity> nearbyLights = mic.getModelInstance().getAdditionalRenderData().getNearbyLights();
 		nearbyLights.clear();
-		if (!DefaultGameSettings.DISABLE_LIGHTS) {
+		if (!DebugSettings.DISABLE_LIGHTS) {
 			if (mic.getModelInstance().getAdditionalRenderData().isAffectedByLight()) {
 				for (Entity light : families.getShadowlessLightsEntities()) {
 					addLightIfClose(mic.getModelInstance(), nearbyLights, light);
@@ -368,7 +368,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private void renderShadows( ) {
-		if (!DefaultGameSettings.ALLOW_STATIC_SHADOWS) return;
+		if (!DebugSettings.ALLOW_STATIC_SHADOWS) return;
 		GameFrameBuffer shadowFrameBuffer = staticShadowsData.getShadowFrameBuffer();
 		shadowFrameBuffer.begin();
 		resetDisplay(Color.BLACK, 0F);
@@ -616,7 +616,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private void renderCharacterDecal(Entity entity, Color color, float alpha) {
-		if (DefaultGameSettings.HIDE_CHARACTERS) return;
+		if (DebugSettings.HIDE_CHARACTERS) return;
 
 		Decal decal = ComponentsMapper.characterDecal.get(entity).getDecal();
 		Vector3 decalPosition = decal.getPosition();

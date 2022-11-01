@@ -19,12 +19,12 @@ public class Industrial extends Game {
 
 	@Override
 	public void create( ) {
-		if (DefaultGameSettings.FULL_SCREEN) {
+		if (DebugSettings.FULL_SCREEN) {
 			Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 		} else {
 			Gdx.graphics.setWindowedMode(WINDOWED_RESOLUTION_WIDTH, WINDOWED_RESOLUTION_HEIGHT);
 		}
-		Gdx.app.setLogLevel(DefaultGameSettings.LOG_LEVEL);
+		Gdx.app.setLogLevel(DebugSettings.LOG_LEVEL);
 		generalHandler.init();
 		setScreen(new InGameScreen(generalHandler));
 	}

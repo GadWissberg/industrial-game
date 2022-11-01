@@ -7,8 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
-import com.gadarts.industrial.DefaultGameSettings;
-import com.gadarts.industrial.Industrial;
+import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.ui.GameStage;
@@ -70,7 +69,7 @@ public class MenuHandlerImpl implements MenuHandler {
 		table.add(new Image(assetsManager.getTexture(Assets.UiTextures.LOGO))).row();
 		applyMenuOptions(MainMenuOptions.values(), assetsManager, systemsCommonData);
 		table.toFront();
-		toggleMenu(DefaultGameSettings.MENU_ON_STARTUP);
+		toggleMenu(DebugSettings.MENU_ON_STARTUP);
 	}
 
 	public void applyMenuOptions(MenuOptionDefinition[] options,

@@ -4,7 +4,7 @@ import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 
 import static com.badlogic.gdx.Application.LOG_DEBUG;
 
-public final class DefaultGameSettings {
+public final class DebugSettings {
 	public static final boolean HIDE_GROUND = false;
 	public static final boolean HIDE_ENEMIES = false;
 	public static final boolean HIDE_CHARACTERS = false;
@@ -26,4 +26,5 @@ public final class DefaultGameSettings {
 	public static final boolean ALLOW_STATIC_SHADOWS = true;
 	public static final boolean DISABLE_FOW = false;
 	public static final boolean PARALYZED_ENEMIES = false;
+	public static final boolean LOW_HP_FOR_ENEMIES = true;
 }

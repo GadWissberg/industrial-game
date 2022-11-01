@@ -20,8 +20,8 @@ import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 
-import static com.gadarts.industrial.DefaultGameSettings.DEBUG_INPUT;
-import static com.gadarts.industrial.DefaultGameSettings.FULL_SCREEN;
+import static com.gadarts.industrial.DebugSettings.DEBUG_INPUT;
+import static com.gadarts.industrial.DebugSettings.FULL_SCREEN;
 import static com.gadarts.industrial.Industrial.*;
 import static com.gadarts.industrial.shared.model.CameraUtils.*;
 

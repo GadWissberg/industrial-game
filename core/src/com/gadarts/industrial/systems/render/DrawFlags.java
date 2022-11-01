@@ -1,6 +1,6 @@
 package com.gadarts.industrial.systems.render;
 
-import com.gadarts.industrial.DefaultGameSettings;
+import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.console.commands.ConsoleCommandParameter;
 import com.gadarts.industrial.console.commands.types.SkipRenderCommand;
 import lombok.Getter;
@@ -12,10 +12,10 @@ import java.util.Map;
 @Setter
 public class DrawFlags {
 
-	private boolean drawGround = !DefaultGameSettings.HIDE_GROUND;
-	private boolean drawEnemy = !DefaultGameSettings.HIDE_ENEMIES;
-	private boolean drawEnv = !DefaultGameSettings.HIDE_ENVIRONMENT_OBJECTS;
-	private boolean drawCursor = !DefaultGameSettings.HIDE_CURSOR;
+	private boolean drawGround = !DebugSettings.HIDE_GROUND;
+	private boolean drawEnemy = !DebugSettings.HIDE_ENEMIES;
+	private boolean drawEnv = !DebugSettings.HIDE_ENVIRONMENT_OBJECTS;
+	private boolean drawCursor = !DebugSettings.HIDE_CURSOR;
 
 	void applySkipRenderCommand(final ConsoleCommandParameter parameter) {
 		String alias = parameter.getAlias();

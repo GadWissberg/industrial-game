@@ -21,7 +21,7 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Pools;
-import com.gadarts.industrial.DefaultGameSettings;
+import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.TriggerComponent;
@@ -699,14 +699,14 @@ public class MapBuilder implements Disposable {
 				Direction.values()[characterJsonObject.get(DIRECTION).getAsInt()],
 				skills,
 				auxCharacterSoundData);
-		Atlases atlas = DefaultGameSettings.STARTING_WEAPON.getRelatedAtlas();
+		Atlases atlas = DebugSettings.STARTING_WEAPON.getRelatedAtlas();
 
 		addCharBaseComponents(
 				builder,
 				data,
 				CharacterTypes.PLAYER.getDefinitions()[0],
 				atlas,
-				DefaultGameSettings.STARTING_WEAPON.getWeaponsDefinition());
+				DebugSettings.STARTING_WEAPON.getWeaponsDefinition());
 
 		builder.finishAndAddToEngine();
 	}
@@ -740,16 +740,16 @@ public class MapBuilder implements Disposable {
 		Enemies type = inflateEnemyType(charJsonObject);
 		EntityBuilder b = beginBuildingEntity(engine).addEnemyComponent(type, inflateEnemyBulletFrames(type));
 		Vector3 position = inflateCharacterPosition(charJsonObject, mapGraph);
-		CharacterData data = inflateCharData(charJsonObject, type, position);
+		CharacterData data = inflateEnemyCharData(charJsonObject, type, position);
 		addCharBaseComponents(b, data, type, type.getAtlasDefinition(), type.getPrimaryAttack());
 		Entity entity = b.finishAndAddToEngine();
 		character.get(entity).setTarget(engine.getEntitiesFor(Family.all(PlayerComponent.class).get()).first());
 	}
 
-	private CharacterData inflateCharData(JsonObject characterJsonObject, Enemies type, Vector3 pos) {
+	private CharacterData inflateEnemyCharData(JsonObject characterJsonObject, Enemies type, Vector3 pos) {
 		auxCharacterSoundData.set(type.getPainSound(), type.getDeathSound(), type.getStepSound());
 		CharacterSkillsParameters skills = new CharacterSkillsParameters(
-				type.getHealth(),
+				!DebugSettings.LOW_HP_FOR_ENEMIES ? type.getHealth() : 1,
 				type.getAgility(),
 				type.getAccuracy() != null ? type.getAccuracy() : null);
 		Direction direction = Direction.values()[characterJsonObject.get(DIRECTION).getAsInt()];

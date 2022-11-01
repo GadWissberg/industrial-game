@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
-import com.gadarts.industrial.DefaultGameSettings;
+import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.systems.GameSystem;
@@ -55,14 +55,14 @@ public class InputSystem extends GameSystem<InputSystemEventsSubscriber> impleme
 	}
 
 	private void clearMultiplexer(InputMultiplexer inputProcessor) {
-		if (!DefaultGameSettings.DEBUG_INPUT) {
+		if (!DebugSettings.DEBUG_INPUT) {
 			inputProcessor.clear();
 		}
 	}
 
 	private void createInputProcessor( ) {
 		InputProcessor input;
-		if (DefaultGameSettings.DEBUG_INPUT) {
+		if (DebugSettings.DEBUG_INPUT) {
 			input = createDebugInput();
 		} else {
 			input = createMultiplexer();
@@ -71,7 +71,7 @@ public class InputSystem extends GameSystem<InputSystemEventsSubscriber> impleme
 	}
 
 	private void addInputProcessor(final InputProcessor inputProcessor) {
-		if (DefaultGameSettings.DEBUG_INPUT) return;
+		if (DebugSettings.DEBUG_INPUT) return;
 		InputMultiplexer inputMultiplexer = (InputMultiplexer) Gdx.input.getInputProcessor();
 		inputMultiplexer.addProcessor(0, inputProcessor);
 	}
@@ -97,7 +97,7 @@ public class InputSystem extends GameSystem<InputSystemEventsSubscriber> impleme
 
 	@Override
 	public boolean keyDown(int keycode) {
-		if (DefaultGameSettings.DEBUG_INPUT) return false;
+		if (DebugSettings.DEBUG_INPUT) return false;
 		for (InputSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.keyDown(keycode);
 		}
@@ -111,12 +111,15 @@ public class InputSystem extends GameSystem<InputSystemEventsSubscriber> impleme
 
 	@Override
 	public boolean keyTyped(char character) {
-		return false;
+		for (InputSystemEventsSubscriber subscriber : subscribers) {
+			subscriber.spaceKeyPressed();
+		}
+		return true;
 	}
 
 	@Override
 	public boolean touchDown(final int screenX, final int screenY, final int pointer, final int button) {
-		if (DefaultGameSettings.DEBUG_INPUT) return false;
+		if (DebugSettings.DEBUG_INPUT) return false;
 		for (InputSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.touchDown(screenX, screenY, button);
 		}
@@ -125,7 +128,7 @@ public class InputSystem extends GameSystem<InputSystemEventsSubscriber> impleme
 
 	@Override
 	public boolean touchUp(final int screenX, final int screenY, final int pointer, final int button) {
-		if (DefaultGameSettings.DEBUG_INPUT) return false;
+		if (DebugSettings.DEBUG_INPUT) return false;
 		for (InputSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.touchUp(screenX, screenY, button);
 		}
@@ -134,7 +137,7 @@ public class InputSystem extends GameSystem<InputSystemEventsSubscriber> impleme
 
 	@Override
 	public boolean touchDragged(final int screenX, final int screenY, final int pointer) {
-		if (DefaultGameSettings.DEBUG_INPUT) return false;
+		if (DebugSettings.DEBUG_INPUT) return false;
 		for (InputSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.touchDragged(screenX, screenY);
 		}
@@ -143,7 +146,7 @@ public class InputSystem extends GameSystem<InputSystemEventsSubscriber> impleme
 
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
-		if (DefaultGameSettings.DEBUG_INPUT) return false;
+		if (DebugSettings.DEBUG_INPUT) return false;
 		for (InputSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.mouseMoved(screenX, screenY);
 		}

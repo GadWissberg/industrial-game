@@ -10,7 +10,7 @@ import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
-import com.gadarts.industrial.DefaultGameSettings;
+import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.systems.render.shaders.ModelsShaderProvider;
 import com.gadarts.industrial.systems.render.shaders.ShadowMapDepthMapShader;
 import com.gadarts.industrial.systems.render.shaders.ShadowMapShader;
@@ -31,7 +31,7 @@ public class RenderBatches implements Disposable {
 					   GameCameraGroupStrategy regularDecalGroupStrategy) {
 		this.modelBatch = new ModelBatch(shaderProvider);
 		this.spriteBatch = new SpriteBatch();
-		if (DefaultGameSettings.ALLOW_STATIC_SHADOWS) {
+		if (DebugSettings.ALLOW_STATIC_SHADOWS) {
 			depthModelBatch = new ModelBatch(new DefaultShaderProvider() {
 				@Override
 				protected Shader createShader(final Renderable renderable) {
@@ -54,7 +54,7 @@ public class RenderBatches implements Disposable {
 		decalBatch.dispose();
 		spriteBatch.dispose();
 		modelBatch.dispose();
-		if (DefaultGameSettings.ALLOW_STATIC_SHADOWS) {
+		if (DebugSettings.ALLOW_STATIC_SHADOWS) {
 			depthModelBatch.dispose();
 			modelBatchShadows.dispose();
 		}

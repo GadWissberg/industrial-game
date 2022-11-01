@@ -22,4 +22,8 @@ public interface InputSystemEventsSubscriber extends SystemEventsSubscriber {
 	default void keyDown(final int keycode) {
 
 	}
+
+	default void spaceKeyPressed( ) {
+
+	}
 }
