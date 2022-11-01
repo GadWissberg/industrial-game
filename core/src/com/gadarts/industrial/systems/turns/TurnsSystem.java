@@ -4,7 +4,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.DoorComponent.DoorStates;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.systems.GameSystem;
@@ -28,6 +27,16 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 		super(systemsCommonData, assetsManager, lifeCycleHandler);
 	}
 
+	private static void decideToRemoveOrAddLast(Queue<Entity> turnsQueue, Entity entity) {
+		if (ComponentsMapper.door.has(entity)) {
+			if (ComponentsMapper.door.get(entity).getState() != DoorStates.CLOSED) {
+				turnsQueue.addLast(entity);
+			}
+		} else {
+			turnsQueue.addLast(entity);
+		}
+	}
+
 	@Override
 	public void update(float deltaTime) {
 		if (currentTurnDone) {
@@ -41,24 +50,18 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 		}
 	}
 
-	private static void decideToRemoveOrAddLast(Queue<Entity> turnsQueue, Entity entity) {
-		if (ComponentsMapper.door.has(entity)) {
-			if (ComponentsMapper.door.get(entity).getState() != DoorStates.CLOSED) {
-				turnsQueue.addLast(entity);
-			}
-		} else {
-			turnsQueue.addLast(entity);
-		}
-	}
-
 	@Override
 	public void onCharacterDies(Entity character) {
 		getSystemsCommonData().getTurnsQueue().removeValue(character, true);
 	}
 
 	@Override
-	public void onDoorOpened(Entity doorEntity) {
-		getSystemsCommonData().getTurnsQueue().addLast(doorEntity);
+	public void onDoorStateChanged(Entity doorEntity, DoorStates oldState, DoorStates newState) {
+		if (newState == DoorStates.OPEN) {
+			getSystemsCommonData().getTurnsQueue().addLast(doorEntity);
+		} else if (newState == DoorStates.CLOSED) {
+			markCurrentTurnAsDone();
+		}
 	}
 
 	@Override
@@ -73,11 +76,6 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 
 	@Override
 	public void onPlayerFinishedTurn( ) {
-		markCurrentTurnAsDone();
-	}
-
-	@Override
-	public void onDoorClosed(Entity doorEntity) {
 		markCurrentTurnAsDone();
 	}
 

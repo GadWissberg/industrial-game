@@ -5,7 +5,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.GridPoint2;
@@ -101,23 +100,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	@Override
-	public void onDoorOpened(Entity doorEntity) {
-		for (Entity enemy : enemies) {
-			awakeEnemyIfTargetSpotted(enemy);
-		}
-	}
-
-	@Override
-	public void onFrameChanged(final Entity entity, final float deltaTime, final TextureAtlas.AtlasRegion newFrame) {
-		SpriteType spriteType = ComponentsMapper.character.get(entity).getCharacterSpriteData().getSpriteType();
-		if (ComponentsMapper.enemy.has(entity)) {
-			if (spriteType == SpriteType.RUN) {
-				onFrameChangedOfRun(entity);
-			}
-		}
-	}
-
-	@Override
 	public void onSpriteTypeChanged(Entity entity, SpriteType spriteType) {
 		if (ComponentsMapper.enemy.has(entity) && spriteType == SpriteType.ATTACK_PRIMARY) {
 			consumeEngineEnergy(entity);
@@ -147,12 +129,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			blocked = checkIfFloorNodesContainObjects(nodes);
 		}
 		return !blocked;
-	}
-
-	private void onFrameChangedOfRun(final Entity entity) {
-		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(entity);
-		Vector3 position = characterDecalComponent.getDecal().getPosition();
-		SimpleDecalComponent simpleDecalComponent = ComponentsMapper.simpleDecal.get(entity);
 	}
 
 	private void invokeEnemyAttackBehaviour(final Entity enemy) {
@@ -461,8 +437,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		Vector2 targetPos = ComponentsMapper.characterDecal.get(target).getNodePosition(auxVector2_2);
 		ComponentsMapper.enemy.get(enemy).setTargetLastVisibleNode(getSystemsCommonData().getMap().getNode(targetPos));
 		int maxDistance = ComponentsMapper.enemy.get(enemy).getEnemyDefinition().getSight().getMaxDistance();
-		boolean targetIsClose = enemyPos.dst2(targetPos) <= Math.pow(maxDistance, 2);
-		return targetIsClose;
+		return enemyPos.dst2(targetPos) <= Math.pow(maxDistance, 2);
 	}
 
 	private void awakeEnemy(final Entity enemy) {
@@ -557,5 +532,16 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	@Override
 	public void dispose( ) {
 
+	}
+
+	@Override
+	public void onDoorStateChanged(Entity doorEntity,
+								   DoorComponent.DoorStates oldState,
+								   DoorComponent.DoorStates newState) {
+		if (newState == DoorComponent.DoorStates.OPEN) {
+			for (Entity enemy : enemies) {
+				awakeEnemyIfTargetSpotted(enemy);
+			}
+		}
 	}
 }

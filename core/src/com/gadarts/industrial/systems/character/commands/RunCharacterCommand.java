@@ -84,7 +84,7 @@ public class RunCharacterCommand extends CharacterCommand {
 		DoorComponent doorComponent = ComponentsMapper.door.get(door);
 		if (doorComponent.getState() == DoorStates.CLOSED) {
 			ComponentsMapper.character.get(character).getCharacterSpriteData().setSpriteType(SpriteType.IDLE);
-			doorComponent.setState(DoorStates.OPENING);
+			doorComponent.requestToOpen(character);
 			consumeTurnTime(character, OPEN_DOOR_TIME_CONSUME);
 		}
 	}

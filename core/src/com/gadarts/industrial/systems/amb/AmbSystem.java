@@ -51,6 +51,10 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 		for (Entity doorEntity : doorEntities) {
 			DoorComponent doorComponent = ComponentsMapper.door.get(doorEntity);
 			DoorStates state = doorComponent.getState();
+			if (doorComponent.getOpenRequestor() != null) {
+				doorComponent.clearOpenRequestor();
+				applyDoorState(doorEntity, doorComponent, OPENING);
+			}
 			if (state == OPENING || state == CLOSING) {
 				handleDoorAction(doorEntity, doorComponent, state == OPENING ? OPEN : CLOSED);
 			}
@@ -69,9 +73,12 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 		}
 	}
 
-	private void applyDoorState(Entity doorEntity, DoorComponent doorComponent, DoorStates state) {
-		doorComponent.setState(state);
-		subscribers.forEach(state == OPEN ? s -> s.onDoorOpened(doorEntity) : s -> s.onDoorClosed(doorEntity));
+	private void applyDoorState(Entity doorEntity, DoorComponent doorComponent, DoorStates newState) {
+		DoorStates oldState = doorComponent.getState();
+		if (oldState == newState) return;
+
+		doorComponent.setState(newState);
+		subscribers.forEach(s -> s.onDoorStateChanged(doorEntity, oldState, newState));
 	}
 
 
@@ -92,7 +99,7 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 			DoorComponent doorComponent = ComponentsMapper.door.get(entity);
 			MapGraph map = getSystemsCommonData().getMap();
 			if (shouldCloseDoor(doorComponent, map)) {
-				closeDoor(doorComponent);
+				closeDoor(doorComponent, entity);
 			} else {
 				doorComponent.setOpenCounter(doorComponent.getOpenCounter() + 1);
 				subscribers.forEach(s -> s.onDoorStayedOpenInTurn(entity));
@@ -105,8 +112,8 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 		return openCounter >= DOOR_OPEN_DURATION && map.checkIfNodeIsFreeOfCharacters(doorComponent.getNode());
 	}
 
-	private void closeDoor(DoorComponent doorComponent) {
+	private void closeDoor(DoorComponent doorComponent, Entity doorEntity) {
 		doorComponent.setOpenCounter(0);
-		doorComponent.setState(CLOSING);
+		applyDoorState(doorEntity, doorComponent, CLOSING);
 	}
 }

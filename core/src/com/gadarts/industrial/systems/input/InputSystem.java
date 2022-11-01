@@ -111,6 +111,7 @@ public class InputSystem extends GameSystem<InputSystemEventsSubscriber> impleme
 
 	@Override
 	public boolean keyTyped(char character) {
+		if (!DebugSettings.SPACE_BAR_SKIPS_PLAYER) return false;
 		for (InputSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.spaceKeyPressed();
 		}

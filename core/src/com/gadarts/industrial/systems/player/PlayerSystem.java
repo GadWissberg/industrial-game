@@ -75,17 +75,17 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private ImmutableArray<Entity> ambObjects;
 	private ImmutableArray<Entity> pickups;
 
+	public PlayerSystem(SystemsCommonData systemsCommonData,
+						GameAssetsManager assetsManager,
+						GameLifeCycleHandler lifeCycleHandler) {
+		super(systemsCommonData, assetsManager, lifeCycleHandler);
+	}
+
 	@Override
 	public void spaceKeyPressed( ) {
 		if (ComponentsMapper.player.has(getSystemsCommonData().getTurnsQueue().first())) {
 			notifyPlayerFinishedTurn();
 		}
-	}
-
-	public PlayerSystem(SystemsCommonData systemsCommonData,
-						GameAssetsManager assetsManager,
-						GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, assetsManager, lifeCycleHandler);
 	}
 
 	private CharacterCommand initializeCommand(CharacterCommandsDefinitions commandDefinition,
@@ -111,13 +111,12 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	@Override
-	public void onDoorOpened(Entity doorEntity) {
-		refreshFogOfWar();
-	}
-
-	@Override
-	public void onDoorClosed(Entity doorEntity) {
-		refreshFogOfWar();
+	public void onDoorStateChanged(Entity doorEntity,
+								   DoorComponent.DoorStates oldState,
+								   DoorComponent.DoorStates newState) {
+		if (newState == DoorComponent.DoorStates.OPENING || newState == DoorComponent.DoorStates.CLOSED) {
+			refreshFogOfWar();
+		}
 	}
 
 	@Override
@@ -321,7 +320,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private boolean checkIfNodeBlocks(MapGraphNode playerNode, MapGraphNode currentNode) {
 		Entity door = currentNode.getDoor();
 		return playerNode.getHeight() + PlayerComponent.PLAYER_HEIGHT < currentNode.getHeight()
-				|| (door != null && ComponentsMapper.door.get(door).getState() != DoorComponent.DoorStates.OPEN);
+				|| (door != null && ComponentsMapper.door.get(door).getState() == DoorComponent.DoorStates.CLOSED);
 	}
 
 	private void notifyPlayerFinishedTurn( ) {
