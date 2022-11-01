@@ -271,7 +271,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 									  boolean renderLight,
 									  ModelInstanceComponent modelInstanceComponent,
 									  boolean considerFow) {
-		if (shouldSkipRenderModel(camera, entity, modelInstanceComponent, considerFow)) return false;
+		if (shouldSkipRenderModel(camera, entity, modelInstanceComponent, considerFow, renderLight)) return false;
 		renderModel(modelBatch, entity, renderLight, modelInstanceComponent);
 		return true;
 	}
@@ -336,14 +336,16 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private boolean shouldSkipRenderModel(Camera camera,
 										  Entity entity,
 										  ModelInstanceComponent miComp,
-										  boolean considerFow) {
+										  boolean considerFow,
+										  boolean renderLight) {
 		DrawFlags drawFlags = getSystemsCommonData().getDrawFlags();
 		return (!miComp.isVisible())
 				|| !isInFrustum(camera, miComp)
 				|| ComponentsMapper.floor.has(entity) && !drawFlags.isDrawGround()
 				|| ComponentsMapper.environmentObject.has(entity) && !drawFlags.isDrawEnv()
 				|| getSystemsCommonData().getCursor() == entity && !drawFlags.isDrawCursor()
-				|| considerFow && isInFow(entity, miComp.getModelInstance().transform.getTranslation(auxVector3_1));
+				|| considerFow && isInFow(entity, miComp.getModelInstance().transform.getTranslation(auxVector3_1))
+				|| !renderLight && ComponentsMapper.door.has(entity);
 	}
 
 	private boolean isInFow(Entity modelEntity, Vector3 position) {
