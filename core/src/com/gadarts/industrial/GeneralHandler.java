@@ -191,7 +191,7 @@ public class GeneralHandler implements
 
 	@Override
 	public void onNewGameSelectedInMenu( ) {
-		startNewGame(OFFICE.name());
+		startNewGame("enemy_test");
 	}
 
 	public void init( ) {

@@ -164,17 +164,11 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		int nodeRow = node.getRow();
 		int nodeCol = node.getCol();
 		float half = LOS_MAX / 2;
-
 		for (int row = (int) (nodeRow - half); row < nodeRow + half; row++) {
 			for (int col = (int) (nodeCol - half); col < nodeCol + half; col++) {
 				MapGraphNode nearbyNode = map.getNode(col, row);
 				if (nearbyNode != null && nearbyNode.getEntity() != null) {
-					if ((row != 0 || col != 0)) {
-						calculateFogOfWarSignature(nearbyNode.getEntity());
-					} else {
-						int northWest = NORTH.getMask() | WEST.getMask() | NORTH_EAST.getMask() | SOUTH_WEST.getMask();
-						ComponentsMapper.floor.get(nearbyNode.getEntity()).setFogOfWarSignature(northWest);
-					}
+					calculateFogOfWarSignature(nearbyNode.getEntity());
 				}
 			}
 		}

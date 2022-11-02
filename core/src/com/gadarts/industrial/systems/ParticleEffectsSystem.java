@@ -25,13 +25,13 @@ import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import java.util.ArrayList;
 
 public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
+	public static final int BULLET_JACKET_TIME_TO_LEAVE = 5000;
+	public static final float FLYING_PART_ROTATION_STEP = 64F;
+	public static final float GRAVITY_COEFF = 1.05F;
 	private static final Matrix4 auxMatrix = new Matrix4();
 	private static final Vector3 auxVector_1 = new Vector3();
 	private static final Vector3 auxVector_2 = new Vector3();
 	private static final Vector3 auxVector_3 = new Vector3();
-	public static final int BULLET_JACKET_TIME_TO_LEAVE = 5000;
-	public static final float FLYING_PART_ROTATION_STEP = 64F;
-	public static final float GRAVITY_COEFF = 1.05F;
 	private final ArrayList<Entity> particleEntitiesToRemove = new ArrayList<>();
 	private final ArrayList<ParticleEffect> particleEffectsToFollow = new ArrayList<>();
 	private PointSpriteParticleBatch pointSpriteBatch;
@@ -138,13 +138,29 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 	@Override
 	public void update(final float deltaTime) {
 		updatesEffectsWithParentsAccordingly();
+		hideParticlesInFow();
+		updateSystem(deltaTime);
+		handleCompletedParticleEffects();
+		updateFlyingParticles();
+	}
+
+	private void hideParticlesInFow( ) {
+		for (Entity particleEntity : particleEffectsEntities) {
+			ParticleEffectComponent particleEffectComponent = ComponentsMapper.particleEffect.get(particleEntity);
+			ParticleEffect particleEffect = particleEffectComponent.getParticleEffect();
+			Vector3 position = particleEffect.getControllers().get(0).transform.getTranslation(auxVector_1);
+			if (!ComponentsMapper.floor.get(getSystemsCommonData().getMap().getNode(position).getEntity()).isRevealed()) {
+				particleEffect.end();
+			}
+		}
+	}
+
+	private void updateSystem(float deltaTime) {
 		ParticleSystem particleSystem = getSystemsCommonData().getParticleSystem();
 		particleSystem.update(deltaTime);
 		particleSystem.begin();
 		particleSystem.draw();
 		particleSystem.end();
-		handleCompletedParticleEffects();
-		updateFlyingParticles();
 	}
 
 	private void updateFlyingParticles( ) {
