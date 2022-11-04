@@ -204,10 +204,6 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		return checkIfNodeIsFreeOfCharactersAndClosedDoors(node, null, true, true);
 	}
 
-	public boolean checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(MapGraphNode destinationNode) {
-		return checkIfNodeIsFreeOfCharactersAndClosedDoors(destinationNode, null, true, true);
-	}
-
 	public boolean checkIfNodeIsFreeOfCharactersAndClosedDoors(MapGraphNode destinationNode,
 															   MapGraphNode pathFinalNode,
 															   boolean includeClosedDoors,
@@ -221,7 +217,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		for (Entity c : characterEntities) {
 			MapGraphNode node = getNode(ComponentsMapper.characterDecal.get(c).getNodePosition(auxVector2));
 			int hp = ComponentsMapper.character.get(c).getSkills().getHealthData().getHp();
-			if ((!alive || hp > 0) && node.equals(destinationNode)) {
+			if (!ComponentsMapper.player.has(c) && (!alive || hp > 0) && node.equals(destinationNode)) {
 				return false;
 			}
 		}

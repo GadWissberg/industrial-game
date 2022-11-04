@@ -29,6 +29,7 @@ import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.characters.Direction;
+import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -50,7 +51,11 @@ import java.util.LinkedHashSet;
 import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.shared.model.characters.Direction.*;
+import static com.gadarts.industrial.shared.model.characters.SpriteType.*;
 import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.*;
+import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.ATTACK_PRIMARY;
+import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.PICKUP;
+import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.RUN;
 import static com.gadarts.industrial.utils.GameUtils.calculatePath;
 
 public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> implements
@@ -79,6 +84,20 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 						GameAssetsManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
 		super(systemsCommonData, assetsManager, lifeCycleHandler);
+	}
+
+	private static void endPlayerTurnOnEnemyAwaken(SystemsCommonData systemsCommonData) {
+		Entity currentCharacter = systemsCommonData.getTurnsQueue().first();
+		if (ComponentsMapper.player.has(currentCharacter)) {
+			Queue<CharacterCommand> commands = ComponentsMapper.character.get(currentCharacter).getCommands();
+			if (!commands.isEmpty()) {
+				CharacterCommand currentCommand = commands.get(0);
+				if (currentCommand.getDefinition() == RUN) {
+					currentCommand.setState(CommandStates.ENDED);
+					ComponentsMapper.character.get(currentCharacter).getCharacterSpriteData().setSpriteType(IDLE);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -219,16 +238,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	@Override
 	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		Entity currentCharacter = systemsCommonData.getTurnsQueue().first();
-		if (ComponentsMapper.player.has(currentCharacter)) {
-			Queue<CharacterCommand> commands = ComponentsMapper.character.get(currentCharacter).getCommands();
-			if (!commands.isEmpty()) {
-				CharacterCommand currentCommand = commands.get(0);
-				if (currentCommand.getDefinition() == RUN) {
-					currentCommand.setState(CommandStates.ENDED);
-				}
-			}
-		}
+		endPlayerTurnOnEnemyAwaken(systemsCommonData);
 	}
 
 	private boolean applyLineOfSightOnNode(MapGraph map, MapGraphNode playerNode, boolean blocked, GridPoint2 nodeCoord) {

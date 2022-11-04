@@ -191,7 +191,7 @@ public class GeneralHandler implements
 
 	@Override
 	public void onNewGameSelectedInMenu( ) {
-		startNewGame("enemy_test");
+		startNewGame(DebugSettings.TEST_LEVEL);
 	}
 
 	public void init( ) {
