@@ -19,6 +19,9 @@ import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.List;
 
+/**
+ * A character's command that engages its primary attack.
+ */
 public class PrimaryAttackCharacterCommand extends CharacterCommand {
 	private final static Vector3 auxVector3_1 = new Vector3();
 
@@ -29,26 +32,38 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 	}
 
 	@Override
-	public void reset( ) {
-
-	}
-
-	@Override
 	public boolean initialize(Entity character,
 							  SystemsCommonData commonData,
 							  Object additionalData,
 							  List<CharacterSystemEventsSubscriber> subscribers) {
 		if (checkAdjacentForMelee(character, commonData)) return true;
-
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		if (characterComponent.getTarget() != null) {
 			characterComponent.getRotationData().setRotating(true);
 		}
-		CharacterComponent charComp = ComponentsMapper.character.get(character);
-		WeaponsDefinitions primary = charComp.getPrimaryAttack();
+		WeaponsDefinitions primary = characterComponent.getPrimaryAttack();
 		int bulletsToShoot = primary.isMelee() ? 1 : randomNumberOfBullets(primary);
-		charComp.getOnGoingAttack().initialize(CharacterComponent.AttackType.PRIMARY, bulletsToShoot);
+		characterComponent.getOnGoingAttack().initialize(CharacterComponent.AttackType.PRIMARY, bulletsToShoot);
 		return false;
+	}
+
+	@Override
+	public void reset( ) {
+
+	}
+
+	@Override
+	public boolean reactToFrameChange(SystemsCommonData systemsCommonData,
+									  Entity character,
+									  TextureAtlas.AtlasRegion newFrame,
+									  List<CharacterSystemEventsSubscriber> subscribers) {
+		engagePrimaryAttack(character, newFrame, systemsCommonData, subscribers);
+		return false;
+	}
+
+	@Override
+	public void free( ) {
+		Pools.get(PrimaryAttackCharacterCommand.class).free(this);
 	}
 
 	private boolean checkAdjacentForMelee(Entity character, SystemsCommonData commonData) {
@@ -61,19 +76,6 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 		return !map.isNodesAdjacent(characterNode, targetNode, GameUtils.calculateCharacterHeight(character) / 2F);
 	}
 
-	@Override
-	public boolean reactToFrameChange(SystemsCommonData systemsCommonData,
-									  Entity character,
-									  TextureAtlas.AtlasRegion newFrame,
-									  List<CharacterSystemEventsSubscriber> subscribers) {
-		return engagePrimaryAttack(character, newFrame, systemsCommonData, subscribers);
-	}
-
-	@Override
-	public void free( ) {
-		Pools.get(PrimaryAttackCharacterCommand.class).free(this);
-	}
-
 	private Vector3 calculateDirectionToTarget(CharacterComponent characterComp,
 											   Vector3 positionNodeCenterPosition,
 											   SystemsCommonData commonData) {
@@ -84,13 +86,13 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 		return targetNodeCenterPosition.sub(positionNodeCenterPosition);
 	}
 
-	private boolean engagePrimaryAttack(Entity character,
-										TextureAtlas.AtlasRegion newFrame,
-										SystemsCommonData commonData,
-										List<CharacterSystemEventsSubscriber> subscribers) {
+	private void engagePrimaryAttack(Entity character,
+									 TextureAtlas.AtlasRegion newFrame,
+									 SystemsCommonData commonData,
+									 List<CharacterSystemEventsSubscriber> subscribers) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		OnGoingAttack onGoingAttack = characterComponent.getOnGoingAttack();
-		if (onGoingAttack.isDone()) return false;
+		if (onGoingAttack.isDone()) return;
 
 		int primaryAttackHitFrameIndex = GameUtils.getPrimaryAttackHitFrameIndexForCharacter(character, commonData);
 		if (newFrame.index == primaryAttackHitFrameIndex) {
@@ -107,7 +109,6 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 				consumeTurnTime(character, primaryAttack.getDuration());
 			}
 		}
-		return false;
 	}
 
 }

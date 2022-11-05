@@ -1,9 +1,7 @@
 package com.gadarts.industrial.map;
 
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
-import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedGraph;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -13,15 +11,9 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
-import com.gadarts.industrial.components.EnvironmentObjectComponent;
-import com.gadarts.industrial.components.PickUpComponent;
-import com.gadarts.industrial.components.character.CharacterComponent;
-import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.shared.model.Coords;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -40,26 +32,13 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 	private final Dimension mapSize;
 	@Getter
 	private final Array<MapGraphNode> nodes;
-	private final ImmutableArray<Entity> pickupEntities;
-	private final ImmutableArray<Entity> enemiesEntities;
-	private final ImmutableArray<Entity> characterEntities;
-	private final ImmutableArray<Entity> environmentObjectsEntities;
-	@Setter(AccessLevel.PACKAGE)
-	@Getter(AccessLevel.PACKAGE)
-	MapGraphNode currentPathFinalDestination;
-	@Setter
-	private MapGraphConnectionCosts maxConnectionCostInSearch;
-	@Setter(AccessLevel.PACKAGE)
-	@Getter(AccessLevel.PACKAGE)
-	private Entity currentCharacterPathPlanner;
-	@Setter
-	private boolean includeEnemiesInGetConnections = true;
+	private final MapGraphRelatedEntities mapGraphRelatedEntities = new MapGraphRelatedEntities();
+	@Getter
+	private final MapGraphStates mapGraphStates = new MapGraphStates();
 
 	public MapGraph(Dimension mapSize, PooledEngine engine, float ambient) {
 		this.ambient = ambient;
-		this.characterEntities = engine.getEntitiesFor(Family.all(CharacterComponent.class).get());
-		this.environmentObjectsEntities = engine.getEntitiesFor(Family.all(EnvironmentObjectComponent.class).get());
-		this.enemiesEntities = engine.getEntitiesFor(Family.all(EnemyComponent.class).get());
+		mapGraphRelatedEntities.init(engine);
 		this.mapSize = mapSize;
 		this.nodes = new Array<>(mapSize.width * mapSize.height);
 		for (int row = 0; row < mapSize.height; row++) {
@@ -67,12 +46,11 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 				nodes.add(new MapGraphNode(col, row, MapNodesTypes.values()[MapNodesTypes.PASSABLE_NODE.ordinal()], 8));
 			}
 		}
-		this.pickupEntities = engine.getEntitiesFor(Family.all(PickUpComponent.class).get());
 	}
 
 	public Entity fetchAliveEnemyFromNode(final MapGraphNode node) {
 		Entity result = null;
-		for (Entity enemy : enemiesEntities) {
+		for (Entity enemy : mapGraphRelatedEntities.getEnemiesEntities()) {
 			MapGraphNode enemyNode = getNode(ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition());
 			if (ComponentsMapper.character.get(enemy).getSkills().getHealthData().getHp() > 0 && enemyNode.equals(node)) {
 				result = enemy;
@@ -125,7 +103,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 
 	public Entity getPickupFromNode(final MapGraphNode node) {
 		Entity result = null;
-		for (Entity pickup : pickupEntities) {
+		for (Entity pickup : mapGraphRelatedEntities.getPickupEntities()) {
 			ModelInstance modelInstance = ComponentsMapper.modelInstance.get(pickup).getModelInstance();
 			MapGraphNode pickupNode = getNode(modelInstance.transform.getTranslation(auxVector3));
 			if (pickupNode.equals(node)) {
@@ -214,7 +192,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 				&& door != null
 				&& ComponentsMapper.door.get(door).getState() != DoorComponent.DoorStates.OPEN) return false;
 
-		for (Entity c : characterEntities) {
+		for (Entity c : mapGraphRelatedEntities.getCharacterEntities()) {
 			MapGraphNode node = getNode(ComponentsMapper.characterDecal.get(c).getNodePosition(auxVector2));
 			int hp = ComponentsMapper.character.get(c).getSkills().getHealthData().getHp();
 			if (!ComponentsMapper.player.has(c) && (!alive || hp > 0) && node.equals(destinationNode)) {
@@ -231,10 +209,11 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 
 	private void checkIfConnectionIsAvailable(final Connection<MapGraphNode> connection) {
 		boolean available = true;
-		if (includeEnemiesInGetConnections) {
+		if (mapGraphStates.isIncludeEnemiesInGetConnections()) {
+			MapGraphNode currentPathFinalDestination = mapGraphStates.getCurrentPathFinalDestination();
 			available = checkIfNodeIsFreeOfAliveCharacters(connection.getToNode(), currentPathFinalDestination);
 		}
-		boolean validCost = connection.getCost() <= maxConnectionCostInSearch.getCostValue();
+		boolean validCost = connection.getCost() <= mapGraphStates.getMaxConnectionCostInSearch().getCostValue();
 		if (available && validCost && checkIfConnectionPassable(connection)) {
 			auxConnectionsList.add(connection);
 		}
@@ -273,8 +252,8 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 	}
 
 	private boolean checkIfConnectionPassable(final Connection<MapGraphNode> con) {
-		if (currentCharacterPathPlanner != null
-				&& ComponentsMapper.player.has(currentCharacterPathPlanner)
+		if (mapGraphStates.getCurrentCharacterPathPlanner() != null
+				&& ComponentsMapper.player.has(mapGraphStates.getCurrentCharacterPathPlanner())
 				&& !isNodeRevealed(con.getToNode()))
 			return false;
 
@@ -363,7 +342,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 
 	public Entity findObstacleByNode(final MapGraphNode node) {
 		Entity result = null;
-		for (Entity obstacle : environmentObjectsEntities) {
+		for (Entity obstacle : mapGraphRelatedEntities.getEnvironmentObjectsEntities()) {
 			ModelInstance modelInstance = ComponentsMapper.modelInstance.get(obstacle).getModelInstance();
 			MapGraphNode pickupNode = getNode(modelInstance.transform.getTranslation(auxVector3));
 			if (pickupNode.equals(node)) {

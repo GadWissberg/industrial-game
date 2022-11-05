@@ -9,7 +9,6 @@ import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.DoorComponent.DoorStates;
-import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
@@ -25,10 +24,8 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 		CharacterSystemEventsSubscriber,
 		TurnsSystemEventsSubscriber {
 	private static final Vector3 auxVector1 = new Vector3();
-	private static final Vector3 auxVector2 = new Vector3();
 	private static final int DOOR_OPEN_DURATION = 3;
 	private ImmutableArray<Entity> doorEntities;
-	private ImmutableArray<Entity> enemiesEntities;
 
 	public AmbSystem(SystemsCommonData systemsCommonData,
 					 GameAssetsManager assetsManager,
@@ -39,6 +36,11 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 	@Override
 	public Class<AmbSystemEventsSubscriber> getEventsSubscriberClass( ) {
 		return AmbSystemEventsSubscriber.class;
+	}
+
+	@Override
+	public void initializeData( ) {
+
 	}
 
 	@Override
@@ -79,12 +81,6 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 
 		doorComponent.setState(newState);
 		subscribers.forEach(s -> s.onDoorStateChanged(doorEntity, oldState, newState));
-	}
-
-
-	@Override
-	public void initializeData( ) {
-		enemiesEntities = getEngine().getEntitiesFor(Family.all(EnemyComponent.class).get());
 	}
 
 
