@@ -29,7 +29,6 @@ import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.characters.Direction;
-import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -50,9 +49,7 @@ import java.util.LinkedHashSet;
 
 import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
-import static com.gadarts.industrial.shared.model.characters.Direction.*;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.*;
-import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.*;
 import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.ATTACK_PRIMARY;
 import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.PICKUP;
 import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.RUN;
@@ -116,13 +113,12 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	@Override
-	public void onCommandInitialized( ) {
-		Entity currentCommand = getSystemsCommonData().getTurnsQueue().first();
-		CharacterCommand command = ComponentsMapper.character.get(currentCommand).getCommands().first();
-		if (!ComponentsMapper.player.has(command.getCharacter())) return;
+	public void onCommandInitialized(Entity character, CharacterCommand command) {
+		if (!ComponentsMapper.player.has(character)) return;
 
 		for (Entity entity : getSystemsCommonData().getTurnsQueue()) {
-			if (ComponentsMapper.enemy.has(entity) && ComponentsMapper.enemy.get(entity).getAiStatus() == EnemyAiStatus.ATTACKING) {
+			boolean isEnemy = ComponentsMapper.enemy.has(entity);
+			if (isEnemy && ComponentsMapper.enemy.get(entity).getAiStatus() == EnemyAiStatus.ATTACKING) {
 				command.onInFight();
 				return;
 			}

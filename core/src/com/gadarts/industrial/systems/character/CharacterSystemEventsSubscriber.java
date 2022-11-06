@@ -39,7 +39,7 @@ public interface CharacterSystemEventsSubscriber extends SystemEventsSubscriber 
 
 	}
 
-	default void onCommandInitialized( ) {
+	default void onCommandInitialized(Entity character, CharacterCommand currentCommand) {
 
 	}
 

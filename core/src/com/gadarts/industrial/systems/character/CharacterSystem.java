@@ -140,8 +140,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (commands.isEmpty()) return;
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		characterComponent.setCommands(commands);
-		Entity currentTurn = getSystemsCommonData().getTurnsQueue().first();
-		CharacterCommand currentCommand = ComponentsMapper.character.get(currentTurn).getCommands().first();
+		CharacterCommand currentCommand = ComponentsMapper.character.get(character).getCommands().first();
 		currentCommand.setState(CommandStates.READY);
 		if (characterComponent.getCharacterSpriteData().getSpriteType() != PAIN) {
 			beginProcessingCommand(character, currentCommand);
@@ -169,7 +168,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		SystemsCommonData data = getSystemsCommonData();
 		Object additionalData = currentCommand.getAdditionalData();
 		boolean alreadyDone = currentCommand.initialize(character, data, additionalData, getSubscribers());
-		subscribers.forEach(CharacterSystemEventsSubscriber::onCommandInitialized);
+		subscribers.forEach(s -> s.onCommandInitialized(character, currentCommand));
 		if (alreadyDone) {
 			commandDone(character);
 		}
