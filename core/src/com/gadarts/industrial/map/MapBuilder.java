@@ -42,10 +42,7 @@ import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
 import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
-import com.gadarts.industrial.shared.model.env.DoorsDefinitions;
-import com.gadarts.industrial.shared.model.env.EnvironmentObjectDefinition;
-import com.gadarts.industrial.shared.model.env.EnvironmentObjectType;
-import com.gadarts.industrial.shared.model.env.ThingsDefinitions;
+import com.gadarts.industrial.shared.model.env.*;
 import com.gadarts.industrial.shared.model.map.MapNodeData;
 import com.gadarts.industrial.shared.model.map.NodeWalls;
 import com.gadarts.industrial.shared.model.map.Wall;
@@ -72,6 +69,7 @@ import static com.gadarts.industrial.shared.model.characters.CharacterTypes.*;
 import static com.gadarts.industrial.shared.model.characters.Direction.NORTH;
 import static com.gadarts.industrial.shared.model.characters.Direction.SOUTH;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.IDLE;
+import static com.gadarts.industrial.shared.model.env.LightConstants.*;
 import static com.gadarts.industrial.shared.model.map.MapNodesTypes.OBSTACLE_KEY_DIAGONAL_FORBIDDEN;
 import static com.gadarts.industrial.utils.EntityBuilder.beginBuildingEntity;
 import static java.lang.String.format;
@@ -80,10 +78,7 @@ public class MapBuilder implements Disposable {
 	public static final int PLAYER_HEALTH = 100;
 
 	public static final String MAP_PATH_TEMP = "assets/maps/%s.json";
-	public static final float INDEPENDENT_LIGHT_RADIUS = 4f;
-	public static final float INDEPENDENT_LIGHT_INTENSITY = 0.3f;
 	public static final String BOUNDING_BOX_PREFIX = "box_";
-	private static final float INDEPENDENT_LIGHT_HEIGHT = 1.9F;
 	private static final CharacterSoundData auxCharacterSoundData = new CharacterSoundData();
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final Vector3 auxVector3_2 = new Vector3();
@@ -121,6 +116,15 @@ public class MapBuilder implements Disposable {
 		if (entity != null && modelInstance.has(entity)) {
 			modelInstance.get(entity).getModelInstance().transform.translate(0, height, 0);
 		}
+	}
+
+	private static Vector3 inflateLightPosition(MapGraph mapGraph, JsonObject lightJsonObj, int row, int col) {
+		Vector3 position = auxVector3_1.set(
+				col + 0.5f,
+				lightJsonObj.has(HEIGHT) ? lightJsonObj.get(HEIGHT).getAsFloat() : DEFAULT_LIGHT_HEIGHT,
+				row + 0.5f);
+		position.add(0, mapGraph.getNode(col, row).getHeight(), 0);
+		return position;
 	}
 
 	private Model createFloorModel( ) {
@@ -300,7 +304,6 @@ public class MapBuilder implements Disposable {
 			}
 		}
 	}
-
 
 	private void avoidZeroDimensions(final BoundingBox bBox) {
 		Vector3 center = bBox.getCenter(auxVector3_1);
@@ -621,13 +624,14 @@ public class MapBuilder implements Disposable {
 	}
 
 	private void inflateLight(final MapGraph mapGraph, final JsonElement element) {
-		JsonObject lightJsonObject = element.getAsJsonObject();
-		int row = lightJsonObject.get(ROW).getAsInt();
-		int col = lightJsonObject.get(COL).getAsInt();
-		Vector3 position = auxVector3_1.set(col + 0.5f, INDEPENDENT_LIGHT_HEIGHT, row + 0.5f);
-		position.add(0, mapGraph.getNode(col, row).getHeight(), 0);
+		JsonObject lightJsonObj = element.getAsJsonObject();
+		int row = lightJsonObj.get(ROW).getAsInt();
+		int col = lightJsonObj.get(COL).getAsInt();
+		Vector3 position = inflateLightPosition(mapGraph, lightJsonObj, row, col);
+		float i = lightJsonObj.has(INTENSITY) ? lightJsonObj.get(INTENSITY).getAsFloat() : DEFAULT_LIGHT_INTENSITY;
+		float radius = lightJsonObj.has(RADIUS) ? lightJsonObj.get(RADIUS).getAsFloat() : DEFAULT_LIGHT_RADIUS;
 		EntityBuilder.beginBuildingEntity(engine)
-				.addStaticLightComponent(position, INDEPENDENT_LIGHT_INTENSITY, INDEPENDENT_LIGHT_RADIUS)
+				.addStaticLightComponent(position, i, radius)
 				.finishAndAddToEngine();
 	}
 
