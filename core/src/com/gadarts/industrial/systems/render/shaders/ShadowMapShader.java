@@ -25,7 +25,7 @@ public class ShadowMapShader extends BaseShader {
 	public static final String UNIFORM_LIGHT_POSITION = "u_lightPosition";
 	public static final float BIAS_MIN_WALL = 0.0021F;
 	public static final float BIAS_MAX_WALL = 0.0022F;
-	public static final float BIAS_MAX_GENERAL = 0.0014F;
+	public static final float BIAS_MAX_GENERAL = 0.0018F;
 	public static final float BIAS_MIN_GENERAL = 0F;
 	private static final String UNIFORM_LIGHTS_COLORS = "u_lightColor";
 	private static final Vector3 auxVector = new Vector3();
