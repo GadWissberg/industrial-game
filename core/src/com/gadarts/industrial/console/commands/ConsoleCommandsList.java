@@ -13,6 +13,7 @@ public enum ConsoleCommandsList implements ConsoleCommands {
 	BORDERS("brd", new BordersCommand(), "Toggles UI elements borders visibility."),
 	SKIP_RENDER("skp", new SkipRenderCommand(), "Toggles drawing skipping mode for given categories.",
 			new SkipRenderCommand.GroundParameter(),
+			new SkipRenderCommand.WallsParameter(),
 			new SkipRenderCommand.EnemyParameter(),
 			new SkipRenderCommand.EnvironmentObjectParameter()),
 	FRUSTUM_CULLING("fc", new FrustumCullingCommand(), "Toggles frustum culling."),

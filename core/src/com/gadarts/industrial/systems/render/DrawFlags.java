@@ -13,6 +13,7 @@ import java.util.Map;
 public class DrawFlags {
 
 	private boolean drawGround = !DebugSettings.HIDE_GROUND;
+	private boolean drawWalls = !DebugSettings.HIDE_WALLS;
 	private boolean drawEnemy = !DebugSettings.HIDE_ENEMIES;
 	private boolean drawEnv = !DebugSettings.HIDE_ENVIRONMENT_OBJECTS;
 	private boolean drawCursor = !DebugSettings.HIDE_CURSOR;

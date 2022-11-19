@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector3;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.StaticLightComponent;
+import com.gadarts.industrial.components.mi.GameModelInstance;
 
 import static com.gadarts.industrial.systems.SystemsCommonData.CAMERA_LIGHT_FAR;
 
@@ -28,7 +29,8 @@ public class ShadowMapShader extends BaseShader {
 	public static final float BIAS_MAX_GENERAL = 0.0018F;
 	public static final float BIAS_MIN_GENERAL = 0F;
 	private static final String UNIFORM_LIGHTS_COLORS = "u_lightColor";
-	private static final Vector3 auxVector = new Vector3();
+	private static final Vector3 auxVector1 = new Vector3();
+	private static final Vector3 auxVector2 = new Vector3();
 	private static final String UNIFORM_RADIUS = "u_radius";
 	private static final String UNIFORM_INTENSITY = "u_intensity";
 	private static final String UNIFORM_MAX_BIAS = "u_maxBias";
@@ -107,9 +109,15 @@ public class ShadowMapShader extends BaseShader {
 	@Override
 	public void render(final Renderable renderable, final Attributes combinedAttributes) {
 		boolean firstCall = true;
+		Entity entity = (Entity) renderable.userData;
 		for (int i = 0; i < lights.size(); i++) {
-			renderLightForShadow(renderable, combinedAttributes, firstCall, i);
-			firstCall = false;
+			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(entity).getModelInstance();
+			Vector3 position = modelInstance.transform.getTranslation(auxVector1);
+			StaticLightComponent lightComponent = ComponentsMapper.staticLight.get(lights.get(i));
+			if (position.dst2(lightComponent.getPosition(auxVector2)) <= lightComponent.getRadius()*5) {
+				renderLightForShadow(renderable, combinedAttributes, firstCall, i);
+				firstCall = false;
+			}
 		}
 	}
 
@@ -152,7 +160,7 @@ public class ShadowMapShader extends BaseShader {
 		program.setUniformf(uniformLocType, StaticLightTypes.POINT.ordinal());
 		program.setUniformi(uniformLocDepthMapCube, CUBE_MAP_TEXTURE_NUMBER);
 		program.setUniformf(uniformLocCameraFar, CAMERA_LIGHT_FAR);
-		program.setUniformf(uniformLocLightPosition, lightComponent.getPosition(auxVector));
+		program.setUniformf(uniformLocLightPosition, lightComponent.getPosition(auxVector1));
 		program.setUniformf(uniformLocRadius, lightComponent.getRadius());
 		program.setUniform3fv(uniformLocLightColor, lightColor, 0, 3);
 		program.setUniformf(uniformLocIntensity, lightComponent.getIntensity());

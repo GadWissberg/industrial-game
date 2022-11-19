@@ -226,8 +226,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		modelBatch.begin(camera);
 		for (Entity entity : entitiesToRender) {
 			ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(entity);
-			boolean rendered = tryRenderingModel(modelBatch, camera, entity, renderLight, modelInstanceComponent, considerFow);
-			if (rendered) {
+			if (tryRenderingModel(modelBatch, camera, entity, renderLight, modelInstanceComponent, considerFow)) {
 				renderAppendixModelInstance(modelBatch, entity);
 			}
 		}
@@ -338,12 +337,12 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 										  ModelInstanceComponent miComp,
 										  boolean considerFow,
 										  boolean renderLight) {
-		DrawFlags drawFlags = getSystemsCommonData().getDrawFlags();
 		return (!miComp.isVisible())
 				|| !isInFrustum(camera, miComp)
-				|| ComponentsMapper.floor.has(entity) && !drawFlags.isDrawGround()
-				|| ComponentsMapper.environmentObject.has(entity) && !drawFlags.isDrawEnv()
-				|| getSystemsCommonData().getCursor() == entity && !drawFlags.isDrawCursor()
+				|| ComponentsMapper.floor.has(entity) && !getSystemsCommonData().getDrawFlags().isDrawGround()
+				|| ComponentsMapper.wall.has(entity) && !getSystemsCommonData().getDrawFlags().isDrawWalls()
+				|| ComponentsMapper.environmentObject.has(entity) && !getSystemsCommonData().getDrawFlags().isDrawEnv()
+				|| getSystemsCommonData().getCursor() == entity && !getSystemsCommonData().getDrawFlags().isDrawCursor()
 				|| considerFow && isInFow(entity, miComp.getModelInstance().transform.getTranslation(auxVector3_1))
 				|| !renderLight && ComponentsMapper.door.has(entity);
 	}
@@ -372,8 +371,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		GameFrameBuffer shadowFrameBuffer = staticShadowsData.getShadowFrameBuffer();
 		shadowFrameBuffer.begin();
 		resetDisplay(Color.BLACK, 0F);
-		Camera camera = getSystemsCommonData().getCamera();
-		renderModels(renderBatches.getModelBatchShadows(), families.getModelEntitiesWithShadows(), false, camera);
+		Camera cam = getSystemsCommonData().getCamera();
+		renderModels(renderBatches.getModelBatchShadows(), families.getModelEntitiesWithShadows(), false, cam);
 		handleScreenshot(shadowFrameBuffer);
 		shadowFrameBuffer.end();
 	}

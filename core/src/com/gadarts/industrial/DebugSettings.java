@@ -6,6 +6,7 @@ import static com.badlogic.gdx.Application.LOG_DEBUG;
 
 public final class DebugSettings {
 	public static final boolean HIDE_GROUND = false;
+	public static final boolean HIDE_WALLS = false;
 	public static final boolean HIDE_ENEMIES = false;
 	public static final boolean HIDE_CHARACTERS = false;
 	public static final boolean HIDE_ENVIRONMENT_OBJECTS = false;

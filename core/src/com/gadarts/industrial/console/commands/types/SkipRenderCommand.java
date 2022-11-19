@@ -33,6 +33,16 @@ public class SkipRenderCommand extends ConsoleCommand {
 
 	}
 
+	public static class WallsParameter extends SkipRenderCommandParameter {
+
+		public static final String ALIAS = "walls";
+
+		public WallsParameter( ) {
+			super(DESCRIPTION, ALIAS, DrawFlags::setDrawWalls);
+		}
+
+	}
+
 	public static class EnemyParameter extends SkipRenderCommandParameter {
 
 		public static final String ALIAS = "enemy";
