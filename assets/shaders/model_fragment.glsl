@@ -175,7 +175,7 @@ void main() {
                         if (light_color_index > -1){
                             light_color = vec3(u_shadowlessLightsColors[light_color_index]);
                         } else {
-                            light_color = vec3(1.0);
+                            light_color = vec3(0.0);
                         }
                         float attenuation = 4.0 * extra.x / (1.0 + (0.01*distance) + (0.9*distance*distance));
                         float dot_value = dot(v_normal, lightDir);

@@ -5,7 +5,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -40,7 +39,6 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private final static float PROJ_LIGHT_INTENSITY = 0.05F;
 	private final static float PROJ_LIGHT_RADIUS = 1F;
-	private final static Color PROJ_LIGHT_COLOR = Color.valueOf("#8396FF");
 	private static final float BULLET_ENGAGE_LIGHT_DURATION = 0.1F;
 	private static final float JACKET_FLY_AWAY_STRENGTH = 0.1F;
 	private static final float JACKET_FLY_AWAY_MIN_DEGREE = 45F;
@@ -122,8 +120,8 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		EntityBuilder builder = EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
 				.addBulletComponent(charPos, direction, character, damagePoints, weaponDefinition)
 				.addModelInstanceComponent(modelInstance, true);
-		if (weaponDefinition.isEmitsLight()) {
-			builder.addShadowlessLightComponent(charPos, PROJ_LIGHT_INTENSITY, PROJ_LIGHT_RADIUS, PROJ_LIGHT_COLOR);
+		if (weaponDefinition.getLightColor() != null) {
+			builder.addShadowlessLightComponent(charPos, PROJ_LIGHT_INTENSITY, PROJ_LIGHT_RADIUS, weaponDefinition.getLightColor());
 		}
 		builder.finishAndAddToEngine();
 
@@ -132,7 +130,7 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 					charPos,
 					PROJ_LIGHT_INTENSITY,
 					PROJ_LIGHT_RADIUS,
-					PROJ_LIGHT_COLOR,
+					weaponDefinition.getLightColor(),
 					BULLET_ENGAGE_LIGHT_DURATION).finishAndAddToEngine();
 		}
 

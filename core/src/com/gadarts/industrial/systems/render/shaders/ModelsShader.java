@@ -90,11 +90,11 @@ public class ModelsShader extends DefaultShader {
 
 	private int insertToLightsArray(final List<Entity> nearbyLights, final int i, final int differentColorIndex) {
 		insertLightPositionToArray(nearbyLights, i);
-		boolean notWhite = insertExtraDataToArray(nearbyLights, i, differentColorIndex);
-		if (notWhite) {
+		boolean white = insertExtraDataToArray(nearbyLights, i, differentColorIndex);
+		if (!white) {
 			insertColorToArray(nearbyLights.get(i), differentColorIndex);
 		}
-		return notWhite ? differentColorIndex + 1 : differentColorIndex;
+		return !white ? differentColorIndex + 1 : differentColorIndex;
 	}
 
 	private void insertColorToArray(final Entity light, final int i) {
@@ -113,9 +113,9 @@ public class ModelsShader extends DefaultShader {
 		float radius = lightComponent.getRadius();
 		shadowlessLightsExtraData[extraDataInd] = intensity;
 		shadowlessLightsExtraData[extraDataInd + 1] = radius;
-		boolean notWhite = lightComponent.getColor(auxColor).equals(Color.WHITE);
-		shadowlessLightsExtraData[extraDataInd + 2] = notWhite ? differentColorIndex : -1F;
-		return notWhite;
+		boolean white = lightComponent.getColor(auxColor).equals(Color.WHITE);
+		shadowlessLightsExtraData[extraDataInd + 2] = white ? -1F : differentColorIndex;
+		return white;
 	}
 
 	@Override

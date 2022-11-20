@@ -12,15 +12,15 @@ import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
-import com.gadarts.industrial.shared.model.characters.Direction;
-import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.components.character.CharacterAnimation;
 import com.gadarts.industrial.components.character.CharacterAnimations;
 import com.gadarts.industrial.console.Console;
 import com.gadarts.industrial.console.ConsoleImpl;
 import com.gadarts.industrial.map.MapBuilder;
+import com.gadarts.industrial.shared.assets.Assets;
+import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.model.characters.Direction;
+import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.*;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystem;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
@@ -32,8 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
-
-import static com.gadarts.industrial.systems.ui.menu.NewGameMenuOptions.OFFICE;
 
 
 @RequiredArgsConstructor

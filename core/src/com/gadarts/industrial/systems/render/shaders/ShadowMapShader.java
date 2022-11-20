@@ -36,7 +36,7 @@ public class ShadowMapShader extends BaseShader {
 	private static final String UNIFORM_MAX_BIAS = "u_maxBias";
 	private static final String UNIFORM_MIN_BIAS = "u_minBias";
 	private static final int CUBE_MAP_TEXTURE_NUMBER = 8;
-	private static final float BIAS_MAX_FLOOR = 0.00155F;
+	private static final float BIAS_MAX_FLOOR = 0.00185F;
 	private static final Color auxColor = new Color();
 	private final ImmutableArray<Entity> lights;
 	private final float[] lightColor = new float[3];
