@@ -167,9 +167,10 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 		Vector3 ray = GameUtils.calculateGridPositionFromMouse(camera, screenX, screenY, auxVector3_2);
 
+		Vector3 pos = camera.position;
 		ArrayDeque<Coord3D> nodes = (ArrayDeque<Coord3D>) Bresenham.line3D(
-				(int) Math.round((double) camera.position.x), (int) Math.round((double) camera.position.y), (int) Math.round((double) camera.position.z),
-				(int) Math.round((double) ray.x), 0, (int) Math.round((double) ray.z));
+				(int) Math.round((double) pos.x), (int) Math.round((double) pos.y), (int) Math.round((double) pos.z),
+				(int) Math.floor(ray.x), 0, (int) Math.floor(ray.z));
 
 		return findNearestNodeOnCameraLineOfSight(map, nodes);
 	}
@@ -178,7 +179,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 															ArrayDeque<Coord3D> nodes) {
 		for (Coord3D coord : nodes) {
 			MapGraphNode node = map.getNode(coord.x, coord.z);
-			if (node != null && (coord.getY() < node.getHeight() || coord.y == 0) && node.getEntity() != null) {
+			if (node != null && (coord.getY() <= node.getHeight() || coord.y == 0) && node.getEntity() != null) {
 				FloorComponent floorComponent = ComponentsMapper.floor.get(node.getEntity());
 				MapNodesTypes nodeType = floorComponent.getNode().getType();
 				if (floorComponent.getNode().isReachable() && nodeType == MapNodesTypes.PASSABLE_NODE) {

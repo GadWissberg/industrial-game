@@ -114,7 +114,9 @@ public class EntityBuilder {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		ShadowlessLightComponent lightComponent = engine.createComponent(ShadowlessLightComponent.class);
 		lightComponent.init(position, intensity, radius, currentEntity, flicker);
-		lightComponent.applyColor(color);
+		if (color != null) {
+			lightComponent.applyColor(color);
+		}
 		lightComponent.applyDuration(duration);
 		currentEntity.add(lightComponent);
 		return instance;
