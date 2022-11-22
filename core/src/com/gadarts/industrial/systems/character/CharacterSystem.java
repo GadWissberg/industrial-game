@@ -214,23 +214,23 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		characterComponent.dealDamage(damage);
 		handleDeath(attacked);
 		if (ComponentsMapper.player.has(attacked) || ComponentsMapper.enemy.get(attacked).getEnemyDefinition().isHuman()) {
-			addSplatterEffect(bulletModelInstanceComponent);
+			addSplatterEffect(bulletModelInstanceComponent, attacked);
 		}
 	}
 
-	private void addSplatterEffect(final ModelInstanceComponent bulletModelInstanceComponent) {
-		Vector3 position = positionBloodSplatter(bulletModelInstanceComponent);
+	private void addSplatterEffect(final ModelInstanceComponent bulletModelInstanceComponent, Entity attacked) {
+		Vector3 position = positionBloodSplatter(bulletModelInstanceComponent, attacked);
 		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
 				.addParticleEffectComponent(bloodSplatterEffect, position)
 				.finishAndAddToEngine();
 	}
 
-	private Vector3 positionBloodSplatter(ModelInstanceComponent bulletModelInstanceComponent) {
+	private Vector3 positionBloodSplatter(ModelInstanceComponent bulletModelInstanceComponent, Entity attacked) {
 		Vector3 position;
 		if (bulletModelInstanceComponent != null) {
 			position = bulletModelInstanceComponent.getModelInstance().transform.getTranslation(auxVector3_1);
 		} else {
-			Decal decal = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer()).getDecal();
+			Decal decal = ComponentsMapper.characterDecal.get(attacked).getDecal();
 			MapGraph map = getSystemsCommonData().getMap();
 			position = map.getNode(decal.getPosition()).getCenterPosition(auxVector3_2).add(0F, PLAYER_HEIGHT, 0F);
 		}

@@ -217,10 +217,13 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	@Override
 	public void onCharacterGotDamage(final Entity entity) {
 		if (ComponentsMapper.enemy.has(entity)) {
-			if (ComponentsMapper.enemy.get(entity).getAiStatus() != ATTACKING) {
+			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(entity);
+			if (enemyComponent.getAiStatus() != ATTACKING) {
 				awakeEnemy(entity);
 			}
-			createFlyingMetalParts(entity);
+			if (!enemyComponent.getEnemyDefinition().isHuman()) {
+				createFlyingMetalParts(entity);
+			}
 		}
 	}
 
