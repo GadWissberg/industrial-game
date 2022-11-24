@@ -21,10 +21,9 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 		CharacterSystemEventsSubscriber {
 	private boolean currentTurnDone;
 
-	public TurnsSystem(SystemsCommonData systemsCommonData,
-					   GameAssetsManager assetsManager,
+	public TurnsSystem(GameAssetsManager assetsManager,
 					   GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, assetsManager, lifeCycleHandler);
+		super(assetsManager, lifeCycleHandler);
 	}
 
 	private static void decideToRemoveOrAddLast(Queue<Entity> turnsQueue, Entity entity) {

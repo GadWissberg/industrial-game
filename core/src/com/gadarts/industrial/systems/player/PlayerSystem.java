@@ -1,6 +1,5 @@
 package com.gadarts.industrial.systems.player;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
@@ -15,7 +14,10 @@ import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
-import com.gadarts.industrial.components.*;
+import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.DoorComponent;
+import com.gadarts.industrial.components.EnvironmentObjectComponent;
+import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterAnimation;
 import com.gadarts.industrial.components.character.CharacterAnimations;
@@ -49,10 +51,8 @@ import java.util.LinkedHashSet;
 
 import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
-import static com.gadarts.industrial.shared.model.characters.SpriteType.*;
-import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.ATTACK_PRIMARY;
-import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.PICKUP;
-import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.RUN;
+import static com.gadarts.industrial.shared.model.characters.SpriteType.IDLE;
+import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.*;
 import static com.gadarts.industrial.utils.GameUtils.calculatePath;
 
 public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> implements
@@ -77,10 +77,9 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private ImmutableArray<Entity> ambObjects;
 	private ImmutableArray<Entity> pickups;
 
-	public PlayerSystem(SystemsCommonData systemsCommonData,
-						GameAssetsManager assetsManager,
+	public PlayerSystem(GameAssetsManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, assetsManager, lifeCycleHandler);
+		super(assetsManager, lifeCycleHandler);
 	}
 
 	private static void endPlayerTurnOnEnemyAwaken(SystemsCommonData systemsCommonData) {
@@ -509,9 +508,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	@Override
 	public void initializeData( ) {
 		playerPathPlanner = new PathPlanHandler(getSystemsCommonData().getMap());
-		if (!getLifeCycleHandler().isInGame()) {
-			changePlayerStatus(true);
-		}
+		changePlayerStatus(!getLifeCycleHandler().isInGame());
 		refreshFogOfWar();
 	}
 
@@ -521,14 +518,15 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		subscribers.forEach(subscriber -> subscriber.onPlayerStatusChanged(disabled));
 	}
 
+
 	@Override
-	public void addedToEngine(Engine engine) {
-		super.addedToEngine(engine);
+	public void onSystemReset(SystemsCommonData systemsCommonData) {
+		super.onSystemReset(systemsCommonData);
 		getSystemsCommonData().setPlayer(getEngine().getEntitiesFor(Family.all(PlayerComponent.class).get()).first());
 		Weapon weapon = initializeStartingWeapon();
 		getSystemsCommonData().getStorage().setSelectedWeapon(weapon);
-		ambObjects = engine.getEntitiesFor(Family.all(EnvironmentObjectComponent.class).exclude(DoorComponent.class).get());
-		pickups = engine.getEntitiesFor(Family.all(PickUpComponent.class).get());
+		ambObjects = getEngine().getEntitiesFor(Family.all(EnvironmentObjectComponent.class).exclude(DoorComponent.class).get());
+		pickups = getEngine().getEntitiesFor(Family.all(PickUpComponent.class).get());
 	}
 
 	private Weapon initializeStartingWeapon( ) {

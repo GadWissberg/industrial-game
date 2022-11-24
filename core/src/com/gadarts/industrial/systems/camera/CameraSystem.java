@@ -1,6 +1,5 @@
 package com.gadarts.industrial.systems.camera;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
@@ -37,10 +36,9 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 	private final Vector2 lastMousePosition = new Vector2();
 	private final Vector2 lastRightPressMousePosition = new Vector2();
 
-	public CameraSystem(SystemsCommonData systemsCommonData,
-						GameAssetsManager assetsManager,
+	public CameraSystem(GameAssetsManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, assetsManager, lifeCycleHandler);
+		super(assetsManager, lifeCycleHandler);
 	}
 
 	@Override
@@ -145,10 +143,6 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 		cam.update();
 	}
 
-	@Override
-	public void addedToEngine(Engine engine) {
-		super.addedToEngine(engine);
-	}
 
 	@Override
 	public void dispose( ) {

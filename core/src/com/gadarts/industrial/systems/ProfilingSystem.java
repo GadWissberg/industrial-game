@@ -1,6 +1,5 @@
 package com.gadarts.industrial.systems;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
@@ -23,7 +22,7 @@ import com.gadarts.industrial.shared.assets.GameAssetsManager;
 
 public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 	public static final String WARNING_COLOR = "[RED]";
-	public static final int LABELS_ORIGIN_OFFSET_FROM_TOP = 100;
+	public static final int LABELS_ORIGIN_OFFSET_FROM_TOP = 200;
 	private static final String VISIBLE_OBJECTS_STRING = "Visible objects: ";
 	private static final String LABEL_FPS = "FPS: ";
 	private static final String LABEL_JAVA_HEAP_USAGE = "Java heap usage: ";
@@ -41,11 +40,11 @@ public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 	private final StringBuilder stringBuilder;
 	private Label label;
 	private ImmutableArray<Entity> modelInstanceEntities;
+	private BitmapFont font;
 
-	public ProfilingSystem(SystemsCommonData systemsCommonData,
-						   GameAssetsManager assetsManager,
+	public ProfilingSystem(GameAssetsManager assetsManager,
 						   GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, assetsManager, lifeCycleHandler);
+		super(assetsManager, lifeCycleHandler);
 		glProfiler = new GLProfiler(Gdx.graphics);
 		stringBuilder = new StringBuilder();
 		setGlProfiler();
@@ -116,9 +115,9 @@ public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 	}
 
 	@Override
-	public void addedToEngine(Engine engine) {
-		super.addedToEngine(engine);
-		modelInstanceEntities = engine.getEntitiesFor(Family.all(ModelInstanceComponent.class).get());
+	public void onSystemReset(SystemsCommonData systemsCommonData) {
+		super.onSystemReset(systemsCommonData);
+		modelInstanceEntities = getEngine().getEntitiesFor(Family.all(ModelInstanceComponent.class).get());
 	}
 
 	@Override
@@ -195,13 +194,13 @@ public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 
 	@Override
 	public void initializeData( ) {
-		BitmapFont font = new BitmapFont();
+		font = new BitmapFont();
 		font.getData().markupEnabled = true;
 		label = addLabel(font);
 	}
 
 	@Override
 	public void dispose( ) {
-
+		font.dispose();
 	}
 }

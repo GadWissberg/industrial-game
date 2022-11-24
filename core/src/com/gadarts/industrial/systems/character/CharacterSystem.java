@@ -1,6 +1,5 @@
 package com.gadarts.industrial.systems.character;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
@@ -64,10 +63,9 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private ImmutableArray<Entity> characters;
 	private ParticleEffect smallExpEffect;
 
-	public CharacterSystem(SystemsCommonData systemsCommonData,
-						   GameAssetsManager assetsManager,
+	public CharacterSystem(GameAssetsManager assetsManager,
 						   GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, assetsManager, lifeCycleHandler);
+		super(assetsManager, lifeCycleHandler);
 	}
 
 	private static void freeEndedCommand(Queue<CharacterCommand> commands) {
@@ -112,8 +110,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	@Override
-	public void addedToEngine(Engine engine) {
-		super.addedToEngine(engine);
+	public void onSystemReset(SystemsCommonData systemsCommonData) {
+		super.onSystemReset(systemsCommonData);
 		characters = getEngine().getEntitiesFor(Family.all(CharacterComponent.class).get());
 	}
 

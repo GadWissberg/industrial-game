@@ -1,6 +1,5 @@
 package com.gadarts.industrial.systems.amb;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
@@ -27,10 +26,9 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 	private static final int DOOR_OPEN_DURATION = 3;
 	private ImmutableArray<Entity> doorEntities;
 
-	public AmbSystem(SystemsCommonData systemsCommonData,
-					 GameAssetsManager assetsManager,
+	public AmbSystem(GameAssetsManager assetsManager,
 					 GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, assetsManager, lifeCycleHandler);
+		super(assetsManager, lifeCycleHandler);
 	}
 
 	@Override
@@ -44,8 +42,9 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 	}
 
 	@Override
-	public void addedToEngine(Engine engine) {
-		doorEntities = engine.getEntitiesFor(Family.all(DoorComponent.class).get());
+	public void onSystemReset(SystemsCommonData systemsCommonData) {
+		super.onSystemReset(systemsCommonData);
+		doorEntities = getEngine().getEntitiesFor(Family.all(DoorComponent.class).get());
 	}
 
 	@Override

@@ -49,10 +49,9 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 	private ImmutableArray<Entity> bullets;
 	private ImmutableArray<Entity> collidables;
 
-	public AttackSystem(SystemsCommonData systemsCommonData,
-						GameAssetsManager assetsManager,
+	public AttackSystem(GameAssetsManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, assetsManager, lifeCycleHandler);
+		super(assetsManager, lifeCycleHandler);
 	}
 
 	@Override
@@ -152,7 +151,9 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 	}
 
 	@Override
-	public void addedToEngine(Engine engine) {
+	public void onSystemReset(SystemsCommonData systemsCommonData) {
+		super.onSystemReset(systemsCommonData);
+		Engine engine = getEngine();
 		bullets = engine.getEntitiesFor(Family.all(BulletComponent.class).get());
 		collidables = engine.getEntitiesFor(Family.all(CollisionComponent.class).get());
 	}

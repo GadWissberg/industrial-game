@@ -8,15 +8,13 @@ import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.systems.GameSystem;
-import com.gadarts.industrial.systems.SystemsCommonData;
 
 public class InputSystem extends GameSystem<InputSystemEventsSubscriber> implements InputProcessor {
 	private CameraInputController debugInput;
 
-	public InputSystem(SystemsCommonData systemsCommonData,
-					   GameAssetsManager assetsManager,
+	public InputSystem(GameAssetsManager assetsManager,
 					   GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, assetsManager, lifeCycleHandler);
+		super(assetsManager, lifeCycleHandler);
 	}
 
 	@Override

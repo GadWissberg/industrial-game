@@ -65,10 +65,14 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private CursorHandler cursorHandler;
 	private ToolTipHandler toolTipHandler;
 
-	public UserInterfaceSystem(SystemsCommonData systemsCommonData,
-							   GameAssetsManager assetsManager,
+	public UserInterfaceSystem(GameAssetsManager assetsManager,
 							   GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, assetsManager, lifeCycleHandler);
+		super(assetsManager, lifeCycleHandler);
+	}
+
+	@Override
+	public void onSystemReset(SystemsCommonData systemsCommonData) {
+		super.onSystemReset(systemsCommonData);
 		addUiStage();
 		Table hudTable = addTable();
 		hudTable.setName(TABLE_NAME_HUD);
@@ -135,7 +139,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 	@Override
 	public void reset( ) {
-		getSystemsCommonData().getUiStage().dispose();
 	}
 
 	private void addUiStage( ) {

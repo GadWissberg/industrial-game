@@ -1,6 +1,5 @@
 package com.gadarts.industrial.systems.render;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.utils.ImmutableArray;
@@ -81,23 +80,18 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private final RenderBatches renderBatches = new RenderBatches();
 	private final RenderSystemRelevantFamilies families = new RenderSystemRelevantFamilies();
 	private final StaticShadowsData staticShadowsData = new StaticShadowsData();
-	private final Environment environment;
-	private final Color ambientColor;
+	private Environment environment;
+	private Color ambientColor;
 	private ModelsShaderProvider shaderProvider;
 	private boolean frustumCull = !DebugSettings.DISABLE_FRUSTUM_CULLING;
 	private GameCameraGroupStrategy regularDecalGroupStrategy;
 	private OutlineGroupStrategy outlineDecalGroupStrategy;
 	private boolean take;
 
-	public RenderSystem(SystemsCommonData systemsCommonData,
-						GameAssetsManager assetsManager,
-						GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, assetsManager, lifeCycleHandler);
-		environment = createEnvironment();
-		getSystemsCommonData().setDrawFlags(new DrawFlags());
-		float ambient = getSystemsCommonData().getMap().getAmbient();
-		ambientColor = new Color(ambient, ambient, ambient, 1F);
+	public RenderSystem(GameAssetsManager assetsManager, GameLifeCycleHandler lifeCycleHandler) {
+		super(assetsManager, lifeCycleHandler);
 	}
+
 
 	private static CharacterAnimation fetchCharacterAnimationByDirectionAndType(Entity entity,
 																				Direction direction,
@@ -148,9 +142,13 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	@Override
-	public void addedToEngine(Engine engine) {
-		super.addedToEngine(engine);
-		families.init(engine);
+	public void onSystemReset(SystemsCommonData systemsCommonData) {
+		super.onSystemReset(systemsCommonData);
+		environment = createEnvironment();
+		getSystemsCommonData().setDrawFlags(new DrawFlags());
+		float ambient = getSystemsCommonData().getMap().getAmbient();
+		ambientColor = new Color(ambient, ambient, ambient, 1F);
+		families.init(getEngine());
 	}
 
 	@Override

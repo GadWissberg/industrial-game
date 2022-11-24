@@ -29,5 +29,5 @@ public final class DebugSettings {
 	public static final boolean PARALYZED_ENEMIES = false;
 	public static final boolean LOW_HP_FOR_ENEMIES = false;
 	public static final boolean SPACE_BAR_SKIPS_PLAYER = false;
-	public static final String TEST_LEVEL = "enemy_test";
+	public static final String TEST_LEVEL = "office";
 }

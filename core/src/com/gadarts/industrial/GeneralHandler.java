@@ -53,11 +53,10 @@ public class GeneralHandler implements
 	private boolean inGame;
 	private Console console;
 
-	private void addSystems(SystemsCommonData systemsCommonData) {
+	private void addSystems( ) {
 		Arrays.stream(Systems.values()).forEach(systemDefinition -> {
 			try {
 				Object system = systemDefinition.getSystemClass().getConstructors()[0].newInstance(
-						systemsCommonData,
 						assetsManager,
 						this);
 				engine.addSystem((GameSystem<? extends SystemEventsSubscriber>) system);
@@ -140,17 +139,17 @@ public class GeneralHandler implements
 	}
 
 	private void createAndSetEngine( ) {
-		Optional.ofNullable(engine).ifPresent(e -> {
-			e.getSystems().forEach(s -> {
+		if (engine != null) {
+			engine.getSystems().forEach(s -> {
 				if (s instanceof Disposable) {
 					((Disposable) s).dispose();
 				}
 			});
-			e.clearPools();
-			e.removeAllEntities();
-			e.removeAllSystems();
-		});
-		this.engine = new PooledEngine();
+			engine.clearPools();
+			engine.removeAllEntities();
+		} else {
+			this.engine = new PooledEngine();
+		}
 	}
 
 	private void initializeAssets( ) {
@@ -164,8 +163,11 @@ public class GeneralHandler implements
 
 	@SuppressWarnings("unchecked")
 	private void initializeSystems( ) {
-		addSystems(systemsCommonData);
+		if (engine.getSystems().size() == 0) {
+			addSystems();
+		}
 		ImmutableArray<EntitySystem> systems = engine.getSystems();
+		systems.forEach(system -> ((GameSystem<? extends SystemEventsSubscriber>) system).onSystemReset(systemsCommonData));
 		systems.forEach(system -> ((GameSystem<? extends SystemEventsSubscriber>) system).initializeData());
 		systems.forEach(system -> {
 			GameSystem<? extends SystemEventsSubscriber> sys = (GameSystem<? extends SystemEventsSubscriber>) system;
@@ -196,7 +198,7 @@ public class GeneralHandler implements
 		initializeAssets();
 		soundPlayer = new SoundPlayer(assetsManager);
 		createAndSetEngine();
-		initializeSystemsCommonData("office");
+		initializeSystemsCommonData(DebugSettings.TEST_LEVEL);
 		initializeSystems();
 		createConsole();
 	}

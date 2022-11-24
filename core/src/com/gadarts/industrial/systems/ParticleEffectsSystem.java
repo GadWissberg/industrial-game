@@ -1,6 +1,5 @@
 package com.gadarts.industrial.systems;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.Family;
@@ -38,21 +37,20 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 	private ImmutableArray<Entity> particleEffectsEntities;
 	private ImmutableArray<Entity> flyingParticlesEntities;
 
-	public ParticleEffectsSystem(SystemsCommonData systemsCommonData,
-								 GameAssetsManager assetsManager,
+	public ParticleEffectsSystem(GameAssetsManager assetsManager,
 								 GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, assetsManager, lifeCycleHandler);
-		if (pointSpriteBatch == null) {
-			pointSpriteBatch = new PointSpriteParticleBatch();
-		}
+		super(assetsManager, lifeCycleHandler);
+		pointSpriteBatch = new PointSpriteParticleBatch();
 		getAssetsManager().loadParticleEffects(pointSpriteBatch);
 	}
 
 	@Override
-	public void addedToEngine(Engine engine) {
-		super.addedToEngine(engine);
+	public void onSystemReset(SystemsCommonData systemsCommonData) {
+		super.onSystemReset(systemsCommonData);
 		particleEffectsEntities = getEngine().getEntitiesFor(Family.all(ParticleEffectComponent.class).get());
 		flyingParticlesEntities = getEngine().getEntitiesFor(Family.all(FlyingParticleComponent.class).get());
+		particleEntitiesToRemove.clear();
+		particleEffectsToFollow.clear();
 		getEngine().addEntityListener(new EntityListener() {
 			@Override
 			public void entityAdded(final Entity entity) {
@@ -60,7 +58,7 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 					ParticleEffect effect = ComponentsMapper.particleEffect.get(entity).getParticleEffect();
 					effect.init();
 					effect.start();
-					getSystemsCommonData().getParticleSystem().add(effect);
+					systemsCommonData.getParticleSystem().add(effect);
 				}
 			}
 
@@ -219,7 +217,5 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 
 	@Override
 	public void dispose( ) {
-		getAssetsManager().unloadParticleEffects();
 	}
-
 }

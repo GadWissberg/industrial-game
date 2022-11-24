@@ -1,6 +1,5 @@
 package com.gadarts.industrial.systems.enemy;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
@@ -73,17 +72,15 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private final static LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
 	private static final CalculatePathRequest request = new CalculatePathRequest();
 	private final List<Sounds> ambSounds = List.of(Sounds.AMB_CHAINS, Sounds.AMB_SIGH, Sounds.AMB_LAUGH);
-	private final PathPlanHandler pathPlanner;
+	private PathPlanHandler pathPlanner;
 	private ImmutableArray<Entity> enemies;
 	private long nextAmbSoundTime;
 	private ParticleEffect smokeEffect;
 
-	public EnemySystem(SystemsCommonData systemsCommonData,
-					   GameAssetsManager assetsManager,
-					   GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, assetsManager, lifeCycleHandler);
-		pathPlanner = new PathPlanHandler(getSystemsCommonData().getMap());
+	public EnemySystem(GameAssetsManager assetsManager, GameLifeCycleHandler lifeCycleHandler) {
+		super(assetsManager, lifeCycleHandler);
 	}
+
 
 	private static void consumeEngineEnergy(Entity character) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
@@ -491,9 +488,10 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	@Override
-	public void addedToEngine(Engine engine) {
-		super.addedToEngine(engine);
-		enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class).get());
+	public void onSystemReset(SystemsCommonData systemsCommonData) {
+		super.onSystemReset(systemsCommonData);
+		pathPlanner = new PathPlanHandler(getSystemsCommonData().getMap());
+		enemies = getEngine().getEntitiesFor(Family.all(EnemyComponent.class).get());
 	}
 
 	@Override

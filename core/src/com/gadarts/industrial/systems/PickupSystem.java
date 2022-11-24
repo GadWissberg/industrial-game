@@ -1,6 +1,5 @@
 package com.gadarts.industrial.systems;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
@@ -22,10 +21,9 @@ public class PickupSystem extends GameSystem<SystemEventsSubscriber> implements 
 	private final float[] hsvArray = new float[3];
 	private ImmutableArray<Entity> pickupEntities;
 
-	public PickupSystem(SystemsCommonData systemsCommonData,
-						GameAssetsManager assetsManager,
+	public PickupSystem(GameAssetsManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
-		super(systemsCommonData, assetsManager, lifeCycleHandler);
+		super(assetsManager, lifeCycleHandler);
 	}
 
 	@Override
@@ -40,9 +38,9 @@ public class PickupSystem extends GameSystem<SystemEventsSubscriber> implements 
 	}
 
 	@Override
-	public void addedToEngine(Engine engine) {
-		super.addedToEngine(engine);
-		pickupEntities = engine.getEntitiesFor(Family.all(PickUpComponent.class).get());
+	public void onSystemReset(SystemsCommonData systemsCommonData) {
+		super.onSystemReset(systemsCommonData);
+		pickupEntities = getEngine().getEntitiesFor(Family.all(PickUpComponent.class).get());
 	}
 
 	@Override

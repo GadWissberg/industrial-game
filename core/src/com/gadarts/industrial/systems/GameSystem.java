@@ -17,20 +17,22 @@ public abstract class GameSystem<T extends SystemEventsSubscriber> extends Entit
 		EventsNotifier<T>,
 		ConsoleEventsSubscriber {
 	protected final List<T> subscribers = new ArrayList<>();
-	private final SystemsCommonData systemsCommonData;
 	private final GameAssetsManager assetsManager;
 	private final GameLifeCycleHandler lifeCycleHandler;
+	private SystemsCommonData systemsCommonData;
 
-	protected GameSystem(SystemsCommonData systemsCommonData,
-						 GameAssetsManager assetsManager,
+	protected GameSystem(GameAssetsManager assetsManager,
 						 GameLifeCycleHandler lifeCycleHandler) {
-		this.systemsCommonData = systemsCommonData;
 		this.assetsManager = assetsManager;
 		this.lifeCycleHandler = lifeCycleHandler;
 	}
 
 	public void reset( ) {
 
+	}
+
+	public void onSystemReset(SystemsCommonData systemsCommonData) {
+		this.systemsCommonData = systemsCommonData;
 	}
 
 	public abstract Class<T> getEventsSubscriberClass( );
