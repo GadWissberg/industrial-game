@@ -13,10 +13,13 @@ public class CharacterAnimations {
 	public void put(SpriteType type, int variationIndex, Direction dir, CharacterAnimation animation) {
 		if (!animations.containsKey(type)) {
 			ArrayList<Map<Direction, CharacterAnimation>> variations = new ArrayList<>();
-			IntStream.range(0, type.getVariations()).forEach(i -> variations.add(new HashMap<>()));
 			animations.put(type, variations);
 		}
-		animations.get(type).get(variationIndex).put(dir, animation);
+		List<Map<Direction, CharacterAnimation>> variations = animations.get(type);
+		if (variationIndex >= variations.size()) {
+			variations.add(new HashMap<>());
+		}
+		variations.get(variationIndex).put(dir, animation);
 	}
 
 	public CharacterAnimation get(final SpriteType type, final Direction direction) {
@@ -24,10 +27,13 @@ public class CharacterAnimations {
 	}
 
 	public CharacterAnimation get(SpriteType type, int variationIndex, Direction direction) {
-		return animations.get(type).get(variationIndex).get(direction);
+		List<Map<Direction, CharacterAnimation>> typeAnimations = animations.get(type);
+		boolean validIndex = variationIndex < typeAnimations.size();
+		return validIndex ? typeAnimations.get(variationIndex).get(direction) : typeAnimations.get(0).get(direction);
 	}
 
 	public boolean contains(final SpriteType spriteType) {
 		return animations.containsKey(spriteType);
 	}
+
 }
