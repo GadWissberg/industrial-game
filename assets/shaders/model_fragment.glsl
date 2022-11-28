@@ -82,11 +82,6 @@ varying vec3 v_ambientLight;
 
 #endif //lightingFlag
 
-#ifdef fogFlag
-uniform vec4 u_fogColor;
-varying float v_fog;
-#endif // fogFlag
-
 // TerrorEffector custom uniforms
 
 uniform float u_affectedByLight;
@@ -307,10 +302,6 @@ void main() {
     #endif //shadowMapFlag
     #endif
     #endif //lightingFlag
-
-    #ifdef fogFlag
-    gl_FragColor.rgb = mix(gl_FragColor.rgb, u_fogColor.rgb, v_fog);
-    #endif // end fogFlag
 
     #ifdef blendedFlag
     gl_FragColor.a = diffuse.a * v_opacity;
