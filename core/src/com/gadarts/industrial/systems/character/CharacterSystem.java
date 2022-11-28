@@ -210,7 +210,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 										int damage,
 										ModelInstanceComponent bulletModelInstanceComponent) {
 		CharacterComponent characterComponent = character.get(attacked);
-		if (!DebugSettings.GOD_MODE || !ComponentsMapper.player.has(attacked)) {
+		if ((ComponentsMapper.player.has(attacked) && !DebugSettings.GOD_MODE)
+				|| ComponentsMapper.enemy.has(attacked) && !DebugSettings.ENEMY_INVULNERABLE) {
 			characterComponent.dealDamage(damage);
 		}
 		handleDeath(attacked);
@@ -397,7 +398,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private void applyAnimationToReverse(AnimationComponent animationComponent) {
 		animationComponent.getAnimation().setPlayMode(Animation.PlayMode.REVERSED);
 		animationComponent.resetStateTime();
-		animationComponent.getAnimation().getPlayMode();
 	}
 
 	private void handleCurrentCommand(final CharacterCommand currentCommand) {
@@ -439,7 +439,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			Vector3 targetPosition = ComponentsMapper.characterDecal.get(charComp.getTarget()).getDecal().getPosition();
 			Vector3 characterPosition = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
 			Vector3 direction = auxVector3_1.set(targetPosition).sub(characterPosition).nor();
-			charComp.getCharacterSpriteData().setFacingDirection(findDirection(auxVector2_1.set(direction.x, direction.z)));
+			charComp.setFacingDirection(findDirection(auxVector2_1.set(direction.x, direction.z)));
 			rotationDone(rotData, charComp.getCharacterSpriteData());
 		}
 	}
@@ -448,9 +448,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 						CharacterRotationData rotationData,
 						Direction directionToDest,
 						Entity character) {
-		if (charComponent.getCharacterSpriteData().getFacingDirection() != directionToDest) {
-			CharacterSpriteData characterSpriteData = charComponent.getCharacterSpriteData();
-			Vector2 currentDirVec = characterSpriteData.getFacingDirection().getDirection(auxVector2_1);
+		if (charComponent.getFacingDirection() != directionToDest) {
+			Vector2 currentDirVec = charComponent.getFacingDirection().getDirection(auxVector2_1);
 			float diff = directionToDest.getDirection(auxVector2_2).angleDeg() - currentDirVec.angleDeg();
 			int side = auxVector2_3.set(1, 0).setAngleDeg(diff).angleDeg() > 180 ? -1 : 1;
 			Vector3 charPos = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
@@ -458,7 +457,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			int fogOfWarSig = floorEntity != null ? ComponentsMapper.floor.get(floorEntity).getFogOfWarSignature() : 0;
 			boolean isNodeHidden = (fogOfWarSig & 16) == 16;
 			Direction newDir = isNodeHidden ? directionToDest : findDirection(currentDirVec.rotateDeg(45f * side));
-			characterSpriteData.setFacingDirection(newDir);
+			charComponent.setFacingDirection(newDir);
 		} else {
 			rotationDone(rotationData, charComponent.getCharacterSpriteData());
 		}

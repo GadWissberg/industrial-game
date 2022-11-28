@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -12,6 +13,7 @@ import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.character.OnGoingAttack;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
+import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
@@ -26,6 +28,7 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 	private final static Vector3 auxVector3_1 = new Vector3();
 
 	private final static Vector3 auxVector3_2 = new Vector3();
+	private final static Vector2 auxVector2 = new Vector2();
 
 	private static int randomNumberOfBullets(WeaponsDefinitions primary) {
 		return MathUtils.random(primary.getMinNumberOfBullets(), primary.getMaxNumberOfBullets());
@@ -100,6 +103,7 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 			MapGraphNode positionNode = commonData.getMap().getNode(charDecalComp.getDecal().getPosition());
 			Vector3 positionNodeCenterPosition = positionNode.getCenterPosition(auxVector3_1);
 			Vector3 direction = calculateDirectionToTarget(characterComponent, positionNodeCenterPosition, commonData);
+			characterComponent.setFacingDirection(Direction.findDirection(auxVector2.set(direction.x, direction.z)));
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onCharacterEngagesPrimaryAttack(character, direction, positionNodeCenterPosition);
 			}

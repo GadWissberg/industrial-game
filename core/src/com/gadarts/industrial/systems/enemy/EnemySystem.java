@@ -388,7 +388,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		Vector3 enemyPos = ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition();
 		CharacterComponent charComponent = ComponentsMapper.character.get(enemy);
 		Vector3 targetPos = ComponentsMapper.characterDecal.get(charComponent.getTarget()).getDecal().getPosition();
-		Vector2 enemyDirection = charComponent.getCharacterSpriteData().getFacingDirection().getDirection(auxVector2_1);
+		Vector2 enemyDirection = charComponent.getFacingDirection().getDirection(auxVector2_1);
 		float dirToTarget = auxVector2_2.set(targetPos.x, targetPos.z).sub(enemyPos.x, enemyPos.z).nor().angleDeg();
 		float angleDiff = (enemyDirection.angleDeg() - dirToTarget + 180 + 360) % 360 - 180;
 		return angleDiff <= ENEMY_HALF_FOV_ANGLE && angleDiff >= -ENEMY_HALF_FOV_ANGLE;

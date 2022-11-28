@@ -1,7 +1,6 @@
 package com.gadarts.industrial.components.character;
 
 import com.badlogic.gdx.utils.Pool;
-import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +8,6 @@ import lombok.Setter;
 @Setter
 @Getter
 public class CharacterSpriteData implements Pool.Poolable {
-	private Direction facingDirection;
 	private int frameIndexNotAffectedByLight;
 	private SpriteType spriteType;
 	private int primaryAttackHitFrameIndex;
@@ -21,11 +19,9 @@ public class CharacterSpriteData implements Pool.Poolable {
 		frameIndexNotAffectedByLight = -1;
 	}
 
-	public void init(final Direction direction,
-					 final SpriteType spriteType,
+	public void init(final SpriteType spriteType,
 					 final int primaryAttackHitFrameIndex,
 					 final boolean singleDeathAnimation) {
-		this.facingDirection = direction;
 		this.spriteType = spriteType;
 		this.primaryAttackHitFrameIndex = primaryAttackHitFrameIndex;
 		this.singleDeathAnimation = singleDeathAnimation;

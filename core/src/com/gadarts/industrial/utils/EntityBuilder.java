@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.components.*;
 import com.gadarts.industrial.components.animation.AnimationComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
@@ -276,10 +275,11 @@ public class EntityBuilder {
 	public EntityBuilder addCharacterComponent(CharacterSpriteData characterSpriteData,
 											   CharacterSoundData characterSoundData,
 											   CharacterSkillsParameters skills,
-											   WeaponsDefinitions primaryAttack) {
+											   WeaponsDefinitions primaryAttack,
+											   Direction direction) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		CharacterComponent charComponent = engine.createComponent(CharacterComponent.class);
-		charComponent.init(characterSpriteData, characterSoundData, skills, primaryAttack);
+		charComponent.init(characterSpriteData, characterSoundData, skills, primaryAttack, direction);
 		currentEntity.add(charComponent);
 		return instance;
 	}

@@ -665,20 +665,21 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private void updateCharacterDecal(float deltaTime, Entity entity) {
 		Camera camera = getSystemsCommonData().getCamera();
-		CharacterSpriteData charSpriteData = ComponentsMapper.character.get(entity).getCharacterSpriteData();
-		Direction direction = CharacterUtils.calculateDirectionSeenFromCamera(camera, charSpriteData.getFacingDirection());
+		CharacterComponent characterComp = ComponentsMapper.character.get(entity);
+		CharacterSpriteData charSpriteData = characterComp.getCharacterSpriteData();
+		Direction direction = CharacterUtils.calculateDirectionSeenFromCamera(camera, characterComp.getFacingDirection());
 		SpriteType spriteType = charSpriteData.getSpriteType();
 		boolean sameSpriteType = spriteType.equals(ComponentsMapper.characterDecal.get(entity).getSpriteType());
 		if ((!sameSpriteType || !ComponentsMapper.characterDecal.get(entity).getDirection().equals(direction))) {
 			updateCharacterDecalSprite(entity, direction, spriteType, sameSpriteType);
 		} else if (spriteType != RUN || getSystemsCommonData().getTurnsQueue().first() == entity) {
-			updateCharacterDecalFrame(deltaTime, entity, charSpriteData, spriteType);
+			updateCharacterDecalFrame(deltaTime, entity, characterComp, spriteType);
 		}
 	}
 
 	private void updateCharacterDecalFrame(float delta,
 										   Entity entity,
-										   CharacterSpriteData charSpriteData,
+										   CharacterComponent characterComponent,
 										   SpriteType spriteType) {
 		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(entity);
 		AnimationComponent aniComp = ComponentsMapper.animation.get(entity);
@@ -692,7 +693,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 					anim.setPlayMode(Animation.PlayMode.NORMAL);
 					Direction direction = CharacterUtils.calculateDirectionSeenFromCamera(
 							systemsCommonData.getCamera(),
-							charSpriteData.getFacingDirection());
+							characterComponent.getFacingDirection());
 					CharacterAnimation animation = fetchCharacterAnimationByDirectionAndType(
 							entity,
 							direction,
@@ -704,20 +705,20 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 			AtlasRegion currentFrame = (AtlasRegion) characterDecalComponent.getDecal().getTextureRegion();
 			AtlasRegion newFrame = calculateCharacterDecalNewFrame(delta, entity, aniComp, currentFrame);
 			if (characterDecalComponent.getSpriteType() == spriteType && currentFrame != newFrame) {
-				updateCharacterDecalTextureAccordingToAnimation(entity, charSpriteData, spriteType, newFrame);
+				updateCharacterDecalTextureAccordingToAnimation(entity, characterComponent, spriteType, newFrame);
 			}
 		}
 	}
 
 	private void updateCharacterDecalTextureAccordingToAnimation(Entity entity,
-																 CharacterSpriteData characterSpriteData,
+																 CharacterComponent characterComponent,
 																 SpriteType spriteType,
 																 AtlasRegion newFrame) {
 		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(entity);
 		CharacterAnimations animations = characterDecalComponent.getAnimations();
 		Decal decal = characterDecalComponent.getDecal();
 		decal.setTextureRegion(newFrame);
-		Direction facingDirection = characterSpriteData.getFacingDirection();
+		Direction facingDirection = characterComponent.getFacingDirection();
 		if (spriteType.isSingleDirection()) {
 			facingDirection = Direction.SOUTH;
 		}
@@ -779,7 +780,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 					newAnimation.setPlayMode(Animation.PlayMode.NORMAL);
 				}
 				animationComponent.resetStateTime();
-			} else if (sameSpriteType && oldAnimation != newAnimation) {
+			} else if (oldAnimation != newAnimation) {
 				newAnimation.setPlayMode(oldAnimation.getPlayMode());
 			}
 		}
