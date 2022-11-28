@@ -136,11 +136,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		stage.addActor(table);
 		return table;
 	}
-
-	@Override
-	public void reset( ) {
-	}
-
 	private void addUiStage( ) {
 		int width = FULL_SCREEN ? FULL_SCREEN_RESOLUTION_WIDTH : WINDOWED_RESOLUTION_WIDTH;
 		int height = FULL_SCREEN ? FULL_SCREEN_RESOLUTION_HEIGHT : WINDOWED_RESOLUTION_HEIGHT;

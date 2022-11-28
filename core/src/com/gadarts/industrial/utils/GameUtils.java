@@ -1,7 +1,6 @@
 package com.gadarts.industrial.utils;
 
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.collision.Ray;

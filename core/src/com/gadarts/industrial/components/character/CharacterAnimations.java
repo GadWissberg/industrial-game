@@ -4,8 +4,10 @@ package com.gadarts.industrial.components.character;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 
-import java.util.*;
-import java.util.stream.IntStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CharacterAnimations {
 	final HashMap<SpriteType, List<Map<Direction, CharacterAnimation>>> animations = new HashMap<>();

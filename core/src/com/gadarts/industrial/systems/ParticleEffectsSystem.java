@@ -34,7 +34,7 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 	private static final Vector3 auxVector_3 = new Vector3();
 	private final ArrayList<Entity> particleEntitiesToRemove = new ArrayList<>();
 	private final ArrayList<ParticleEffect> particleEffectsToFollow = new ArrayList<>();
-	private PointSpriteParticleBatch pointSpriteBatch;
+	private final PointSpriteParticleBatch pointSpriteBatch;
 	private ImmutableArray<Entity> particleEffectsEntities;
 	private ImmutableArray<Entity> flyingParticlesEntities;
 
