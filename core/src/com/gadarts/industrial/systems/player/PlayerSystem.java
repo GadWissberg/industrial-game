@@ -339,7 +339,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	private void planPath(final MapGraphNode cursorNode) {
-		Entity enemyAtNode = getSystemsCommonData().getMap().fetchAliveEnemyFromNode(cursorNode);
+		Entity enemyAtNode = getSystemsCommonData().getMap().fetchAliveCharacterFromNode(cursorNode);
 		if (!calculatePathAccordingToSelection(cursorNode, enemyAtNode)) return;
 
 		pathHasCreated(cursorNode, enemyAtNode);
@@ -347,7 +347,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	private void enemySelected(MapGraphNode targetNode, Entity enemyAtNode) {
 		ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).setTarget(enemyAtNode);
-		Entity targetCharacter = getSystemsCommonData().getMap().fetchAliveEnemyFromNode(targetNode);
+		Entity targetCharacter = getSystemsCommonData().getMap().fetchAliveCharacterFromNode(targetNode);
 		Decal playerDecal = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer()).getDecal();
 		if (!getSystemsCommonData().getStorage().getSelectedWeapon().isMelee()) {
 			playerPathPlanner.resetPlan();

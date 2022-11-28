@@ -322,7 +322,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		} else if (aiStatus == DODGING) {
 			MapGraph map = getSystemsCommonData().getMap();
 			Decal decal = ComponentsMapper.characterDecal.get(enemy).getDecal();
-			List<MapGraphNode> availableNodes = map.getAvailableNodesAroundNode(map.getNode(decal.getPosition()));
+			List<MapGraphNode> availableNodes = map.fetchAvailableNodesAroundNode(map.getNode(decal.getPosition()));
 			for (int i = 0; i < availableNodes.size(); i++) {
 				Vector3 enemyPosition = ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition();
 				float enemyNodeHeight = getSystemsCommonData().getMap().getNode(enemyPosition).getHeight();

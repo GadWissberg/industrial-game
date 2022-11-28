@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedGraph;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -48,16 +49,22 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		}
 	}
 
-	public Entity fetchAliveEnemyFromNode(final MapGraphNode node) {
-		Entity result = null;
-		for (Entity enemy : mapGraphRelatedEntities.getEnemiesEntities()) {
-			MapGraphNode enemyNode = getNode(ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition());
-			if (ComponentsMapper.character.get(enemy).getSkills().getHealthData().getHp() > 0 && enemyNode.equals(node)) {
-				result = enemy;
-				break;
+	public Entity fetchAliveCharacterFromNode(MapGraphNode node) {
+		return fetchAliveCharacterFromNode(node, false);
+	}
+
+	public Entity fetchAliveCharacterFromNode(MapGraphNode node, boolean includePlayer) {
+		for (Entity character : mapGraphRelatedEntities.getCharacterEntities()) {
+			if (!ComponentsMapper.player.has(character) || includePlayer) {
+				Decal decal = ComponentsMapper.characterDecal.get(character).getDecal();
+				MapGraphNode characterNode = getNode(decal.getPosition());
+				int hp = ComponentsMapper.character.get(character).getSkills().getHealthData().getHp();
+				if (hp > 0 && characterNode.equals(node)) {
+					return character;
+				}
 			}
 		}
-		return result;
+		return null;
 	}
 
 	private void getThreeBehind(final MapGraphNode node, final List<MapGraphNode> output) {
@@ -228,16 +235,19 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		return result;
 	}
 
-	public List<MapGraphNode> getAvailableNodesAroundNode(final MapGraphNode node) {
+	public List<MapGraphNode> fetchAvailableNodesAroundNode(final MapGraphNode node) {
 		auxNodesList_1.clear();
 		auxNodesList_2.clear();
 		List<MapGraphNode> nodesAround = getNodesAround(node, auxNodesList_1);
 		List<MapGraphNode> availableNodes = auxNodesList_2;
+
 		for (MapGraphNode nearbyNode : nodesAround) {
-			if (nearbyNode.getType() == MapNodesTypes.PASSABLE_NODE && fetchAliveEnemyFromNode(nearbyNode) == null) {
+			Entity character = fetchAliveCharacterFromNode(nearbyNode, true);
+			if (nearbyNode.getType() == MapNodesTypes.PASSABLE_NODE && character == null) {
 				availableNodes.add(nearbyNode);
 			}
 		}
+
 		return availableNodes;
 	}
 
