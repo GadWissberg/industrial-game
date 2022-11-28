@@ -19,6 +19,7 @@ import com.gadarts.industrial.components.FlyingParticleComponent;
 import com.gadarts.industrial.components.ParticleEffectComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
+import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 
 import java.util.ArrayList;
@@ -147,7 +148,8 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 			ParticleEffectComponent particleEffectComponent = ComponentsMapper.particleEffect.get(particleEntity);
 			ParticleEffect particleEffect = particleEffectComponent.getParticleEffect();
 			Vector3 position = particleEffect.getControllers().get(0).transform.getTranslation(auxVector_1);
-			if (!ComponentsMapper.floor.get(getSystemsCommonData().getMap().getNode(position).getEntity()).isRevealed()) {
+			MapGraphNode node = getSystemsCommonData().getMap().getNode(position);
+			if (node != null && node.getEntity() != null && !ComponentsMapper.floor.get(node.getEntity()).isRevealed()) {
 				particleEffect.end();
 			}
 		}

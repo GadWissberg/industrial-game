@@ -695,7 +695,7 @@ public class MapBuilder implements Disposable {
 		Vector3 position = inflateCharacterPosition(characterJsonObject, mapGraph);
 		auxCharacterSoundData.set(Sounds.PLAYER_PAIN, Sounds.PLAYER_DEATH, Sounds.STEP);
 		CharacterSkillsParameters skills = new CharacterSkillsParameters(
-				PLAYER_HEALTH,
+				!DebugSettings.LOW_HP_FOR_PLAYER ? PLAYER_HEALTH : 1,
 				PlayerComponent.PLAYER_AGILITY,
 				Accuracy.LOW);
 		CharacterData data = new CharacterData(
