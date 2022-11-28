@@ -5,7 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.gadarts.industrial.components.PickUpComponent;
-import com.gadarts.industrial.components.ShadowlessLightComponent;
+import com.gadarts.industrial.components.sll.ShadowlessLightComponent;
 import com.gadarts.industrial.components.SimpleShadowComponent;
 import com.gadarts.industrial.components.StaticLightComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;

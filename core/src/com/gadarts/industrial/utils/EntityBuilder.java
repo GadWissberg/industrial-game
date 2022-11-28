@@ -25,6 +25,7 @@ import com.gadarts.industrial.components.player.Item;
 import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.components.sd.SimpleDecalComponent;
+import com.gadarts.industrial.components.sll.ShadowlessLightComponent;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;

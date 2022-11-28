@@ -24,10 +24,13 @@ import com.gadarts.industrial.shared.assets.GameAssetsManager;
 
 import java.util.ArrayList;
 
+/**
+ * Handles the particle effects lifecycle and the libGdx Particle System object.
+ */
 public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
-	public static final int BULLET_JACKET_TIME_TO_LEAVE = 5000;
-	public static final float FLYING_PART_ROTATION_STEP = 64F;
 	public static final float GRAVITY_COEFF = 1.05F;
+	private static final int BULLET_JACKET_TIME_TO_LEAVE = 5000;
+	private static final float FLYING_PART_ROTATION_STEP = 64F;
 	private static final Matrix4 auxMatrix = new Matrix4();
 	private static final Vector3 auxVector_1 = new Vector3();
 	private static final Vector3 auxVector_2 = new Vector3();
@@ -76,6 +79,32 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 				}
 			}
 		});
+	}
+
+	@Override
+	public void update(final float deltaTime) {
+		updatesEffectsWithParentsAccordingly();
+		hideParticlesInFow();
+		updateSystem(deltaTime);
+		handleCompletedParticleEffects();
+		updateFlyingParticles();
+	}
+
+	@Override
+	public Class<SystemEventsSubscriber> getEventsSubscriberClass( ) {
+		return null;
+	}
+
+	@Override
+	public void initializeData( ) {
+		ParticleSystem particleSystem = new ParticleSystem();
+		getSystemsCommonData().setParticleSystem(particleSystem);
+		particleSystem.add(pointSpriteBatch);
+		pointSpriteBatch.setCamera(getSystemsCommonData().getCamera());
+	}
+
+	@Override
+	public void dispose( ) {
 	}
 
 	private void finalizeEffect(final Entity effect) {
@@ -134,15 +163,6 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 		}
 	}
 
-	@Override
-	public void update(final float deltaTime) {
-		updatesEffectsWithParentsAccordingly();
-		hideParticlesInFow();
-		updateSystem(deltaTime);
-		handleCompletedParticleEffects();
-		updateFlyingParticles();
-	}
-
 	private void hideParticlesInFow( ) {
 		for (Entity particleEntity : particleEffectsEntities) {
 			ParticleEffectComponent particleEffectComponent = ComponentsMapper.particleEffect.get(particleEntity);
@@ -179,9 +199,13 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 			modelInstance.transform.rotate(Vector3.Z, FLYING_PART_ROTATION_STEP);
 			startCountDownForFlyingParticleWhenReachesGround(modelInstance, flyingPartComponent);
 		} else if (TimeUtils.timeSinceMillis(flyingPartComponent.getDestroyTime()) > 0) {
-			flyingPartComponent.setDestroyTime(0);
-			particleEntitiesToRemove.add(flyingPart);
+			destroyFlyingPart(flyingPart, flyingPartComponent);
 		}
+	}
+
+	private void destroyFlyingPart(Entity flyingPart, FlyingParticleComponent flyingPartComponent) {
+		flyingPartComponent.setDestroyTime(0);
+		particleEntitiesToRemove.add(flyingPart);
 	}
 
 	private void startCountDownForFlyingParticleWhenReachesGround(GameModelInstance modelInstance,
@@ -202,22 +226,5 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 		Vector3 gravityForce = flyingParticleComponent.getGravityForce(auxVector_2);
 		modelInstance.transform.trn(gravityForce);
 		flyingParticleComponent.setGravityForce(gravityForce.scl(GRAVITY_COEFF));
-	}
-
-	@Override
-	public Class<SystemEventsSubscriber> getEventsSubscriberClass( ) {
-		return null;
-	}
-
-	@Override
-	public void initializeData( ) {
-		ParticleSystem particleSystem = new ParticleSystem();
-		getSystemsCommonData().setParticleSystem(particleSystem);
-		particleSystem.add(pointSpriteBatch);
-		pointSpriteBatch.setCamera(getSystemsCommonData().getCamera());
-	}
-
-	@Override
-	public void dispose( ) {
 	}
 }

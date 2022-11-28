@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.ShadowlessLightComponent;
+import com.gadarts.industrial.components.sll.ShadowlessLightComponent;
 import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.AdditionalRenderData;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;

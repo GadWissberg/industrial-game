@@ -9,6 +9,7 @@ import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.components.sd.SimpleDecalComponent;
+import com.gadarts.industrial.components.sll.ShadowlessLightComponent;
 
 /**
  * Easy to access component mappers.

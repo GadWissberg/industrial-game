@@ -1,8 +1,9 @@
-package com.gadarts.industrial.components;
+package com.gadarts.industrial.components.sll;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.gadarts.industrial.components.LightComponent;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,14 +11,12 @@ import lombok.Setter;
 public class ShadowlessLightComponent extends LightComponent {
 
 
+	private final ShadowlessLightOriginalData shadowlessLightOriginalData = new ShadowlessLightOriginalData();
 	private float duration;
 	private long beginTime;
-
 	private boolean flicker;
 	@Setter
 	private long nextFlicker;
-	private float originalIntensity;
-	private float originalRadius;
 	private Entity parent;
 
 	@Override
@@ -33,8 +32,7 @@ public class ShadowlessLightComponent extends LightComponent {
 
 	public void init(Vector3 position, float intensity, float radius, Entity parent, boolean flicker) {
 		super.init(position, intensity, radius);
-		this.originalIntensity = intensity;
-		this.originalRadius = radius;
+		this.shadowlessLightOriginalData.set(intensity, radius);
 		this.flicker = flicker;
 		this.parent = parent;
 		duration = -1L;

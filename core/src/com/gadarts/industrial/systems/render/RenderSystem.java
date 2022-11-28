@@ -34,6 +34,8 @@ import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.components.sd.RelatedDecal;
 import com.gadarts.industrial.components.sd.SimpleDecalComponent;
+import com.gadarts.industrial.components.sll.ShadowlessLightComponent;
+import com.gadarts.industrial.components.sll.ShadowlessLightOriginalData;
 import com.gadarts.industrial.console.commands.ConsoleCommandParameter;
 import com.gadarts.industrial.console.commands.ConsoleCommandResult;
 import com.gadarts.industrial.console.commands.ConsoleCommands;
@@ -643,8 +645,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private void updateFlicker(final ShadowlessLightComponent lc, final long now) {
 		if (lc.isFlicker() && now >= lc.getNextFlicker()) {
-			lc.setIntensity(MathUtils.random(FLICKER_RANDOM_MIN, FLICKER_RANDOM_MAX) * lc.getOriginalIntensity());
-			lc.setRadius(MathUtils.random(FLICKER_RANDOM_MIN, FLICKER_RANDOM_MAX) * lc.getOriginalRadius());
+			ShadowlessLightOriginalData originalData = lc.getShadowlessLightOriginalData();
+			lc.setIntensity(MathUtils.random(FLICKER_RANDOM_MIN, FLICKER_RANDOM_MAX) * originalData.getOriginalIntensity());
+			lc.setRadius(MathUtils.random(FLICKER_RANDOM_MIN, FLICKER_RANDOM_MAX) * originalData.getOriginalRadius());
 			lc.setNextFlicker(now + MathUtils.random(FLICKER_MAX_INTERVAL));
 		}
 	}
