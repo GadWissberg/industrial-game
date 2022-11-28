@@ -13,7 +13,7 @@ public class MapGraphStates {
 	@Setter
 	private MapGraphConnectionCosts maxConnectionCostInSearch;
 	@Setter
-	private boolean includeEnemiesInGetConnections = true;
+	private boolean includeCharactersInGetConnections = true;
 	@Setter(AccessLevel.PACKAGE)
 	@Getter(AccessLevel.PACKAGE)
 	private Entity currentCharacterPathPlanner;

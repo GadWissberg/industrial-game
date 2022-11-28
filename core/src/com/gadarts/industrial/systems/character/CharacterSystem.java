@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Queue;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.animation.AnimationComponent;
@@ -209,7 +210,9 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 										int damage,
 										ModelInstanceComponent bulletModelInstanceComponent) {
 		CharacterComponent characterComponent = character.get(attacked);
-		characterComponent.dealDamage(damage);
+		if (!DebugSettings.GOD_MODE || !ComponentsMapper.player.has(attacked)) {
+			characterComponent.dealDamage(damage);
+		}
 		handleDeath(attacked);
 		if (ComponentsMapper.player.has(attacked) || ComponentsMapper.enemy.get(attacked).getEnemyDefinition().isHuman()) {
 			addSplatterEffect(bulletModelInstanceComponent, attacked);

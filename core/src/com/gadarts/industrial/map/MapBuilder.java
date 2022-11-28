@@ -161,7 +161,7 @@ public class MapBuilder implements Disposable {
 		GameHeuristic heuristic = new GameHeuristic();
 		GamePathFinder auxPathPlanner = new GamePathFinder(mapGraph);
 		MapGraphPath auxGraphPath = new MapGraphPath();
-		mapGraph.getMapGraphStates().setIncludeEnemiesInGetConnections(false);
+		mapGraph.getMapGraphStates().setIncludeCharactersInGetConnections(false);
 		mapGraph.getMapGraphStates().setMaxConnectionCostInSearch(MapGraphConnectionCosts.CLEAN);
 		mapGraph.getNodes().forEach(node -> {
 			boolean reachable = auxPathPlanner.searchNodePath(playerNode, node, heuristic, auxGraphPath);

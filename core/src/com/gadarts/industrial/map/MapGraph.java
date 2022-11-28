@@ -202,7 +202,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		for (Entity c : mapGraphRelatedEntities.getCharacterEntities()) {
 			MapGraphNode node = getNode(ComponentsMapper.characterDecal.get(c).getNodePosition(auxVector2));
 			int hp = ComponentsMapper.character.get(c).getSkills().getHealthData().getHp();
-			if (!ComponentsMapper.player.has(c) && (!alive || hp > 0) && node.equals(destinationNode)) {
+			if ((!alive || hp > 0) && node.equals(destinationNode)) {
 				return false;
 			}
 		}
@@ -216,7 +216,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 
 	private void checkIfConnectionIsAvailable(final Connection<MapGraphNode> connection) {
 		boolean available = true;
-		if (mapGraphStates.isIncludeEnemiesInGetConnections()) {
+		if (mapGraphStates.isIncludeCharactersInGetConnections()) {
 			MapGraphNode currentPathFinalDestination = mapGraphStates.getCurrentPathFinalDestination();
 			available = checkIfNodeIsFreeOfAliveCharacters(connection.getToNode(), currentPathFinalDestination);
 		}

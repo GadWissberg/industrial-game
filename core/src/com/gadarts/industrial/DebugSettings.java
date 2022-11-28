@@ -27,8 +27,9 @@ public final class DebugSettings {
 	public static final boolean ALLOW_STATIC_SHADOWS = true;
 	public static final boolean DISABLE_FOW = false;
 	public static final boolean PARALYZED_ENEMIES = false;
-	public static final boolean LOW_HP_FOR_ENEMIES = true;
-	public static final boolean LOW_HP_FOR_PLAYER = true;
+	public static final boolean LOW_HP_FOR_ENEMIES = false;
+	public static final boolean LOW_HP_FOR_PLAYER = false;
+	public static final boolean GOD_MODE = true;
 	public static final boolean SPACE_BAR_SKIPS_PLAYER = false;
 	public static final String TEST_LEVEL = "enemy_test";
 }

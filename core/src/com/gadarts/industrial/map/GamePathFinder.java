@@ -14,14 +14,14 @@ public class GamePathFinder extends IndexedAStarPathFinder<MapGraphNode> {
 											   final CalculatePathRequest req) {
 		MapGraphStates mapGraphStates = map.getMapGraphStates();
 		MapGraphNode oldDest = mapGraphStates.getCurrentPathFinalDestination();
-		mapGraphStates.setIncludeEnemiesInGetConnections(req.isAvoidCharactersInCalculations());
+		mapGraphStates.setIncludeCharactersInGetConnections(req.isAvoidCharactersInCalculations());
 		mapGraphStates.setCurrentPathFinalDestination(req.getDestNode());
 		mapGraphStates.setMaxConnectionCostInSearch(req.getMaxCostInclusive());
 		mapGraphStates.setCurrentCharacterPathPlanner(req.getRequester());
 		boolean result = searchNodePath(req.getSourceNode(), req.getDestNode(), heuristic, req.getOutputPath());
 		mapGraphStates.setMaxConnectionCostInSearch(MapGraphConnectionCosts.CLEAN);
 		mapGraphStates.setCurrentPathFinalDestination(oldDest);
-		mapGraphStates.setIncludeEnemiesInGetConnections(true);
+		mapGraphStates.setIncludeCharactersInGetConnections(true);
 		return result;
 	}
 }
