@@ -79,7 +79,7 @@ public class SoundPlayer implements ConsoleEventsSubscriber {
 	private String getRandomSound(final Assets.Sounds soundDef) {
 		String filePath = soundDef.getFilePath();
 		if (soundDef.getFiles().length > 0) {
-			filePath = GameUtils.getRandomRoadSound(soundDef);
+			filePath = GameUtils.getRandomSound(soundDef);
 		}
 		return filePath;
 	}

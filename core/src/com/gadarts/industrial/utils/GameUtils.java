@@ -46,7 +46,7 @@ public class GameUtils {
 				&& ((ymin >= y && ymin <= y + height) && (ymax >= y && ymax <= y + height));
 	}
 
-	public static String getRandomRoadSound(final Assets.Sounds soundDefinition) {
+	public static String getRandomSound(final Assets.Sounds soundDefinition) {
 		int random = MathUtils.random(soundDefinition.getFiles().length - 1);
 		return soundDefinition.getFiles()[random];
 	}

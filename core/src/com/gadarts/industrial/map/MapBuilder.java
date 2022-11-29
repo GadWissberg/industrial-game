@@ -693,7 +693,7 @@ public class MapBuilder implements Disposable {
 		CharacterAnimations general = assetsManager.get(PLAYER_GENERIC.name());
 		EntityBuilder builder = beginBuildingEntity(engine).addPlayerComponent(general);
 		Vector3 position = inflateCharacterPosition(characterJsonObject, mapGraph);
-		auxCharacterSoundData.set(Sounds.PLAYER_PAIN, Sounds.PLAYER_DEATH, Sounds.STEP);
+		auxCharacterSoundData.set(Sounds.PLAYER_PAIN, Sounds.PLAYER_DEATH);
 		CharacterSkillsParameters skills = new CharacterSkillsParameters(
 				!DebugSettings.LOW_HP_FOR_PLAYER ? PLAYER_HEALTH : 1,
 				PlayerComponent.PLAYER_AGILITY,
@@ -751,7 +751,7 @@ public class MapBuilder implements Disposable {
 	}
 
 	private CharacterData inflateEnemyCharData(JsonObject characterJsonObject, Enemies type, Vector3 pos) {
-		auxCharacterSoundData.set(type.getPainSound(), type.getDeathSound(), type.getStepSound());
+		auxCharacterSoundData.set(type.getPainSound(), type.getDeathSound());
 		CharacterSkillsParameters skills = new CharacterSkillsParameters(
 				!DebugSettings.LOW_HP_FOR_ENEMIES ? type.getHealth() : 1,
 				type.getAgility(),
@@ -820,7 +820,7 @@ public class MapBuilder implements Disposable {
 			entityBuilder.addModelInstanceComponent(mi, true);
 		}
 		node.setType(definition == Assets.SurfaceTextures.BLANK ? OBSTACLE_KEY_DIAGONAL_FORBIDDEN : node.getType());
-		node.setEntity(entityBuilder.addFloorComponent(node).finishAndAddToEngine());
+		node.setEntity(entityBuilder.addFloorComponent(node, definition).finishAndAddToEngine());
 	}
 
 	private void defineNodeModelInstance(int row,

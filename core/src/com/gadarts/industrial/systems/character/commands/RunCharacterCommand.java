@@ -15,7 +15,6 @@ import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphConnection;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.map.MapGraphPath;
-import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.model.characters.CharacterTypes;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -75,8 +74,6 @@ public class RunCharacterCommand extends CharacterCommand {
 									  AtlasRegion newFrame,
 									  List<CharacterSystemEventsSubscriber> subscribers) {
 		if (path.nodes.isEmpty()) return true;
-
-		playStepSound(systemsCommonData, character, newFrame);
 		return updateCommand(systemsCommonData, character, subscribers);
 	}
 
@@ -86,13 +83,6 @@ public class RunCharacterCommand extends CharacterCommand {
 			ComponentsMapper.character.get(character).getCharacterSpriteData().setSpriteType(SpriteType.IDLE);
 			doorComponent.requestToOpen(character);
 			consumeTurnTime(character, OPEN_DOOR_TIME_CONSUME);
-		}
-	}
-
-	private void playStepSound(SystemsCommonData systemsCommonData, Entity character, AtlasRegion newFrame) {
-		if (newFrame.index == 0 || newFrame.index == 5) {
-			Assets.Sounds stepSound = ComponentsMapper.character.get(character).getSoundData().getStepSound();
-			systemsCommonData.getSoundPlayer().playSound(stepSound);
 		}
 	}
 

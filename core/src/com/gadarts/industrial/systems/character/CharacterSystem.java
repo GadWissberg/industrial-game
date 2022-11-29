@@ -22,7 +22,9 @@ import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
+import com.gadarts.industrial.shared.assets.Assets.Sounds;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.SurfaceType;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
@@ -37,6 +39,8 @@ import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
 import com.gadarts.industrial.utils.EntityBuilder;
 import com.gadarts.industrial.utils.GameUtils;
+
+import java.util.Map;
 
 import static com.gadarts.industrial.components.ComponentsMapper.character;
 import static com.gadarts.industrial.components.player.PlayerComponent.PLAYER_HEIGHT;
@@ -63,6 +67,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private ParticleEffect bloodSplatterEffect;
 	private ImmutableArray<Entity> characters;
 	private ParticleEffect smallExpEffect;
+	private Map<SurfaceType, Sounds> surfaceTypeToStepSound;
 
 	public CharacterSystem(GameAssetsManager assetsManager,
 						   GameLifeCycleHandler lifeCycleHandler) {
@@ -114,6 +119,9 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	public void onSystemReset(SystemsCommonData systemsCommonData) {
 		super.onSystemReset(systemsCommonData);
 		characters = getEngine().getEntitiesFor(Family.all(CharacterComponent.class).get());
+		surfaceTypeToStepSound = Map.of(
+				SurfaceType.CONCRETE, Sounds.STEP_CONCRETE,
+				SurfaceType.METAL, Sounds.STEP_METAL);
 	}
 
 	@Override
@@ -492,14 +500,26 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	@Override
 	public void onFrameChanged(final Entity character, final float deltaTime, final TextureAtlas.AtlasRegion newFrame) {
-		SystemsCommonData commonData = getSystemsCommonData();
+
+		SpriteType spriteType = ComponentsMapper.characterDecal.get(character).getSpriteType();
+		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		if (spriteType == RUN && (newFrame.index == 0 || newFrame.index == 5)) {
+			Vector3 position = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
+			Entity entity = systemsCommonData.getMap().getNode(position).getEntity();
+			if (entity != null) {
+				SurfaceType surfaceType = ComponentsMapper.floor.get(entity).getDefinition().getSurfaceType();
+				Sounds stepSound = surfaceTypeToStepSound.get(surfaceType);
+				systemsCommonData.getSoundPlayer().playSound(stepSound);
+			}
+		}
+
 		CharacterComponent characterComp = ComponentsMapper.character.get(character);
-		Entity turn = commonData.getTurnsQueue().first();
+		Entity turn = systemsCommonData.getTurnsQueue().first();
 		Queue<CharacterCommand> commands = characterComp.getCommands();
 		if (turn == character && !commands.isEmpty()) {
 			CharacterCommand currentCommand = commands.first();
 			if (currentCommand.getState() == CommandStates.RUNNING) {
-				if (currentCommand.reactToFrameChange(commonData, character, newFrame, subscribers)) {
+				if (currentCommand.reactToFrameChange(systemsCommonData, character, newFrame, subscribers)) {
 					commandDone(character);
 				}
 			}

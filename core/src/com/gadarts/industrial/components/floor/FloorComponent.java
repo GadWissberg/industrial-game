@@ -3,6 +3,7 @@ package com.gadarts.industrial.components.floor;
 import com.badlogic.ashley.core.Entity;
 import com.gadarts.industrial.components.GameComponent;
 import com.gadarts.industrial.map.MapGraphNode;
+import com.gadarts.industrial.shared.assets.Assets;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,14 +22,16 @@ public class FloorComponent implements GameComponent {
 
 	@Setter
 	private boolean revealCalculated;
+	private Assets.SurfaceTextures definition;
 
 	@Override
 	public void reset( ) {
 
 	}
 
-	public void init(MapGraphNode node) {
+	public void init(MapGraphNode node, Assets.SurfaceTextures definition) {
 		this.node = node;
+		this.definition = definition;
 	}
 
 	public boolean isRevealed( ) {

@@ -27,6 +27,7 @@ import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.components.sd.SimpleDecalComponent;
 import com.gadarts.industrial.components.sll.ShadowlessLightComponent;
 import com.gadarts.industrial.map.MapGraphNode;
+import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
@@ -146,10 +147,10 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addFloorComponent(MapGraphNode node) {
+	public EntityBuilder addFloorComponent(MapGraphNode node, Assets.SurfaceTextures definition) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		FloorComponent floorComponent = engine.createComponent(FloorComponent.class);
-		floorComponent.init(node);
+		floorComponent.init(node, definition);
 		currentEntity.add(floorComponent);
 		return instance;
 	}
