@@ -24,8 +24,10 @@ import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.model.characters.CharacterDefinition;
 import com.gadarts.industrial.shared.model.characters.CharacterTypes;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
+import com.gadarts.industrial.shared.model.characters.player.PlayerDefinition;
 import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.ModelInstancePools;
@@ -70,20 +72,21 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		Weapon selectedWeapon = getSystemsCommonData().getStorage().getSelectedWeapon();
 		PlayerWeaponsDefinitions definition = (PlayerWeaponsDefinitions) selectedWeapon.getDefinition();
 		WeaponsDefinitions weaponDefinition = definition.getWeaponsDefinition();
-		getSystemsCommonData().getSoundPlayer().playSound(weaponDefinition.getEngageSound());
+		CharacterDefinition playerDefinition = CharacterTypes.PLAYER.getDefinitions()[0];
+		getSystemsCommonData().getSoundPlayer().playSound(weaponDefinition.isMelee() ? playerDefinition.getMeleeSound() : weaponDefinition.getEngageSound());
 		primaryAttackEngaged(
 				character,
 				direction,
 				charPos,
-				CharacterTypes.PLAYER.getDefinitions()[0].getBulletCreationHeight(),
+				playerDefinition.getBulletCreationHeight(),
 				weaponDefinition);
 	}
 
 	private void enemyEngagesPrimaryAttack(final Entity character, final Vector3 direction, final Vector3 charPos) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
-		getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.ATTACK_ENERGY_BALL);
-		float bulletCreationHeight = ComponentsMapper.enemy.get(character).getEnemyDefinition().getBulletCreationHeight();
 		WeaponsDefinitions primaryAttack = enemyComp.getEnemyDefinition().getPrimaryAttack();
+		getSystemsCommonData().getSoundPlayer().playSound(primaryAttack.getEngageSound());
+		float bulletCreationHeight = ComponentsMapper.enemy.get(character).getEnemyDefinition().getBulletCreationHeight();
 		primaryAttackEngaged(character, direction, charPos, bulletCreationHeight, primaryAttack);
 	}
 

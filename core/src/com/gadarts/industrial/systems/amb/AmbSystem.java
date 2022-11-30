@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Vector3;
 import com.gadarts.industrial.GameLifeCycleHandler;
+import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.DoorComponent.DoorStates;
@@ -78,8 +79,19 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 		DoorStates oldState = doorComponent.getState();
 		if (oldState == newState) return;
 
+		playDoorSound(doorComponent, newState);
 		doorComponent.setState(newState);
 		subscribers.forEach(s -> s.onDoorStateChanged(doorEntity, oldState, newState));
+	}
+
+	private void playDoorSound(DoorComponent doorComponent, DoorStates newState) {
+		SoundPlayer soundPlayer = getSystemsCommonData().getSoundPlayer();
+		DoorTypes type = doorComponent.getDefinition().getType();
+		if (newState == OPENING) {
+			soundPlayer.playSound(type.getOpenSound());
+		} else if (newState == CLOSING) {
+			soundPlayer.playSound(type.getClosedSound());
+		}
 	}
 
 

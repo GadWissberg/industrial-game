@@ -41,12 +41,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import static com.badlogic.gdx.utils.TimeUtils.millis;
 import static com.badlogic.gdx.utils.TimeUtils.timeSinceMillis;
 import static com.gadarts.industrial.DebugSettings.PARALYZED_ENEMIES;
 import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
-import static com.gadarts.industrial.shared.assets.Assets.Sounds;
 import static com.gadarts.industrial.systems.enemy.EnemyAiStatus.*;
 
 public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> implements
@@ -54,8 +52,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		TurnsSystemEventsSubscriber,
 		RenderSystemEventsSubscriber,
 		AmbSystemEventsSubscriber {
-	private static final long AMB_SOUND_INTERVAL_MIN = 10L;
-	private static final long AMB_SOUND_INTERVAL_MAX = 50L;
 	private final static Vector2 auxVector2_1 = new Vector2();
 	private final static Vector2 auxVector2_2 = new Vector2();
 	private static final float ENEMY_HALF_FOV_ANGLE = 95F;
@@ -71,10 +67,8 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private static final float SMOKE_HEIGHT_BIAS = 0.4F;
 	private final static LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
 	private static final CalculatePathRequest request = new CalculatePathRequest();
-	private final List<Sounds> ambSounds = List.of(Sounds.AMB_CHAINS, Sounds.AMB_SIGH, Sounds.AMB_LAUGH);
 	private PathPlanHandler pathPlanner;
 	private ImmutableArray<Entity> enemies;
-	private long nextAmbSoundTime;
 	private ParticleEffect smokeEffect;
 
 	public EnemySystem(GameAssetsManager assetsManager, GameLifeCycleHandler lifeCycleHandler) {
@@ -498,10 +492,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	public void update(final float deltaTime) {
 		super.update(deltaTime);
 		handleRoamSounds();
-		if (millis() > nextAmbSoundTime) {
-			getSystemsCommonData().getSoundPlayer().playSound(ambSounds.get(MathUtils.random(0, ambSounds.size() - 1)));
-			resetNextAmbSound();
-		}
 	}
 
 	private void handleRoamSounds( ) {
@@ -514,10 +504,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 				enemyComp.calculateNextRoamSound();
 			}
 		}
-	}
-
-	private void resetNextAmbSound( ) {
-		nextAmbSoundTime = millis() + MathUtils.random(AMB_SOUND_INTERVAL_MIN, AMB_SOUND_INTERVAL_MAX) * 1000L;
 	}
 
 	@Override

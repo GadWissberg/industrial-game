@@ -34,7 +34,6 @@ public class SoundPlayer implements ConsoleEventsSubscriber {
 		this.assetManager = assetManager;
 		setSfxEnabled(DebugSettings.SFX_ENABLED);
 		setMusicEnabled(DebugSettings.MELODY_ENABLED);
-		playAmbSound();
 	}
 
 
@@ -113,18 +112,11 @@ public class SoundPlayer implements ConsoleEventsSubscriber {
 	}
 
 	private void applySfxCommand(final ConsoleCommandResult consoleCommandResult) {
-		boolean originalValue = isSfxEnabled();
 		setSfxEnabled(!isSfxEnabled());
 		if (!isSfxEnabled()) {
 			stopLoopingSounds();
-		} else if (!originalValue) {
-			playAmbSound();
 		}
 		logAudioMessage(consoleCommandResult, "Sound effects", isSfxEnabled());
-	}
-
-	private void playAmbSound( ) {
-		playSound(Assets.Sounds.AMB_WIND, 0.5F);
 	}
 
 	@Override
