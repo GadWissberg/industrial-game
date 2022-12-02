@@ -41,7 +41,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import static com.badlogic.gdx.utils.TimeUtils.timeSinceMillis;
 import static com.gadarts.industrial.DebugSettings.PARALYZED_ENEMIES;
 import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
@@ -440,7 +439,9 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		EnemyAiStatus prevAiStatus = enemyComponent.getAiStatus();
 		enemyComponent.setAiStatus(ATTACKING);
-		getSystemsCommonData().getSoundPlayer().playSound(enemyComponent.getEnemyDefinition().getAwakeSound());
+		if (prevAiStatus == IDLE) {
+			getSystemsCommonData().getSoundPlayer().playSound(enemyComponent.getEnemyDefinition().getAwakeSound());
+		}
 		for (EnemySystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onEnemyAwaken(enemy, prevAiStatus);
 		}
@@ -491,19 +492,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	@Override
 	public void update(final float deltaTime) {
 		super.update(deltaTime);
-		handleRoamSounds();
-	}
-
-	private void handleRoamSounds( ) {
-		for (Entity enemy : enemies) {
-			EnemyComponent enemyComp = ComponentsMapper.enemy.get(enemy);
-			if (enemyComp.getAiStatus() != IDLE && timeSinceMillis(enemyComp.getNextRoamSound()) >= 0) {
-				if (enemyComp.getNextRoamSound() != 0) {
-					getSystemsCommonData().getSoundPlayer().playSound(enemyComp.getEnemyDefinition().getRoamSound());
-				}
-				enemyComp.calculateNextRoamSound();
-			}
-		}
 	}
 
 	@Override

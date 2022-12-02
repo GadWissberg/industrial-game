@@ -283,6 +283,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	private void createExplosionOnCharacterDeath(Entity character) {
 		if (ComponentsMapper.enemy.has(character) && !ComponentsMapper.enemy.get(character).getEnemyDefinition().isHuman()) {
+			getSystemsCommonData().getSoundPlayer().playSound(Sounds.SMALL_EXP);
 			Decal decal = ComponentsMapper.characterDecal.get(character).getDecal();
 			MapGraphNode node = getSystemsCommonData().getMap().getNode(decal.getPosition());
 			float height = ComponentsMapper.enemy.get(character).getEnemyDefinition().getHeight();
@@ -504,11 +505,17 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		SpriteType spriteType = ComponentsMapper.characterDecal.get(character).getSpriteType();
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		if (spriteType == RUN && (newFrame.index == 0 || newFrame.index == 5)) {
-			Vector3 position = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
-			Entity entity = systemsCommonData.getMap().getNode(position).getEntity();
-			if (entity != null) {
-				SurfaceType surfaceType = ComponentsMapper.floor.get(entity).getDefinition().getSurfaceType();
-				Sounds stepSound = surfaceTypeToStepSound.get(surfaceType);
+			boolean isPlayer = ComponentsMapper.player.has(character);
+			if (isPlayer || ComponentsMapper.enemy.get(character).getEnemyDefinition().isHuman()) {
+				Vector3 position = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
+				Entity entity = systemsCommonData.getMap().getNode(position).getEntity();
+				if (entity != null) {
+					SurfaceType surfaceType = ComponentsMapper.floor.get(entity).getDefinition().getSurfaceType();
+					Sounds stepSound = surfaceTypeToStepSound.get(surfaceType);
+					systemsCommonData.getSoundPlayer().playSound(stepSound);
+				}
+			} else {
+				Sounds stepSound = ComponentsMapper.enemy.get(character).getEnemyDefinition().getStepSound();
 				systemsCommonData.getSoundPlayer().playSound(stepSound);
 			}
 		}
