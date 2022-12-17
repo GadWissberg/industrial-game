@@ -439,8 +439,9 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		EnemyAiStatus prevAiStatus = enemyComponent.getAiStatus();
 		enemyComponent.setAiStatus(ATTACKING);
-		if (prevAiStatus == IDLE) {
-			getSystemsCommonData().getSoundPlayer().playSound(enemyComponent.getEnemyDefinition().getAwakeSound());
+		Assets.Sounds awakeSound = enemyComponent.getEnemyDefinition().getAwakeSound();
+		if (prevAiStatus == IDLE && awakeSound != null) {
+			getSystemsCommonData().getSoundPlayer().playSound(awakeSound);
 		}
 		for (EnemySystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onEnemyAwaken(enemy, prevAiStatus);
