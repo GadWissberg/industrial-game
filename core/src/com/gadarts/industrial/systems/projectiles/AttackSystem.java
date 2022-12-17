@@ -28,6 +28,7 @@ import com.gadarts.industrial.shared.model.characters.CharacterDefinition;
 import com.gadarts.industrial.shared.model.characters.CharacterTypes;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.shared.model.characters.player.PlayerDefinition;
+import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.ModelInstancePools;
@@ -219,7 +220,10 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		if (ComponentsMapper.characterDecal.has(collidable)) {
 			return checkCollisionWithCharacter(gameModelInstance, collidable);
 		} else if (ComponentsMapper.environmentObject.has(collidable)) {
-			return checkCollisionWithEnvObject(gameModelInstance, collidable);
+			MapNodesTypes nodeType = ComponentsMapper.environmentObject.get(collidable).getType().getNodeType();
+			if (nodeType != MapNodesTypes.PASSABLE_NODE) {
+				return checkCollisionWithEnvObject(gameModelInstance, collidable);
+			}
 		}
 		return false;
 	}

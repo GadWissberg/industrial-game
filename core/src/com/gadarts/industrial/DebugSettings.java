@@ -17,8 +17,8 @@ public final class DebugSettings {
 	public static final boolean DISPLAY_CURSOR_POSITION = true;
 	public static final boolean SHOW_GL_PROFILING = true;
 	public static final boolean DISPLAY_HUD_OUTLINES = false;
-	public static final boolean MELODY_ENABLED = true;
-	public static final boolean SFX_ENABLED = true;
+	public static final boolean MELODY_ENABLED = false;
+	public static final boolean SFX_ENABLED = false;
 	public static final boolean FULL_SCREEN = false;
 	public static final boolean DEBUG_INPUT = false;
 	public static final boolean DISABLE_FRUSTUM_CULLING = false;
@@ -32,5 +32,5 @@ public final class DebugSettings {
 	public static final boolean GOD_MODE = false;
 	public static final boolean ENEMY_INVULNERABLE = false;
 	public static final boolean SPACE_BAR_SKIPS_PLAYER = false;
-	public static final String TEST_LEVEL = OFFICE.name();
+	public static final String TEST_LEVEL = "enemy_test";
 }
