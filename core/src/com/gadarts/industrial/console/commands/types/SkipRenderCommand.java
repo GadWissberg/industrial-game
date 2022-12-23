@@ -63,22 +63,8 @@ public class SkipRenderCommand extends ConsoleCommand {
 
 	}
 
-	public static class CursorParameter extends SkipRenderCommandParameter {
-
-		public static final String ALIAS = "cursor";
-
-		public CursorParameter( ) {
-			super(DESCRIPTION, ALIAS, DrawFlags::setDrawCursor);
-		}
-
-	}
-
 	private abstract static class SkipRenderCommandParameter extends ConsoleCommandParameter {
 		public static final String DESCRIPTION = "0 - Renders as normal. 1 - Skips.";
-
-		public SkipRenderCommandParameter(final String description, final String alias) {
-			this(description, alias, null);
-		}
 
 		public SkipRenderCommandParameter(final String description, final String alias, final DrawFlagSet drawFlagSet) {
 			super(description, alias);

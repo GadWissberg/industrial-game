@@ -10,7 +10,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.window.GameWindowEvent;
@@ -32,7 +31,6 @@ public class PlayerLayout extends ItemsTable {
 	public PlayerLayout(Texture texture,
 						Weapon weaponChoice,
 						ItemSelectionHandler itemSelectionHandler,
-						SystemsCommonData systemsCommonData,
 						List<UserInterfaceSystemEventsSubscriber> subscribers) {
 		super(itemSelectionHandler);
 		if (weaponChoice.getImage() != null) {
@@ -44,7 +42,7 @@ public class PlayerLayout extends ItemsTable {
 		addListener(event -> {
 			boolean result = false;
 			if (event instanceof GameWindowEvent) {
-				result = onGameWindowEvent(event, systemsCommonData, subscribers);
+				result = onGameWindowEvent(event, subscribers);
 			}
 			return result;
 		});
@@ -87,7 +85,6 @@ public class PlayerLayout extends ItemsTable {
 	}
 
 	private boolean onGameWindowEvent(Event event,
-									  SystemsCommonData systemsCommonData,
 									  List<UserInterfaceSystemEventsSubscriber> subscribers) {
 		GameWindowEventType type = ((GameWindowEvent) event).getType();
 		boolean result = false;

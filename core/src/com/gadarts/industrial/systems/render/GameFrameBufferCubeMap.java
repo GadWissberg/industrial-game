@@ -13,14 +13,6 @@ public class GameFrameBufferCubeMap extends FrameBufferCubemap {
 		super(format, width, height, hasDepth);
 	}
 
-	public GameFrameBufferCubeMap(final Pixmap.Format format,
-								  final int width,
-								  final int height,
-								  final boolean hasDepth,
-								  final boolean hasStencil) {
-		super(format, width, height, hasDepth, hasStencil);
-	}
-
 	public void bindSide(final Cubemap.CubemapSide side) {
 		super.bindSide(side);
 	}

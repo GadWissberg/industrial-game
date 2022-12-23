@@ -26,11 +26,6 @@ public class SimpleDecalComponent implements GameComponent {
 
 	}
 
-	//Optimize this - it creates an object each time.
-	public void init(final Texture texture, final boolean visible) {
-		init(new TextureRegion(texture), visible);
-	}
-
 	public void init(final Texture texture, final boolean visible, final boolean billboard) {
 		init(new TextureRegion(texture), visible, billboard, animatedByAnimationComponent);
 	}
@@ -53,9 +48,5 @@ public class SimpleDecalComponent implements GameComponent {
 			}
 			relatedDecals.clear();
 		}
-	}
-
-	public void addRelatedDecal(final RelatedDecal decal) {
-		relatedDecals.add(decal);
 	}
 }

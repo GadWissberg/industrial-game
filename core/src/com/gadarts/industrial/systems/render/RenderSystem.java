@@ -9,20 +9,21 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
-import com.gadarts.industrial.components.*;
+import com.gadarts.industrial.components.AppendixModelInstanceComponent;
+import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.LightComponent;
+import com.gadarts.industrial.components.StaticLightComponent;
 import com.gadarts.industrial.components.animation.AnimationComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterAnimation;
@@ -49,7 +50,6 @@ import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
-import com.gadarts.industrial.systems.render.shaders.ModelsShaderProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,13 +82,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private final RenderBatches renderBatches = new RenderBatches();
 	private final RenderSystemRelevantFamilies families = new RenderSystemRelevantFamilies();
 	private final StaticShadowsData staticShadowsData = new StaticShadowsData();
-	private Environment environment;
-	private Color ambientColor;
-	private ModelsShaderProvider shaderProvider;
+	private final DecalsGroupStrategies strategies = new DecalsGroupStrategies();
+	private GameEnvironment environment;
 	private boolean frustumCull = !DebugSettings.DISABLE_FRUSTUM_CULLING;
-	private GameCameraGroupStrategy regularDecalGroupStrategy;
-	private OutlineGroupStrategy outlineDecalGroupStrategy;
-	private boolean take;
 
 	public RenderSystem(GameAssetsManager assetsManager, GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
@@ -128,14 +124,14 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	@Override
 	public void keyDown(int keycode) {
 		if (keycode == Input.Keys.T) {
-			take = true;
+			staticShadowsData.setTake(true);
 		}
 	}
 
 
-	private Environment createEnvironment( ) {
-		final Environment environment;
-		environment = new Environment();
+	private GameEnvironment createEnvironment( ) {
+		final GameEnvironment environment;
+		environment = new GameEnvironment();
 		float ambient = getSystemsCommonData().getMap().getAmbient();
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, ambient, ambient, ambient, 0.1f));
 		float dirValue = 0.1F;
@@ -149,7 +145,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		environment = createEnvironment();
 		getSystemsCommonData().setDrawFlags(new DrawFlags());
 		float ambient = getSystemsCommonData().getMap().getAmbient();
-		ambientColor = new Color(ambient, ambient, ambient, 1F);
+		environment.setAmbientColor(new Color(ambient, ambient, ambient, 1F));
 		families.init(getEngine());
 	}
 
@@ -161,31 +157,24 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	@Override
 	public void initializeData( ) {
 		staticShadowsData.init(getAssetsManager(), families.getStaticLightsEntities());
-		shaderProvider = new ModelsShaderProvider(getAssetsManager(), staticShadowsData.getShadowFrameBuffer());
-		createDecalGroupStrategies();
+		renderBatches.createShaderProvider(getAssetsManager(), staticShadowsData.getShadowFrameBuffer());
+		strategies.createDecalGroupStrategies(getSystemsCommonData().getCamera(), getAssetsManager());
 		renderBatches.createBatches(
-				shaderProvider,
 				staticShadowsData, families.getStaticLightsEntities(),
-				regularDecalGroupStrategy);
+				strategies.getRegularDecalGroupStrategy());
 		if (DebugSettings.ALLOW_STATIC_SHADOWS) {
 			createShadowMaps();
 		}
 	}
 
-	private void createDecalGroupStrategies( ) {
-		regularDecalGroupStrategy = new GameCameraGroupStrategy(getSystemsCommonData().getCamera(), getAssetsManager());
-		outlineDecalGroupStrategy = new OutlineGroupStrategy(getSystemsCommonData().getCamera(), getAssetsManager());
+	private void resetDisplay( ) {
+		resetDisplay(1F);
 	}
 
-
-	private void resetDisplay(Color color) {
-		resetDisplay(color, 1F);
-	}
-
-	private void resetDisplay(Color color, float alpha) {
+	private void resetDisplay(float alpha) {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		int sam = Gdx.graphics.getBufferFormat().coverageSampling ? GL20.GL_COVERAGE_BUFFER_BIT_NV : 0;
-		Gdx.gl.glClearColor(color.r, color.g, color.b, alpha);
+		Gdx.gl.glClearColor(0, 0, 0, alpha);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | sam);
 	}
 
@@ -270,7 +259,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 									  boolean renderLight,
 									  ModelInstanceComponent modelInstanceComponent,
 									  boolean considerFow) {
-		if (shouldSkipRenderModel(camera, entity, modelInstanceComponent, considerFow, renderLight)) return false;
+		if (shouldSkipRenderModel(camera, entity, modelInstanceComponent, considerFow)) return false;
 		renderModel(modelBatch, entity, renderLight, modelInstanceComponent);
 		return true;
 	}
@@ -335,8 +324,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private boolean shouldSkipRenderModel(Camera camera,
 										  Entity entity,
 										  ModelInstanceComponent miComp,
-										  boolean considerFow,
-										  boolean renderLight) {
+										  boolean considerFow) {
 		return (!miComp.isVisible())
 				|| !isInFrustum(camera, miComp)
 				|| ComponentsMapper.floor.has(entity) && !getSystemsCommonData().getDrawFlags().isDrawGround()
@@ -369,24 +357,18 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		if (!DebugSettings.ALLOW_STATIC_SHADOWS) return;
 		GameFrameBuffer shadowFrameBuffer = staticShadowsData.getShadowFrameBuffer();
 		shadowFrameBuffer.begin();
-		resetDisplay(Color.BLACK, 0F);
+		resetDisplay(0F);
 		Camera cam = getSystemsCommonData().getCamera();
 		renderModels(renderBatches.getModelBatchShadows(), families.getModelEntitiesWithShadows(), false, cam);
-		handleScreenshot(shadowFrameBuffer);
+		staticShadowsData.handleScreenshot(shadowFrameBuffer);
 		shadowFrameBuffer.end();
 	}
 
-	private void handleScreenshot(FrameBuffer frameBuffer) {
-		if (take) {
-			ScreenshotFactory.saveScreenshot(frameBuffer.getWidth(), frameBuffer.getHeight(), "depthmap");
-			take = false;
-		}
-	}
 
 	private void render(float deltaTime) {
 		getSystemsCommonData().setNumberOfVisible(0);
 		renderShadows();
-		resetDisplay(Color.BLACK);
+		resetDisplay();
 		renderModels(renderBatches.getModelBatch(), families.getModelEntities(), true, getSystemsCommonData().getCamera());
 		renderDecals(deltaTime);
 		renderParticleEffects();
@@ -402,9 +384,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private void renderDecals(final float deltaTime) {
 		Gdx.gl.glDepthMask(false);
 		DecalBatch decalBatch = renderBatches.getDecalBatch();
-		decalBatch.setGroupStrategy(regularDecalGroupStrategy);
+		decalBatch.setGroupStrategy(strategies.getRegularDecalGroupStrategy());
 		renderSimpleDecals();
-		renderLiveCharacters(deltaTime, ambientColor, 1F);
+		renderLiveCharacters(deltaTime, environment.getAmbientColor());
 		decalBatch.flush();
 		renderCharactersOutline(deltaTime);
 		Gdx.gl.glDepthMask(true);
@@ -412,7 +394,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private void renderCharactersOutline(float deltaTime) {
 		DecalBatch decalBatch = renderBatches.getDecalBatch();
-		decalBatch.setGroupStrategy(outlineDecalGroupStrategy);
+		decalBatch.setGroupStrategy(strategies.getOutlineDecalGroupStrategy());
 		renderLiveCharacters(deltaTime, null, OUTLINE_ALPHA, false);
 		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 		Gdx.gl.glDepthFunc(GL20.GL_GREATER);
@@ -463,8 +445,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		}
 	}
 
-	private void renderLiveCharacters(final float deltaTime, Color color, float alpha) {
-		renderLiveCharacters(deltaTime, color, alpha, true);
+	private void renderLiveCharacters(final float deltaTime, Color color) {
+		renderLiveCharacters(deltaTime, color, 1F, true);
 	}
 
 	private void renderLiveCharacters(final float deltaTime, Color color, float alpha, boolean updateCharacterDecal) {
@@ -569,7 +551,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		cameraLight.rotate(Vector3.Y, 0);
 		cameraLight.update();
 		StaticLightComponent lightComponent = ComponentsMapper.staticLight.get(light);
-		resetDisplay(Color.BLACK);
+		resetDisplay();
 		ShaderProgram depthShaderProgram = staticShadowsData.getDepthShaderProgram();
 		depthShaderProgram.bind();
 		depthShaderProgram.setUniformf("u_cameraFar", cameraLight.far);
@@ -792,6 +774,5 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	public void dispose( ) {
 		staticShadowsData.dispose();
 		renderBatches.dispose();
-		shaderProvider.dispose();
 	}
 }

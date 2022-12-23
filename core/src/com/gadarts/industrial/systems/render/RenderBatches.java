@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
 import com.gadarts.industrial.DebugSettings;
+import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.systems.render.shaders.ModelsShaderProvider;
 import com.gadarts.industrial.systems.render.shaders.ShadowMapDepthMapShader;
 import com.gadarts.industrial.systems.render.shaders.ShadowMapShader;
@@ -19,14 +20,14 @@ import lombok.Getter;
 @Getter
 public class RenderBatches implements Disposable {
 	private static final int DECALS_POOL_SIZE = 200;
+	private ModelsShaderProvider shaderProvider;
 	private ModelBatch depthModelBatch;
 	private ModelBatch modelBatchShadows;
 	private ModelBatch modelBatch;
 	private SpriteBatch spriteBatch;
 	private DecalBatch decalBatch;
 
-	void createBatches(ModelsShaderProvider shaderProvider,
-					   StaticShadowsData staticShadowsData,
+	void createBatches(StaticShadowsData staticShadowsData,
 					   ImmutableArray<Entity> staticLightsEntities,
 					   GameCameraGroupStrategy regularDecalGroupStrategy) {
 		this.modelBatch = new ModelBatch(shaderProvider);
@@ -51,6 +52,7 @@ public class RenderBatches implements Disposable {
 
 	@Override
 	public void dispose( ) {
+		shaderProvider.dispose();
 		decalBatch.dispose();
 		spriteBatch.dispose();
 		modelBatch.dispose();
@@ -58,5 +60,9 @@ public class RenderBatches implements Disposable {
 			depthModelBatch.dispose();
 			modelBatchShadows.dispose();
 		}
+	}
+
+	public void createShaderProvider(GameAssetsManager assetsManager, GameFrameBuffer shadowFrameBuffer) {
+		shaderProvider = new ModelsShaderProvider(assetsManager, shadowFrameBuffer);
 	}
 }

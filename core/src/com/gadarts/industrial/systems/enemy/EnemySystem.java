@@ -47,6 +47,9 @@ import static com.gadarts.industrial.components.character.CharacterComponent.TUR
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.systems.enemy.EnemyAiStatus.*;
 
+/**
+ * Responsible for enemy AI.
+ */
 public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> implements
 		CharacterSystemEventsSubscriber,
 		TurnsSystemEventsSubscriber,
@@ -220,22 +223,25 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	private void createFlyingMetalParts(Entity entity) {
 		for (int i = 0; i < MathUtils.random(MIN_METAL_PARTS_TO_SPAWN, MAX_METAL_PARTS_TO_SPAWN); i++) {
-			createFlyingMetalPart(entity);
+			generateFlyingMetalPart(entity);
 		}
 	}
 
-	private void createFlyingMetalPart(Entity entity) {
+	private void generateFlyingMetalPart(Entity entity) {
 		Decal decal = ComponentsMapper.characterDecal.get(entity).getDecal();
 		ModelInstancePools pooledModelInstances = getSystemsCommonData().getPooledModelInstances();
 		GameModelInstance modelInstance = pooledModelInstances.obtain(getAssetsManager(), Assets.Models.METAL_PART);
 		float characterHeight = ComponentsMapper.enemy.get(entity).getEnemyDefinition().getHeight();
 		modelInstance.transform.setTranslation(decal.getPosition()).trn(0F, characterHeight / 2F, 0F);
-		float nodeHeight = getSystemsCommonData().getMap().getNode(decal.getPosition()).getHeight();
-		float deceleration = MathUtils.random(METAL_PART_FLY_AWAY_MIN_DEC, METAL_PART_FLY_AWAY_MAX_DEC);
+		createAndAddFlyingMetalPartEntity(decal, modelInstance);
+	}
+
+	private void createAndAddFlyingMetalPartEntity(Decal decal, GameModelInstance modelInstance) {
 		EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-				.addFlyingParticleComponent(nodeHeight,
+				.addFlyingParticleComponent(
+						getSystemsCommonData().getMap().getNode(decal.getPosition()).getHeight(),
 						METAL_PART_FLY_AWAY_STRENGTH,
-						deceleration,
+						MathUtils.random(METAL_PART_FLY_AWAY_MIN_DEC, METAL_PART_FLY_AWAY_MAX_DEC),
 						METAL_PART_FLY_AWAY_MIN_DEGREE,
 						METAL_PART_FLY_AWAY_MAX_DEGREE_TO_ADD)
 				.addModelInstanceComponent(modelInstance)
@@ -278,11 +284,11 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 				enemy);
 	}
 
-	public void initializePathPlanRequest(MapGraphNode sourceNode,
-										  MapGraphNode destinationNode,
-										  MapGraphConnectionCosts maxCostInclusive,
-										  boolean avoidCharactersInCalculations,
-										  Entity character) {
+	private void initializePathPlanRequest(MapGraphNode sourceNode,
+										   MapGraphNode destinationNode,
+										   MapGraphConnectionCosts maxCostInclusive,
+										   boolean avoidCharactersInCalculations,
+										   Entity character) {
 		request.setSourceNode(sourceNode);
 		request.setDestNode(destinationNode);
 		request.setOutputPath(pathPlanner.getCurrentPath());
@@ -306,6 +312,11 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		subscribers.forEach(sub -> sub.onEnemyAppliedCommand(command, enemy));
 	}
 
+	/**
+	 * Invokes the given enemy's turn according to its AI status.
+	 *
+	 * @param enemy
+	 */
 	void invokeEnemyTurn(final Entity enemy) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(enemy);
 		enemyComp.setEngineEnergy(Math.min(enemyComp.getEngineEnergy() + 1, enemyComp.getEnemyDefinition().getEngine()));

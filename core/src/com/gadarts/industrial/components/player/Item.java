@@ -33,10 +33,4 @@ public class Item implements Pool.Poolable {
 
 	}
 
-	public void init(final Item item) {
-		this.definition = item.getDefinition();
-		this.image = item.getImage();
-		this.row = item.row;
-		this.col = item.col;
-	}
 }

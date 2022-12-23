@@ -1,7 +1,6 @@
 package com.gadarts.industrial.map;
 
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -14,8 +13,8 @@ import java.awt.*;
 @Getter
 public class MapGraphNode {
 	private final Array<MapGraphConnection> connections;
-	private int col;
-	private int row;
+	private final int col;
+	private final int row;
 
 	@Setter
 	private Entity door;
@@ -68,25 +67,5 @@ public class MapGraphNode {
 
 	public int getIndex(final Dimension mapSize) {
 		return row * mapSize.width + col;
-	}
-
-	public MapGraphNode set(final MapGraphNode newValue) {
-		this.col = newValue.col;
-		this.row = newValue.row;
-		this.type = newValue.type;
-		this.connections.clear();
-		connections.addAll(newValue.connections);
-		return this;
-	}
-
-	public boolean isConnectedNeighbour(final MapGraphNode node) {
-		boolean result = false;
-		for (Connection<MapGraphNode> connection : connections) {
-			if (connection.getToNode().equals(node)) {
-				result = true;
-				break;
-			}
-		}
-		return result;
 	}
 }

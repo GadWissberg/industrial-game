@@ -5,12 +5,14 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import lombok.Getter;
+import lombok.Setter;
 
 import static com.gadarts.industrial.shared.assets.Assets.Shaders.*;
 
@@ -20,6 +22,16 @@ public class StaticShadowsData implements Disposable {
 	private ShaderProgram depthShaderProgram;
 	private ShaderProgram shadowsShaderProgram;
 	private ImmutableArray<Entity> staticLightsEntities;
+
+	@Setter
+	private boolean take;
+
+	void handleScreenshot(FrameBuffer frameBuffer) {
+		if (take) {
+			ScreenshotFactory.saveScreenshot(frameBuffer.getWidth(), frameBuffer.getHeight(), "depthmap");
+			take = false;
+		}
+	}
 
 	private void createShaderPrograms(GameAssetsManager assetsManager) {
 		depthShaderProgram = new ShaderProgram(

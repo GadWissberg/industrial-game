@@ -57,14 +57,6 @@ public class GameCameraGroupStrategy implements GroupStrategy, Disposable {
 		createDefaultShader(assetsManager);
 	}
 
-	public Camera getCamera( ) {
-		return camera;
-	}
-
-	public void setCamera(final Camera camera) {
-		this.camera = camera;
-	}
-
 	@Override
 	public int decideGroup(final Decal decal) {
 		return decal.getMaterial().isOpaque() ? GROUP_OPAQUE : GROUP_BLEND;

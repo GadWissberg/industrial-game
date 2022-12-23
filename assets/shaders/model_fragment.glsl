@@ -68,7 +68,7 @@ uniform vec4 u_emissiveColor;
 #ifdef lightingFlag
 varying vec3 v_lightDiffuse;
 
-#if	defined(ambientLightFlag) || defined(ambientCubemapFlag) || defined(sphericalHarmonicsFlag)
+#if	defined(ambientLightFlag) || defined(ambientCubemapFlag)
 #define ambientFlag
 #endif //ambientFlag
 

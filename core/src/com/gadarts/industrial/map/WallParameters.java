@@ -12,7 +12,4 @@ public class WallParameters {
 	private final float vOffset;
 	private final Assets.SurfaceTextures definition;
 
-	public WallParameters(Assets.SurfaceTextures definition) {
-		this(0, 0, 0, definition);
-	}
 }

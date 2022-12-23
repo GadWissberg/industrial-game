@@ -12,9 +12,4 @@ public class ParticleEffectParentComponent implements GameComponent {
 	public void reset() {
 
 	}
-
-	public void init(final Entity child) {
-		children.clear();
-		children.add(child);
-	}
 }

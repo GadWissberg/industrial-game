@@ -185,7 +185,7 @@ public class StorageWindow extends GameWindow {
 								 List<UserInterfaceSystemEventsSubscriber> subscribers) {
 		Texture texture = assetsManager.getTexture(Assets.UiTextures.PLAYER_LAYOUT);
 		Weapon selectedWeapon = systemsCommonData.getStorage().getSelectedWeapon();
-		playerLayout = new PlayerLayout(texture, selectedWeapon, selectedItem, systemsCommonData, subscribers);
+		playerLayout = new PlayerLayout(texture, selectedWeapon, selectedItem, subscribers);
 		add(playerLayout).pad(PLAYER_LAYOUT_PADDING);
 	}
 

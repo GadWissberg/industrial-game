@@ -28,7 +28,7 @@ public class ScreenshotFactory {
 			PixmapIO.writePNG(fh, pixmap);
 			pixmap.dispose();
 			Gdx.app.log("screenshot", "Screenshot saved to " + fh);
-		} catch (final Exception e) {
+		} catch (final Exception ignored) {
 		}
 	}
 

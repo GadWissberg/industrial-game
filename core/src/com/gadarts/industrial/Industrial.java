@@ -5,7 +5,6 @@ import com.badlogic.gdx.Gdx;
 import com.gadarts.industrial.screens.InGameScreen;
 
 public class Industrial extends Game {
-	public static final String TITLE = "PyroShock";
 
 	public static final int FULL_SCREEN_RESOLUTION_WIDTH = 1920;
 	public static final int FULL_SCREEN_RESOLUTION_HEIGHT = 1080;
