@@ -23,7 +23,7 @@ public final class DebugSettings {
 	public static final boolean DEBUG_INPUT = false;
 	public static final boolean DISABLE_FRUSTUM_CULLING = false;
 	public static final int LOG_LEVEL = LOG_DEBUG;
-	public static final PlayerWeaponsDefinitions STARTING_WEAPON = PlayerWeaponsDefinitions.PUNCH;
+	public static final PlayerWeaponsDefinitions STARTING_WEAPON = PlayerWeaponsDefinitions.GLOCK;
 	public static final boolean ALLOW_STATIC_SHADOWS = true;
 	public static final boolean DISABLE_FOW = false;
 	public static final boolean PARALYZED_ENEMIES = false;
@@ -31,6 +31,7 @@ public final class DebugSettings {
 	public static final boolean LOW_HP_FOR_PLAYER = false;
 	public static final boolean GOD_MODE = false;
 	public static final boolean ENEMY_INVULNERABLE = false;
+	public static final boolean ENEMY_CANT_MOVE = false;
 	public static final boolean SPACE_BAR_SKIPS_PLAYER = false;
-	public static final String TEST_LEVEL = "enemy_test";
+	public static final String TEST_LEVEL = OFFICE.name();
 }

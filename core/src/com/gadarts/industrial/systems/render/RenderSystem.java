@@ -343,8 +343,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 				|| ComponentsMapper.wall.has(entity) && !getSystemsCommonData().getDrawFlags().isDrawWalls()
 				|| ComponentsMapper.environmentObject.has(entity) && !getSystemsCommonData().getDrawFlags().isDrawEnv()
 				|| getSystemsCommonData().getCursor() == entity && !getSystemsCommonData().getDrawFlags().isDrawCursor()
-				|| considerFow && isInFow(entity, miComp.getModelInstance().transform.getTranslation(auxVector3_1))
-				|| !renderLight && ComponentsMapper.door.has(entity);
+				|| considerFow && isInFow(entity, miComp.getModelInstance().transform.getTranslation(auxVector3_1));
 	}
 
 	private boolean isInFow(Entity modelEntity, Vector3 position) {

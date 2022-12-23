@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
+import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.shared.model.Coords;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import lombok.Getter;
@@ -367,6 +368,19 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		int row = Math.abs(srcNode.getRow() - targetNode.getRow());
 		int col = Math.abs(srcNode.getCol() - targetNode.getCol());
 		return Math.abs(srcNode.getHeight() - targetNode.getHeight()) <= maxHeight && row <= 1 && col <= 1;
+	}
+
+	public boolean checkIfNodeIsFreeOfEnvObjects(GridPoint2 destinationNode) {
+		MapGraphNode node = getNode(destinationNode);
+		for (Entity entity : mapGraphRelatedEntities.getEnvironmentObjectsEntities()) {
+			MapNodesTypes nodeType = ComponentsMapper.environmentObject.get(entity).getType().getNodeType();
+			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(entity).getModelInstance();
+			Vector3 position = modelInstance.transform.getTranslation(auxVector3);
+			if (nodeType != MapNodesTypes.PASSABLE_NODE && node.equals(getNode(position))) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
 

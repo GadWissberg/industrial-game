@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
+import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
@@ -158,7 +159,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		boolean result = false;
 		for (GridPoint2 point : nodes) {
 			MapGraph map = getSystemsCommonData().getMap();
-			if (!map.checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(point)) {
+			if (!map.checkIfNodeIsFreeOfAliveCharactersAndClosedDoors(point) || !map.checkIfNodeIsFreeOfEnvObjects(point)) {
 				result = true;
 				break;
 			}
@@ -312,33 +313,37 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		EnemyAiStatus aiStatus = enemyComponent.getAiStatus();
 		if (aiStatus == ATTACKING) {
 			invokeEnemyAttackBehaviour(enemy);
-		} else if (aiStatus == DODGING) {
-			MapGraph map = getSystemsCommonData().getMap();
-			Decal decal = ComponentsMapper.characterDecal.get(enemy).getDecal();
-			List<MapGraphNode> availableNodes = map.fetchAvailableNodesAroundNode(map.getNode(decal.getPosition()));
-			for (int i = 0; i < availableNodes.size(); i++) {
-				Vector3 enemyPosition = ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition();
-				float enemyNodeHeight = getSystemsCommonData().getMap().getNode(enemyPosition).getHeight();
-				float height = availableNodes.get(i).getHeight();
-				if (Math.abs(enemyNodeHeight - height) > CharacterComponent.PASSABLE_MAX_HEIGHT_DIFF) {
-					availableNodes.remove(i);
-					i--;
+		} else if (!DebugSettings.ENEMY_CANT_MOVE) {
+			if (aiStatus == DODGING) {
+				MapGraph map = getSystemsCommonData().getMap();
+				Decal decal = ComponentsMapper.characterDecal.get(enemy).getDecal();
+				List<MapGraphNode> availableNodes = map.fetchAvailableNodesAroundNode(map.getNode(decal.getPosition()));
+				for (int i = 0; i < availableNodes.size(); i++) {
+					Vector3 enemyPosition = ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition();
+					float enemyNodeHeight = getSystemsCommonData().getMap().getNode(enemyPosition).getHeight();
+					float height = availableNodes.get(i).getHeight();
+					if (Math.abs(enemyNodeHeight - height) > CharacterComponent.PASSABLE_MAX_HEIGHT_DIFF) {
+						availableNodes.remove(i);
+						i--;
+					}
 				}
-			}
-			int count = availableNodes.size();
-			MapGraphNode dst = count > 0 ? availableNodes.get(MathUtils.random(count - 1)) : null;
-			goAttackAtGivenLocation(enemy, dst, CharacterCommandsDefinitions.DODGE);
-		} else {
-			CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
-			if (characterComponent.getTurnTimeLeft() >= characterComponent.getSkills().getAgility()) {
-				MapGraphNode targetLastVisibleNode = enemyComponent.getTargetLastVisibleNode();
-				if (targetLastVisibleNode == null) {
-					applySearchingModeOnEnemy(enemy);
-				}
-				goAttackAtTheLastVisibleNodeOfTarget(enemy);
+				int count = availableNodes.size();
+				MapGraphNode dst = count > 0 ? availableNodes.get(MathUtils.random(count - 1)) : null;
+				goAttackAtGivenLocation(enemy, dst, CharacterCommandsDefinitions.DODGE);
 			} else {
-				enemyFinishedTurn();
+				CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
+				if (characterComponent.getTurnTimeLeft() >= characterComponent.getSkills().getAgility()) {
+					MapGraphNode targetLastVisibleNode = enemyComponent.getTargetLastVisibleNode();
+					if (targetLastVisibleNode == null) {
+						applySearchingModeOnEnemy(enemy);
+					}
+					goAttackAtTheLastVisibleNodeOfTarget(enemy);
+				} else {
+					enemyFinishedTurn();
+				}
 			}
+		} else {
+			enemyFinishedTurn();
 		}
 	}
 
