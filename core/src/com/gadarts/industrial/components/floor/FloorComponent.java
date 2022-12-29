@@ -15,7 +15,6 @@ public class FloorComponent implements GameComponent {
 
 	@Getter
 	private final List<Entity> nearbySimpleShadows = new ArrayList<>();
-
 	@Setter
 	private int fogOfWarSignature;
 	private MapGraphNode node;

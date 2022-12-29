@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -836,6 +837,9 @@ public class MapBuilder implements Disposable {
 	private Material createFloorMaterial( ) {
 		Material material = new Material();
 		material.id = "floor_test";
+		BlendingAttribute blendingAttribute = new BlendingAttribute();
+		blendingAttribute.opacity = 1F;
+		material.set(blendingAttribute);
 		return material;
 	}
 

@@ -3,13 +3,23 @@ package com.gadarts.industrial.systems.amb;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.graphics.g3d.Attribute;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.DoorComponent.DoorStates;
+import com.gadarts.industrial.components.WallComponent;
+import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
+import com.gadarts.industrial.components.mi.ModelInstanceComponent;
+import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.model.env.DoorTypes;
@@ -23,9 +33,14 @@ import static com.gadarts.industrial.components.DoorComponent.DoorStates.*;
 public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 		CharacterSystemEventsSubscriber,
 		TurnsSystemEventsSubscriber {
-	private static final Vector3 auxVector1 = new Vector3();
+	private static final Vector3 auxVector3_1 = new Vector3();
+	private static final Vector3 auxVector3_2 = new Vector3();
+	private static final Vector2 auxVector2_1 = new Vector2();
+	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final int DOOR_OPEN_DURATION = 3;
 	private ImmutableArray<Entity> doorEntities;
+	private ImmutableArray<Entity> wallsEntities;
+	private ImmutableArray<Entity> floorsEntities;
 
 	public AmbSystem(GameAssetsManager assetsManager,
 					 GameLifeCycleHandler lifeCycleHandler) {
@@ -46,10 +61,58 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 	public void onSystemReset(SystemsCommonData systemsCommonData) {
 		super.onSystemReset(systemsCommonData);
 		doorEntities = getEngine().getEntitiesFor(Family.all(DoorComponent.class).get());
+		wallsEntities = getEngine().getEntitiesFor(Family.all(WallComponent.class).get());
+		floorsEntities = getEngine().getEntitiesFor(Family.all(FloorComponent.class).get());
 	}
 
 	@Override
 	public void update(float deltaTime) {
+		updateDoors();
+		handleFloorTilesFading();
+	}
+
+	private void handleFloorTilesFading( ) {
+		for (Entity entity : floorsEntities) {
+			handleFloorTileFading(entity);
+		}
+	}
+
+	private void handleFloorTileFading(Entity entity) {
+		SystemsCommonData data = getSystemsCommonData();
+		FloorComponent currentFloorComponent = ComponentsMapper.floor.get(entity);
+		ModelInstanceComponent modelInstanceComp = ComponentsMapper.modelInstance.get(entity);
+		ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(entity);
+		GameModelInstance model = modelInstanceComponent.getModelInstance();
+		BlendingAttribute blendingAttribute = (BlendingAttribute) model.materials.get(0).get(BlendingAttribute.Type);
+		if (shouldFloorFadeOut(data, currentFloorComponent, modelInstanceComp)) {
+			if (blendingAttribute.opacity > 0F) {
+				blendingAttribute.opacity = Math.max(0F, blendingAttribute.opacity - 0.05F);
+			} else {
+				modelInstanceComponent.setVisible(false);
+			}
+		} else {
+			blendingAttribute.opacity = Math.min(1F, blendingAttribute.opacity + 0.05F);
+			modelInstanceComponent.setVisible(true);
+		}
+	}
+
+	private void applyFadingEffectOnFloor(Entity entity) {
+	}
+
+	private static boolean shouldFloorFadeOut(SystemsCommonData data,
+											  FloorComponent currentFloorComponent,
+											  ModelInstanceComponent modelInstanceComponent) {
+		Vector3 playerNodePos = ComponentsMapper.characterDecal.get(data.getPlayer()).getNodePosition(auxVector3_1);
+		Vector3 currentFloorPos = modelInstanceComponent.getModelInstance().transform.getTranslation(auxVector3_2);
+		Vector3 cameraPos = data.getCamera().position;
+		float floorToCameraDist = auxVector2_2.set(currentFloorPos.x, currentFloorPos.z).dst2(cameraPos.x, cameraPos.z);
+		float playerToCameraDistance = auxVector2_1.set(playerNodePos.x, playerNodePos.z).dst2(cameraPos.x, cameraPos.z) - 1F;
+		float currentHeight = currentFloorComponent.getNode().getHeight();
+		return currentHeight > data.getMap().getNode(playerNodePos).getHeight() + PlayerComponent.PLAYER_HEIGHT / 2F
+				&& playerToCameraDistance > floorToCameraDist;
+	}
+
+	private void updateDoors( ) {
 		for (Entity doorEntity : doorEntities) {
 			DoorComponent doorComponent = ComponentsMapper.door.get(doorEntity);
 			DoorStates state = doorComponent.getState();
@@ -65,7 +128,7 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 
 	private void handleDoorAction(Entity doorEntity, DoorComponent doorComponent, DoorStates targetState) {
 		GameModelInstance modelInstance = ComponentsMapper.appendixModelInstance.get(doorEntity).getModelInstance();
-		Vector3 nodeCenterPosition = doorComponent.getNode().getCenterPosition(auxVector1);
+		Vector3 nodeCenterPosition = doorComponent.getNode().getCenterPosition(auxVector3_1);
 		DoorTypes doorType = doorComponent.getDefinition().getType();
 		DoorAnimation doorAnimation = DoorsAnimations.animations.get(doorType);
 		if (doorAnimation.isAnimationEnded(targetState, nodeCenterPosition, doorEntity)) {

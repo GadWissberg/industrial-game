@@ -9,7 +9,9 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
@@ -284,6 +286,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 			applySpecificRenderingForWall(entity);
 		}
 	}
+
+
 
 	private void applySpecificRenderingForWall(Entity entity) {
 		if (entity == null) return;
