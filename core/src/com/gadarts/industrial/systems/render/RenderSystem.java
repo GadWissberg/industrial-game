@@ -288,17 +288,16 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 
-
 	private void applySpecificRenderingForWall(Entity entity) {
 		if (entity == null) return;
 
-		ModelInstanceComponent modelInstanceComp = ComponentsMapper.modelInstance.get(entity);
-		Entity nodeEntity = ComponentsMapper.wall.get(entity).getParentNode().getEntity();
-		modelInstanceComp.setFlatColor(null);
-		if (nodeEntity == null
-				|| (ComponentsMapper.modelInstance.has(nodeEntity)
-				&& ComponentsMapper.modelInstance.get(nodeEntity).getFlatColor() != null)) {
-			modelInstanceComp.setFlatColor(Color.BLACK);
+		Entity parentNode = ComponentsMapper.wall.get(entity).getParentNode().getEntity();
+		ModelInstanceComponent wallModelInstanceComponent = ComponentsMapper.modelInstance.get(entity);
+		wallModelInstanceComponent.setFlatColor(null);
+		if (parentNode == null
+				|| (ComponentsMapper.modelInstance.has(parentNode)
+				&& ComponentsMapper.modelInstance.get(parentNode).getFlatColor() != null)) {
+			wallModelInstanceComponent.setFlatColor(Color.BLACK);
 		}
 	}
 

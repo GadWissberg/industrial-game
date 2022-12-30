@@ -3,11 +3,7 @@ package com.gadarts.industrial.systems.amb;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.graphics.g3d.Attribute;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.gadarts.industrial.GameLifeCycleHandler;
@@ -78,38 +74,36 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 	}
 
 	private void handleFloorTileFading(Entity entity) {
-		SystemsCommonData data = getSystemsCommonData();
-		FloorComponent currentFloorComponent = ComponentsMapper.floor.get(entity);
-		ModelInstanceComponent modelInstanceComp = ComponentsMapper.modelInstance.get(entity);
 		ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(entity);
 		GameModelInstance model = modelInstanceComponent.getModelInstance();
 		BlendingAttribute blendingAttribute = (BlendingAttribute) model.materials.get(0).get(BlendingAttribute.Type);
-		if (shouldFloorFadeOut(data, currentFloorComponent, modelInstanceComp)) {
-			if (blendingAttribute.opacity > 0F) {
-				blendingAttribute.opacity = Math.max(0F, blendingAttribute.opacity - 0.05F);
-			} else {
-				modelInstanceComponent.setVisible(false);
-			}
+		if (shouldFloorFadeOut(ComponentsMapper.floor.get(entity), ComponentsMapper.modelInstance.get(entity))) {
+			fadeOutFloor(modelInstanceComponent, blendingAttribute);
 		} else {
 			blendingAttribute.opacity = Math.min(1F, blendingAttribute.opacity + 0.05F);
 			modelInstanceComponent.setVisible(true);
 		}
 	}
 
-	private void applyFadingEffectOnFloor(Entity entity) {
+	private static void fadeOutFloor(ModelInstanceComponent modelInstanceComponent, BlendingAttribute blendingAttribute) {
+		if (blendingAttribute.opacity > 0F) {
+			blendingAttribute.opacity = Math.max(0F, blendingAttribute.opacity - 0.05F);
+		} else {
+			modelInstanceComponent.setVisible(false);
+		}
 	}
 
-	private static boolean shouldFloorFadeOut(SystemsCommonData data,
-											  FloorComponent currentFloorComponent,
-											  ModelInstanceComponent modelInstanceComponent) {
+	private boolean shouldFloorFadeOut(FloorComponent currentFloorComponent,
+									   ModelInstanceComponent modelInstanceComponent) {
+		SystemsCommonData data = getSystemsCommonData();
 		Vector3 playerNodePos = ComponentsMapper.characterDecal.get(data.getPlayer()).getNodePosition(auxVector3_1);
 		Vector3 currentFloorPos = modelInstanceComponent.getModelInstance().transform.getTranslation(auxVector3_2);
 		Vector3 cameraPos = data.getCamera().position;
 		float floorToCameraDist = auxVector2_2.set(currentFloorPos.x, currentFloorPos.z).dst2(cameraPos.x, cameraPos.z);
-		float playerToCameraDistance = auxVector2_1.set(playerNodePos.x, playerNodePos.z).dst2(cameraPos.x, cameraPos.z) - 1F;
+		float playerToCamDist = auxVector2_1.set(playerNodePos.x, playerNodePos.z).dst2(cameraPos.x, cameraPos.z) - 1F;
 		float currentHeight = currentFloorComponent.getNode().getHeight();
-		return currentHeight > data.getMap().getNode(playerNodePos).getHeight() + PlayerComponent.PLAYER_HEIGHT / 2F
-				&& playerToCameraDistance > floorToCameraDist;
+		return currentHeight > data.getMap().getNode(playerNodePos).getHeight() + PlayerComponent.PLAYER_HEIGHT
+				&& playerToCamDist > floorToCameraDist;
 	}
 
 	private void updateDoors( ) {

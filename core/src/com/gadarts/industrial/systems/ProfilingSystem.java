@@ -21,7 +21,6 @@ import com.gadarts.industrial.console.commands.types.ProfilerCommand;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 
 public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
-	public static final String WARNING_COLOR = "[RED]";
 	public static final int LABELS_ORIGIN_OFFSET_FROM_TOP = 200;
 	private static final String VISIBLE_OBJECTS_STRING = "Visible objects: ";
 	private static final String LABEL_FPS = "FPS: ";
@@ -34,7 +33,6 @@ public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 	private static final String LABEL_GL_VERTEX_COUNT = "Vertex count: ";
 	private static final String SUFFIX_MB = "MB";
 	private static final String LABEL_VERSION = "Version: ";
-	private static final int VERTEX_COUNT_WARNING_LIMIT = 40000;
 	private static final char SEPARATOR = '/';
 	private final GLProfiler glProfiler;
 	private final StringBuilder stringBuilder;
@@ -129,18 +127,15 @@ public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 	}
 
 	private void displayMemoryLabels( ) {
-		displayLine(LABEL_JAVA_HEAP_USAGE, Gdx.app.getJavaHeap() / (1024L * 1024L), false);
+		displayLine(LABEL_JAVA_HEAP_USAGE, Gdx.app.getJavaHeap() / (1024L * 1024L));
 		stringBuilder.append(' ').append(SUFFIX_MB).append('\n');
-		displayLine(LABEL_NATIVE_HEAP_USAGE, Gdx.app.getNativeHeap() / (1024L * 1024L), false);
+		displayLine(LABEL_NATIVE_HEAP_USAGE, Gdx.app.getNativeHeap() / (1024L * 1024L));
 		stringBuilder.append(' ').append(SUFFIX_MB).append('\n');
 	}
 
-	private void displayLine(final String label, final Object value, final boolean addEndOfLine) {
+	private void displayLine(final String label, final Object value) {
 		stringBuilder.append(label);
 		stringBuilder.append(value);
-		if (addEndOfLine) {
-			stringBuilder.append('\n');
-		}
 	}
 
 	private void displayLabels( ) {
@@ -157,7 +152,7 @@ public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 		displayLine(LABEL_GL_DRAW_CALL, glProfiler.getDrawCalls());
 		displayLine(LABEL_GL_SHADER_SWITCHES, glProfiler.getShaderSwitches());
 		displayLine(LABEL_GL_TEXTURE_BINDINGS, glProfiler.getTextureBindings() - 1);
-		displayLine(LABEL_GL_VERTEX_COUNT, glProfiler.getVertexCount().total, VERTEX_COUNT_WARNING_LIMIT);
+		displayLine(LABEL_GL_VERTEX_COUNT, glProfiler.getVertexCount().total);
 		displayNumberOfVisibleObjects();
 		glProfiler.reset();
 	}
@@ -170,22 +165,6 @@ public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 		stringBuilder.append('\n');
 	}
 
-	private void displayLine(final String label, final Object value, final int warningThreshold) {
-		stringBuilder.append(label);
-		boolean displayWarning = value instanceof Float && warningThreshold <= ((float) value);
-		if (displayWarning) {
-			stringBuilder.append(WARNING_COLOR);
-		}
-		stringBuilder.append(value);
-		if (displayWarning) {
-			stringBuilder.append("[WHITE]");
-		}
-		stringBuilder.append('\n');
-	}
-
-	private void displayLine(final String label, final Object value) {
-		displayLine(label, value, true);
-	}
 
 	@Override
 	public Class<SystemEventsSubscriber> getEventsSubscriberClass( ) {
