@@ -40,6 +40,7 @@ public class CharacterComponent implements GameComponent {
 
 	@Override
 	public void reset( ) {
+		commands.clear();
 		target = null;
 		rotationData.reset();
 	}

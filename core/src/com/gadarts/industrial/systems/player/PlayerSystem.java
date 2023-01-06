@@ -137,7 +137,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	public void onCharacterNodeChanged(Entity entity, MapGraphNode oldNode, MapGraphNode newNode) {
 		if (ComponentsMapper.player.has(entity)) {
 			if (ComponentsMapper.trigger.has(newNode.getEntity())) {
-				getLifeCycleHandler().restartGame();
+				getLifeCycleHandler().raiseFlagToRestartGame();
 			} else {
 				refreshFogOfWar();
 				notifyPlayerFinishedTurn();

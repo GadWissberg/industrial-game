@@ -136,6 +136,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		stage.addActor(table);
 		return table;
 	}
+
 	private void addUiStage( ) {
 		int width = FULL_SCREEN ? FULL_SCREEN_RESOLUTION_WIDTH : WINDOWED_RESOLUTION_WIDTH;
 		int height = FULL_SCREEN ? FULL_SCREEN_RESOLUTION_HEIGHT : WINDOWED_RESOLUTION_HEIGHT;
@@ -212,7 +213,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		toolTipHandler = new ToolTipHandler(getSystemsCommonData().getUiStage());
 		toolTipHandler.addToolTipTable();
 	}
-
 
 	@Override
 	public void touchDown(final int screenX, final int screenY, final int button) {

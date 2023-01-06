@@ -19,7 +19,6 @@ import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 
-import static com.gadarts.industrial.DebugSettings.DEBUG_INPUT;
 import static com.gadarts.industrial.DebugSettings.FULL_SCREEN;
 import static com.gadarts.industrial.Industrial.*;
 import static com.gadarts.industrial.shared.model.CameraUtils.*;
@@ -73,11 +72,9 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 	}
 
 	private boolean shouldCameraFollow( ) {
-		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		return !DEBUG_INPUT
-				&& !systemsCommonData.getUiStage().hasOpenWindows()
-				&& !systemsCommonData.isCameraIsRotating()
-				&& !systemsCommonData.getMenuTable().isVisible();
+		return !getSystemsCommonData().getUiStage().hasOpenWindows()
+				&& !getSystemsCommonData().isCameraIsRotating()
+				&& !getSystemsCommonData().getMenuTable().isVisible();
 	}
 
 	private void handleCameraFollow( ) {

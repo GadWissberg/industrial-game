@@ -52,6 +52,7 @@ public class GeneralHandler implements
 	private SystemsCommonData systemsCommonData;
 	private boolean inGame;
 	private Console console;
+	private boolean restartGame;
 
 	private void addSystems( ) {
 		Arrays.stream(Systems.values()).forEach(systemDefinition -> {
@@ -146,6 +147,7 @@ public class GeneralHandler implements
 				}
 			});
 			engine.clearPools();
+//			engine.getSystems().forEach(system -> system.setProcessing(false));
 			engine.removeAllEntities();
 		} else {
 			this.engine = new PooledEngine();
@@ -187,6 +189,7 @@ public class GeneralHandler implements
 				s.subscribeForEvents(this);
 			}
 		});
+		engine.getSystems().forEach(system -> system.setProcessing(true));
 	}
 
 	@Override
@@ -276,6 +279,10 @@ public class GeneralHandler implements
 	}
 
 	public void update(float delta) {
+		if (restartGame) {
+			restartGame = false;
+			onNewGameSelectedInMenu();
+		}
 		engine.update(delta);
 	}
 
@@ -285,7 +292,7 @@ public class GeneralHandler implements
 	}
 
 	@Override
-	public void restartGame( ) {
-		onNewGameSelectedInMenu();
+	public void raiseFlagToRestartGame( ) {
+		restartGame = true;
 	}
 }
