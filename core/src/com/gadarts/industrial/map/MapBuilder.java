@@ -119,13 +119,12 @@ public class MapBuilder implements Disposable {
 		}
 	}
 
-	private static Vector3 inflateLightPosition(MapGraph mapGraph, JsonObject lightJsonObj, int row, int col) {
-		Vector3 position = auxVector3_1.set(
+	private static Vector3 inflateLightPosition(JsonObject lightJsonObj, int row, int col, MapGraph mapGraph) {
+		float nodeHeight = mapGraph.getNode(col, row).getHeight();
+		return auxVector3_1.set(
 				col + 0.5f,
-				lightJsonObj.has(HEIGHT) ? lightJsonObj.get(HEIGHT).getAsFloat() : DEFAULT_LIGHT_HEIGHT,
+				lightJsonObj.has(HEIGHT) ? nodeHeight + lightJsonObj.get(HEIGHT).getAsFloat() : DEFAULT_LIGHT_HEIGHT,
 				row + 0.5f);
-		position.add(0, mapGraph.getNode(col, row).getHeight(), 0);
-		return position;
 	}
 
 	private Model createFloorModel( ) {
@@ -501,7 +500,7 @@ public class MapBuilder implements Disposable {
 		modelInstance.transform.setTranslation(auxVector3_1.set(node.getCol() + 0.5f, 0, node.getRow() + 0.5f));
 		modelInstance.transform.rotate(Vector3.Y, -1 * direction.getDirection(auxVector2_1).angleDeg());
 		Vector3 offset = type.getOffset(auxVector3_1);
-		modelInstance.transform.translate(0, node.getHeight() + height, 0);
+		modelInstance.transform.translate(0, height, 0);
 		if (!offset.isZero()) {
 			modelInstance.nodes.forEach(n -> {
 				n.isAnimated = false;
@@ -616,7 +615,7 @@ public class MapBuilder implements Disposable {
 
 	private void inflateLights(final JsonObject mapJsonObject, final MapGraph mapGraph) {
 		JsonArray lights = mapJsonObject.getAsJsonArray(KEY_LIGHTS);
-		lights.forEach(element -> inflateLight(mapGraph, element));
+		lights.forEach(e -> inflateLight(e, mapGraph));
 	}
 
 	private void inflateTriggers(JsonObject mapJsonObject, MapGraph mapGraph) {
@@ -624,11 +623,11 @@ public class MapBuilder implements Disposable {
 		triggers.forEach(element -> inflateTrigger(mapGraph, element));
 	}
 
-	private void inflateLight(final MapGraph mapGraph, final JsonElement element) {
+	private void inflateLight(final JsonElement element, MapGraph mapGraph) {
 		JsonObject lightJsonObj = element.getAsJsonObject();
 		int row = lightJsonObj.get(ROW).getAsInt();
 		int col = lightJsonObj.get(COL).getAsInt();
-		Vector3 position = inflateLightPosition(mapGraph, lightJsonObj, row, col);
+		Vector3 position = inflateLightPosition(lightJsonObj, row, col, mapGraph);
 		float i = lightJsonObj.has(INTENSITY) ? lightJsonObj.get(INTENSITY).getAsFloat() : DEFAULT_LIGHT_INTENSITY;
 		float radius = lightJsonObj.has(RADIUS) ? lightJsonObj.get(RADIUS).getAsFloat() : DEFAULT_LIGHT_RADIUS;
 		EntityBuilder.beginBuildingEntity(engine)
