@@ -9,7 +9,7 @@ public class ModelsShaderUniformsLocations {
 	private static final String UNIFORM_NUMBER_OF_NEARBY_SIMPLE_SHADOWS = "u_numberOfNearbySimpleShadows";
 	private static final String UNIFORM_NEARBY_SIMPLE_SHADOWS_DATA = "u_nearbySimpleShadowsData[0]";
 	private static final String UNIFORM_FLOOR_AMBIENT_OCCLUSION = "u_floorAmbientOcclusion";
-	private static final String UNIFORM_IS_WALL = "u_isWall";
+	private static final String UNIFORM_ENTITY_TYPE = "u_entityType";
 	private static final String UNIFORM_NUMBER_OF_SHADOWLESS_LIGHTS = "u_numberOfShadowlessLights";
 	private static final String UNIFORM_SHADOWLESS_LIGHTS_POSITIONS = "u_shadowlessLightsPositions[0]";
 	private static final String UNIFORM_SHADOWLESS_LIGHTS_EXTRA_DATA = "u_shadowlessLightsExtraData[0]";
@@ -37,7 +37,7 @@ public class ModelsShaderUniformsLocations {
 	private int uniformLocModelX;
 	private int uniformLocModelY;
 	private int uniformLocModelZ;
-	private int uniformLocIsWall;
+	private int uniformLocEntityType;
 	private int uniformLocFlatColor;
 	private int uniformLocFowSignature;
 
@@ -46,7 +46,7 @@ public class ModelsShaderUniformsLocations {
 		uniformLocNumberOfNearbySimpleShadows = program.getUniformLocation(UNIFORM_NUMBER_OF_NEARBY_SIMPLE_SHADOWS);
 		uniformLocNearbyCharsData = program.getUniformLocation(UNIFORM_NEARBY_SIMPLE_SHADOWS_DATA);
 		uniformLocFloorAmbientOcclusion = program.getUniformLocation(UNIFORM_FLOOR_AMBIENT_OCCLUSION);
-		uniformLocIsWall = program.getUniformLocation(UNIFORM_IS_WALL);
+		uniformLocEntityType = program.getUniformLocation(UNIFORM_ENTITY_TYPE);
 		uniformLocModelWidth = program.getUniformLocation(UNIFORM_MODEL_WIDTH);
 		uniformLocModelHeight = program.getUniformLocation(UNIFORM_MODEL_HEIGHT);
 		uniformLocModelDepth = program.getUniformLocation(UNIFORM_MODEL_DEPTH);

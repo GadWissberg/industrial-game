@@ -16,7 +16,7 @@ precision mediump float;
 
 #ifdef normalFlag
 varying vec3 v_normal;
-#endif //normalFlag
+#endif//normalFlag
 
 #if defined(colorFlag)
 varying vec4 v_color;
@@ -26,8 +26,8 @@ varying vec4 v_color;
 varying float v_opacity;
 #ifdef alphaTestFlag
 varying float v_alphaTest;
-#endif //alphaTestFlag
-#endif //blendedFlag
+#endif//alphaTestFlag
+#endif//blendedFlag
 
 #if defined(diffuseTextureFlag) || defined(specularTextureFlag)
 #define textureFlag
@@ -68,19 +68,19 @@ uniform vec4 u_emissiveColor;
 #ifdef lightingFlag
 varying vec3 v_lightDiffuse;
 
-#if	defined(ambientLightFlag) || defined(ambientCubemapFlag)
+#if    defined(ambientLightFlag) || defined(ambientCubemapFlag)
 #define ambientFlag
-#endif //ambientFlag
+#endif//ambientFlag
 
 #ifdef specularFlag
 varying vec3 v_lightSpecular;
-#endif //specularFlag
+#endif//specularFlag
 
-    #if defined(ambientFlag) && defined(separateAmbientFlag)
+#if defined(ambientFlag) && defined(separateAmbientFlag)
 varying vec3 v_ambientLight;
-#endif //separateAmbientFlag
+#endif//separateAmbientFlag
 
-#endif //lightingFlag
+#endif//lightingFlag
 
 // TerrorEffector custom uniforms
 
@@ -101,7 +101,7 @@ uniform float u_modelY;
 uniform float u_modelZ;
 uniform int u_numberOfNearbySimpleShadows;
 uniform int u_floorAmbientOcclusion;
-uniform int u_isWall;
+uniform int u_entityType;
 uniform sampler2D u_shadows;
 uniform vec3 u_flatColor;
 uniform int u_fowSignature;
@@ -114,12 +114,10 @@ float map(float value, float min1, float max1, float min2, float max2) {
 
 void main() {
 
-    
-    
-    
+
     #if defined(normalFlag)
     vec3 normal = v_normal;
-    #endif // normalFlag
+    #endif// normalFlag
 
     #if defined(diffuseTextureFlag) && defined(diffuseColorFlag) && defined(colorFlag)
     vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV) * u_diffuseColor * v_color;
@@ -185,7 +183,7 @@ void main() {
             vec2 c= gl_FragCoord.xy;
             c.x/=u_screenWidth;
             c.y/=u_screenHeight;
-            vec4 staticLightsColor=texture2D(u_shadows, c);
+            vec4 staticLightsColor= (u_entityType < 2) ? texture2D(u_shadows, c) : vec4(0.5);
             gl_FragColor.rgb += (diffuse.rgb * (v_lightDiffuse + staticLightsColor.rgb)) + emissive.rgb;
 
             float minDistToChar = 21390950.0;
@@ -259,7 +257,7 @@ void main() {
                 if ((u_fowSignature & 256) == 256){ // North-West
                     gl_FragColor.rgb *= 1.0 - max(u_modelX - v_frag_pos.x, 0.0)*max(u_modelZ - v_frag_pos.z, 0.0)*FLOOR_DIAG_AO_STRENGTH;
                 }
-            } else if (u_isWall == 1){
+            } else if (u_entityType == 1){
                 float WALL_BOTTOM_AO_MAX_HEIGHT = u_modelY + 0.5;
                 float WALL_TOP_AO_MIN_HEIGHT = u_modelY + u_modelHeight - 0.5;
                 const float WALL_AO_STRENGTH = 0.85;
@@ -273,7 +271,7 @@ void main() {
         } else {
             gl_FragColor.rgb = diffuse.rgb;
         }
-    }else{
+    } else {
         gl_FragColor.rgb = u_flatColor;
     }
     #endif
@@ -293,15 +291,15 @@ void main() {
     gl_FragColor.rgb = (diffuse.rgb * (getShadow() * v_lightDiffuse + v_ambientLight)) + specular + emissive.rgb;
     #else
     gl_FragColor.rgb = (diffuse.rgb * (v_lightDiffuse + v_ambientLight)) + specular + emissive.rgb;
-    #endif //shadowMapFlag
+    #endif//shadowMapFlag
     #else
     #ifdef shadowMapFlag
     gl_FragColor.rgb = getShadow() * ((diffuse.rgb * v_lightDiffuse) + specular) + emissive.rgb;
     #else
     gl_FragColor.rgb = (diffuse.rgb * v_lightDiffuse) + specular + emissive.rgb;
-    #endif //shadowMapFlag
+    #endif//shadowMapFlag
     #endif
-    #endif //lightingFlag
+    #endif//lightingFlag
 
     #ifdef blendedFlag
     gl_FragColor.a = diffuse.a * v_opacity;

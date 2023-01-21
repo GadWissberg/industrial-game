@@ -90,8 +90,10 @@ public class InputSystem extends GameSystem<InputSystemEventsSubscriber> impleme
 		return true;
 	}
 
+
 	@Override
 	public boolean touchDown(final int screenX, final int screenY, final int pointer, final int button) {
+
 		for (InputSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.touchDown(screenX, screenY, button);
 		}

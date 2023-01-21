@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.StaticLightComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
+import com.gadarts.industrial.systems.render.RenderSystem;
 
 import static com.gadarts.industrial.systems.SystemsCommonData.CAMERA_LIGHT_FAR;
 

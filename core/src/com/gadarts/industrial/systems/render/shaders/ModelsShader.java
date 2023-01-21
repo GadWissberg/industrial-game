@@ -154,16 +154,19 @@ public class ModelsShader extends DefaultShader {
 
 	private void insertDataForSpecificModels(Renderable renderable) {
 		insertDataForFloor(renderable);
-		insertDataForWall(renderable);
+		insertDataForWallAndDoor(renderable);
 	}
 
-	private void insertDataForWall(Renderable renderable) {
-		Entity wall = (Entity) renderable.userData;
-		if (ComponentsMapper.wall.has(wall)) {
-			program.setUniformi(locations.getUniformLocIsWall(), 1);
+	private void insertDataForWallAndDoor(Renderable renderable) {
+		int type;
+		if (ComponentsMapper.wall.has((Entity) renderable.userData)) {
+			type = 1;
+		} else if (door.has((Entity) renderable.userData)) {
+			type = 2;
 		} else {
-			program.setUniformi(locations.getUniformLocIsWall(), 0);
+			type = 0;
 		}
+		program.setUniformi(locations.getUniformLocEntityType(), type);
 	}
 
 	private void insertModelDimensions(AdditionalRenderData additionalRenderData, Entity entity) {
