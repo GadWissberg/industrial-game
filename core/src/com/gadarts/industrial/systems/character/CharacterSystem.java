@@ -504,19 +504,21 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 		SpriteType spriteType = ComponentsMapper.characterDecal.get(character).getSpriteType();
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		if (spriteType == RUN && (newFrame.index == 0 || newFrame.index == 5)) {
+		if (spriteType == RUN) {
 			boolean isPlayer = ComponentsMapper.player.has(character);
-			if (isPlayer || ComponentsMapper.enemy.get(character).getEnemyDefinition().isHuman()) {
-				Vector3 position = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
-				Entity entity = systemsCommonData.getMap().getNode(position).getEntity();
-				if (entity != null) {
-					SurfaceType surfaceType = ComponentsMapper.floor.get(entity).getDefinition().getSurfaceType();
-					Sounds stepSound = surfaceTypeToStepSound.get(surfaceType);
+			if ((newFrame.index == 0 || newFrame.index == 5)) {
+				if (isPlayer || ComponentsMapper.enemy.get(character).getEnemyDefinition().isHuman()) {
+					Vector3 position = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
+					Entity entity = systemsCommonData.getMap().getNode(position).getEntity();
+					if (entity != null) {
+						SurfaceType surfaceType = ComponentsMapper.floor.get(entity).getDefinition().getSurfaceType();
+						Sounds stepSound = surfaceTypeToStepSound.get(surfaceType);
+						systemsCommonData.getSoundPlayer().playSound(stepSound);
+					}
+				} else {
+					Sounds stepSound = ComponentsMapper.enemy.get(character).getEnemyDefinition().getStepSound();
 					systemsCommonData.getSoundPlayer().playSound(stepSound);
 				}
-			} else {
-				Sounds stepSound = ComponentsMapper.enemy.get(character).getEnemyDefinition().getStepSound();
-				systemsCommonData.getSoundPlayer().playSound(stepSound);
 			}
 		}
 

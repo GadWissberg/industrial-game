@@ -45,6 +45,7 @@ import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
 import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.shared.model.env.*;
 import com.gadarts.industrial.shared.model.map.MapNodeData;
+import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.shared.model.map.NodeWalls;
 import com.gadarts.industrial.shared.model.map.Wall;
 import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
@@ -557,7 +558,7 @@ public class MapBuilder implements Disposable {
 		MapGraphNode node = mapGraph.getNode(coord.getCol(), coord.getRow());
 		GameModelInstance mi = inflateEnvModelInstanceComponent(node, jsonObject, type, builder);
 		inflateEnvLightComponent(builder, type, mi, dirIndex);
-		node.setType(type.getNodeType());
+		node.setType(node.getType().ordinal() < type.getNodeType().ordinal() ? type.getNodeType() : node.getType());
 		inflateDoor(type, builder, node);
 		builder.addCollisionComponent();
 	}

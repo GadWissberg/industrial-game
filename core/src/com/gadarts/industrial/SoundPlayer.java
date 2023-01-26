@@ -59,7 +59,8 @@ public class SoundPlayer implements ConsoleEventsSubscriber {
 		music.stop();
 	}
 
-	public void playSound(final Assets.Sounds soundDef) {
+	public void playSound(Assets.Sounds soundDef) {
+		if (soundDef == null) return;
 		playSound(soundDef, 1F);
 	}
 
