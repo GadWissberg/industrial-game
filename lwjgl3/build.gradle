@@ -79,6 +79,7 @@ if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
 // you could very easily need more modules than this one.
 // use the lwjgl3:suggestModules task to see which modules may be needed.
         modules.set([
+                'java.desktop',
                 'jdk.unsupported'
         ])
         distDir.set(file(buildDir))
