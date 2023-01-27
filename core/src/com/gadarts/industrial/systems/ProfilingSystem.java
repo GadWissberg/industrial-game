@@ -127,15 +127,22 @@ public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 	}
 
 	private void displayMemoryLabels( ) {
-		displayLine(LABEL_JAVA_HEAP_USAGE, Gdx.app.getJavaHeap() / (1024L * 1024L));
+		displayLine(LABEL_JAVA_HEAP_USAGE, Gdx.app.getJavaHeap() / (1024L * 1024L), false);
 		stringBuilder.append(' ').append(SUFFIX_MB).append('\n');
-		displayLine(LABEL_NATIVE_HEAP_USAGE, Gdx.app.getNativeHeap() / (1024L * 1024L));
+		displayLine(LABEL_NATIVE_HEAP_USAGE, Gdx.app.getNativeHeap() / (1024L * 1024L), false);
 		stringBuilder.append(' ').append(SUFFIX_MB).append('\n');
 	}
 
-	private void displayLine(final String label, final Object value) {
+	private void displayLine(String label, Object value) {
+		displayLine(label, value, true);
+	}
+
+	private void displayLine(String label, Object value, boolean newLine) {
 		stringBuilder.append(label);
 		stringBuilder.append(value);
+		if (newLine) {
+			stringBuilder.append("\n");
+		}
 	}
 
 	private void displayLabels( ) {
