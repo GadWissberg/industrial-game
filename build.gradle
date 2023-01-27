@@ -1,23 +1,41 @@
 buildscript {
-
-
     repositories {
-        mavenLocal()
         mavenCentral()
-        gradlePluginPortal()
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url 'https://s01.oss.sonatype.org' }
+        mavenLocal()
         google()
+        gradlePluginPortal()
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+        maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
     }
     dependencies {
 
 
     }
 }
-
 allprojects {
-    apply plugin: "eclipse"
-
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
+}
+configure(subprojects) {
+    apply plugin: 'java-library'
+    sourceCompatibility = 1.17
+    compileJava {
+        options.incremental = true
+    }
+}
+subprojects {
     version = '0.8'
+    ext.appName = 'Terror-Effector'
+    repositories {
+        mavenCentral()
+        maven { url 'https://s01.oss.sonatype.org' }
+        mavenLocal()
+        gradlePluginPortal()
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+        maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
+        maven { url 'https://jitpack.io' }
+    }
     ext {
         versionNumber = 9
         appName = "industrial"
@@ -28,45 +46,6 @@ allprojects {
         aiVersion = '1.8.2'
         gdxControllersVersion = '2.2.1'
     }
-
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        google()
-        gradlePluginPortal()
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
-        maven { url "https://jitpack.io" }
-    }
 }
+eclipse.project.name = 'test' + '-parent'
 
-project(":desktop") {
-    apply plugin: "java-library"
-
-
-    dependencies {
-        implementation project(":core")
-        api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-        api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
-
-    }
-}
-
-project(":core") {
-    apply plugin: "java-library"
-
-
-    dependencies {
-        implementation 'com.gadarts.industrial:shared:0.1'
-        api "com.badlogicgames.gdx:gdx:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
-        api "com.badlogicgames.ashley:ashley:$ashleyVersion"
-        api 'com.squidpony:squidlib-util:3.0.4'
-        compileOnly 'org.projectlombok:lombok:1.18.22'
-        annotationProcessor 'org.projectlombok:lombok:1.18.22'
-        implementation 'com.google.code.gson:gson:2.9.0'
-
-    }
-}

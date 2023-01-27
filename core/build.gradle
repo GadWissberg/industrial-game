@@ -1,8 +1,15 @@
-apply plugin: "java"
-
-sourceCompatibility = 1.17
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+eclipse.project.name = appName + '-core'
 
-sourceSets.main.java.srcDirs = [ "src/" ]
+dependencies {
+    api "com.badlogicgames.gdx:gdx:$gdxVersion"
+    implementation 'com.gadarts.industrial:shared:0.1'
+    api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+    api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
+    api "com.badlogicgames.ashley:ashley:$ashleyVersion"
+    api 'com.squidpony:squidlib-util:3.0.4'
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    implementation 'com.google.code.gson:gson:2.9.0'
 
-eclipse.project.name = appName + "-core"
+}

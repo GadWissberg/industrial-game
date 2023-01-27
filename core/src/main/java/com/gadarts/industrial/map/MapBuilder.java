@@ -79,7 +79,7 @@ import static java.lang.String.format;
 public class MapBuilder implements Disposable {
 	public static final int PLAYER_HEALTH = 100;
 
-	public static final String MAP_PATH_TEMP = "assets/maps/%s.json";
+	public static final String MAP_PATH_TEMP = "maps/%s.json";
 	public static final String BOUNDING_BOX_PREFIX = "box_";
 	private static final CharacterSoundData auxCharacterSoundData = new CharacterSoundData();
 	private static final Vector3 auxVector3_1 = new Vector3();

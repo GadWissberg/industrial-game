@@ -1,7 +1,8 @@
-package com.gadarts.industrial;
+package com.gadarts.industrial.lwjgl3;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.gadarts.industrial.Industrial;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,14 +12,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class DesktopLauncher {
+public class Lwjgl3Launcher {
+
 	public static void main(String[] arg) {
 		Lwjgl3ApplicationConfiguration config = createGameConfig();
 		config.setForegroundFPS(60);
 		String versionName = "0.0";
 		int versionNumber = 0;
 		try {
-			InputStream res = DesktopLauncher.class.getClassLoader().getResourceAsStream("version.txt");
+			InputStream res = Lwjgl3Launcher.class.getClassLoader().getResourceAsStream("version.txt");
 			BufferedReader versionFile = new BufferedReader(new InputStreamReader(Objects.requireNonNull(res)));
 			String line;
 			List<String> lines = new ArrayList<>();
