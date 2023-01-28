@@ -127,3 +127,4 @@ Thumbs.db
 *.blend1
 /lwjgl3/out
 /lwjgl3/build/
+/materials/releases
