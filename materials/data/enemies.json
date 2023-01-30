@@ -1,0 +1,62 @@
+{
+  "enemies": [
+    {
+      "id": "mnt_bot",
+      "name": "Maintenance-Bot",
+      "atlas_definition": "maint_bot",
+      "agility": 0.4,
+      "health": 2,
+      "accuracy": "none",
+      "sight": "high",
+      "engine": 2,
+      "attack_primary": "cutter",
+      "attack_primary_hit_frame_index": 4,
+      "height": 1,
+      "sound_awake": "guard_bot_awake",
+      "sound_melee": "weapon_fist",
+      "sound_pain": "guard_bot_pain",
+      "sound_death": "guard_bot_death",
+      "explosion_effect_on_destroy": "small_exp",
+      "shadow_radius": 0.45
+    },
+    {
+      "id": "grd_bot",
+      "name": "Guard-Bot",
+      "atlas_definition": "guard_bot",
+      "agility": 1,
+      "health": 4,
+      "accuracy": "med",
+      "sight": "high",
+      "engine": 4,
+      "attack_primary": "rapid_laser_cannon",
+      "attack_primary_hit_frame_index": 3,
+      "height": 1.5,
+      "sound_awake": "guard_bot_awake",
+      "sound_melee": "weapon_fist",
+      "sound_pain": "guard_bot_pain",
+      "sound_death": "guard_bot_death",
+      "sound_step": "guard_bot_step",
+      "explosion_effect_on_destroy": "small_exp",
+      "shadow_radius": 0.2,
+      "bullet_creation_height": 1
+    },
+    {
+      "id": "trr_glc",
+      "name": "Terrorist - Glock",
+      "atlas_definition": "terrorist_glock",
+      "agility": 0.5,
+      "health": 3,
+      "accuracy": "med",
+      "sight": "high",
+      "attack_primary": "glock",
+      "attack_primary_hit_frame_index": 3,
+      "height": 1.5,
+      "sound_melee": "weapon_fist",
+      "sound_pain": "player_pain",
+      "sound_death": "player_death",
+      "sound_step": "step_concrete",
+      "shadow_radius": 0.2,
+      "human": true
+    }
+  ]
+}

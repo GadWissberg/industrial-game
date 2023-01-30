@@ -19,7 +19,7 @@ public final class DebugSettings {
 	public static final boolean DISPLAY_HUD_OUTLINES = false;
 	public static final boolean MELODY_ENABLED = true;
 	public static final boolean SFX_ENABLED = true;
-	public static final boolean FULL_SCREEN = true;
+	public static final boolean FULL_SCREEN = false;
 	public static final boolean DISABLE_FRUSTUM_CULLING = false;
 	public static final int LOG_LEVEL = LOG_DEBUG;
 	public static final PlayerWeaponsDefinitions STARTING_WEAPON = PlayerWeaponsDefinitions.PUNCH;
