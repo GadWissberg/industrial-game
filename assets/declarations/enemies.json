@@ -2,7 +2,7 @@
   "enemies": [
     {
       "id": "mnt_bot",
-      "name": "Maintenance-Bot",
+      "display_name": "Maintenance-Bot",
       "atlas_definition": "maint_bot",
       "agility": 0.4,
       "health": 2,
