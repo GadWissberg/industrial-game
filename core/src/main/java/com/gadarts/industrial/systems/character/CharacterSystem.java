@@ -25,9 +25,9 @@ import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.Assets.Sounds;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
 import com.gadarts.industrial.shared.assets.SurfaceType;
+import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
-import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
@@ -223,7 +223,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			characterComponent.dealDamage(damage);
 		}
 		handleDeath(attacked);
-		if (ComponentsMapper.player.has(attacked) || ComponentsMapper.enemy.get(attacked).getEnemyDefinition().isHuman()) {
+		if (ComponentsMapper.player.has(attacked) || ComponentsMapper.enemy.get(attacked).getEnemyDeclaration().human()) {
 			addSplatterEffect(bulletModelInstanceComponent, attacked);
 		}
 	}
@@ -282,11 +282,11 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	private void createExplosionOnCharacterDeath(Entity character) {
-		if (ComponentsMapper.enemy.has(character) && !ComponentsMapper.enemy.get(character).getEnemyDefinition().isHuman()) {
+		if (ComponentsMapper.enemy.has(character) && !ComponentsMapper.enemy.get(character).getEnemyDeclaration().human()) {
 			getSystemsCommonData().getSoundPlayer().playSound(Sounds.SMALL_EXP);
 			Decal decal = ComponentsMapper.characterDecal.get(character).getDecal();
 			MapGraphNode node = getSystemsCommonData().getMap().getNode(decal.getPosition());
-			float height = ComponentsMapper.enemy.get(character).getEnemyDefinition().getHeight();
+			float height = ComponentsMapper.enemy.get(character).getEnemyDeclaration().height();
 			Vector3 pos = node.getCenterPosition(auxVector3_1).add(0F, height / 4F, 0F);
 			EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
 					.addParticleEffectComponent(smallExpEffect, pos)
@@ -295,7 +295,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	@Override
-	public void onMeleeAttackAppliedOnTarget(Entity character, Entity target, WeaponsDefinitions primaryAttack) {
+	public void onMeleeAttackAppliedOnTarget(Entity character, Entity target, WeaponDeclaration primaryAttack) {
 		MapGraph map = getSystemsCommonData().getMap();
 		MapGraphNode srcNode = map.getNode(ComponentsMapper.characterDecal.get(character).getDecal().getPosition());
 		MapGraphNode targetNode = map.getNode(ComponentsMapper.characterDecal.get(target).getDecal().getPosition());
@@ -507,7 +507,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (spriteType == RUN) {
 			boolean isPlayer = ComponentsMapper.player.has(character);
 			if ((newFrame.index == 0 || newFrame.index == 5)) {
-				if (isPlayer || ComponentsMapper.enemy.get(character).getEnemyDefinition().isHuman()) {
+				if (isPlayer || ComponentsMapper.enemy.get(character).getEnemyDeclaration().human()) {
 					Vector3 position = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
 					Entity entity = systemsCommonData.getMap().getNode(position).getEntity();
 					if (entity != null) {
@@ -516,7 +516,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 						systemsCommonData.getSoundPlayer().playSound(stepSound);
 					}
 				} else {
-					Sounds stepSound = ComponentsMapper.enemy.get(character).getEnemyDefinition().getStepSound();
+					Sounds stepSound = ComponentsMapper.enemy.get(character).getEnemyDeclaration().soundStep();
 					systemsCommonData.getSoundPlayer().playSound(stepSound);
 				}
 			}

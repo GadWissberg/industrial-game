@@ -1,7 +1,10 @@
 package com.gadarts.industrial.systems.ui.storage;
 
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
+import com.gadarts.industrial.shared.assets.Assets.Declarations;
+import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponsDeclarations;
+import com.gadarts.industrial.systems.player.PlayerStorage;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.window.GameWindowEventType;
 import com.gadarts.industrial.systems.ui.window.OnEvent;
@@ -12,7 +15,7 @@ import java.util.Optional;
 
 enum StorageWindowOnEvents {
 
-	ITEM_SELECTED(GameWindowEventType.ITEM_SELECTED, (parameters) -> {
+	ITEM_SELECTED(GameWindowEventType.ITEM_SELECTED, (parameters, assetsManager, storage) -> {
 		parameters.getSoundPlayer().playSound(Assets.Sounds.UI_ITEM_SELECT);
 		ItemDisplay target = (ItemDisplay) parameters.getWindowEvent().getTarget();
 		StorageWindow storageWindow = (StorageWindow) parameters.getTarget();
@@ -24,7 +27,7 @@ enum StorageWindowOnEvents {
 		return false;
 	}),
 
-	ITEM_PLACED(GameWindowEventType.ITEM_PLACED, (parameters) -> {
+	ITEM_PLACED(GameWindowEventType.ITEM_PLACED, (parameters, assetsManager, storage) -> {
 		parameters.getSoundPlayer().playSound(Assets.Sounds.UI_ITEM_PLACED);
 		StorageWindow storageWindow = (StorageWindow) parameters.getTarget();
 		if (parameters.getWindowEvent().getTarget() instanceof PlayerLayout) {
@@ -36,18 +39,19 @@ enum StorageWindowOnEvents {
 		return true;
 	}),
 
-	CLICK_RIGHT(GameWindowEventType.CLICK_RIGHT, (parameters) -> {
+	CLICK_RIGHT(GameWindowEventType.CLICK_RIGHT, (parameters, assetsManager, storage) -> {
 		StorageWindow storageWindow = (StorageWindow) parameters.getTarget();
 		return storageWindow.onRightClick();
 	}),
 
-	WINDOW_CLOSED(GameWindowEventType.WINDOW_CLOSED, (parameters) -> {
+	WINDOW_CLOSED(GameWindowEventType.WINDOW_CLOSED, (parameters, assetsManager, storage) -> {
 		StorageWindow storageWindow = (StorageWindow) parameters.getTarget();
 		if (parameters.getWindowEvent().getTarget() == storageWindow) {
 			PlayerLayout playerLayout = storageWindow.getPlayerLayout();
 			if (playerLayout.getWeaponChoice() == null) {
 				StorageGrid storageGrid = storageWindow.getStorageGrid();
-				Optional.ofNullable(storageGrid.findItemDisplay(PlayerWeaponsDefinitions.GLOCK.getId())).ifPresent(itemDisplay -> {
+				WeaponsDeclarations declarations = (WeaponsDeclarations) assetsManager.getDeclaration(Declarations.WEAPONS);
+				Optional.ofNullable(storageGrid.findItemDisplay(storage.getIndices().get(declarations.parsePlayerWeaponDeclaration("glc")))).ifPresent(itemDisplay -> {
 							List<UserInterfaceSystemEventsSubscriber> subscribers = parameters.getSubscribers();
 							playerLayout.applySelectionToSelectedWeapon(storageGrid, itemDisplay, subscribers);
 						}
@@ -65,11 +69,13 @@ enum StorageWindowOnEvents {
 		this.onEvent = onEvent;
 	}
 
-	public static boolean execute(WindowEventParameters windowEventParameters) {
+	public static boolean execute(WindowEventParameters windowEventParameters,
+								  GameAssetsManager assetsManager,
+								  PlayerStorage storage) {
 		StorageWindowOnEvents[] values = values();
 		for (StorageWindowOnEvents e : values) {
 			if (e.type == windowEventParameters.getWindowEvent().getType()) {
-				return e.onEvent.execute(windowEventParameters);
+				return e.onEvent.execute(windowEventParameters, assetsManager, storage);
 			}
 		}
 		return false;

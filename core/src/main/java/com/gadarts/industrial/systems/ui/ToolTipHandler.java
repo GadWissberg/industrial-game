@@ -36,10 +36,10 @@ public class ToolTipHandler implements Disposable {
 	private String checkIfToolTipIsPickupOrObstacle(final MapGraphNode cursorNode, final MapGraph map) {
 		Entity pickup = map.getPickupFromNode(cursorNode);
 		if (pickup != null) {
-			return ComponentsMapper.pickup.get(pickup).getItem().getDefinition().getDisplayName();
+			return ComponentsMapper.pickup.get(pickup).getItem().getDeclaration().displayName();
 		} else {
 			Entity obstacle = map.findObstacleByNode(cursorNode);
-			return obstacle != null ? ComponentsMapper.environmentObject.get(obstacle).getType().getDisplayName() : null;
+			return obstacle != null ? ComponentsMapper.environmentObject.get(obstacle).getType().displayName() : null;
 		}
 	}
 
@@ -56,7 +56,7 @@ public class ToolTipHandler implements Disposable {
 		Entity enemyAtNode = map.fetchAliveCharacterFromNode(cursorNode);
 		String result;
 		if (enemyAtNode != null) {
-			result = ComponentsMapper.enemy.get(enemyAtNode).getEnemyDefinition().getDisplayName();
+			result = ComponentsMapper.enemy.get(enemyAtNode).getEnemyDeclaration().displayName();
 		} else {
 			result = checkIfToolTipIsPickupOrObstacle(cursorNode, map);
 		}

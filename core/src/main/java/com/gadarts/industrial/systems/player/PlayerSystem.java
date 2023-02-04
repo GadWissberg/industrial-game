@@ -29,9 +29,12 @@ import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.shared.assets.Assets;
+import com.gadarts.industrial.shared.assets.Assets.Declarations;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponsDeclarations;
 import com.gadarts.industrial.shared.model.characters.Direction;
-import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
@@ -48,6 +51,7 @@ import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
 import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 
 import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
@@ -80,6 +84,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	public PlayerSystem(GameAssetsManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
+		getSystemsCommonData().setStorage(new PlayerStorage(assetsManager));
 	}
 
 	private static void endPlayerTurnOnEnemyAwaken(SystemsCommonData systemsCommonData) {
@@ -284,15 +289,15 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	@Override
 	public void onSelectedWeaponChanged(Weapon selectedWeapon) {
-		PlayerWeaponsDefinitions definition = (PlayerWeaponsDefinitions) selectedWeapon.getDefinition();
+		PlayerWeaponDeclaration definition = (PlayerWeaponDeclaration) selectedWeapon.getDeclaration();
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		Entity player = systemsCommonData.getPlayer();
 		CharacterDecalComponent cdc = ComponentsMapper.characterDecal.get(player);
-		CharacterAnimations animations = getAssetsManager().get(definition.getRelatedAtlas().name());
+		CharacterAnimations animations = getAssetsManager().get(definition.relatedAtlas().name());
 		cdc.init(animations, cdc.getSpriteType(), cdc.getDirection(), auxVector3_1.set(cdc.getDecal().getPosition()));
 		CharacterAnimation animation = animations.get(cdc.getSpriteType(), cdc.getDirection());
 		ComponentsMapper.animation.get(player).init(cdc.getSpriteType().getFrameDuration(), animation);
-		ComponentsMapper.character.get(player).setPrimaryAttack(definition.getWeaponsDefinition());
+		ComponentsMapper.character.get(player).setPrimaryAttack(definition.declaration());
 		if (selectedWeapon != systemsCommonData.getStorage().getSelectedWeapon()) {
 			systemsCommonData.getStorage().setSelectedWeapon(selectedWeapon);
 		}
@@ -531,10 +536,13 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	private Weapon initializeStartingWeapon( ) {
 		Weapon weapon = Pools.obtain(Weapon.class);
-		Assets.UiTextures symbol = DebugSettings.STARTING_WEAPON.getSymbol();
+
 		GameAssetsManager am = getAssetsManager();
-		Texture image = DebugSettings.STARTING_WEAPON.getSymbol() != null ? am.getTexture(symbol) : null;
-		weapon.init(DebugSettings.STARTING_WEAPON, 0, 0, image);
+		WeaponsDeclarations weaponsDeclarations = (WeaponsDeclarations) am.getDeclaration(Declarations.WEAPONS);
+		WeaponDeclaration declaration = weaponsDeclarations.parseWeaponDeclaration(DebugSettings.STARTING_WEAPON);
+		Assets.UiTextures symbol = declaration.getSymbol();
+		Texture image = symbol != null ? am.getTexture(symbol) : null;
+		weapon.init(declaration, 0, 0, image);
 		return weapon;
 	}
 

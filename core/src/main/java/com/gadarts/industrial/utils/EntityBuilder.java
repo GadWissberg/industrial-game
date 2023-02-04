@@ -28,14 +28,14 @@ import com.gadarts.industrial.components.sd.SimpleDecalComponent;
 import com.gadarts.industrial.components.sll.ShadowlessLightComponent;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
+import com.gadarts.industrial.shared.assets.declarations.enemies.EnemyDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
+import com.gadarts.industrial.shared.model.ItemDeclaration;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
-import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
-import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.shared.model.env.DoorsDefinitions;
-import com.gadarts.industrial.shared.model.env.EnvironmentObjectDefinition;
-import com.gadarts.industrial.shared.model.pickups.ItemDefinition;
-import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
+import com.gadarts.industrial.shared.model.env.EnvironmentObjectDeclaration;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -74,10 +74,10 @@ public class EntityBuilder {
 											Vector3 direction,
 											Entity owner,
 											Integer damagePoints,
-											WeaponsDefinitions weaponDefinition) {
+											WeaponDeclaration weaponDeclaration) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		BulletComponent bulletComp = engine.createComponent(BulletComponent.class);
-		bulletComp.init(auxVector2.set(initialPos.x, initialPos.z), direction, owner, damagePoints, weaponDefinition);
+		bulletComp.init(auxVector2.set(initialPos.x, initialPos.z), direction, owner, damagePoints, weaponDeclaration);
 		currentEntity.add(bulletComp);
 		return instance;
 	}
@@ -123,9 +123,9 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addEnvironmentObjectComponent(final Vector2 topLeft,
-													   final Vector2 bottomRight,
-													   final EnvironmentObjectDefinition type) {
+	public EntityBuilder addEnvironmentObjectComponent(Vector2 topLeft,
+													   Vector2 bottomRight,
+													   EnvironmentObjectDeclaration type) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		EnvironmentObjectComponent environmentObjectComponent = engine.createComponent(EnvironmentObjectComponent.class);
 		environmentObjectComponent.init(topLeft, bottomRight, type);
@@ -155,11 +155,11 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addPickUpComponentAsWeapon(PlayerWeaponsDefinitions definition,
+	public EntityBuilder addPickUpComponentAsWeapon(PlayerWeaponDeclaration declaration,
 													Texture displayImage,
 													TextureAtlas.AtlasRegion bulletRegion) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
-		Weapon weapon = (Weapon) addPickUpComponent(Weapon.class, definition, displayImage);
+		Weapon weapon = (Weapon) addPickUpComponent(Weapon.class, declaration, displayImage);
 		weapon.setBulletTextureRegion(bulletRegion);
 		return instance;
 	}
@@ -265,7 +265,7 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addEnemyComponent(final Enemies enemyDefinition,
+	public EntityBuilder addEnemyComponent(final EnemyDeclaration enemyDefinition,
 										   final Animation<TextureAtlas.AtlasRegion> bulletRegions) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		EnemyComponent component = engine.createComponent(EnemyComponent.class);
@@ -277,7 +277,7 @@ public class EntityBuilder {
 	public EntityBuilder addCharacterComponent(CharacterSpriteData characterSpriteData,
 											   CharacterSoundData characterSoundData,
 											   CharacterSkillsParameters skills,
-											   WeaponsDefinitions primaryAttack,
+											   WeaponDeclaration primaryAttack,
 											   Direction direction) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		CharacterComponent charComponent = engine.createComponent(CharacterComponent.class);
@@ -348,12 +348,12 @@ public class EntityBuilder {
 		this.currentEntity = engine.createEntity();
 	}
 
-	private Item addPickUpComponent(final Class<? extends Item> type,
-									final ItemDefinition definition,
-									final Texture displayImage) {
+	private Item addPickUpComponent( Class<? extends Item> type,
+									 ItemDeclaration declaration,
+									 Texture displayImage) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		Item pickup = Pools.obtain(type);
-		pickup.init(definition, 0, 0, displayImage);
+		pickup.init(declaration, 0, 0, displayImage);
 		PickUpComponent pickupComponent = engine.createComponent(PickUpComponent.class);
 		pickupComponent.setItem(pickup);
 		currentEntity.add(pickupComponent);

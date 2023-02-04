@@ -26,7 +26,7 @@ public class SystemsCommonData implements Disposable {
 	@Setter(AccessLevel.NONE)
 	private final String versionName;
 	private final int versionNumber;
-	private final PlayerStorage storage = new PlayerStorage();
+	private PlayerStorage storage;
 	private final com.badlogic.gdx.utils.Queue<Entity> turnsQueue = new com.badlogic.gdx.utils.Queue<>();
 	private final SoundPlayer soundPlayer;
 	private DrawFlags drawFlags;

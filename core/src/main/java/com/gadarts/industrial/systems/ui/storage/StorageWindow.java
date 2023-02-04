@@ -64,7 +64,7 @@ public class StorageWindow extends GameWindow {
 		addPlayerLayout(assetsManager, systemsCommonData, subscribers);
 		setTouchable(Touchable.enabled);
 		addStorageGrid(systemsCommonData);
-		initializeListeners(soundPlayer, systemsCommonData, subscribers);
+		initializeListeners(soundPlayer, systemsCommonData, subscribers, assetsManager);
 	}
 
 	/**
@@ -115,12 +115,13 @@ public class StorageWindow extends GameWindow {
 
 	private void initializeListeners(SoundPlayer soundPlayer,
 									 SystemsCommonData commonData,
-									 List<UserInterfaceSystemEventsSubscriber> subscribers) {
+									 List<UserInterfaceSystemEventsSubscriber> subscribers,
+									 GameAssetsManager assetsManager) {
 		addListener(event -> {
 			boolean result = false;
 			if (event instanceof GameWindowEvent windowEvent) {
 				initializeWindowEventParameters(soundPlayer, commonData, subscribers, windowEvent);
-				result = execute(auxWindowEventParameters);
+				result = execute(auxWindowEventParameters, assetsManager, commonData.getStorage());
 			}
 			return result;
 		});

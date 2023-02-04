@@ -1,5 +1,5 @@
 {
-  "enemies": [
+  "enemies_definitions": [
     {
       "id": "mnt_bot",
       "display_name": "Maintenance-Bot",

@@ -4,9 +4,9 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
 import com.gadarts.industrial.components.GameComponent;
 import com.gadarts.industrial.map.MapGraphNode;
+import com.gadarts.industrial.shared.assets.declarations.enemies.EnemyDeclaration;
 import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,22 +20,22 @@ public class EnemyComponent implements GameComponent {
 	private MapGraphNode targetLastVisibleNode;
 	private int engineEnergy;
 	private long nextRoamSound;
-	private Enemies enemyDefinition;
+	private EnemyDeclaration enemyDeclaration;
 	private EnemyAiStatus aiStatus;
 	private EnemyTimeStamps timeStamps = new EnemyTimeStamps();
 	private Animation<TextureAtlas.AtlasRegion> bulletAnimation;
 	private long iconDisplayInFlowerTimeStamp;
 
-	public void init(final Enemies enemyDefinition,
+	public void init(final EnemyDeclaration enemyDeclaration,
 					 final Animation<TextureAtlas.AtlasRegion> bulletAnimation) {
 		calculateNextRoamSound();
-		this.enemyDefinition = enemyDefinition;
+		this.enemyDeclaration = enemyDeclaration;
 		this.bulletAnimation = bulletAnimation;
 		timeStamps.reset();
 		targetLastVisibleNode = null;
 		aiStatus = EnemyAiStatus.IDLE;
 		iconDisplayInFlowerTimeStamp = 0;
-		engineEnergy = enemyDefinition.getEngine();
+		engineEnergy = enemyDeclaration.engine();
 	}
 
 	@Override

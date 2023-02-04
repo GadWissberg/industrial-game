@@ -4,8 +4,8 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.components.GameComponent;
+import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.model.characters.Direction;
-import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -27,7 +27,7 @@ public class CharacterComponent implements GameComponent {
 	private CharacterSkills skills = new CharacterSkills();
 	@Setter(AccessLevel.NONE)
 	private OnGoingAttack onGoingAttack = new OnGoingAttack();
-	private WeaponsDefinitions primaryAttack;
+	private WeaponDeclaration primaryAttack;
 	private float turnTimeLeft;
 	private Direction facingDirection;
 
@@ -48,7 +48,7 @@ public class CharacterComponent implements GameComponent {
 	public void init(CharacterSpriteData characterSpriteData,
 					 CharacterSoundData soundData,
 					 CharacterSkillsParameters skills,
-					 WeaponsDefinitions primaryAttack,
+					 WeaponDeclaration primaryAttack,
 					 Direction direction) {
 		this.characterSpriteData = characterSpriteData;
 		this.skills.applyParameters(skills);

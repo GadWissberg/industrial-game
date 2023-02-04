@@ -23,8 +23,8 @@ import com.gadarts.industrial.components.sd.SimpleDecalComponent;
 import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
-import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.ModelInstancePools;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -81,7 +81,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	private static void consumeEngineEnergy(Entity character) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
-		WeaponsDefinitions primaryAttack = enemyComp.getEnemyDefinition().getPrimaryAttack();
+		WeaponDeclaration primaryAttack = enemyComp.getEnemyDeclaration().attackPrimary();
 		enemyComp.setEngineEnergy(Math.max(enemyComp.getEngineEnergy() - primaryAttack.getEngineConsumption(), 0));
 	}
 
@@ -215,7 +215,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			if (enemyComponent.getAiStatus() != ATTACKING) {
 				awakeEnemy(entity);
 			}
-			if (!enemyComponent.getEnemyDefinition().isHuman()) {
+			if (!enemyComponent.getEnemyDeclaration().human()) {
 				createFlyingMetalParts(entity);
 			}
 		}
@@ -231,7 +231,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		Decal decal = ComponentsMapper.characterDecal.get(entity).getDecal();
 		ModelInstancePools pooledModelInstances = getSystemsCommonData().getPooledModelInstances();
 		GameModelInstance modelInstance = pooledModelInstances.obtain(getAssetsManager(), Assets.Models.METAL_PART);
-		float characterHeight = ComponentsMapper.enemy.get(entity).getEnemyDefinition().getHeight();
+		float characterHeight = ComponentsMapper.enemy.get(entity).getEnemyDeclaration().getHeight();
 		modelInstance.transform.setTranslation(decal.getPosition()).trn(0F, characterHeight / 2F, 0F);
 		createAndAddFlyingMetalPartEntity(decal, modelInstance);
 	}
@@ -251,7 +251,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	@Override
 	public void onCharacterDies(final Entity character) {
 		if (ComponentsMapper.enemy.has(character)) {
-			if (!ComponentsMapper.enemy.get(character).getEnemyDefinition().isHuman()) {
+			if (!ComponentsMapper.enemy.get(character).getEnemyDeclaration().human()) {
 				createSmoke(character);
 				createFlyingMetalParts(character);
 			}
@@ -319,7 +319,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	 */
 	void invokeEnemyTurn(final Entity enemy) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(enemy);
-		enemyComp.setEngineEnergy(Math.min(enemyComp.getEngineEnergy() + 1, enemyComp.getEnemyDefinition().getEngine()));
+		enemyComp.setEngineEnergy(Math.min(enemyComp.getEngineEnergy() + 1, enemyComp.getEnemyDeclaration().engine()));
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		EnemyAiStatus aiStatus = enemyComponent.getAiStatus();
 		if (aiStatus == ATTACKING) {
@@ -445,7 +445,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		Entity target = ComponentsMapper.character.get(enemy).getTarget();
 		Vector2 targetPos = ComponentsMapper.characterDecal.get(target).getNodePosition(auxVector2_2);
 		ComponentsMapper.enemy.get(enemy).setTargetLastVisibleNode(getSystemsCommonData().getMap().getNode(targetPos));
-		int maxDistance = ComponentsMapper.enemy.get(enemy).getEnemyDefinition().getSight().getMaxDistance();
+		int maxDistance = ComponentsMapper.enemy.get(enemy).getEnemyDeclaration().sight().getMaxDistance();
 		return enemyPos.dst2(targetPos) <= Math.pow(maxDistance, 2);
 	}
 
@@ -455,7 +455,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		EnemyAiStatus prevAiStatus = enemyComponent.getAiStatus();
 		enemyComponent.setAiStatus(ATTACKING);
-		Assets.Sounds awakeSound = enemyComponent.getEnemyDefinition().getAwakeSound();
+		Assets.Sounds awakeSound = enemyComponent.getEnemyDeclaration().soundAwake();
 		if (prevAiStatus == IDLE && awakeSound != null) {
 			getSystemsCommonData().getSoundPlayer().playSound(awakeSound);
 		}
@@ -486,7 +486,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		if (enemyComponent.getAiStatus() != ATTACKING) {
 			awakeEnemyIfTargetSpotted(enemy);
-		} else if (enemyComponent.getAiStatus() != IDLE) {
+		} else {
 			tryToToSetToLastSeenPosition(oldNode, enemy, enemyComponent);
 		}
 	}

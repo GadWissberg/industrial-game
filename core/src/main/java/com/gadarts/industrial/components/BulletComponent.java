@@ -3,7 +3,7 @@ package com.gadarts.industrial.components;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
+import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import lombok.AccessLevel;
 import lombok.Getter;
 
@@ -18,7 +18,7 @@ public class BulletComponent implements GameComponent {
 
 	private Entity owner;
 	private Integer damage;
-	private WeaponsDefinitions weaponDefinition;
+	private WeaponDeclaration weaponDeclaration;
 
 	public Vector3 getDirection(final Vector3 output) {
 		return output.set(direction);
@@ -37,11 +37,11 @@ public class BulletComponent implements GameComponent {
 					 Vector3 direction,
 					 Entity owner,
 					 Integer damagePoints,
-					 WeaponsDefinitions weaponsDefinition) {
+					 WeaponDeclaration weaponsDeclaration) {
 		this.initialPosition.set(initialPosition);
 		this.direction.set(direction);
 		this.owner = owner;
 		this.damage = damagePoints;
-		this.weaponDefinition = weaponsDefinition;
+		this.weaponDeclaration = weaponsDeclaration;
 	}
 }

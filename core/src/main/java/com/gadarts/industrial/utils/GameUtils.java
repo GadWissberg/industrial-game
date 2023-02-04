@@ -12,7 +12,7 @@ import com.gadarts.industrial.map.GameHeuristic;
 import com.gadarts.industrial.map.GamePathFinder;
 import com.gadarts.industrial.map.MapGraphPath;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
+import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.google.gson.JsonObject;
 
@@ -88,7 +88,7 @@ public class GameUtils {
 	public static float calculateCharacterHeight(Entity character) {
 		float height;
 		if (ComponentsMapper.enemy.has(character)) {
-			height = ComponentsMapper.enemy.get(character).getEnemyDefinition().getHeight();
+			height = ComponentsMapper.enemy.get(character).getEnemyDeclaration().getHeight();
 		} else {
 			height = PLAYER_HEIGHT;
 		}
@@ -168,8 +168,8 @@ public class GameUtils {
 	public static int getPrimaryAttackHitFrameIndexForCharacter(Entity character, SystemsCommonData commonData) {
 		if (ComponentsMapper.player.has(character)) {
 			Weapon selectedWeapon = commonData.getStorage().getSelectedWeapon();
-			PlayerWeaponsDefinitions definition = (PlayerWeaponsDefinitions) (selectedWeapon.getDefinition());
-			return definition.getHitFrameIndex();
+			PlayerWeaponDeclaration definition = (PlayerWeaponDeclaration) (selectedWeapon.getDeclaration());
+			return definition.hitFrameIndex();
 		} else {
 			return ComponentsMapper.character.get(character).getCharacterSpriteData().getPrimaryAttackHitFrameIndex();
 		}

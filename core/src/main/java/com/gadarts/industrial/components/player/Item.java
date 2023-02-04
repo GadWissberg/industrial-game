@@ -2,13 +2,13 @@ package com.gadarts.industrial.components.player;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Pool;
-import com.gadarts.industrial.shared.model.pickups.ItemDefinition;
+import com.gadarts.industrial.shared.model.ItemDeclaration;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 public class Item implements Pool.Poolable {
-	private ItemDefinition definition;
+	private ItemDeclaration declaration;
 	private Texture image;
 
 	@Setter
@@ -17,8 +17,8 @@ public class Item implements Pool.Poolable {
 	@Setter
 	private int col;
 
-	public void init(final ItemDefinition definition, final int row, final int col, final Texture image) {
-		this.definition = definition;
+	public void init(ItemDeclaration definition, int row, int col, Texture image) {
+		this.declaration = definition;
 		this.row = row;
 		this.col = col;
 		this.image = image;

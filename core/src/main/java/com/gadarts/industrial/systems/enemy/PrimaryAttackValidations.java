@@ -2,8 +2,8 @@ package com.gadarts.industrial.systems.enemy;
 
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
-import com.gadarts.industrial.shared.model.characters.enemies.Enemies;
-import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
+import com.gadarts.industrial.shared.assets.declarations.enemies.EnemyDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.List;
@@ -15,7 +15,7 @@ final public class PrimaryAttackValidations {
 			new PrimaryAttackValidation(
 					(entity, enemySystem) -> {
 						EnemyComponent enemyComp = ComponentsMapper.enemy.get(entity);
-						WeaponsDefinitions primaryAttack = enemyComp.getEnemyDefinition().getPrimaryAttack();
+						WeaponDeclaration primaryAttack = enemyComp.getEnemyDeclaration().attackPrimary();
 						return enemyComp.getEngineEnergy() >= primaryAttack.getEngineConsumption();
 					},
 					(entity, enemySystem) -> {
@@ -24,22 +24,22 @@ final public class PrimaryAttackValidations {
 					}),
 			new PrimaryAttackValidation(
 					(entity, enemySystem) -> {
-						Enemies enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDefinition();
-						WeaponsDefinitions primaryAttack = enemyDefinition.getPrimaryAttack();
+						EnemyDeclaration enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDeclaration();
+						WeaponDeclaration primaryAttack = enemyDefinition.attackPrimary();
 						return ComponentsMapper.character.get(entity).getTurnTimeLeft() >= primaryAttack.getDuration();
 					},
 					null),
 			new PrimaryAttackValidation(
 					(entity, enemySystem) -> {
-						Enemies enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDefinition();
+						EnemyDeclaration enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDeclaration();
 						float disToTarget = GameUtils.calculateAngbandDistanceToTarget(entity);
-						return disToTarget <= enemyDefinition.getSight().getMaxDistance();
+						return disToTarget <= enemyDefinition.sight().getMaxDistance();
 					},
 					null),
 			new PrimaryAttackValidation(
 					(entity, enemySystem) -> {
-						Enemies enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDefinition();
-						WeaponsDefinitions primaryAttack = enemyDefinition.getPrimaryAttack();
+						EnemyDeclaration enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDeclaration();
+						WeaponDeclaration primaryAttack = enemyDefinition.attackPrimary();
 						float disToTarget = GameUtils.calculateAngbandDistanceToTarget(entity);
 						return !primaryAttack.isMelee() || disToTarget <= 1;
 					},
@@ -49,8 +49,8 @@ final public class PrimaryAttackValidations {
 					}),
 			new PrimaryAttackValidation(
 					(entity, enemySystem) -> {
-						Enemies enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDefinition();
-						WeaponsDefinitions primaryAttack = enemyDefinition.getPrimaryAttack();
+						EnemyDeclaration enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDeclaration();
+						WeaponDeclaration primaryAttack = enemyDefinition.attackPrimary();
 						return primaryAttack.isMelee() || enemySystem.checkIfWayIsClearToTarget(entity);
 					},
 					(entity, enemySystem) -> {

@@ -13,8 +13,8 @@ import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.character.OnGoingAttack;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
+import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.model.characters.Direction;
-import com.gadarts.industrial.shared.model.characters.enemies.WeaponsDefinitions;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.utils.GameUtils;
@@ -30,8 +30,8 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 	private final static Vector3 auxVector3_2 = new Vector3();
 	private final static Vector2 auxVector2 = new Vector2();
 
-	private static int randomNumberOfBullets(WeaponsDefinitions primary) {
-		return MathUtils.random(primary.getMinNumberOfBullets(), primary.getMaxNumberOfBullets());
+	private static int randomNumberOfBullets(WeaponDeclaration primary) {
+		return MathUtils.random(primary.getNumberOfBulletsMin(), primary.getNumberOfBulletsMax());
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 		if (characterComponent.getTarget() != null) {
 			characterComponent.getRotationData().setRotating(true);
 		}
-		WeaponsDefinitions primary = characterComponent.getPrimaryAttack();
+		WeaponDeclaration primary = characterComponent.getPrimaryAttack();
 		int bulletsToShoot = primary.isMelee() ? 1 : randomNumberOfBullets(primary);
 		characterComponent.getOnGoingAttack().initialize(CharacterComponent.AttackType.PRIMARY, bulletsToShoot);
 		return false;
@@ -109,7 +109,7 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 			}
 			onGoingAttack.bulletShot();
 			if (onGoingAttack.getBulletsToShoot() <= 0) {
-				WeaponsDefinitions primaryAttack = characterComponent.getPrimaryAttack();
+				WeaponDeclaration primaryAttack = characterComponent.getPrimaryAttack();
 				consumeTurnTime(character, primaryAttack.getDuration());
 			}
 		}

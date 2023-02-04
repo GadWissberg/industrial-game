@@ -14,14 +14,15 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.gadarts.industrial.shared.model.pickups.ItemDefinition;
 import com.gadarts.industrial.components.player.Item;
+import com.gadarts.industrial.shared.model.ItemDeclaration;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.player.PlayerStorage;
 import com.gadarts.industrial.systems.ui.window.GameWindowEvent;
 import com.gadarts.industrial.systems.ui.window.GameWindowEventType;
 import com.gadarts.industrial.utils.GameUtils;
 
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -108,7 +109,8 @@ public class StorageGrid extends ItemsTable {
 		int minCol = Integer.MAX_VALUE;
 		for (int i = 0; i < numberOfCells; i++) {
 			if ((checkIfCellIsBehindSelection(i, auxCoords))) {
-				storage.getStorageMap()[auxCoords.row * cellsInRow + auxCoords.col] = item.getDefinition().getId();
+				HashMap<ItemDeclaration, Integer> indices = systemsCommonData.getStorage().getIndices();
+				storage.getStorageMap()[auxCoords.row * cellsInRow + auxCoords.col] = indices.get(item.getDeclaration());
 				minRow = Math.min(auxCoords.row, minRow);
 				minCol = Math.min(auxCoords.col, minCol);
 			}
@@ -177,7 +179,8 @@ public class StorageGrid extends ItemsTable {
 			PlayerStorage storage = systemsCommonData.getStorage();
 			int valueInMap = storage.getStorageMap()[auxCoords.row * PlayerStorage.WIDTH + auxCoords.col];
 			ItemDisplay selection = itemSelectionHandler.getSelection();
-			if (selection != null && cellIsBehindSelection && valueInMap > 0 && valueInMap != selection.getItem().getDefinition().getId()) {
+			HashMap<ItemDeclaration, Integer> indices = systemsCommonData.getStorage().getIndices();
+			if (selection != null && cellIsBehindSelection && valueInMap > 0 && valueInMap != indices.get(selection.getItem().getDeclaration())) {
 				invalidLocation = true;
 				color = COLOR_INVALID;
 			}
@@ -203,7 +206,7 @@ public class StorageGrid extends ItemsTable {
 		if (itemSelectionHandler.getSelection() != null) {
 			if (cellRectangle.overlaps(selectedItemRectangle)) {
 				ItemDisplay selection = itemSelectionHandler.getSelection();
-				ItemDefinition definition = selection.getItem().getDefinition();
+				ItemDeclaration definition = selection.getItem().getDeclaration();
 				int col = ((int) (MathUtils.map(selectedItemRectangle.x, selectedItemRectangle.x + selection.getPrefWidth(), 0, definition.getWidth(), cellRectangle.x)));
 				int row = ((int) (MathUtils.map(selectedItemRectangle.y, selectedItemRectangle.y + selection.getPrefHeight(), 0, definition.getSymbolHeight(), cellRectangle.y)));
 				int mask = definition.getMask()[(row * definition.getWidth() + col)];
@@ -240,7 +243,8 @@ public class StorageGrid extends ItemsTable {
 
 	@Override
 	public void removeItem(final ItemDisplay item) {
-		systemsCommonData.getStorage().removeItem(item.getItem().getDefinition().getId());
+		Integer itemId = systemsCommonData.getStorage().getIndices().get(item.getItem().getDeclaration());
+		systemsCommonData.getStorage().removeItem(itemId);
 	}
 
 	/**
@@ -252,7 +256,8 @@ public class StorageGrid extends ItemsTable {
 		Optional<ItemDisplay> item = IntStream.range(0, items.length)
 				.filter(i -> {
 					Actor actor = items[i];
-					return actor instanceof ItemDisplay && ((ItemDisplay) actor).getItem().getDefinition().getId() == id;
+					Integer itemId = systemsCommonData.getStorage().getIndices().get(((ItemDisplay) actor).getItem().getDeclaration());
+					return itemId == id;
 				})
 				.mapToObj(value -> ((ItemDisplay) items[value]))
 				.findFirst();

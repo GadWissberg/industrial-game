@@ -1,7 +1,5 @@
 package com.gadarts.industrial;
 
-import com.gadarts.industrial.shared.model.pickups.PlayerWeaponsDefinitions;
-
 import static com.badlogic.gdx.Application.LOG_DEBUG;
 import static com.gadarts.industrial.systems.ui.menu.NewGameMenuOptions.OFFICE;
 
@@ -22,7 +20,7 @@ public final class DebugSettings {
 	public static final boolean FULL_SCREEN = false;
 	public static final boolean DISABLE_FRUSTUM_CULLING = false;
 	public static final int LOG_LEVEL = LOG_DEBUG;
-	public static final PlayerWeaponsDefinitions STARTING_WEAPON = PlayerWeaponsDefinitions.PUNCH;
+	public static final String STARTING_WEAPON = "pnc";
 	public static final boolean ALLOW_STATIC_SHADOWS = true;
 	public static final boolean DISABLE_FOW = false;
 	public static final boolean PARALYZED_ENEMIES = false;

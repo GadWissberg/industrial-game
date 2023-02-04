@@ -1,0 +1,76 @@
+{
+  "weapons_declarations": [
+    {
+      "id": "pnc",
+      "display_name": "Punch",
+      "frame_duration": 0.1,
+      "damage": 1,
+      "melee": true,
+      "duration": 1.0
+    },
+    {
+      "id": "ctr",
+      "display_name": "Cutter",
+      "frame_duration": 0.1,
+      "damage": 2,
+      "engine_consumption": 1,
+      "melee": true,
+      "duration": 0.4,
+      "sound_engage": "weapon_cutter"
+    },
+    {
+      "id": "rlc",
+      "display_name": "Rapid Laser Cannon",
+      "frame_duration": 0.1,
+      "damage": 2,
+      "sound_engage": "weapon_rapid_laser_cannon",
+      "sound_impact": "small_exp",
+      "number_of_bullets_min": 5,
+      "number_of_bullets_max": 7,
+      "engine_consumption": 4,
+      "bullet_model": "laser_bullet",
+      "bullet_speed": 0.2,
+      "bullet_light_color": "ff0000ff",
+      "bullet_explosion": "laser_exp"
+    },
+    {
+      "id": "glc",
+      "display_name": "Glock",
+      "frame_duration": 0.1,
+      "damage": 1,
+      "sound_engage": "weapon_glock",
+      "sound_impact": "small_exp",
+      "number_of_bullets_min": 1,
+      "number_of_bullets_max": 1,
+      "bullet_model": "gun_bullet",
+      "bullet_speed": 0.6,
+      "light_on_creation": true,
+      "bullet_explosion": "bullet_ricochet"
+    }
+  ],
+  "player_weapons_declarations": [
+    {
+      "id": "pnc",
+      "hit_frame_index": 3,
+      "melee": true,
+      "hidden_from_map": true,
+      "definition": "pnc",
+      "related_atlas": "player_melee"
+    },
+    {
+      "id": "glc",
+      "hit_frame_index": 3,
+      "symbol_width": 2,
+      "symbol_height": 2,
+      "symbol": "weapon_colt",
+      "definition": "glc",
+      "related_atlas": "player_colt",
+      "mask": [
+        1,
+        1,
+        1,
+        0
+      ]
+    }
+  ]
+}

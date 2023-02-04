@@ -1,13 +1,19 @@
 package com.gadarts.industrial.systems.player;
 
-import com.gadarts.industrial.shared.model.pickups.ItemDefinition;
 import com.gadarts.industrial.components.player.Item;
 import com.gadarts.industrial.components.player.Weapon;
+import com.gadarts.industrial.shared.assets.Assets;
+import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponsDeclarations;
+import com.gadarts.industrial.shared.model.ItemDeclaration;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 
@@ -22,12 +28,21 @@ public class PlayerStorage {
 	private final int[] storageMap = new int[SIZE];
 	@Getter(AccessLevel.NONE)
 	private final int[] storageMapSketch = new int[SIZE];
-
+	private final List<PlayerWeaponDeclaration> playerWeaponsDeclarations;
+	private final HashMap<ItemDeclaration, Integer> indices;
 	@Setter(AccessLevel.PACKAGE)
 	private Weapon selectedWeapon;
 
+	public PlayerStorage(GameAssetsManager assetsManager) {
+		WeaponsDeclarations declarations = (WeaponsDeclarations) assetsManager.getDeclaration(Assets.Declarations.WEAPONS);
+		playerWeaponsDeclarations = declarations.playerWeaponsDeclarations();
+		final int[] counter = {0};
+		final HashMap<ItemDeclaration, Integer> indices = new HashMap<>();
+		playerWeaponsDeclarations.forEach(declaration -> indices.put(declaration, counter[0]++));
+		this.indices = indices;
+	}
 
-	public void clear() {
+	public void clear( ) {
 		items.clear();
 		IntStream.range(0, storageMap.length).forEach(i -> storageMap[i] = 0);
 	}
@@ -37,7 +52,7 @@ public class PlayerStorage {
 		int index = 0;
 		boolean result = false;
 		while (index < SIZE) {
-			if (tryToFillItemArea(index, item.getDefinition())) {
+			if (tryToFillItemArea(index, item.getDeclaration())) {
 				applyItemAddition(item, index);
 				result = true;
 				break;
@@ -55,7 +70,7 @@ public class PlayerStorage {
 		items.add(item);
 	}
 
-	private boolean tryToFillItemArea(final int index, final ItemDefinition definition) {
+	private boolean tryToFillItemArea(int index, ItemDeclaration definition) {
 		for (int row = 0; row < definition.getSymbolHeight(); row++) {
 			if (index % (WIDTH) + definition.getWidth() < WIDTH) {
 				if (!tryToFillRow(index, definition, row)) {
@@ -69,7 +84,7 @@ public class PlayerStorage {
 		return true;
 	}
 
-	private boolean tryToFillRow(final int index, final ItemDefinition definition, final int row) {
+	private boolean tryToFillRow(int index, ItemDeclaration definition, int row) {
 		int leftMost = index % (WIDTH);
 		int rightMost = leftMost + definition.getWidth();
 		for (int col = leftMost; col < rightMost; col++) {
@@ -81,11 +96,11 @@ public class PlayerStorage {
 		return true;
 	}
 
-	private boolean tryToFillCell(final ItemDefinition definition, final int row, final int col, final int leftMost) {
+	private boolean tryToFillCell(ItemDeclaration definition, int row, int col, int leftMost) {
 		if (definition.getMask()[row * (definition.getWidth()) + (col - leftMost)] == 1) {
 			int currentCellInStorage = row * WIDTH + col;
 			if (storageMap[currentCellInStorage] == 0) {
-				storageMapSketch[currentCellInStorage] = definition.getId();
+				storageMapSketch[currentCellInStorage] = indices.get(definition);
 				return true;
 			} else {
 				return false;
@@ -95,9 +110,7 @@ public class PlayerStorage {
 	}
 
 	private void initializeStorageArray(final int[] source, final int[] destination) {
-		for (int i = 0; i < source.length; i++) {
-			destination[i] = source[i];
-		}
+		System.arraycopy(source, 0, destination, 0, source.length);
 	}
 
 	public void removeItem(final int itemId) {

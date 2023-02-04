@@ -12,8 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.gadarts.industrial.shared.model.pickups.ItemDefinition;
 import com.gadarts.industrial.components.player.Item;
+import com.gadarts.industrial.shared.model.ItemDeclaration;
 import com.gadarts.industrial.systems.ui.window.GameWindowEvent;
 import com.gadarts.industrial.systems.ui.window.GameWindowEventType;
 import lombok.Getter;
@@ -61,7 +61,7 @@ public class ItemDisplay extends Image {
 	@Override
 	public Actor hit(final float x, final float y, final boolean touchable) {
 		if (!isVisible() || (touchable && getTouchable() != Touchable.enabled) || x < 0 || y < 0) return null;
-		ItemDefinition def = item.getDefinition();
+		ItemDeclaration def = item.getDeclaration();
 		int col = (int) MathUtils.map(0, getPrefWidth(), 0, def.getWidth(), x);
 		int row = ((int) MathUtils.map(0, getPrefHeight(), 0, def.getSymbolHeight(), y));
 		float cellIndex = def.getWidth() * row + col;
