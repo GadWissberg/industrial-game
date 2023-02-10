@@ -43,7 +43,7 @@ import com.gadarts.industrial.console.commands.ConsoleCommands;
 import com.gadarts.industrial.console.commands.ConsoleCommandsList;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.model.characters.CharacterUtils;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
@@ -86,7 +86,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private GameEnvironment environment;
 	private boolean frustumCull = !DebugSettings.DISABLE_FRUSTUM_CULLING;
 
-	public RenderSystem(GameAssetsManager assetsManager, GameLifeCycleHandler lifeCycleHandler) {
+	public RenderSystem(GameAssetManager assetsManager, GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
 	}
 

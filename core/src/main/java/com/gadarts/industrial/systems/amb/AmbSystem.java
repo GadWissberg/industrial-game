@@ -18,7 +18,7 @@ import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.model.env.DoorTypes;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -39,7 +39,7 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 	private ImmutableArray<Entity> wallsEntities;
 	private ImmutableArray<Entity> floorsEntities;
 
-	public AmbSystem(GameAssetsManager assetsManager,
+	public AmbSystem(GameAssetManager assetsManager,
 					 GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
 	}

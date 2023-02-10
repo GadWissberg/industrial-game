@@ -22,7 +22,7 @@ import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.sd.SimpleDecalComponent;
 import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.GameSystem;
@@ -74,7 +74,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private ImmutableArray<Entity> enemies;
 	private ParticleEffect smokeEffect;
 
-	public EnemySystem(GameAssetsManager assetsManager, GameLifeCycleHandler lifeCycleHandler) {
+	public EnemySystem(GameAssetManager assetsManager, GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
 	}
 
@@ -82,7 +82,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private static void consumeEngineEnergy(Entity character) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
 		WeaponDeclaration primaryAttack = enemyComp.getEnemyDeclaration().attackPrimary();
-		enemyComp.setEngineEnergy(Math.max(enemyComp.getEngineEnergy() - primaryAttack.getEngineConsumption(), 0));
+		enemyComp.setEngineEnergy(Math.max(enemyComp.getEngineEnergy() - primaryAttack.engineConsumption(), 0));
 	}
 
 	private static boolean checkIfFloorNodeBlockSightToTarget(Vector2 enemyPosition,

@@ -14,7 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.player.Item;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -54,7 +54,7 @@ public class StorageWindow extends GameWindow {
 	private PlayerLayout playerLayout;
 
 	public StorageWindow(WindowStyle windowStyle,
-						 GameAssetsManager assetsManager,
+						 GameAssetManager assetsManager,
 						 SoundPlayer soundPlayer,
 						 SystemsCommonData systemsCommonData,
 						 List<UserInterfaceSystemEventsSubscriber> subscribers) {
@@ -116,7 +116,7 @@ public class StorageWindow extends GameWindow {
 	private void initializeListeners(SoundPlayer soundPlayer,
 									 SystemsCommonData commonData,
 									 List<UserInterfaceSystemEventsSubscriber> subscribers,
-									 GameAssetsManager assetsManager) {
+									 GameAssetManager assetsManager) {
 		addListener(event -> {
 			boolean result = false;
 			if (event instanceof GameWindowEvent windowEvent) {
@@ -181,7 +181,7 @@ public class StorageWindow extends GameWindow {
 		auxWindowEventParameters.setSubscribers(subscribers);
 	}
 
-	private void addPlayerLayout(GameAssetsManager assetsManager,
+	private void addPlayerLayout(GameAssetManager assetsManager,
 								 SystemsCommonData systemsCommonData,
 								 List<UserInterfaceSystemEventsSubscriber> subscribers) {
 		Texture texture = assetsManager.getTexture(Assets.UiTextures.PLAYER_LAYOUT);

@@ -5,10 +5,10 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 
 public class OutlineGroupStrategy extends GameCameraGroupStrategy {
-	public OutlineGroupStrategy(Camera camera, GameAssetsManager assetsManager) {
+	public OutlineGroupStrategy(Camera camera, GameAssetManager assetsManager) {
 		super(camera, assetsManager);
 	}
 
@@ -18,7 +18,7 @@ public class OutlineGroupStrategy extends GameCameraGroupStrategy {
 	}
 
 	@Override
-	void createDefaultShader(GameAssetsManager assetsManager) {
+	void createDefaultShader(GameAssetManager assetsManager) {
 		String vertexShader = assetsManager.getShader(Assets.Shaders.DECAL_VERTEX);
 		String fragmentShader = assetsManager.getShader(Assets.Shaders.DECAL_OUTLINE_FRAGMENT);
 		shader = new ShaderProgram(vertexShader, fragmentShader);

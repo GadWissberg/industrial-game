@@ -32,11 +32,12 @@ import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.shared.WallCreator;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.MapJsonKeys;
 import com.gadarts.industrial.shared.assets.declarations.enemies.EnemiesDeclarations;
 import com.gadarts.industrial.shared.assets.declarations.enemies.EnemyDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponsDeclarations;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponsDeclarations;
 import com.gadarts.industrial.shared.model.Coords;
@@ -55,10 +56,7 @@ import com.gadarts.industrial.shared.model.map.NodeWalls;
 import com.gadarts.industrial.shared.model.map.Wall;
 import com.gadarts.industrial.utils.EntityBuilder;
 import com.gadarts.industrial.utils.GameUtils;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 
 import java.awt.*;
 import java.util.List;
@@ -102,13 +100,13 @@ public class MapBuilder implements Disposable {
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private final Model floorModel;
-	private final GameAssetsManager assetsManager;
-	private final Gson gson = new Gson();
+	private final GameAssetManager assetsManager;
+	private final Gson gson = new GsonBuilder().create();
 	private final WallCreator wallCreator;
 	private final Map<EnemyDeclaration, Animation<TextureAtlas.AtlasRegion>> enemyBulletsTextureRegions = new HashMap<>();
 	private PooledEngine engine;
 
-	public MapBuilder(PooledEngine engine, GameAssetsManager assetsManager) {
+	public MapBuilder(PooledEngine engine, GameAssetManager assetsManager) {
 		this.engine = engine;
 		this.assetsManager = assetsManager;
 		this.wallCreator = new WallCreator(assetsManager);
@@ -651,7 +649,7 @@ public class MapBuilder implements Disposable {
 
 	private void inflatePickups(final JsonObject mapJsonObject, final MapGraph mapGraph) {
 		JsonArray pickups = mapJsonObject.getAsJsonArray(KEY_PICKUPS);
-		WeaponsDeclarations declarations = (WeaponsDeclarations) assetsManager.getDeclaration(Declarations.WEAPONS);
+		PlayerWeaponsDeclarations declarations = (PlayerWeaponsDeclarations) assetsManager.getDeclaration(Declarations.PLAYER_WEAPONS);
 		pickups.forEach(element -> {
 			JsonObject pickJsonObject = element.getAsJsonObject();
 			PlayerWeaponDeclaration type = declarations.playerWeaponsDeclarations()
@@ -660,7 +658,7 @@ public class MapBuilder implements Disposable {
 					.findFirst()
 					.orElseThrow();
 			TextureAtlas.AtlasRegion bulletRegion = null;
-			if (!type.declaration().isMelee()) {
+			if (!type.declaration().melee()) {
 				bulletRegion = assetsManager.getAtlas(type.relatedAtlas()).findRegion(REGION_NAME_BULLET);
 			}
 			inflatePickupEntity(pickJsonObject, type, bulletRegion, mapGraph);
@@ -714,8 +712,8 @@ public class MapBuilder implements Disposable {
 				Direction.values()[characterJsonObject.get(DIRECTION).getAsInt()],
 				skills,
 				auxCharacterSoundData);
-		PlayerWeaponDeclaration weaponDec = ((WeaponsDeclarations)assetsManager.getDeclaration(Declarations.WEAPONS))
-				.parsePlayerWeaponDeclaration(DebugSettings.STARTING_WEAPON);
+		PlayerWeaponDeclaration weaponDec = ((PlayerWeaponsDeclarations) assetsManager.getDeclaration(Declarations.PLAYER_WEAPONS))
+				.parse(DebugSettings.STARTING_WEAPON);
 		Atlases atlas = weaponDec.relatedAtlas();
 
 		addCharBaseComponents(
@@ -777,9 +775,9 @@ public class MapBuilder implements Disposable {
 		Animation<TextureAtlas.AtlasRegion> bulletAnimation = enemyBulletsTextureRegions.get(type);
 		if (type.attackPrimary() != null && !enemyBulletsTextureRegions.containsKey(type)) {
 			WeaponsDeclarations weapons = (WeaponsDeclarations) assetsManager.getDeclaration(Declarations.WEAPONS);
-			String name = weapons.parseWeaponDeclaration("rlc").name();
+			String name = weapons.parse("rlc").name();
 			Array<TextureAtlas.AtlasRegion> regions = assetsManager.getAtlas(GUARD_BOT).findRegions(name);
-			bulletAnimation = new Animation<>(type.attackPrimary().getFrameDuration(), regions);
+			bulletAnimation = new Animation<>(type.attackPrimary().frameDuration(), regions);
 			enemyBulletsTextureRegions.put(type, bulletAnimation);
 		}
 		return bulletAnimation;
@@ -788,7 +786,7 @@ public class MapBuilder implements Disposable {
 	private EnemyDeclaration inflateEnemyType(JsonObject characterJsonObject) {
 		EnemyDeclaration type;
 		EnemiesDeclarations declaration = (EnemiesDeclarations) assetsManager.getDeclaration(Declarations.ENEMIES);
-		List<EnemyDeclaration> enemies = declaration.enemies();
+		List<EnemyDeclaration> enemies = declaration.enemiesDeclarations();
 		String asString = characterJsonObject.get(TYPE).getAsString();
 		type = enemies.stream().filter(def -> def.id().equalsIgnoreCase(asString)).findFirst()
 				.orElseThrow();

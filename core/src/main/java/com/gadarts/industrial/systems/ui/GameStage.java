@@ -10,7 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.player.Item;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -54,7 +54,7 @@ public class GameStage extends Stage {
 		return result;
 	}
 
-	private void createStorageWindow(GameAssetsManager assetsManager,
+	private void createStorageWindow(GameAssetManager assetsManager,
 									 SystemsCommonData systemsCommonData,
 									 List<UserInterfaceSystemEventsSubscriber> subscribers) {
 		Texture ninePatchTexture = assetsManager.getTexture(Assets.UiTextures.NINEPATCHES);
@@ -66,7 +66,7 @@ public class GameStage extends Stage {
 		windows.add(window);
 	}
 
-	void openStorageWindow(GameAssetsManager assetsManager,
+	void openStorageWindow(GameAssetManager assetsManager,
 						   SystemsCommonData systemsCommonData,
 						   List<UserInterfaceSystemEventsSubscriber> subscribers) {
 		GameWindow windowByName = getWindowByName(StorageWindow.NAME);

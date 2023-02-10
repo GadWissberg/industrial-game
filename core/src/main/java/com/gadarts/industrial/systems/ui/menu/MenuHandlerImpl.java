@@ -6,7 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -25,11 +25,11 @@ public class MenuHandlerImpl implements MenuHandler {
 	private final SystemsCommonData systemsCommonData;
 
 	private final List<UserInterfaceSystemEventsSubscriber> subscribers;
-	private final GameAssetsManager assetsManager;
+	private final GameAssetManager assetsManager;
 
 	public MenuHandlerImpl(SystemsCommonData systemsCommonData,
 						   List<UserInterfaceSystemEventsSubscriber> subscribers,
-						   GameAssetsManager assetsManager) {
+						   GameAssetManager assetsManager) {
 		this.systemsCommonData = systemsCommonData;
 		this.subscribers = subscribers;
 		this.assetsManager = assetsManager;
@@ -56,13 +56,13 @@ public class MenuHandlerImpl implements MenuHandler {
 
 	@Override
 	public void init(Table table,
-					 GameAssetsManager assetsManager,
+					 GameAssetManager assetsManager,
 					 SystemsCommonData systemsCommonData) {
 		addMenuTable(table, assetsManager, systemsCommonData);
 	}
 
 	private void addMenuTable(Table table,
-							  GameAssetsManager assetsManager,
+							  GameAssetManager assetsManager,
 							  SystemsCommonData systemsCommonData) {
 		systemsCommonData.setMenuTable(table);
 		table.setName(TABLE_NAME_MENU);
@@ -73,7 +73,7 @@ public class MenuHandlerImpl implements MenuHandler {
 	}
 
 	public void applyMenuOptions(MenuOptionDefinition[] options,
-								 GameAssetsManager assetsManager,
+								 GameAssetManager assetsManager,
 								 SystemsCommonData commonData) {
 		BitmapFont smallFont = assetsManager.getFont(Assets.Fonts.CHUBGOTHIC_SMALL);
 		Label.LabelStyle style = new Label.LabelStyle(smallFont, MenuOption.FONT_COLOR_REGULAR);

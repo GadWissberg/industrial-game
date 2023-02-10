@@ -2,7 +2,7 @@ package com.gadarts.industrial.systems.ui.storage;
 
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.Assets.Declarations;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponsDeclarations;
 import com.gadarts.industrial.systems.player.PlayerStorage;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
@@ -51,7 +51,7 @@ enum StorageWindowOnEvents {
 			if (playerLayout.getWeaponChoice() == null) {
 				StorageGrid storageGrid = storageWindow.getStorageGrid();
 				WeaponsDeclarations declarations = (WeaponsDeclarations) assetsManager.getDeclaration(Declarations.WEAPONS);
-				Optional.ofNullable(storageGrid.findItemDisplay(storage.getIndices().get(declarations.parsePlayerWeaponDeclaration("glc")))).ifPresent(itemDisplay -> {
+				Optional.ofNullable(storageGrid.findItemDisplay(storage.getIndices().get(declarations.parse("glc")))).ifPresent(itemDisplay -> {
 							List<UserInterfaceSystemEventsSubscriber> subscribers = parameters.getSubscribers();
 							playerLayout.applySelectionToSelectedWeapon(storageGrid, itemDisplay, subscribers);
 						}
@@ -70,7 +70,7 @@ enum StorageWindowOnEvents {
 	}
 
 	public static boolean execute(WindowEventParameters windowEventParameters,
-								  GameAssetsManager assetsManager,
+								  GameAssetManager assetsManager,
 								  PlayerStorage storage) {
 		StorageWindowOnEvents[] values = values();
 		for (StorageWindowOnEvents e : values) {

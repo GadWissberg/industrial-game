@@ -29,7 +29,7 @@ import com.gadarts.industrial.console.commands.ConsoleCommandsList;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -65,7 +65,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private CursorHandler cursorHandler;
 	private ToolTipHandler toolTipHandler;
 
-	public UserInterfaceSystem(GameAssetsManager assetsManager,
+	public UserInterfaceSystem(GameAssetManager assetsManager,
 							   GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
 	}
@@ -106,7 +106,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 	private void addStorageButton(final Table table) {
 		Button.ButtonStyle buttonStyle = new Button.ButtonStyle();
-		GameAssetsManager assetsManager = getAssetsManager();
+		GameAssetManager assetsManager = getAssetsManager();
 		Button button = createButtonStyle(buttonStyle, assetsManager);
 		button.setName(BUTTON_NAME_STORAGE);
 		button.addListener(new ClickListener() {
@@ -121,7 +121,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		table.add(button).expand().left().bottom().pad(BUTTON_PADDING);
 	}
 
-	private Button createButtonStyle(Button.ButtonStyle buttonStyle, GameAssetsManager assetsManager) {
+	private Button createButtonStyle(Button.ButtonStyle buttonStyle, GameAssetManager assetsManager) {
 		buttonStyle.up = new TextureRegionDrawable(assetsManager.getTexture(Assets.UiTextures.BUTTON_STORAGE));
 		buttonStyle.down = new TextureRegionDrawable(assetsManager.getTexture(Assets.UiTextures.BUTTON_STORAGE_DOWN));
 		buttonStyle.over = new TextureRegionDrawable(assetsManager.getTexture(Assets.UiTextures.BUTTON_STORAGE_HOVER));

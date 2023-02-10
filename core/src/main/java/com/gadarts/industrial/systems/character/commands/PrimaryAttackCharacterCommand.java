@@ -31,7 +31,7 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 	private final static Vector2 auxVector2 = new Vector2();
 
 	private static int randomNumberOfBullets(WeaponDeclaration primary) {
-		return MathUtils.random(primary.getNumberOfBulletsMin(), primary.getNumberOfBulletsMax());
+		return MathUtils.random(primary.numberOfBulletsMin(), primary.numberOfBulletsMax());
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 			characterComponent.getRotationData().setRotating(true);
 		}
 		WeaponDeclaration primary = characterComponent.getPrimaryAttack();
-		int bulletsToShoot = primary.isMelee() ? 1 : randomNumberOfBullets(primary);
+		int bulletsToShoot = primary.melee() ? 1 : randomNumberOfBullets(primary);
 		characterComponent.getOnGoingAttack().initialize(CharacterComponent.AttackType.PRIMARY, bulletsToShoot);
 		return false;
 	}
@@ -70,7 +70,7 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 	}
 
 	private boolean checkAdjacentForMelee(Entity character, SystemsCommonData commonData) {
-		if (!ComponentsMapper.character.get(character).getPrimaryAttack().isMelee()) return false;
+		if (!ComponentsMapper.character.get(character).getPrimaryAttack().melee()) return false;
 		Entity target = ComponentsMapper.character.get(character).getTarget();
 		Decal targetDecal = ComponentsMapper.characterDecal.get(target).getDecal();
 		MapGraph map = commonData.getMap();
@@ -110,7 +110,7 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 			onGoingAttack.bulletShot();
 			if (onGoingAttack.getBulletsToShoot() <= 0) {
 				WeaponDeclaration primaryAttack = characterComponent.getPrimaryAttack();
-				consumeTurnTime(character, primaryAttack.getDuration());
+				consumeTurnTime(character, primaryAttack.duration());
 			}
 		}
 	}

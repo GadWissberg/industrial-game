@@ -23,7 +23,7 @@ import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.Assets.Sounds;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.SurfaceType;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.model.characters.Direction;
@@ -69,7 +69,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private ParticleEffect smallExpEffect;
 	private Map<SurfaceType, Sounds> surfaceTypeToStepSound;
 
-	public CharacterSystem(GameAssetsManager assetsManager,
+	public CharacterSystem(GameAssetManager assetsManager,
 						   GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
 	}
@@ -302,7 +302,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		float height;
 		height = GameUtils.calculateCharacterHeight(character);
 		if (map.isNodesAdjacent(srcNode, targetNode, height / 2F)) {
-			applyDamageToCharacter(target, primaryAttack.getDamage());
+			applyDamageToCharacter(target, primaryAttack.damage());
 		}
 	}
 
@@ -373,7 +373,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			int primaryAttackHitFrameIndex = GameUtils.getPrimaryAttackHitFrameIndexForCharacter(character, commonData);
 			if (onGoingAttack.isDone()) {
 				onGoingAttack.setType(null);
-				if (!characterComp.getPrimaryAttack().isMelee()) {
+				if (!characterComp.getPrimaryAttack().melee()) {
 					animationComponent.setStateTime(0);
 					animation.setPlayMode(Animation.PlayMode.REVERSED);
 				} else {

@@ -11,7 +11,7 @@ import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
@@ -21,7 +21,7 @@ public class PickupSystem extends GameSystem<SystemEventsSubscriber> implements 
 	private final float[] hsvArray = new float[3];
 	private ImmutableArray<Entity> pickupEntities;
 
-	public PickupSystem(GameAssetsManager assetsManager,
+	public PickupSystem(GameAssetManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
 	}

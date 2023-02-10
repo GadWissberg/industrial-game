@@ -20,7 +20,7 @@ import com.gadarts.industrial.components.ParticleEffectComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.map.MapGraphNode;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 
 import java.util.ArrayList;
 
@@ -41,7 +41,7 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 	private ImmutableArray<Entity> particleEffectsEntities;
 	private ImmutableArray<Entity> flyingParticlesEntities;
 
-	public ParticleEffectsSystem(GameAssetsManager assetsManager,
+	public ParticleEffectsSystem(GameAssetManager assetsManager,
 								 GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
 		pointSpriteBatch = new PointSpriteParticleBatch();

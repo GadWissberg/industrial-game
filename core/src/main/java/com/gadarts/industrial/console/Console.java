@@ -1,6 +1,6 @@
 package com.gadarts.industrial.console;
 
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.console.commands.ConsoleCommandParameter;
 import com.gadarts.industrial.console.commands.ConsoleCommandResult;
 import com.gadarts.industrial.console.commands.ConsoleCommands;
@@ -29,7 +29,7 @@ public interface Console extends EventsNotifier<ConsoleEventsSubscriber> {
 
 	boolean isActive( );
 
-	void init(GameAssetsManager assetsManager, SystemsCommonData systemsCommonData);
+	void init(GameAssetManager assetsManager, SystemsCommonData systemsCommonData);
 
 	void dispose( );
 }

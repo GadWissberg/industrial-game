@@ -12,7 +12,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.map.MapGraph;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.model.CameraUtils;
 import com.gadarts.industrial.shared.model.GeneralUtils;
 import com.gadarts.industrial.systems.GameSystem;
@@ -35,7 +35,7 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 	private final Vector2 lastMousePosition = new Vector2();
 	private final Vector2 lastRightPressMousePosition = new Vector2();
 
-	public CameraSystem(GameAssetsManager assetsManager,
+	public CameraSystem(GameAssetManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
 	}

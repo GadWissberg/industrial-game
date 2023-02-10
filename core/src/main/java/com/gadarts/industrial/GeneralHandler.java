@@ -18,7 +18,7 @@ import com.gadarts.industrial.console.Console;
 import com.gadarts.industrial.console.ConsoleImpl;
 import com.gadarts.industrial.map.MapBuilder;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.*;
@@ -46,7 +46,7 @@ public class GeneralHandler implements
 	private final String versionName;
 	private final int versionNumber;
 	private PooledEngine engine;
-	private GameAssetsManager assetsManager;
+	private GameAssetManager assetsManager;
 	private SoundPlayer soundPlayer;
 	private MapBuilder mapBuilder;
 	private SystemsCommonData systemsCommonData;
@@ -155,7 +155,7 @@ public class GeneralHandler implements
 	}
 
 	private void initializeAssets( ) {
-		assetsManager = new GameAssetsManager();
+		assetsManager = new GameAssetManager();
 		assetsManager.loadGameFiles();
 		generateCharactersAnimations();
 		applyAlphaOnModels();

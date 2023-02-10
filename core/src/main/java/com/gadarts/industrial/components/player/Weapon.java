@@ -17,6 +17,6 @@ public class Weapon extends Item {
 
 	public boolean isMelee( ) {
 		PlayerWeaponDeclaration definition = (PlayerWeaponDeclaration) getDeclaration();
-		return definition.declaration().isMelee();
+		return definition.declaration().melee();
 	}
 }

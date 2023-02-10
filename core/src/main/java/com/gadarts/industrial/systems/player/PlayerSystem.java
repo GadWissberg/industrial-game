@@ -30,7 +30,7 @@ import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.Assets.Declarations;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponsDeclarations;
@@ -51,7 +51,6 @@ import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
 import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 
 import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
@@ -81,7 +80,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private ImmutableArray<Entity> ambObjects;
 	private ImmutableArray<Entity> pickups;
 
-	public PlayerSystem(GameAssetsManager assetsManager,
+	public PlayerSystem(GameAssetManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
 		getSystemsCommonData().setStorage(new PlayerStorage(assetsManager));
@@ -537,9 +536,9 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private Weapon initializeStartingWeapon( ) {
 		Weapon weapon = Pools.obtain(Weapon.class);
 
-		GameAssetsManager am = getAssetsManager();
+		GameAssetManager am = getAssetsManager();
 		WeaponsDeclarations weaponsDeclarations = (WeaponsDeclarations) am.getDeclaration(Declarations.WEAPONS);
-		WeaponDeclaration declaration = weaponsDeclarations.parseWeaponDeclaration(DebugSettings.STARTING_WEAPON);
+		WeaponDeclaration declaration = weaponsDeclarations.parse(DebugSettings.STARTING_WEAPON);
 		Assets.UiTextures symbol = declaration.getSymbol();
 		Texture image = symbol != null ? am.getTexture(symbol) : null;
 		weapon.init(declaration, 0, 0, image);

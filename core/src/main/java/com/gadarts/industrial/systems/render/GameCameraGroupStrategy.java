@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.Pool;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 
 import java.util.Comparator;
 
@@ -41,7 +41,7 @@ public class GameCameraGroupStrategy implements GroupStrategy, Disposable {
 	ShaderProgram shader;
 	Camera camera;
 
-	public GameCameraGroupStrategy(final Camera camera, final GameAssetsManager assetsManager) {
+	public GameCameraGroupStrategy(final Camera camera, final GameAssetManager assetsManager) {
 		this(camera, assetsManager, (o1, o2) -> {
 			float dist1 = camera.position.dst(o1.getPosition());
 			float dist2 = camera.position.dst(o2.getPosition());
@@ -50,7 +50,7 @@ public class GameCameraGroupStrategy implements GroupStrategy, Disposable {
 	}
 
 	public GameCameraGroupStrategy(final Camera camera,
-								   final GameAssetsManager assetsManager,
+								   final GameAssetManager assetsManager,
 								   final Comparator<Decal> sorter) {
 		this.camera = camera;
 		this.cameraSorter = sorter;
@@ -118,7 +118,7 @@ public class GameCameraGroupStrategy implements GroupStrategy, Disposable {
 		Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
 	}
 
-	void createDefaultShader(final GameAssetsManager assetsManager) {
+	void createDefaultShader(final GameAssetManager assetsManager) {
 		String vertexShader = assetsManager.getShader(Assets.Shaders.DECAL_VERTEX);
 		String fragmentShader = assetsManager.getShader(Assets.Shaders.DECAL_FRAGMENT);
 		shader = new ShaderProgram(vertexShader, fragmentShader);

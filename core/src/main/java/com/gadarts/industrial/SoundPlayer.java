@@ -3,7 +3,7 @@ package com.gadarts.industrial;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.console.ConsoleEventsSubscriber;
 import com.gadarts.industrial.console.commands.ConsoleCommandParameter;
 import com.gadarts.industrial.console.commands.ConsoleCommandResult;
@@ -22,7 +22,7 @@ import static com.badlogic.gdx.math.MathUtils.randomBoolean;
 public class SoundPlayer implements ConsoleEventsSubscriber {
 	private static final float MELODY_VOLUME = 0.4f;
 	private static final float PITCH_OFFSET = 0.1f;
-	private final GameAssetsManager assetManager;
+	private final GameAssetManager assetManager;
 	private final List<Sound> loopingSounds = new ArrayList<>();
 	@Getter
 	@Setter
@@ -30,7 +30,7 @@ public class SoundPlayer implements ConsoleEventsSubscriber {
 	@Getter
 	private boolean musicEnabled;
 
-	public SoundPlayer(final GameAssetsManager assetManager) {
+	public SoundPlayer(final GameAssetManager assetManager) {
 		this.assetManager = assetManager;
 		setSfxEnabled(DebugSettings.SFX_ENABLED);
 		setMusicEnabled(DebugSettings.MELODY_ENABLED);

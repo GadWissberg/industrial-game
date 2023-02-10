@@ -23,7 +23,7 @@ import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.model.characters.CharacterDeclaration;
@@ -51,7 +51,7 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 	private ImmutableArray<Entity> bullets;
 	private ImmutableArray<Entity> collidables;
 
-	public AttackSystem(GameAssetsManager assetsManager,
+	public AttackSystem(GameAssetManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
 	}
@@ -73,7 +73,7 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		PlayerWeaponDeclaration definition = (PlayerWeaponDeclaration) selectedWeapon.getDeclaration();
 		WeaponDeclaration weaponDefinition = definition.declaration();
 		CharacterDeclaration playerDefinition = CharacterTypes.PLAYER.getDefinitions()[0];
-		getSystemsCommonData().getSoundPlayer().playSound(weaponDefinition.isMelee() ? playerDefinition.getSoundMelee() : weaponDefinition.getSoundEngage());
+		getSystemsCommonData().getSoundPlayer().playSound(weaponDefinition.melee() ? playerDefinition.getSoundMelee() : weaponDefinition.soundEngage());
 		primaryAttackEngaged(
 				character,
 				direction,
@@ -85,7 +85,7 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 	private void enemyEngagesPrimaryAttack(final Entity character, final Vector3 direction, final Vector3 charPos) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
 		WeaponDeclaration primaryAttack = enemyComp.getEnemyDeclaration().attackPrimary();
-		getSystemsCommonData().getSoundPlayer().playSound(primaryAttack.getSoundEngage());
+		getSystemsCommonData().getSoundPlayer().playSound(primaryAttack.soundEngage());
 		float bulletCreationHeight = ComponentsMapper.enemy.get(character).getEnemyDeclaration().bulletCreationHeight();
 		primaryAttackEngaged(character, direction, charPos, bulletCreationHeight, primaryAttack);
 	}
@@ -95,7 +95,7 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 									  Vector3 charPos,
 									  float bulletCreationHeight,
 									  WeaponDeclaration primaryAttack) {
-		if (primaryAttack.isMelee()) {
+		if (primaryAttack.melee()) {
 			subscribers.forEach(subscriber -> {
 				Entity target = ComponentsMapper.character.get(character).getTarget();
 				subscriber.onMeleeAttackAppliedOnTarget(character, target, primaryAttack);
@@ -111,9 +111,9 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 							  WeaponDeclaration weaponDeclaration,
 							  float bulletCreationHeight) {
 		charPos.y += bulletCreationHeight;
-		Integer damagePoints = weaponDeclaration.getDamage();
-		GameAssetsManager assetsManager = getAssetsManager();
-		Assets.Models modelDefinition = weaponDeclaration.getBulletModel();
+		Integer damagePoints = weaponDeclaration.damage();
+		GameAssetManager assetsManager = getAssetsManager();
+		Assets.Models modelDefinition = weaponDeclaration.bulletModel();
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		ModelInstancePools pooledModelInstances = systemsCommonData.getPooledModelInstances();
 		GameModelInstance modelInstance = pooledModelInstances.obtain(assetsManager, modelDefinition);
@@ -122,21 +122,21 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		EntityBuilder builder = EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
 				.addBulletComponent(charPos, direction, character, damagePoints, weaponDeclaration)
 				.addModelInstanceComponent(modelInstance, true);
-		if (weaponDeclaration.getBulletLightColor() != null) {
-			builder.addShadowlessLightComponent(charPos, PROJ_LIGHT_INTENSITY, PROJ_LIGHT_RADIUS, weaponDeclaration.getBulletLightColor());
+		if (weaponDeclaration.bulletLightColor() != null) {
+			builder.addShadowlessLightComponent(charPos, PROJ_LIGHT_INTENSITY, PROJ_LIGHT_RADIUS, weaponDeclaration.bulletLightColor());
 		}
 		builder.finishAndAddToEngine();
 
-		if (weaponDeclaration.isLightOnCreation()) {
+		if (weaponDeclaration.lightOnCreation()) {
 			EntityBuilder.beginBuildingEntity((PooledEngine) getEngine()).addShadowlessLightComponent(
 					charPos,
 					PROJ_LIGHT_INTENSITY,
 					PROJ_LIGHT_RADIUS,
-					weaponDeclaration.getBulletLightColor(),
+					weaponDeclaration.bulletLightColor(),
 					BULLET_ENGAGE_LIGHT_DURATION).finishAndAddToEngine();
 		}
 
-		Assets.Models bulletJacket = weaponDeclaration.getBulletJacket();
+		Assets.Models bulletJacket = weaponDeclaration.bulletJacket();
 		if (bulletJacket != null) {
 			Vector3 nodePosition = ComponentsMapper.characterDecal.get(character).getNodePosition(auxVector3_1);
 			MapGraphNode currentNode = systemsCommonData.getMap().getNode(nodePosition);
@@ -197,7 +197,7 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		getEngine().removeEntity(bullet);
 		GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(bullet).getModelInstance();
 		Vector3 pos = auxVector3_1.set(modelInstance.transform.getTranslation(auxVector3_1));
-		createExplosion(getAssetsManager().getParticleEffect(weaponDefinition.getBulletExplosion()), pos);
+		createExplosion(getAssetsManager().getParticleEffect(weaponDefinition.bulletExplosion()), pos);
 	}
 
 	private void createExplosion(final ParticleEffect effect, final Vector3 pos) {
@@ -283,7 +283,7 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 	}
 
 	private void handleBulletMovement(GameModelInstance gameModelInstance, BulletComponent bulletComponent) {
-		float bulletSpeed = bulletComponent.getWeaponDeclaration().getBulletSpeed();
+		float bulletSpeed = bulletComponent.getWeaponDeclaration().bulletSpeed();
 		Vector3 velocity = bulletComponent.getDirection(auxVector3_1).nor().scl(bulletSpeed);
 		gameModelInstance.transform.trn(velocity);
 	}

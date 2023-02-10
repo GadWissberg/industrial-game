@@ -4,7 +4,7 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.utils.Disposable;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.console.ConsoleEventsSubscriber;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import lombok.AccessLevel;
 import lombok.Getter;
 
@@ -17,11 +17,11 @@ public abstract class GameSystem<T extends SystemEventsSubscriber> extends Entit
 		EventsNotifier<T>,
 		ConsoleEventsSubscriber {
 	protected final List<T> subscribers = new ArrayList<>();
-	private final GameAssetsManager assetsManager;
+	private final GameAssetManager assetsManager;
 	private final GameLifeCycleHandler lifeCycleHandler;
 	private SystemsCommonData systemsCommonData;
 
-	protected GameSystem(GameAssetsManager assetsManager,
+	protected GameSystem(GameAssetManager assetsManager,
 						 GameLifeCycleHandler lifeCycleHandler) {
 		this.assetsManager = assetsManager;
 		this.lifeCycleHandler = lifeCycleHandler;

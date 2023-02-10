@@ -10,7 +10,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,7 +33,7 @@ public class StaticShadowsData implements Disposable {
 		}
 	}
 
-	private void createShaderPrograms(GameAssetsManager assetsManager) {
+	private void createShaderPrograms(GameAssetManager assetsManager) {
 		depthShaderProgram = new ShaderProgram(
 				assetsManager.getShader(DEPTHMAP_VERTEX),
 				assetsManager.getShader(DEPTHMAP_FRAGMENT));
@@ -42,7 +42,7 @@ public class StaticShadowsData implements Disposable {
 				assetsManager.getShader(SHADOW_FRAGMENT));
 	}
 
-	public void init(GameAssetsManager assetsManager, ImmutableArray<Entity> staticLightsEntities) {
+	public void init(GameAssetManager assetsManager, ImmutableArray<Entity> staticLightsEntities) {
 		shadowFrameBuffer = new GameFrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 		createShaderPrograms(assetsManager);
 		this.staticLightsEntities = staticLightsEntities;

@@ -6,7 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 
 public class GameWindow extends Window {
 
@@ -14,7 +14,7 @@ public class GameWindow extends Window {
 
 	public GameWindow(final String windowNameStorage,
 					  final WindowStyle windowStyle,
-					  final GameAssetsManager assetsManager) {
+					  final GameAssetManager assetsManager) {
 		super(windowNameStorage, windowStyle);
 		Button.ButtonStyle style = createButtonStyle(assetsManager);
 		closeButton = new Button(style);
@@ -29,7 +29,7 @@ public class GameWindow extends Window {
 		});
 	}
 
-	private Button.ButtonStyle createButtonStyle(GameAssetsManager assetsManager) {
+	private Button.ButtonStyle createButtonStyle(GameAssetManager assetsManager) {
 		Button.ButtonStyle style = new Button.ButtonStyle();
 		style.up = new TextureRegionDrawable(assetsManager.getTexture(Assets.UiTextures.BUTTON_CLOSE));
 		style.down = new TextureRegionDrawable(assetsManager.getTexture(Assets.UiTextures.BUTTON_CLOSE_DOWN));

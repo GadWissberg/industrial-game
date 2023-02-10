@@ -3,8 +3,9 @@ package com.gadarts.industrial.systems.player;
 import com.gadarts.industrial.components.player.Item;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponsDeclarations;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponsDeclarations;
 import com.gadarts.industrial.shared.model.ItemDeclaration;
 import lombok.AccessLevel;
@@ -33,8 +34,8 @@ public class PlayerStorage {
 	@Setter(AccessLevel.PACKAGE)
 	private Weapon selectedWeapon;
 
-	public PlayerStorage(GameAssetsManager assetsManager) {
-		WeaponsDeclarations declarations = (WeaponsDeclarations) assetsManager.getDeclaration(Assets.Declarations.WEAPONS);
+	public PlayerStorage(GameAssetManager assetsManager) {
+		PlayerWeaponsDeclarations declarations = (PlayerWeaponsDeclarations) assetsManager.getDeclaration(Assets.Declarations.PLAYER_WEAPONS);
 		playerWeaponsDeclarations = declarations.playerWeaponsDeclarations();
 		final int[] counter = {0};
 		final HashMap<ItemDeclaration, Integer> indices = new HashMap<>();

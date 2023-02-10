@@ -1,0 +1,27 @@
+{
+  "player_weapons_declarations": [
+    {
+      "id": "pnc",
+      "hit_frame_index": 3,
+      "melee": true,
+      "hidden_from_map": true,
+      "definition": "pnc",
+      "related_atlas": "player_melee"
+    },
+    {
+      "id": "glc",
+      "hit_frame_index": 3,
+      "symbol_width": 2,
+      "symbol_height": 2,
+      "symbol": "weapon_colt",
+      "definition": "glc",
+      "related_atlas": "player_colt",
+      "mask": [
+        1,
+        1,
+        1,
+        0
+      ]
+    }
+  ]
+}

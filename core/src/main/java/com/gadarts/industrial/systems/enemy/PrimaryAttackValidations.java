@@ -16,7 +16,7 @@ final public class PrimaryAttackValidations {
 					(entity, enemySystem) -> {
 						EnemyComponent enemyComp = ComponentsMapper.enemy.get(entity);
 						WeaponDeclaration primaryAttack = enemyComp.getEnemyDeclaration().attackPrimary();
-						return enemyComp.getEngineEnergy() >= primaryAttack.getEngineConsumption();
+						return enemyComp.getEngineEnergy() >= primaryAttack.engineConsumption();
 					},
 					(entity, enemySystem) -> {
 						ComponentsMapper.enemy.get(entity).setAiStatus(DODGING);
@@ -26,7 +26,7 @@ final public class PrimaryAttackValidations {
 					(entity, enemySystem) -> {
 						EnemyDeclaration enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDeclaration();
 						WeaponDeclaration primaryAttack = enemyDefinition.attackPrimary();
-						return ComponentsMapper.character.get(entity).getTurnTimeLeft() >= primaryAttack.getDuration();
+						return ComponentsMapper.character.get(entity).getTurnTimeLeft() >= primaryAttack.duration();
 					},
 					null),
 			new PrimaryAttackValidation(
@@ -41,7 +41,7 @@ final public class PrimaryAttackValidations {
 						EnemyDeclaration enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDeclaration();
 						WeaponDeclaration primaryAttack = enemyDefinition.attackPrimary();
 						float disToTarget = GameUtils.calculateAngbandDistanceToTarget(entity);
-						return !primaryAttack.isMelee() || disToTarget <= 1;
+						return !primaryAttack.melee() || disToTarget <= 1;
 					},
 					(entity, enemySystem) -> {
 						ComponentsMapper.enemy.get(entity).setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
@@ -51,7 +51,7 @@ final public class PrimaryAttackValidations {
 					(entity, enemySystem) -> {
 						EnemyDeclaration enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDeclaration();
 						WeaponDeclaration primaryAttack = enemyDefinition.attackPrimary();
-						return primaryAttack.isMelee() || enemySystem.checkIfWayIsClearToTarget(entity);
+						return primaryAttack.melee() || enemySystem.checkIfWayIsClearToTarget(entity);
 					},
 					(entity, enemySystem) -> {
 						ComponentsMapper.enemy.get(entity).setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);

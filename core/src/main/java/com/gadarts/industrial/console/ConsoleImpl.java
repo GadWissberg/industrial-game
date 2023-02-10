@@ -18,7 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.console.commands.*;
 import com.gadarts.industrial.systems.SystemsCommonData;
 
@@ -263,7 +263,7 @@ public class ConsoleImpl extends Table implements Console, InputProcessor, Dispo
 	}
 
 	@Override
-	public void init(GameAssetsManager assetsManager, SystemsCommonData systemsCommonData) {
+	public void init(GameAssetManager assetsManager, SystemsCommonData systemsCommonData) {
 		consoleTextData = new ConsoleTextData(assetsManager);
 		setName(NAME);
 		int screenHeight = Gdx.graphics.getHeight();

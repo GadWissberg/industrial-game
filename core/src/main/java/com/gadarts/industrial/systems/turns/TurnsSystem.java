@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent.DoorStates;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
@@ -21,7 +21,7 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 		CharacterSystemEventsSubscriber {
 	private boolean currentTurnDone;
 
-	public TurnsSystem(GameAssetsManager assetsManager,
+	public TurnsSystem(GameAssetManager assetsManager,
 					   GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
 	}

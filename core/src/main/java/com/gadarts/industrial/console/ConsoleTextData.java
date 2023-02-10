@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.StringBuilder;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Optional;
@@ -27,7 +27,7 @@ public class ConsoleTextData implements Disposable {
 	private final Label.LabelStyle textStyle;
 	private Stage stage;
 
-	public ConsoleTextData(final GameAssetsManager assetManager) {
+	public ConsoleTextData(final GameAssetManager assetManager) {
 		font = assetManager.getFont(Assets.Fonts.CONSOLA);
 		font.getData().markupEnabled = true;
 		textStyle = new Label.LabelStyle(font, Color.WHITE);

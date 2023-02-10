@@ -18,7 +18,7 @@ import com.gadarts.industrial.console.commands.ConsoleCommandResult;
 import com.gadarts.industrial.console.commands.ConsoleCommands;
 import com.gadarts.industrial.console.commands.ConsoleCommandsList;
 import com.gadarts.industrial.console.commands.types.ProfilerCommand;
-import com.gadarts.industrial.shared.assets.GameAssetsManager;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 
 public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 	public static final int LABELS_ORIGIN_OFFSET_FROM_TOP = 200;
@@ -40,7 +40,7 @@ public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 	private ImmutableArray<Entity> modelInstanceEntities;
 	private BitmapFont font;
 
-	public ProfilingSystem(GameAssetsManager assetsManager,
+	public ProfilingSystem(GameAssetManager assetsManager,
 						   GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
 		glProfiler = new GLProfiler(Gdx.graphics);
