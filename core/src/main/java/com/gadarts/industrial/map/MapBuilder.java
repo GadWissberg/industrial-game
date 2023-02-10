@@ -788,8 +788,7 @@ public class MapBuilder implements Disposable {
 		EnemiesDeclarations declaration = (EnemiesDeclarations) assetsManager.getDeclaration(Declarations.ENEMIES);
 		List<EnemyDeclaration> enemies = declaration.enemiesDeclarations();
 		String asString = characterJsonObject.get(TYPE).getAsString();
-		type = enemies.stream().filter(def -> def.id().equalsIgnoreCase(asString)).findFirst()
-				.orElseThrow();
+		type = enemies.stream().filter(def -> def.id().equalsIgnoreCase(asString)).findFirst().orElseThrow();
 		return type;
 	}
 

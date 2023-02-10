@@ -83,7 +83,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	public PlayerSystem(GameAssetManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
-		getSystemsCommonData().setStorage(new PlayerStorage(assetsManager));
 	}
 
 	private static void endPlayerTurnOnEnemyAwaken(SystemsCommonData systemsCommonData) {
@@ -528,6 +527,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		super.onSystemReset(systemsCommonData);
 		getSystemsCommonData().setPlayer(getEngine().getEntitiesFor(Family.all(PlayerComponent.class).get()).first());
 		Weapon weapon = initializeStartingWeapon();
+		getSystemsCommonData().setStorage(new PlayerStorage(getAssetsManager()));
 		getSystemsCommonData().getStorage().setSelectedWeapon(weapon);
 		ambObjects = getEngine().getEntitiesFor(Family.all(EnvironmentObjectComponent.class).exclude(DoorComponent.class).get());
 		pickups = getEngine().getEntitiesFor(Family.all(PickUpComponent.class).get());
