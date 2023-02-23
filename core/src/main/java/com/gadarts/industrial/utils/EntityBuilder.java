@@ -34,8 +34,8 @@ import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclarati
 import com.gadarts.industrial.shared.model.ItemDeclaration;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
-import com.gadarts.industrial.shared.model.env.DoorsDefinitions;
 import com.gadarts.industrial.shared.model.env.EnvironmentObjectDeclaration;
+import com.gadarts.industrial.shared.model.env.door.DoorsDefinitions;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;

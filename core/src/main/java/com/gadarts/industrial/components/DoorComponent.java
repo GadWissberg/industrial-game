@@ -2,7 +2,7 @@ package com.gadarts.industrial.components;
 
 import com.badlogic.ashley.core.Entity;
 import com.gadarts.industrial.map.MapGraphNode;
-import com.gadarts.industrial.shared.model.env.DoorsDefinitions;
+import com.gadarts.industrial.shared.model.env.door.DoorsDefinitions;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;

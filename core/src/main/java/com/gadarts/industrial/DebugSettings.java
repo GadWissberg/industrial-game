@@ -30,5 +30,5 @@ public final class DebugSettings {
 	public static final boolean ENEMY_INVULNERABLE = false;
 	public static final boolean ENEMY_CANT_MOVE = false;
 	public static final boolean SPACE_BAR_SKIPS_PLAYER = false;
-	public static final String TEST_LEVEL = OFFICE.name().toLowerCase();
+	public static final String TEST_LEVEL = "enemy_test";
 }

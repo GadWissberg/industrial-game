@@ -11,15 +11,13 @@ import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.DoorComponent.DoorStates;
-import com.gadarts.industrial.components.WallComponent;
 import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.map.MapGraph;
-import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
-import com.gadarts.industrial.shared.model.env.DoorTypes;
+import com.gadarts.industrial.shared.model.env.door.DoorTypes;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
@@ -36,7 +34,6 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final int DOOR_OPEN_DURATION = 3;
 	private ImmutableArray<Entity> doorEntities;
-	private ImmutableArray<Entity> wallsEntities;
 	private ImmutableArray<Entity> floorsEntities;
 
 	public AmbSystem(GameAssetManager assetsManager,
@@ -58,7 +55,6 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 	public void onSystemReset(SystemsCommonData systemsCommonData) {
 		super.onSystemReset(systemsCommonData);
 		doorEntities = getEngine().getEntitiesFor(Family.all(DoorComponent.class).get());
-		wallsEntities = getEngine().getEntitiesFor(Family.all(WallComponent.class).get());
 		floorsEntities = getEngine().getEntitiesFor(Family.all(FloorComponent.class).get());
 	}
 

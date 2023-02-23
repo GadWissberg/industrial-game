@@ -28,7 +28,7 @@
       "accuracy": "med",
       "sight": "high",
       "engine": 4,
-      "attack_primary": "rapid_laser_cannon",
+      "attack_primary": "rlc",
       "attack_primary_hit_frame_index": 3,
       "height": 1.5,
       "sound_awake": "guard_bot_awake",
@@ -38,7 +38,11 @@
       "sound_step": "guard_bot_step",
       "explosion_effect_on_destroy": "small_exp",
       "shadow_radius": 0.2,
-      "bullet_creation_height": 1
+      "bullet_creation_offset": {
+        "x": 0.3,
+        "y": 1,
+        "z": -0.3
+      }
     },
     {
       "id": "trr_glc",

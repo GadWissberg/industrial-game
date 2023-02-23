@@ -11,7 +11,7 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
-import com.gadarts.industrial.shared.model.env.DoorTypes;
+import com.gadarts.industrial.shared.model.env.door.DoorTypes;
 
 import java.util.Map;
 

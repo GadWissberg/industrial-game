@@ -47,10 +47,11 @@ import com.gadarts.industrial.shared.model.characters.CharacterDeclaration;
 import com.gadarts.industrial.shared.model.characters.CharacterTypes;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
-import com.gadarts.industrial.shared.model.env.DoorsDefinitions;
+import com.gadarts.industrial.shared.model.characters.player.PlayerDeclaration;
 import com.gadarts.industrial.shared.model.env.EnvironmentObjectDeclaration;
 import com.gadarts.industrial.shared.model.env.EnvironmentObjectType;
 import com.gadarts.industrial.shared.model.env.ThingsDefinitions;
+import com.gadarts.industrial.shared.model.env.door.DoorsDefinitions;
 import com.gadarts.industrial.shared.model.map.MapNodeData;
 import com.gadarts.industrial.shared.model.map.NodeWalls;
 import com.gadarts.industrial.shared.model.map.Wall;
@@ -74,7 +75,7 @@ import static com.gadarts.industrial.shared.model.characters.CharacterTypes.*;
 import static com.gadarts.industrial.shared.model.characters.Direction.NORTH;
 import static com.gadarts.industrial.shared.model.characters.Direction.SOUTH;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.IDLE;
-import static com.gadarts.industrial.shared.model.env.LightConstants.*;
+import static com.gadarts.industrial.shared.model.env.light.LightConstants.*;
 import static com.gadarts.industrial.shared.model.map.MapNodesTypes.OBSTACLE_KEY_DIAGONAL_FORBIDDEN;
 import static com.gadarts.industrial.utils.EntityBuilder.beginBuildingEntity;
 import static java.lang.String.format;
@@ -719,7 +720,7 @@ public class MapBuilder implements Disposable {
 		addCharBaseComponents(
 				builder,
 				data,
-				CharacterTypes.PLAYER.getDefinitions()[0],
+				PlayerDeclaration.getInstance(),
 				atlas,
 				weaponDec.declaration());
 
