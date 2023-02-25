@@ -120,14 +120,23 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		modelInstance.transform.setToTranslation(position);
 		modelInstance.transform.rotate(Vector3.Y, -auxVector2_1.set(direction.x, direction.z).nor().angleDeg())
 				.translate(bulletCreationOffset);
+
 		Vector3 biasedPos = modelInstance.transform.getTranslation(auxVector3_1);
+		modelInstance.transform.setToTranslation(biasedPos);
 		Entity target = ComponentsMapper.character.get(character).getTarget();
-		Vector3 targetPos = ComponentsMapper.characterDecal.get(target).getNodePosition(auxVector3_2);
-		modelInstance.transform.setToRotation(Vector3.Y, -auxVector2_1.set(targetPos.x, targetPos.z)
-						.sub(biasedPos.x, biasedPos.z).nor().angleDeg())
-				.setTranslation(biasedPos);
+		Vector3 targetPos = ComponentsMapper.characterDecal.get(target).getDecal().getPosition();
+		Vector2 bulletDirectionAfterBias = auxVector2_1.set(targetPos.x, targetPos.z)
+				.sub(biasedPos.x, biasedPos.z)
+				.nor();
+		modelInstance.transform.rotate(Vector3.Y, -bulletDirectionAfterBias.angleDeg());
+
 		EntityBuilder builder = EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-				.addBulletComponent(position, direction, character, damagePoints, weaponDeclaration)
+				.addBulletComponent(
+						position,
+						auxVector3_1.set(bulletDirectionAfterBias.x, 0F, bulletDirectionAfterBias.y),
+						character,
+						damagePoints,
+						weaponDeclaration)
 				.addModelInstanceComponent(modelInstance, true);
 		if (weaponDeclaration.bulletLightColor() != null) {
 			builder.addShadowlessLightComponent(position, PROJ_LIGHT_INTENSITY, PROJ_LIGHT_RADIUS, weaponDeclaration.bulletLightColor());
