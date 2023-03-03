@@ -41,7 +41,6 @@ import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponsDe
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponsDeclarations;
 import com.gadarts.industrial.shared.model.Coords;
-import com.gadarts.industrial.shared.model.GeneralUtils;
 import com.gadarts.industrial.shared.model.RelativeBillboard;
 import com.gadarts.industrial.shared.model.characters.CharacterDeclaration;
 import com.gadarts.industrial.shared.model.characters.CharacterTypes;
@@ -55,6 +54,7 @@ import com.gadarts.industrial.shared.model.env.door.DoorsDefinitions;
 import com.gadarts.industrial.shared.model.map.MapNodeData;
 import com.gadarts.industrial.shared.model.map.NodeWalls;
 import com.gadarts.industrial.shared.model.map.Wall;
+import com.gadarts.industrial.shared.utils.GeneralUtils;
 import com.gadarts.industrial.utils.EntityBuilder;
 import com.gadarts.industrial.utils.GameUtils;
 import com.google.gson.*;
@@ -369,7 +369,7 @@ public class MapBuilder implements Disposable {
 					definition));
 			Coords coords = nodeData.getCoords();
 			MapNodeData westNodeData = new MapNodeData(
-					coords.getRow(),
+					coords.row(),
 					westNodeCol,
 					OBSTACLE_KEY_DIAGONAL_FORBIDDEN);
 			nodeData.lift(height);
@@ -399,7 +399,7 @@ public class MapBuilder implements Disposable {
 					definition));
 			Coords coords = nodeData.getCoords();
 			MapNodeData eastNodeData = new MapNodeData(
-					coords.getRow(),
+					coords.row(),
 					eastNodeCol,
 					OBSTACLE_KEY_DIAGONAL_FORBIDDEN);
 			nodeData.lift(height);
@@ -428,7 +428,7 @@ public class MapBuilder implements Disposable {
 			Coords coords = nodeData.getCoords();
 			MapNodeData southNodeData = new MapNodeData(
 					southNodeRow,
-					coords.getCol(),
+					coords.col(),
 					OBSTACLE_KEY_DIAGONAL_FORBIDDEN);
 			nodeData.lift(height);
 			if (southNodeRow >= 0 && southNodeRow < mapGraph.getDepth()) {
@@ -456,7 +456,7 @@ public class MapBuilder implements Disposable {
 			Coords coords = nodeData.getCoords();
 			MapNodeData northNodeData = new MapNodeData(
 					northNodeRow,
-					coords.getCol(),
+					coords.col(),
 					OBSTACLE_KEY_DIAGONAL_FORBIDDEN);
 			nodeData.lift(height);
 			if (northNodeRow >= 0 && northNodeRow < mapGraph.getDepth()) {
@@ -479,8 +479,8 @@ public class MapBuilder implements Disposable {
 										   EnvironmentObjectDeclaration type,
 										   EntityBuilder builder,
 										   Direction facingDirection) {
-		int col = coord.getCol();
-		int row = coord.getRow();
+		int col = coord.col();
+		int row = coord.row();
 		int halfWidth = type.getWidth() / 2;
 		int halfDepth = type.getDepth() / 2;
 		if (facingDirection == NORTH || facingDirection == SOUTH) {
@@ -559,7 +559,7 @@ public class MapBuilder implements Disposable {
 									  Coords coord) {
 		int dirIndex = jsonObject.get(DIRECTION).getAsInt();
 		inflateEnvObjectComponent(coord, type, builder, Direction.values()[dirIndex]);
-		MapGraphNode node = mapGraph.getNode(coord.getCol(), coord.getRow());
+		MapGraphNode node = mapGraph.getNode(coord.col(), coord.row());
 		GameModelInstance mi = inflateEnvModelInstanceComponent(node, jsonObject, type, builder);
 		inflateEnvLightComponent(builder, type, mi, dirIndex);
 		node.setType(node.getType().ordinal() < type.getNodeType().ordinal() ? type.getNodeType() : node.getType());
@@ -686,7 +686,7 @@ public class MapBuilder implements Disposable {
 		String fileName = BOUNDING_BOX_PREFIX + modelDefinition.getFilePath();
 		BoundingBox boundingBox = assetsManager.get(fileName, BoundingBox.class);
 		GameModelInstance modelInstance = new GameModelInstance(assetsManager.getModel(modelDefinition), boundingBox);
-		modelInstance.transform.setTranslation(auxVector3_1.set(coord.getCol() + 0.5f, 0, coord.getRow() + 0.5f));
+		modelInstance.transform.setTranslation(auxVector3_1.set(coord.col() + 0.5f, 0, coord.row() + 0.5f));
 		modelInstance.transform.translate(0, mapGraph.getNode(coord).getHeight(), 0);
 		builder.addModelInstanceComponent(modelInstance, true);
 	}

@@ -4,7 +4,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
@@ -31,6 +30,7 @@ import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
+import com.gadarts.industrial.shared.utils.CameraUtils;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
@@ -39,9 +39,7 @@ import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.menu.MenuHandler;
 import com.gadarts.industrial.systems.ui.menu.MenuHandlerImpl;
 import com.gadarts.industrial.utils.EntityBuilder;
-import com.gadarts.industrial.utils.GameUtils;
 import lombok.Getter;
-import squidpony.squidmath.Bresenham;
 import squidpony.squidmath.Coord3D;
 
 import java.util.ArrayDeque;
@@ -162,17 +160,10 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private MapGraphNode calculateNewNode(int screenX, int screenY) {
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		MapGraph map = systemsCommonData.getMap();
-		Camera camera = systemsCommonData.getCamera();
-
-		Vector3 ray = GameUtils.calculateGridPositionFromMouse(camera, screenX, screenY, auxVector3_2);
-
-		Vector3 pos = camera.position;
-		ArrayDeque<Coord3D> nodes = (ArrayDeque<Coord3D>) Bresenham.line3D(
-				(int) Math.round((double) pos.x), (int) Math.round((double) pos.y), (int) Math.round((double) pos.z),
-				(int) Math.floor(ray.x), 0, (int) Math.floor(ray.z));
-
+		ArrayDeque<Coord3D> nodes = CameraUtils.findAllCoordsOnRay(screenX, screenY, systemsCommonData.getCamera());
 		return findNearestNodeOnCameraLineOfSight(map, nodes);
 	}
+
 
 	private MapGraphNode findNearestNodeOnCameraLineOfSight(MapGraph map,
 															ArrayDeque<Coord3D> nodes) {

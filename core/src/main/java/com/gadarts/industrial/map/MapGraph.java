@@ -280,7 +280,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 	}
 
 	public MapGraphNode getNode(final Coords coord) {
-		return getNode(coord.getCol(), coord.getRow());
+		return getNode(coord.col(), coord.row());
 	}
 
 	public MapGraphNode getNode(GridPoint2 coord) {

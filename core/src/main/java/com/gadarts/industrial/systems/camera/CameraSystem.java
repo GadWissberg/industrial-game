@@ -13,15 +13,15 @@ import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
-import com.gadarts.industrial.shared.model.CameraUtils;
-import com.gadarts.industrial.shared.model.GeneralUtils;
+import com.gadarts.industrial.shared.utils.CameraUtils;
+import com.gadarts.industrial.shared.utils.GeneralUtils;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 
 import static com.gadarts.industrial.DebugSettings.FULL_SCREEN;
 import static com.gadarts.industrial.Industrial.*;
-import static com.gadarts.industrial.shared.model.CameraUtils.*;
+import static com.gadarts.industrial.shared.utils.CameraUtils.*;
 
 public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> implements InputSystemEventsSubscriber {
 	private static final float FAR = 100f;

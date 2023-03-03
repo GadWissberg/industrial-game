@@ -1,9 +1,7 @@
 package com.gadarts.industrial.utils;
 
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.player.Weapon;
@@ -24,7 +22,6 @@ import static com.gadarts.industrial.components.player.PlayerComponent.PLAYER_HE
 
 public class GameUtils {
 	public static final float EPSILON = 0.025f;
-	private static final Plane floorPlane = new Plane(new Vector3(0, 1, 0), 0);
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Bresenham2 bresenham = new Bresenham2();
@@ -49,24 +46,6 @@ public class GameUtils {
 	public static String getRandomSound(final Assets.Sounds soundDefinition) {
 		int random = MathUtils.random(soundDefinition.getFiles().length - 1);
 		return soundDefinition.getFiles()[random];
-	}
-
-	/**
-	 * Calculates the node's position based on screen mouse position.
-	 *
-	 * @param camera  The rendering camera.
-	 * @param screenX MouseX
-	 * @param screenY MouseY
-	 * @param output  The result
-	 * @return output argument for chaining.
-	 */
-	public static Vector3 calculateGridPositionFromMouse(final Camera camera,
-														 final float screenX,
-														 final float screenY,
-														 final Vector3 output) {
-		Ray ray = camera.getPickRay(screenX, screenY);
-		Intersector.intersectRayPlane(ray, floorPlane, output);
-		return output;
 	}
 
 	public static float getFloatFromJsonOrDefault(final JsonObject jsonObject,
