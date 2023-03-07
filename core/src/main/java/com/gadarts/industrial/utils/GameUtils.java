@@ -12,6 +12,7 @@ import com.gadarts.industrial.map.MapGraphPath;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.systems.SystemsCommonData;
+import com.gadarts.industrial.systems.player.PlayerStorage;
 import com.google.gson.JsonObject;
 
 import java.util.LinkedHashSet;
@@ -146,8 +147,9 @@ public class GameUtils {
 
 	public static int getPrimaryAttackHitFrameIndexForCharacter(Entity character, SystemsCommonData commonData) {
 		if (ComponentsMapper.player.has(character)) {
-			Weapon selectedWeapon = commonData.getStorage().getSelectedWeapon();
-			PlayerWeaponDeclaration definition = (PlayerWeaponDeclaration) (selectedWeapon.getDeclaration());
+			PlayerStorage storage = commonData.getStorage();
+			Weapon selectedWeapon = storage.getSelectedWeapon();
+			PlayerWeaponDeclaration definition = storage.getPlayerWeaponsDeclarations().get(selectedWeapon.getDeclaration());
 			return definition.hitFrameIndex();
 		} else {
 			return ComponentsMapper.character.get(character).getCharacterSpriteData().getPrimaryAttackHitFrameIndex();

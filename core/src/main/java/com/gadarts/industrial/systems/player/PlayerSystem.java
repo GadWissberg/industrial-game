@@ -32,6 +32,7 @@ import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.Assets.Declarations;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponsDeclarations;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponsDeclarations;
 import com.gadarts.industrial.shared.model.characters.Direction;
@@ -537,11 +538,11 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		Weapon weapon = Pools.obtain(Weapon.class);
 
 		GameAssetManager am = getAssetsManager();
-		WeaponsDeclarations weaponsDeclarations = (WeaponsDeclarations) am.getDeclaration(Declarations.WEAPONS);
-		WeaponDeclaration declaration = weaponsDeclarations.parse(DebugSettings.STARTING_WEAPON);
-		Assets.UiTextures symbol = declaration.getSymbol();
+		PlayerWeaponsDeclarations weaponsDeclarations = (PlayerWeaponsDeclarations) am.getDeclaration(Declarations.PLAYER_WEAPONS);
+		PlayerWeaponDeclaration declaration = weaponsDeclarations.parse(DebugSettings.STARTING_WEAPON);
+		Assets.UiTextures symbol = declaration.declaration().getSymbol();
 		Texture image = symbol != null ? am.getTexture(symbol) : null;
-		weapon.init(declaration, 0, 0, image);
+		weapon.init(declaration.declaration(), 0, 0, image);
 		return weapon;
 	}
 

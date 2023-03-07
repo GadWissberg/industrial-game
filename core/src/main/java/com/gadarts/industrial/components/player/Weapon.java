@@ -1,7 +1,6 @@
 package com.gadarts.industrial.components.player;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import lombok.Getter;
 import lombok.Setter;

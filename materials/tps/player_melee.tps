@@ -181,54 +181,94 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">../sprites/player/melee/attack_primary_east_0.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_east_1.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_east_2.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_east_3.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_east_4.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_east_5.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_0.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_1.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_2.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_3.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_4.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_5.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_east_0.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_east_1.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_east_2.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_east_3.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_east_4.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_east_5.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_west_0.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_west_1.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_west_2.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_west_3.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_west_4.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_north_west_5.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_0.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_1.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_2.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_3.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_4.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_5.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_east_0.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_east_1.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_east_2.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_east_3.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_east_4.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_east_5.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_west_0.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_west_1.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_west_2.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_west_3.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_west_4.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_south_west_5.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_west_0.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_west_1.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_west_2.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_west_3.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_west_4.png</key>
-            <key type="filename">../sprites/player/melee/attack_primary_west_5.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_east_0.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_east_1.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_east_2.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_east_3.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_east_4.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_east_5.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_0.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_1.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_2.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_3.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_4.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_5.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_east_0.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_east_1.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_east_2.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_east_3.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_east_4.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_east_5.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_west_0.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_west_1.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_west_2.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_west_3.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_west_4.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_north_west_5.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_0.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_1.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_2.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_3.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_4.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_5.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_east_0.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_east_1.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_east_2.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_east_3.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_east_4.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_east_5.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_west_0.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_west_1.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_west_2.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_west_3.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_west_4.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_south_west_5.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_west_0.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_west_1.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_west_2.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_west_3.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_west_4.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_0_west_5.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_east_0.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_east_1.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_east_2.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_east_3.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_east_4.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_north_0.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_north_1.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_north_2.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_north_3.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_north_4.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_north_east_0.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_north_east_1.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_north_east_2.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_north_east_3.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_north_east_4.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_north_west_0.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_north_west_1.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_north_west_2.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_north_west_3.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_north_west_4.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_south_0.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_south_1.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_south_2.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_south_3.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_south_4.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_south_east_0.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_south_east_1.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_south_east_2.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_south_east_3.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_south_east_4.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_south_west_0.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_south_west_1.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_south_west_2.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_south_west_3.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_south_west_4.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_west_0.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_west_1.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_west_2.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_west_3.png</key>
+            <key type="filename">../sprites/player/melee/attack_primary_1_west_4.png</key>
             <key type="filename">../sprites/player/melee/idle_0_east_0.png</key>
             <key type="filename">../sprites/player/melee/idle_0_east_1.png</key>
             <key type="filename">../sprites/player/melee/idle_0_east_2.png</key>
@@ -382,54 +422,6 @@
         </map>
         <key>fileList</key>
         <array>
-            <filename>../sprites/player/melee/attack_primary_east_0.png</filename>
-            <filename>../sprites/player/melee/attack_primary_east_1.png</filename>
-            <filename>../sprites/player/melee/attack_primary_east_2.png</filename>
-            <filename>../sprites/player/melee/attack_primary_east_3.png</filename>
-            <filename>../sprites/player/melee/attack_primary_east_4.png</filename>
-            <filename>../sprites/player/melee/attack_primary_east_5.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_0.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_1.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_2.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_3.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_4.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_5.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_east_0.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_east_1.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_east_2.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_east_3.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_east_4.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_east_5.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_west_0.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_west_1.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_west_2.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_west_3.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_west_4.png</filename>
-            <filename>../sprites/player/melee/attack_primary_north_west_5.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_0.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_1.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_2.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_3.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_4.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_5.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_east_0.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_east_1.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_east_2.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_east_3.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_east_4.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_east_5.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_west_0.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_west_1.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_west_2.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_west_3.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_west_4.png</filename>
-            <filename>../sprites/player/melee/attack_primary_south_west_5.png</filename>
-            <filename>../sprites/player/melee/attack_primary_west_0.png</filename>
-            <filename>../sprites/player/melee/attack_primary_west_1.png</filename>
-            <filename>../sprites/player/melee/attack_primary_west_2.png</filename>
-            <filename>../sprites/player/melee/attack_primary_west_3.png</filename>
-            <filename>../sprites/player/melee/attack_primary_west_4.png</filename>
-            <filename>../sprites/player/melee/attack_primary_west_5.png</filename>
             <filename>../sprites/player/melee/idle_0_east_0.png</filename>
             <filename>../sprites/player/melee/idle_0_east_1.png</filename>
             <filename>../sprites/player/melee/idle_0_east_2.png</filename>
@@ -566,6 +558,94 @@
             <filename>../sprites/player/melee/run_west_5.png</filename>
             <filename>../sprites/player/melee/run_west_6.png</filename>
             <filename>../sprites/player/melee/run_west_7.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_east_0.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_east_1.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_east_2.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_east_3.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_east_4.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_east_5.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_0.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_1.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_2.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_3.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_4.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_5.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_east_0.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_east_1.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_east_2.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_east_3.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_east_4.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_east_5.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_west_0.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_west_1.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_west_2.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_west_3.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_west_4.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_north_west_5.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_0.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_1.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_2.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_3.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_4.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_5.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_east_0.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_east_1.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_east_2.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_east_3.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_east_4.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_east_5.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_west_0.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_west_1.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_west_2.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_west_3.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_west_4.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_south_west_5.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_west_0.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_west_1.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_west_2.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_west_3.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_west_4.png</filename>
+            <filename>../sprites/player/melee/attack_primary_0_west_5.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_east_0.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_east_1.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_east_2.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_east_3.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_east_4.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_north_0.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_north_1.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_north_2.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_north_3.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_north_4.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_north_east_0.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_north_east_1.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_north_east_2.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_north_east_3.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_north_east_4.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_north_west_0.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_north_west_1.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_north_west_2.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_north_west_3.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_north_west_4.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_south_0.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_south_1.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_south_2.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_south_3.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_south_4.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_south_east_0.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_south_east_1.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_south_east_2.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_south_east_3.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_south_east_4.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_south_west_0.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_south_west_1.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_south_west_2.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_south_west_3.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_south_west_4.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_west_0.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_west_1.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_west_2.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_west_3.png</filename>
+            <filename>../sprites/player/melee/attack_primary_1_west_4.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

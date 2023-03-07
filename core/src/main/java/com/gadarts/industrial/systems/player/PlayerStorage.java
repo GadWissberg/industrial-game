@@ -6,16 +6,14 @@ import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponsDeclarations;
+import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponsDeclarations;
 import com.gadarts.industrial.shared.model.ItemDeclaration;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.IntStream;
 
 @Getter
@@ -29,17 +27,17 @@ public class PlayerStorage {
 	private final int[] storageMap = new int[SIZE];
 	@Getter(AccessLevel.NONE)
 	private final int[] storageMapSketch = new int[SIZE];
-	private final List<PlayerWeaponDeclaration> playerWeaponsDeclarations;
+	private final HashMap<WeaponDeclaration, PlayerWeaponDeclaration> playerWeaponsDeclarations = new HashMap<>();
 	private final HashMap<ItemDeclaration, Integer> indices;
 	@Setter(AccessLevel.PACKAGE)
 	private Weapon selectedWeapon;
 
 	public PlayerStorage(GameAssetManager assetsManager) {
 		PlayerWeaponsDeclarations declarations = (PlayerWeaponsDeclarations) assetsManager.getDeclaration(Assets.Declarations.PLAYER_WEAPONS);
-		playerWeaponsDeclarations = declarations.playerWeaponsDeclarations();
+		declarations.playerWeaponsDeclarations().forEach(d -> playerWeaponsDeclarations.put(d.declaration(), d));
 		final int[] counter = {0};
 		final HashMap<ItemDeclaration, Integer> indices = new HashMap<>();
-		playerWeaponsDeclarations.forEach(declaration -> indices.put(declaration, counter[0]++));
+		playerWeaponsDeclarations.forEach((declaration, playerWeaponDeclaration) -> indices.put(declaration, counter[0]++));
 		this.indices = indices;
 	}
 

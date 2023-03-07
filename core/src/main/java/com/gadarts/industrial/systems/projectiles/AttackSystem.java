@@ -24,7 +24,6 @@ import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
-import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.model.characters.CharacterDeclaration;
 import com.gadarts.industrial.shared.model.characters.player.PlayerDeclaration;
@@ -71,16 +70,15 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 
 	private void playerEngagesSelectedWeapon(Entity character, Vector3 direction, Vector3 charPos) {
 		Weapon selectedWeapon = getSystemsCommonData().getStorage().getSelectedWeapon();
-		PlayerWeaponDeclaration definition = (PlayerWeaponDeclaration) selectedWeapon.getDeclaration();
-		WeaponDeclaration weaponDefinition = definition.declaration();
+		WeaponDeclaration weaponDeclaration = (WeaponDeclaration) selectedWeapon.getDeclaration();
 		CharacterDeclaration playerDefinition = PlayerDeclaration.getInstance();
-		getSystemsCommonData().getSoundPlayer().playSound(weaponDefinition.melee() ? playerDefinition.getSoundMelee() : weaponDefinition.soundEngage());
+		getSystemsCommonData().getSoundPlayer().playSound(weaponDeclaration.melee() ? playerDefinition.getSoundMelee() : weaponDeclaration.soundEngage());
 		primaryAttackEngaged(
 				character,
 				direction,
 				charPos,
 				playerDefinition.getBulletCreationOffset(auxVector3_1),
-				weaponDefinition);
+				weaponDeclaration);
 	}
 
 	private void enemyEngagesPrimaryAttack(final Entity character, final Vector3 direction, final Vector3 charPos) {
