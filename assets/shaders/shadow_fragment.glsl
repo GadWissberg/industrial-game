@@ -50,7 +50,7 @@ void main()
     vec3 color = vec3(1.0);
     float bias = max(u_maxBias * (1.0 - dot(v_normal, lightDirection)), u_minBias);
     if (lenDepthMap>lenToLight - bias){
-        final_intensity=u_intensity*(1.0-((lenToLight)/(u_radius/u_cameraFar)));
+        final_intensity=(u_intensity)*(1.0-((lenToLight)/(u_radius/u_cameraFar)));
         color = u_lightColor;
     }
     gl_FragColor = vec4(color.r*final_intensity, color.g*final_intensity, color.b*final_intensity, final_intensity);

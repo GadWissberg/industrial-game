@@ -4,7 +4,7 @@ package com.gadarts.industrial.systems.render;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
@@ -22,9 +22,27 @@ public class StaticShadowsData implements Disposable {
 	private ShaderProgram depthShaderProgram;
 	private ShaderProgram shadowsShaderProgram;
 	private ImmutableArray<Entity> staticLightsEntities;
-
+	private ShaderProgram blurShader;
+	private GameFrameBuffer blurTargetA;
+	private GameFrameBuffer blurTargetB;
 	@Setter
 	private boolean take;
+
+	private void createBlurShader(GameAssetManager assetsManager) {
+		blurShader = new ShaderProgram(assetsManager.getShader(BLUR_VERTEX), assetsManager.getShader(BLUR_FRAGMENT));
+		if (!blurShader.isCompiled()) {
+			System.err.println(blurShader.getLog());
+			System.exit(0);
+		}
+		if (blurShader.getLog().length() != 0)
+			System.out.println(blurShader.getLog());
+		//setup uniforms for our shader
+		blurShader.begin();
+		blurShader.setUniformf("dir", 0f, 0f);
+		blurShader.setUniformf("resolution", getShadowFrameBuffer().getWidth());
+		blurShader.setUniformf("radius", 1f);
+		blurShader.end();
+	}
 
 	void handleScreenshot(FrameBuffer frameBuffer) {
 		if (take) {
@@ -40,10 +58,19 @@ public class StaticShadowsData implements Disposable {
 		shadowsShaderProgram = new ShaderProgram(
 				assetsManager.getShader(SHADOW_VERTEX),
 				assetsManager.getShader(SHADOW_FRAGMENT));
+		createBlurShader(assetsManager);
 	}
 
 	public void init(GameAssetManager assetsManager, ImmutableArray<Entity> staticLightsEntities) {
-		shadowFrameBuffer = new GameFrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+		shadowFrameBuffer = new GameFrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+		blurTargetA = new GameFrameBuffer(Format.RGBA8888,
+				Gdx.graphics.getWidth(),
+				Gdx.graphics.getHeight(),
+				false);
+		blurTargetB = new GameFrameBuffer(Format.RGBA8888,
+				Gdx.graphics.getWidth(),
+				Gdx.graphics.getHeight(),
+				false);
 		createShaderPrograms(assetsManager);
 		this.staticLightsEntities = staticLightsEntities;
 	}
@@ -53,6 +80,9 @@ public class StaticShadowsData implements Disposable {
 		if (!DebugSettings.ALLOW_STATIC_SHADOWS) return;
 		depthShaderProgram.dispose();
 		shadowsShaderProgram.dispose();
+		blurTargetA.dispose();
+		blurTargetB.dispose();
+		blurShader.dispose();
 		shadowFrameBuffer.dispose();
 		for (Entity light : staticLightsEntities) {
 			ComponentsMapper.staticLight.get(light).getShadowFrameBuffer().dispose();

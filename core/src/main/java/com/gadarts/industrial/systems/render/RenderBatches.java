@@ -24,14 +24,14 @@ public class RenderBatches implements Disposable {
 	private ModelBatch depthModelBatch;
 	private ModelBatch modelBatchShadows;
 	private ModelBatch modelBatch;
-	private SpriteBatch spriteBatch;
+	private SpriteBatch blurBatch;
 	private DecalBatch decalBatch;
 
 	void createBatches(StaticShadowsData staticShadowsData,
 					   ImmutableArray<Entity> staticLightsEntities,
 					   GameCameraGroupStrategy regularDecalGroupStrategy) {
 		this.modelBatch = new ModelBatch(shaderProvider);
-		this.spriteBatch = new SpriteBatch();
+		this.blurBatch = new SpriteBatch();
 		if (DebugSettings.ALLOW_STATIC_SHADOWS) {
 			depthModelBatch = new ModelBatch(new DefaultShaderProvider() {
 				@Override
@@ -54,7 +54,7 @@ public class RenderBatches implements Disposable {
 	public void dispose( ) {
 		shaderProvider.dispose();
 		decalBatch.dispose();
-		spriteBatch.dispose();
+		blurBatch.dispose();
 		modelBatch.dispose();
 		if (DebugSettings.ALLOW_STATIC_SHADOWS) {
 			depthModelBatch.dispose();

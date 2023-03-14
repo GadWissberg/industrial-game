@@ -8,6 +8,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
@@ -66,6 +67,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	public static final float FLICKER_RANDOM_MAX = 1.05F;
 	public static final int DEPTH_MAP_SIZE = 1024;
 	public static final float OUTLINE_ALPHA = 0.4F;
+	private static final Vector2 auxVector2 = new Vector2();
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final Vector3 auxVector3_3 = new Vector3();
@@ -361,8 +363,27 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		resetDisplay(0F);
 		Camera cam = getSystemsCommonData().getCamera();
 		renderModels(renderBatches.getModelBatchShadows(), families.getModelEntitiesWithShadows(), false, cam);
-		staticShadowsData.handleScreenshot(shadowFrameBuffer);
 		shadowFrameBuffer.end();
+//		GameFrameBuffer blurTargetA = staticShadowsData.getBlurTargetA();
+//		blurShadows(blurTargetA, shadowFrameBuffer.getColorBufferTexture(), auxVector2.set(1, 0));
+//		blurShadows(staticShadowsData.getBlurTargetB(), blurTargetA.getColorBufferTexture(), auxVector2.set(0, 1));
+	}
+
+	private void blurShadows(GameFrameBuffer blurTarget, Texture colorBufferTexture, Vector2 direction) {
+		blurTarget.begin();
+		Gdx.gl.glClearColor(0F, 0F, 0F, 0F);
+		Gdx.gl.glClear(GL30.GL_COLOR_BUFFER_BIT);
+		ShaderProgram blurShader = staticShadowsData.getBlurShader();
+		SpriteBatch spriteBatch = renderBatches.getBlurBatch();
+		spriteBatch.begin();
+		spriteBatch.setShader(blurShader);
+		spriteBatch.getProjectionMatrix().idt();
+		blurShader.setUniformf("dir", direction.x, direction.y);
+		blurShader.setUniformf("radius", 1);
+		spriteBatch.draw(colorBufferTexture, -1, 1, 2, -2);
+		spriteBatch.end();
+		staticShadowsData.handleScreenshot(staticShadowsData.getShadowFrameBuffer());
+		blurTarget.end();
 	}
 
 
@@ -570,8 +591,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 					false,
 					cameraLight,
 					false);
-//			handleScreenshot(frameBuffer);
-
 		}
 		frameBuffer.end();
 		lightComponent.setShadowFrameBuffer(frameBuffer);

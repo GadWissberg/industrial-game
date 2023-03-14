@@ -19,7 +19,7 @@ import lombok.Setter;
 @Getter
 @RequiredArgsConstructor
 public class SystemsCommonData implements Disposable {
-	public static final int CAMERA_LIGHT_FAR = 30;
+	public static final int CAMERA_LIGHT_FAR = 7;
 	public static final String TABLE_NAME_HUD = "hud";
 	private final ModelInstancePools pooledModelInstances = new ModelInstancePools();
 
