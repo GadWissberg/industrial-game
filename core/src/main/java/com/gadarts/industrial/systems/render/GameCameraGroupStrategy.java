@@ -39,7 +39,7 @@ public class GameCameraGroupStrategy implements GroupStrategy, Disposable {
 	private final Array<Array<Decal>> usedArrays = new Array<>();
 	private final ObjectMap<DecalMaterial, Array<Decal>> materialGroups = new ObjectMap<>();
 	ShaderProgram shader;
-	Camera camera;
+	final Camera camera;
 
 	public GameCameraGroupStrategy(final Camera camera, final GameAssetManager assetsManager) {
 		this(camera, assetsManager, (o1, o2) -> {

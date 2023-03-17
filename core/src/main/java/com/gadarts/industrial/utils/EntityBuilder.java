@@ -59,12 +59,6 @@ public class EntityBuilder {
 	@Getter
 	private Entity currentEntity;
 
-	/**
-	 * Create an entity instance to start adding it components.
-	 *
-	 * @param engine
-	 * @return The EntityBuilder singleton for chaining.
-	 */
 	public static EntityBuilder beginBuildingEntity(final PooledEngine engine) {
 		instance.init(engine);
 		return instance;

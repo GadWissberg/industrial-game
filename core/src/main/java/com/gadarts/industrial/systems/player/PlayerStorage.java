@@ -7,7 +7,6 @@ import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponsDeclarations;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
-import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponsDeclarations;
 import com.gadarts.industrial.shared.model.ItemDeclaration;
 import lombok.AccessLevel;
 import lombok.Getter;

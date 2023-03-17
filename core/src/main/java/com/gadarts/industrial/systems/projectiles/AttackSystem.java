@@ -38,7 +38,6 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final float BULLET_MAX_DISTANCE = 14;
 	private static final Vector3 auxVector3_1 = new Vector3();
-	private static final Vector3 auxVector3_2 = new Vector3();
 	private final static float PROJ_LIGHT_INTENSITY = 0.05F;
 	private final static float PROJ_LIGHT_RADIUS = 1F;
 	private static final float BULLET_ENGAGE_LIGHT_DURATION = 0.1F;

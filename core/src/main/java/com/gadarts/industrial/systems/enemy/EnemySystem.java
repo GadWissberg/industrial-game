@@ -312,11 +312,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		subscribers.forEach(sub -> sub.onEnemyAppliedCommand(command, enemy));
 	}
 
-	/**
-	 * Invokes the given enemy's turn according to its AI status.
-	 *
-	 * @param enemy
-	 */
 	void invokeEnemyTurn(final Entity enemy) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(enemy);
 		enemyComp.setEngineEnergy(Math.min(enemyComp.getEngineEnergy() + 1, enemyComp.getEnemyDeclaration().engine()));

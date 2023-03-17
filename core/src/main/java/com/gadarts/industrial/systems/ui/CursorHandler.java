@@ -72,7 +72,7 @@ public class CursorHandler implements Disposable {
 	void colorizeCursor(MapGraphNode node) {
 		Entity nodeEntity = node.getEntity();
 		boolean hasModel = modelInstance.has(nodeEntity);
-		if (nodeEntity != null && (hasModel && modelInstance.get(nodeEntity).getFlatColor() == null)) {
+		if (hasModel && modelInstance.get(nodeEntity).getFlatColor() == null) {
 			setCursorOpacity(1F);
 			setCursorColor(CURSOR_REGULAR);
 		} else {

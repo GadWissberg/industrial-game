@@ -33,8 +33,6 @@ import com.gadarts.industrial.shared.assets.Assets.Declarations;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponsDeclarations;
-import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
-import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponsDeclarations;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;

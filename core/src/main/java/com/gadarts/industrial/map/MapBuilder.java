@@ -132,6 +132,27 @@ public class MapBuilder implements Disposable {
 				row + 0.5f);
 	}
 
+	public MapGraph inflateTestMap(final String map) {
+		JsonObject mapJsonObj = gson.fromJson(Gdx.files.internal(format(MAP_PATH_TEMP, map)).reader(), JsonObject.class);
+		MapGraph mapGraph = createMapGraph(mapJsonObj);
+		inflateNodes(mapJsonObj.get(NODES).getAsJsonObject(), mapGraph);
+		inflateHeightsAndWalls(mapJsonObj, mapGraph, mapJsonObj.get(NODES).getAsJsonObject());
+		inflateAllElements(mapJsonObj, mapGraph);
+		mapGraph.init();
+		markAllReachableNodes(mapGraph);
+		return mapGraph;
+	}
+
+	@Override
+	public void dispose( ) {
+		floorModel.dispose();
+		wallCreator.dispose();
+	}
+
+	public void reset(final PooledEngine engine) {
+		this.engine = engine;
+	}
+
 	private Model createFloorModel( ) {
 		ModelBuilder modelBuilder = new ModelBuilder();
 		modelBuilder.begin();
@@ -141,23 +162,6 @@ public class MapBuilder implements Disposable {
 				createFloorMaterial());
 		createRect(meshPartBuilder);
 		return modelBuilder.end();
-	}
-
-	/**
-	 * Creates the test map.
-	 *
-	 * @return The Inflated map.
-	 */
-	public MapGraph inflateTestMap(final String map) {
-		JsonObject mapJsonObj = gson.fromJson(Gdx.files.internal(format(MAP_PATH_TEMP, map)).reader(), JsonObject.class);
-		JsonObject nodesJsonObject = mapJsonObj.get(NODES).getAsJsonObject();
-		MapGraph mapGraph = createMapGraph(mapJsonObj);
-		inflateNodes(nodesJsonObject, mapGraph);
-		inflateHeightsAndWalls(mapJsonObj, mapGraph, nodesJsonObject);
-		inflateAllElements(mapJsonObj, mapGraph);
-		mapGraph.init();
-		markAllReachableNodes(mapGraph);
-		return mapGraph;
 	}
 
 	private void markAllReachableNodes(MapGraph mapGraph) {
@@ -857,18 +861,5 @@ public class MapBuilder implements Disposable {
 				auxVector3_2.set(1 + OFFSET, 0, OFFSET),
 				auxVector3_3.set(OFFSET, 0, OFFSET),
 				auxVector3_5.set(0, 1, 0));
-	}
-
-	@Override
-	public void dispose( ) {
-		floorModel.dispose();
-		wallCreator.dispose();
-	}
-
-	/**
-	 * @param engine Destroys the current engine and replaces with the given one
-	 */
-	public void reset(final PooledEngine engine) {
-		this.engine = engine;
 	}
 }
