@@ -105,6 +105,7 @@ uniform int u_entityType;
 uniform sampler2D u_shadows;
 uniform vec3 u_flatColor;
 uniform int u_fowSignature;
+uniform int u_discoveredArea;
 
 //
 
@@ -153,7 +154,7 @@ void main() {
     if (!gl_FrontFacing){
         return;
     }
-    if (u_flatColor.x < 0.0){
+    if (u_flatColor.x < 0.0 || (u_discoveredArea == 1)){
         if (u_affectedByLight != 0.0){
             if (u_numberOfShadowlessLights > 0) {
                 for (int i = 0; i< u_numberOfShadowlessLights; i++){
@@ -267,6 +268,10 @@ void main() {
 
                 // Top AO.
                 gl_FragColor.rgb *= 1.0 - max(0.5 - (u_modelY + u_modelHeight - v_frag_pos.y), 0.0)*WALL_AO_STRENGTH;
+            }
+            if (u_discoveredArea == 1 && u_flatColor.x >= 0.0){
+                float gray = dot(gl_FragColor.rgb, vec3(0.299, 0.587, 0.114)) * 0.5;
+                gl_FragColor.rgb = vec3(gray);
             }
         } else {
             gl_FragColor.rgb = diffuse.rgb;

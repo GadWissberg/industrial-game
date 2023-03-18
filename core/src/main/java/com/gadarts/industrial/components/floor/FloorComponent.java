@@ -21,6 +21,8 @@ public class FloorComponent implements GameComponent {
 
 	@Setter
 	private boolean revealCalculated;
+	@Setter
+	private boolean discovered;
 	private Assets.SurfaceTextures definition;
 
 	@Override

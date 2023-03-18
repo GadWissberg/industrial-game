@@ -209,8 +209,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			Entity nearbyNodeEntity = nearbyNode.getEntity();
 			if (nearbyNodeEntity != null) {
 				result = !DebugSettings.DISABLE_FOW
-						&& ComponentsMapper.modelInstance.has(nearbyNodeEntity)
-						&& ComponentsMapper.modelInstance.get(nearbyNodeEntity).getFlatColor() != null;
+						&& !ComponentsMapper.floor.get(nearbyNodeEntity).isDiscovered();
 			}
 		}
 		total |= result ? mask : 0;
@@ -242,13 +241,16 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		MapGraphNode currentNode = map.getNode(nodeCoord.x, nodeCoord.y);
 		if (currentNode != null && currentNode.getEntity() != null) {
 			FloorComponent floorComponent = ComponentsMapper.floor.get(currentNode.getEntity());
-			ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(currentNode.getEntity());
+			ModelInstanceComponent modelInstanceComp = ComponentsMapper.modelInstance.get(currentNode.getEntity());
 			if (!floorComponent.isRevealCalculated()) {
-				if (modelInstanceComponent != null) {
-					modelInstanceComponent.setFlatColor(!DebugSettings.DISABLE_FOW && blocked ? Color.BLACK : null);
+				if (modelInstanceComp != null) {
+					modelInstanceComp.setFlatColor((!DebugSettings.DISABLE_FOW && blocked) ? Color.BLACK : null);
 				}
 				floorComponent.setFogOfWarSignature(blocked ? 16 : 0);
 				floorComponent.setRevealCalculated(true);
+				if (!blocked) {
+					floorComponent.setDiscovered(true);
+				}
 			}
 			if (!blocked) {
 				if (checkIfNodeBlocks(playerNode, currentNode) || checkIfAnyEnvironmentObjectBlocks(playerNode, currentNode)) {

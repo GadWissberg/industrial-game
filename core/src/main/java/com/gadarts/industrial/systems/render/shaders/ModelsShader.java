@@ -204,8 +204,11 @@ public class ModelsShader extends DefaultShader {
 			initializeNearbySimpleShadowsPositions(renderable, size);
 			int length = size * NEARBY_SIMPLE_SHADOW_VECTOR_SIZE;
 			program.setUniform3fv(locations.getUniformLocNearbyCharsData(), this.nearbySimpleShadowsData, 0, length);
-			program.setUniformi(locations.getUniformLocFloorAmbientOcclusion(), floorComponent.getNode().getNodeAmbientOcclusionValue());
-			program.setUniformi(locations.getUniformLocFowSignature(), floorComponent.getFogOfWarSignature());
+			int nodeAmbientOcclusionValue = floorComponent.getNode().getNodeAmbientOcclusionValue();
+			program.setUniformi(locations.getUniformLocFloorAmbientOcclusion(), nodeAmbientOcclusionValue);
+			int signature = floorComponent.getFogOfWarSignature();
+			program.setUniformi(locations.getUniformLocFowSignature(), signature);
+			program.setUniformi(locations.getUniformLocDiscoveredArea(), floorComponent.isDiscovered() ? 1 : 0);
 		} else {
 			program.setUniformi(locations.getUniformLocNumberOfNearbySimpleShadows(), 0);
 			program.setUniformi(locations.getUniformLocFloorAmbientOcclusion(), 0);
