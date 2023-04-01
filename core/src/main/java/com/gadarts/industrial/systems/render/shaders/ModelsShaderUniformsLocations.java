@@ -16,7 +16,7 @@ public class ModelsShaderUniformsLocations {
 	private static final String UNIFORM_SHADOWLESS_LIGHTS_COLORS = "u_shadowlessLightsColors[0]";
 	private static final String UNIFORM_FLAT_COLOR = "u_flatColor";
 	private static final String UNIFORM_FOW_SIGNATURE = "u_fowSignature";
-	private static final String UNIFORM_DISCOVERED_AREA = "u_discoveredArea";
+	private static final String UNIFORM_GRAY_SIGNATURE = "u_graySignature";
 	private static final String UNIFORM_MODEL_WIDTH = "u_modelWidth";
 	private static final String UNIFORM_MODEL_HEIGHT = "u_modelHeight";
 	private static final String UNIFORM_MODEL_DEPTH = "u_modelDepth";
@@ -41,7 +41,7 @@ public class ModelsShaderUniformsLocations {
 	private int uniformLocEntityType;
 	private int uniformLocFlatColor;
 	private int uniformLocFowSignature;
-	private int uniformLocDiscoveredArea;
+	private int uniformLocGraySignature;
 
 	public void init(ShaderProgram program) {
 		uniformLocAffectedByLight = program.getUniformLocation(UNIFORM_AFFECTED_BY_LIGHT);
@@ -61,6 +61,6 @@ public class ModelsShaderUniformsLocations {
 		uniformLocShadowlessLightsColors = program.getUniformLocation(UNIFORM_SHADOWLESS_LIGHTS_COLORS);
 		uniformLocFlatColor = program.getUniformLocation(UNIFORM_FLAT_COLOR);
 		uniformLocFowSignature = program.getUniformLocation(UNIFORM_FOW_SIGNATURE);
-		uniformLocDiscoveredArea = program.getUniformLocation(UNIFORM_DISCOVERED_AREA);
+		uniformLocGraySignature = program.getUniformLocation(UNIFORM_GRAY_SIGNATURE);
 	}
 }

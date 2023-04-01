@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.gadarts.industrial.components.GameComponent;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,18 +12,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
 public class FloorComponent implements GameComponent {
 
 	@Getter
+	@Setter(AccessLevel.NONE)
 	private final List<Entity> nearbySimpleShadows = new ArrayList<>();
-	@Setter
 	private int fogOfWarSignature;
+	private int graySignature;
+	@Setter(AccessLevel.NONE)
 	private MapGraphNode node;
-
-	@Setter
 	private boolean revealCalculated;
-	@Setter
 	private boolean discovered;
+	@Setter(AccessLevel.NONE)
 	private Assets.SurfaceTextures definition;
 
 	@Override

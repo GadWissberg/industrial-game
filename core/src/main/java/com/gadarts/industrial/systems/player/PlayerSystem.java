@@ -156,6 +156,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			revealNodes(map, playerPos, playerNode, dir);
 		}
 		calculateFogOfWarEdgesForFloor(playerNode, map);
+		calculateGraySignatures(playerNode, map);
 	}
 
 	private void clearFlatColorAndFowSignatureForRegionOfNodes(MapGraphNode playerNode) {
@@ -171,6 +172,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				if (floorEntity != null) {
 					ComponentsMapper.floor.get(floorEntity).setRevealCalculated(false);
 					ComponentsMapper.floor.get(floorEntity).setFogOfWarSignature(16);
+					ComponentsMapper.floor.get(floorEntity).setGraySignature(16);
 				}
 			}
 		}
@@ -184,23 +186,64 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			for (int col = (int) (nodeCol - half); col < nodeCol + half; col++) {
 				MapGraphNode nearbyNode = map.getNode(col, row);
 				if (nearbyNode != null && nearbyNode.getEntity() != null) {
-					calculateFogOfWarSignature(nearbyNode.getEntity());
+					ComponentsMapper.floor.get(nearbyNode.getEntity()).setFogOfWarSignature(calculateFowSignature(nearbyNode.getEntity(), ComponentsMapper.floor.get(nearbyNode.getEntity()).getFogOfWarSignature()));
 				}
 			}
 		}
 	}
 
-	private void calculateFogOfWarSignature(Entity floor) {
-		int total = ComponentsMapper.floor.get(floor).getFogOfWarSignature() & 16;
-		FloorComponent floorComponent = ComponentsMapper.floor.get(floor);
-		for (Direction direction : Direction.values()) {
-			Vector2 vector = direction.getDirection(auxVector2_1);
-			total = calculateFogOfWarForNode(floor, total, (int) vector.x, (int) vector.y, direction.getMask());
+	private void calculateGraySignatures(MapGraphNode node, MapGraph map) {
+		int nodeRow = node.getRow();
+		int nodeCol = node.getCol();
+		float half = LOS_MAX / 2;
+		for (int row = (int) (nodeRow - half); row < nodeRow + half; row++) {
+			for (int col = (int) (nodeCol - half); col < nodeCol + half; col++) {
+				MapGraphNode nearbyNode = map.getNode(col, row);
+				if (nearbyNode != null) {
+					Entity entity = nearbyNode.getEntity();
+					if (entity != null) {
+						FloorComponent floorComponent = ComponentsMapper.floor.get(entity);
+						floorComponent.setGraySignature(calculateGraySignature(entity, floorComponent.getGraySignature()));
+					}
+				}
+			}
 		}
-		floorComponent.setFogOfWarSignature(total);
 	}
 
-	private int calculateFogOfWarForNode(Entity entity, int total, int colOffset, int rowOffset, int mask) {
+	private int calculateFowSignature(Entity floor, int currentSignature) {
+		int total = currentSignature & 16;
+		for (Direction direction : Direction.values()) {
+			Vector2 vector = direction.getDirection(auxVector2_1);
+			total = calculateFowSignatureRelativeToNearbyNode(floor, total, (int) vector.x, (int) vector.y, direction.getMask());
+		}
+		return total;
+	}
+
+	private int calculateGraySignature(Entity floor, int currentSignature) {
+		int total = currentSignature & 16;
+		for (Direction direction : Direction.values()) {
+			Vector2 vector = direction.getDirection(auxVector2_1);
+			total = calculateGraySignatureRelativeToNearbyNode(floor, total, (int) vector.x, (int) vector.y, direction.getMask());
+		}
+		return flipOffDiagonalsIfNeeded(total);
+	}
+
+	private int flipOffDiagonalsIfNeeded(int total) {
+		total = flipOffDiagonal(total, Direction.NORTH_EAST.getMask(), Direction.NORTH.getMask(), Direction.EAST.getMask());
+		total = flipOffDiagonal(total, Direction.NORTH_WEST.getMask(), Direction.NORTH.getMask(), Direction.WEST.getMask());
+		total = flipOffDiagonal(total, Direction.SOUTH_EAST.getMask(), Direction.SOUTH.getMask(), Direction.EAST.getMask());
+		total = flipOffDiagonal(total, Direction.SOUTH_WEST.getMask(), Direction.SOUTH.getMask(), Direction.WEST.getMask());
+		return total;
+	}
+
+	private static int flipOffDiagonal(int total, int mask, int firstDirMask, int secondDirMask) {
+		if ((total & mask) == mask && ((total & firstDirMask) == firstDirMask || (total & secondDirMask) == secondDirMask)) {
+			total = total & ~mask;
+		}
+		return total;
+	}
+
+	private int calculateFowSignatureRelativeToNearbyNode(Entity entity, int total, int colOffset, int rowOffset, int mask) {
 		MapGraphNode node = ComponentsMapper.floor.get(entity).getNode();
 		MapGraph map = getSystemsCommonData().getMap();
 		MapGraphNode nearbyNode = map.getNode(node.getCol() + colOffset, node.getRow() + rowOffset);
@@ -210,6 +253,22 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			if (nearbyNodeEntity != null) {
 				result = !DebugSettings.DISABLE_FOW
 						&& !ComponentsMapper.floor.get(nearbyNodeEntity).isDiscovered();
+			}
+		}
+		total |= result ? mask : 0;
+		return total;
+	}
+
+	private int calculateGraySignatureRelativeToNearbyNode(Entity entity, int total, int colOffset, int rowOffset, int mask) {
+		MapGraphNode node = ComponentsMapper.floor.get(entity).getNode();
+		MapGraph map = getSystemsCommonData().getMap();
+		MapGraphNode nearbyNode = map.getNode(node.getCol() + colOffset, node.getRow() + rowOffset);
+		boolean result = true;
+		if (nearbyNode != null) {
+			Entity nearbyNodeEntity = nearbyNode.getEntity();
+			if (nearbyNodeEntity != null) {
+				result = !DebugSettings.DISABLE_FOW
+						&& ((ComponentsMapper.floor.get(nearbyNodeEntity).getGraySignature() & 16) == 16);
 			}
 		}
 		total |= result ? mask : 0;
@@ -247,6 +306,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 					modelInstanceComp.setFlatColor((!DebugSettings.DISABLE_FOW && blocked) ? Color.BLACK : null);
 				}
 				floorComponent.setFogOfWarSignature(blocked ? 16 : 0);
+				floorComponent.setGraySignature(blocked ? 16 : 0);
 				floorComponent.setRevealCalculated(true);
 				if (!blocked) {
 					floorComponent.setDiscovered(true);

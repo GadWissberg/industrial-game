@@ -105,12 +105,36 @@ uniform int u_entityType;
 uniform sampler2D u_shadows;
 uniform vec3 u_flatColor;
 uniform int u_fowSignature;
-uniform int u_discoveredArea;
+uniform int u_graySignature;
 
 //
 
 float map(float value, float min1, float max1, float min2, float max2) {
     return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
+}
+
+vec4 grayFadeOneWay(float edgeCoord, float fragCoord){
+    float normalized = 1.0 - min(1.0, max(fragCoord-(edgeCoord-0.5), 0.0)*4.0);
+    vec4 color = vec4(gl_FragColor.rgb, 1.0);
+    float luminance = dot(color.rgb, vec3(0.099, 0.387, 0.014));
+    vec3 grayscaleColor = vec3(luminance);
+    vec3 shadedColor = mix(color.rgb, grayscaleColor, normalized);
+    color.rgb = shadedColor;
+    return color;
+}
+
+vec4 grayFadeDiagonal(vec2 cornerCoord, vec2 fragCoord){
+    float distanceThreshold = 0.4;
+    float distance = distance(fragCoord, cornerCoord) / length(vec2(0.5));
+    vec4 color = vec4(gl_FragColor.rgb, 1.0);
+    if (distance < distanceThreshold) {
+        float normalized = smoothstep(distanceThreshold, 0.0, distance);
+        float luminance = dot(color.rgb, vec3(0.099, 0.387, 0.014));
+        vec3 grayscaleColor = vec3(luminance);
+        vec3 shadedColor = mix(color.rgb, grayscaleColor, normalized);
+        color.rgb = shadedColor;
+    }
+    return color;
 }
 
 void main() {
@@ -154,7 +178,7 @@ void main() {
     if (!gl_FrontFacing){
         return;
     }
-    if (u_flatColor.x < 0.0 || (u_discoveredArea == 1)){
+    if (u_flatColor.x < 0.0 || ((u_graySignature & 16) == 16)){
         if (u_affectedByLight != 0.0){
             if (u_numberOfShadowlessLights > 0) {
                 for (int i = 0; i< u_numberOfShadowlessLights; i++){
@@ -269,9 +293,38 @@ void main() {
                 // Top AO.
                 gl_FragColor.rgb *= 1.0 - max(0.5 - (u_modelY + u_modelHeight - v_frag_pos.y), 0.0)*WALL_AO_STRENGTH;
             }
-            if (u_discoveredArea == 1 && u_flatColor.x >= 0.0){
-                float gray = dot(gl_FragColor.rgb, vec3(0.299, 0.587, 0.114)) * 0.5;
-                gl_FragColor.rgb = vec3(gray);
+            if (u_graySignature > 0){
+                if ((u_graySignature & 16) == 16){
+                    float gray = dot(gl_FragColor.rgb, vec3(0.099, 0.387, 0.014));
+                    gl_FragColor.rgb = vec3(gray);
+                } else {
+                    const float AO_STRENGTH = 2.0;
+                    const float FLOOR_DIAG_AO_STRENGTH = AO_STRENGTH*2.0;
+                    if ((u_graySignature & 1) == 1){ // South-East
+                        gl_FragColor = grayFadeDiagonal(vec2(v_frag_pos.x, v_frag_pos.z), vec2(u_modelX+0.5, u_modelZ+0.5));
+                    }
+                    if ((u_graySignature & 2) == 2){ // South
+                        gl_FragColor = grayFadeOneWay(v_frag_pos.z, u_modelZ);
+                    }
+                    if ((u_graySignature & 4) == 4){ // South-West
+                        gl_FragColor = grayFadeDiagonal(vec2(v_frag_pos.x, v_frag_pos.z), vec2(u_modelX-0.5, u_modelZ+0.5));
+                    }
+                    if ((u_graySignature & 8) == 8){ // East
+                        gl_FragColor = grayFadeOneWay(v_frag_pos.x, u_modelX);
+                    }
+                    if ((u_graySignature & 32) == 32){ // West
+                        gl_FragColor = grayFadeOneWay(u_modelX, v_frag_pos.x);
+                    }
+                    if ((u_graySignature & 64) == 64){ // North-East
+                        gl_FragColor = grayFadeDiagonal(vec2(v_frag_pos.x, v_frag_pos.z), vec2(u_modelX+0.5, u_modelZ-0.5));
+                    }
+                    if ((u_graySignature & 128) == 128){ // North
+                        gl_FragColor = grayFadeOneWay(u_modelZ, v_frag_pos.z);
+                    }
+                    if ((u_graySignature & 256) == 256){ // North-West
+                        gl_FragColor = grayFadeDiagonal(vec2(v_frag_pos.x, v_frag_pos.z), vec2(u_modelX-0.5, u_modelZ-0.5));
+                    }
+                }
             }
         } else {
             gl_FragColor.rgb = diffuse.rgb;

@@ -208,11 +208,13 @@ public class ModelsShader extends DefaultShader {
 			program.setUniformi(locations.getUniformLocFloorAmbientOcclusion(), nodeAmbientOcclusionValue);
 			int signature = floorComponent.getFogOfWarSignature();
 			program.setUniformi(locations.getUniformLocFowSignature(), signature);
-			program.setUniformi(locations.getUniformLocDiscoveredArea(), floorComponent.isDiscovered() ? 1 : 0);
+			int graySignature = floorComponent.getGraySignature();
+			program.setUniformi(locations.getUniformLocGraySignature(), graySignature);
 		} else {
 			program.setUniformi(locations.getUniformLocNumberOfNearbySimpleShadows(), 0);
 			program.setUniformi(locations.getUniformLocFloorAmbientOcclusion(), 0);
 			program.setUniformi(locations.getUniformLocFowSignature(), 0);
+			program.setUniformi(locations.getUniformLocGraySignature(), 0);
 		}
 	}
 
