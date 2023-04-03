@@ -178,7 +178,7 @@ void main() {
     if (!gl_FrontFacing){
         return;
     }
-    if (u_flatColor.x < 0.0 || ((u_graySignature & 16) == 16)){
+    if (u_flatColor.x < 0.0){
         if (u_affectedByLight != 0.0){
             if (u_numberOfShadowlessLights > 0) {
                 for (int i = 0; i< u_numberOfShadowlessLights; i++){

@@ -11,6 +11,8 @@ import lombok.Setter;
 public class ModelInstanceComponent implements GameComponent {
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final Vector3 auxVector3_2 = new Vector3();
+	@Setter
+	private Integer graySignature;
 
 	@Setter
 	private boolean visible;
@@ -28,7 +30,7 @@ public class ModelInstanceComponent implements GameComponent {
 		this.colorAttribute = null;
 	}
 
-	public ColorAttribute getColorAttribute() {
+	public ColorAttribute getColorAttribute( ) {
 		if (colorAttribute == null) {
 			colorAttribute = modelInstance.materials.get(0).get(ColorAttribute.class, ColorAttribute.Diffuse);
 		}
@@ -36,7 +38,7 @@ public class ModelInstanceComponent implements GameComponent {
 	}
 
 	@Override
-	public void reset() {
+	public void reset( ) {
 		modelInstance = null;
 	}
 

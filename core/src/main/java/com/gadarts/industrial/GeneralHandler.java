@@ -146,9 +146,8 @@ public class GeneralHandler implements
 					((Disposable) s).dispose();
 				}
 			});
-			engine.clearPools();
-//			engine.getSystems().forEach(system -> system.setProcessing(false));
 			engine.removeAllEntities();
+			engine.clearPools();
 		} else {
 			this.engine = new PooledEngine();
 		}

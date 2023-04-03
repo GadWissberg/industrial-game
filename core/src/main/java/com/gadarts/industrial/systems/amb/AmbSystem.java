@@ -11,11 +11,13 @@ import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.DoorComponent.DoorStates;
+import com.gadarts.industrial.components.EnvironmentObjectComponent;
 import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.map.MapGraph;
+import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.model.env.door.DoorTypes;
 import com.gadarts.industrial.systems.GameSystem;
@@ -35,6 +37,7 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 	private static final int DOOR_OPEN_DURATION = 3;
 	private ImmutableArray<Entity> doorEntities;
 	private ImmutableArray<Entity> floorsEntities;
+	private ImmutableArray<Entity> environmentObjectsEntities;
 
 	public AmbSystem(GameAssetManager assetsManager,
 					 GameLifeCycleHandler lifeCycleHandler) {
@@ -55,6 +58,7 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 	public void onSystemReset(SystemsCommonData systemsCommonData) {
 		super.onSystemReset(systemsCommonData);
 		doorEntities = getEngine().getEntitiesFor(Family.all(DoorComponent.class).get());
+		environmentObjectsEntities = getEngine().getEntitiesFor(Family.all(EnvironmentObjectComponent.class).get());
 		floorsEntities = getEngine().getEntitiesFor(Family.all(FloorComponent.class).get());
 	}
 
@@ -164,6 +168,18 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 			} else {
 				doorComponent.setOpenCounter(doorComponent.getOpenCounter() + 1);
 				subscribers.forEach(s -> s.onDoorStayedOpenInTurn(entity));
+			}
+		}
+	}
+
+	@Override
+	public void onCharacterNodeChanged(Entity entity, MapGraphNode oldNode, MapGraphNode newNode) {
+		if (ComponentsMapper.player.has(entity)) {
+			for (Entity environmentObject : environmentObjectsEntities) {
+				ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(environmentObject);
+				GameModelInstance modelInstance = modelInstanceComponent.getModelInstance();
+				MapGraphNode node = getSystemsCommonData().getMap().getNode(modelInstance.transform.getTranslation(auxVector3_1));
+				modelInstanceComponent.setGraySignature(ComponentsMapper.modelInstance.get(node.getEntity()).getGraySignature());
 			}
 		}
 	}

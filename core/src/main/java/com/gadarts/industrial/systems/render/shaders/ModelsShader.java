@@ -197,8 +197,14 @@ public class ModelsShader extends DefaultShader {
 	}
 
 	private void insertDataForFloor(Renderable renderable) {
-		if (floor.has((Entity) renderable.userData)) {
-			FloorComponent floorComponent = floor.get((Entity) renderable.userData);
+		Entity entity = (Entity) renderable.userData;
+		Integer graySignature = 0;
+		if (modelInstance.has(entity)) {
+			graySignature = ComponentsMapper.modelInstance.get(entity).getGraySignature();
+		}
+		program.setUniformi(locations.getUniformLocGraySignature(), graySignature != null ? graySignature : 0);
+		if (floor.has(entity)) {
+			FloorComponent floorComponent = floor.get(entity);
 			int size = floorComponent.getNearbySimpleShadows().size();
 			program.setUniformi(locations.getUniformLocNumberOfNearbySimpleShadows(), size);
 			initializeNearbySimpleShadowsPositions(renderable, size);
@@ -208,13 +214,10 @@ public class ModelsShader extends DefaultShader {
 			program.setUniformi(locations.getUniformLocFloorAmbientOcclusion(), nodeAmbientOcclusionValue);
 			int signature = floorComponent.getFogOfWarSignature();
 			program.setUniformi(locations.getUniformLocFowSignature(), signature);
-			int graySignature = floorComponent.getGraySignature();
-			program.setUniformi(locations.getUniformLocGraySignature(), graySignature);
 		} else {
 			program.setUniformi(locations.getUniformLocNumberOfNearbySimpleShadows(), 0);
 			program.setUniformi(locations.getUniformLocFloorAmbientOcclusion(), 0);
 			program.setUniformi(locations.getUniformLocFowSignature(), 0);
-			program.setUniformi(locations.getUniformLocGraySignature(), 0);
 		}
 	}
 

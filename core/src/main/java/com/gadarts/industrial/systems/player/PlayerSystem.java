@@ -172,7 +172,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				if (floorEntity != null) {
 					ComponentsMapper.floor.get(floorEntity).setRevealCalculated(false);
 					ComponentsMapper.floor.get(floorEntity).setFogOfWarSignature(16);
-					ComponentsMapper.floor.get(floorEntity).setGraySignature(16);
+					ComponentsMapper.modelInstance.get(floorEntity).setGraySignature(16);
 				}
 			}
 		}
@@ -202,8 +202,8 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				if (nearbyNode != null) {
 					Entity entity = nearbyNode.getEntity();
 					if (entity != null) {
-						FloorComponent floorComponent = ComponentsMapper.floor.get(entity);
-						floorComponent.setGraySignature(calculateGraySignature(entity, floorComponent.getGraySignature()));
+						ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(entity);
+						modelInstanceComponent.setGraySignature(calculateGraySignature(entity, modelInstanceComponent.getGraySignature()));
 					}
 				}
 			}
@@ -268,7 +268,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			Entity nearbyNodeEntity = nearbyNode.getEntity();
 			if (nearbyNodeEntity != null) {
 				result = !DebugSettings.DISABLE_FOW
-						&& ((ComponentsMapper.floor.get(nearbyNodeEntity).getGraySignature() & 16) == 16);
+						&& ((ComponentsMapper.modelInstance.get(nearbyNodeEntity).getGraySignature() & 16) == 16);
 			}
 		}
 		total |= result ? mask : 0;
@@ -303,10 +303,14 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			ModelInstanceComponent modelInstanceComp = ComponentsMapper.modelInstance.get(currentNode.getEntity());
 			if (!floorComponent.isRevealCalculated()) {
 				if (modelInstanceComp != null) {
-					modelInstanceComp.setFlatColor((!DebugSettings.DISABLE_FOW && blocked) ? Color.BLACK : null);
+					Color flatColor = null;
+					if (!DebugSettings.DISABLE_FOW && blocked && !floorComponent.isDiscovered()) {
+						flatColor = Color.BLACK;
+					}
+					modelInstanceComp.setFlatColor(flatColor);
+					modelInstanceComp.setGraySignature(blocked ? 16 : 0);
 				}
 				floorComponent.setFogOfWarSignature(blocked ? 16 : 0);
-				floorComponent.setGraySignature(blocked ? 16 : 0);
 				floorComponent.setRevealCalculated(true);
 				if (!blocked) {
 					floorComponent.setDiscovered(true);

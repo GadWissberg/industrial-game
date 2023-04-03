@@ -30,6 +30,7 @@ import com.gadarts.industrial.components.character.CharacterAnimation;
 import com.gadarts.industrial.components.character.CharacterAnimations;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.character.CharacterSpriteData;
+import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.AdditionalRenderData;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
@@ -302,23 +303,27 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private void renderSimpleShadowsOnFloor(Entity entity) {
 		List<Entity> nearbyCharacters = ComponentsMapper.floor.get(entity).getNearbySimpleShadows();
 		nearbyCharacters.clear();
-		for (Entity thing : families.getSimpleShadowEntities()) {
-			Vector3 pos;
-			if (ComponentsMapper.characterDecal.has(thing)) {
-				pos = ComponentsMapper.characterDecal.get(thing).getDecal().getPosition();
-			} else {
-				pos = ComponentsMapper.modelInstance.get(thing).getModelInstance().transform.getTranslation(auxVector3_1);
-			}
-			auxCircle.set(pos.x, pos.z, CharacterComponent.CHAR_RAD * 3F);
-			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(entity).getModelInstance();
-			Vector3 floorPos = modelInstance.transform.getTranslation(auxVector3_1);
-			auxRect.set(floorPos.x, floorPos.z, 1F, 1F);
-			if (Intersector.overlaps(auxCircle, auxRect)) {
-				nearbyCharacters.add(thing);
-				if (nearbyCharacters.size() >= 2) {
-					return;
+		if ((ComponentsMapper.modelInstance.get(entity).getGraySignature() & 16) == 0) {
+			for (Entity thing : families.getSimpleShadowEntities()) {
+				Vector3 pos;
+				if (ComponentsMapper.characterDecal.has(thing)) {
+					pos = ComponentsMapper.characterDecal.get(thing).getDecal().getPosition();
+				} else {
+					pos = ComponentsMapper.modelInstance.get(thing).getModelInstance().transform.getTranslation(auxVector3_1);
+				}
+				auxCircle.set(pos.x, pos.z, CharacterComponent.CHAR_RAD * 3F);
+				GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(entity).getModelInstance();
+				Vector3 floorPos = modelInstance.transform.getTranslation(auxVector3_1);
+				auxRect.set(floorPos.x, floorPos.z, 1F, 1F);
+				if (Intersector.overlaps(auxCircle, auxRect)) {
+					nearbyCharacters.add(thing);
+					if (nearbyCharacters.size() >= 2) {
+						return;
+					}
 				}
 			}
+		} else {
+
 		}
 	}
 
@@ -344,7 +349,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		MapGraphNode node = map.getNode(position);
 		if (node == null) return false;
 		Entity nodeEntity = node.getEntity();
-		return nodeEntity == null || ((ComponentsMapper.floor.get(nodeEntity).getFogOfWarSignature() & 16) == 16);
+		if (nodeEntity == null) return true;
+		FloorComponent floorComponent = ComponentsMapper.floor.get(nodeEntity);
+		return (floorComponent.getFogOfWarSignature() & 16) == 16 && !floorComponent.isDiscovered();
 	}
 
 	@Override
@@ -462,7 +469,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private boolean isNodeRevealed(Entity floorEntity) {
-		return floorEntity != null && ComponentsMapper.modelInstance.get(floorEntity).getFlatColor() == null;
+		if (floorEntity == null) return false;
+		ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(floorEntity);
+		return modelInstanceComponent.getFlatColor() == null && (modelInstanceComponent.getGraySignature() & 16) == 0;
 	}
 
 	private boolean shouldRenderEnemy(Entity entity) {

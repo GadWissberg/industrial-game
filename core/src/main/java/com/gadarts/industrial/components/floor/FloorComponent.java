@@ -19,7 +19,6 @@ public class FloorComponent implements GameComponent {
 	@Setter(AccessLevel.NONE)
 	private final List<Entity> nearbySimpleShadows = new ArrayList<>();
 	private int fogOfWarSignature;
-	private int graySignature;
 	@Setter(AccessLevel.NONE)
 	private MapGraphNode node;
 	private boolean revealCalculated;
