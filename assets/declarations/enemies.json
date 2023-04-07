@@ -21,7 +21,7 @@
     },
     {
       "id": "grd_bot",
-      "name": "Guard-Bot",
+      "display_name": "Guard-Bot",
       "atlas_definition": "guard_bot",
       "agility": 1,
       "health": 4,
@@ -46,7 +46,7 @@
     },
     {
       "id": "trr_glc",
-      "name": "Terrorist - Glock",
+      "display_name": "Terrorist - Glock",
       "atlas_definition": "terrorist_glock",
       "agility": 0.5,
       "health": 3,
