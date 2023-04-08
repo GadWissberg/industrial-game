@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
@@ -160,8 +161,10 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private MapGraphNode calculateNewNode(int screenX, int screenY) {
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		MapGraph map = systemsCommonData.getMap();
-		ArrayDeque<Coord3D> nodes = CameraUtils.findAllCoordsOnRay(screenX, screenY, systemsCommonData.getCamera());
-		return findNearestNodeOnCameraLineOfSight(map, nodes);
+		Camera camera = systemsCommonData.getCamera();
+		ArrayDeque<Coord3D> nodes = CameraUtils.findAllCoordsOnRay(screenX, screenY, camera);
+		MapGraphNode nearestNodeOnCameraLineOfSight = findNearestNodeOnCameraLineOfSight(map, nodes);
+		return nearestNodeOnCameraLineOfSight;
 	}
 
 
