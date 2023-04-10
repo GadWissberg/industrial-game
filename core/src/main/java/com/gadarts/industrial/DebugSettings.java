@@ -23,7 +23,7 @@ public final class DebugSettings {
 	public static final String  STARTING_WEAPON = "pnc";
 	public static final boolean ALLOW_STATIC_SHADOWS = true;
 	public static final boolean DISABLE_FOW = false;
-	public static final boolean PARALYZED_ENEMIES = false;
+	public static final boolean PARALYZED_ENEMIES = true;
 	public static final boolean LOW_HP_FOR_ENEMIES = false;
 	public static final boolean LOW_HP_FOR_PLAYER = false;
 	public static final boolean GOD_MODE = false;
@@ -31,4 +31,5 @@ public final class DebugSettings {
 	public static final boolean ENEMY_CANT_MOVE = false;
 	public static final boolean SPACE_BAR_SKIPS_PLAYER = false;
 	public static final String TEST_LEVEL = OFFICE.name();
+	public static final boolean ALLOW_SCREEN_SHOT_OF_DEPTH_MAP = false;
 }

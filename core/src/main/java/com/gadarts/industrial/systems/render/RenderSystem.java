@@ -210,13 +210,13 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private void renderModels(ModelBatch modelBatch,
 							  ImmutableArray<Entity> entitiesToRender,
-							  boolean renderLight,
+							  boolean renderShadowlessLights,
 							  Camera camera,
 							  boolean considerFow) {
 		modelBatch.begin(camera);
 		for (Entity entity : entitiesToRender) {
 			ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(entity);
-			if (tryRenderingModel(modelBatch, camera, entity, renderLight, modelInstanceComponent, considerFow)) {
+			if (tryRenderingModel(modelBatch, camera, entity, renderShadowlessLights, modelInstanceComponent, considerFow)) {
 				renderAppendixModelInstance(modelBatch, entity);
 			}
 		}
@@ -230,7 +230,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		}
 	}
 
-	private void applyLightsOnModel(final ModelInstanceComponent mic) {
+	private void applyShadowlessLightsOnModel(final ModelInstanceComponent mic) {
 		List<Entity> nearbyLights = mic.getModelInstance().getAdditionalRenderData().getNearbyLights();
 		nearbyLights.clear();
 		if (!DebugSettings.DISABLE_LIGHTS) {
@@ -274,7 +274,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		getSystemsCommonData().setNumberOfVisible(getSystemsCommonData().getNumberOfVisible() + 1);
 		applySpecificRendering(entity);
 		if (renderLight) {
-			applyLightsOnModel(modelInstanceComponent);
+			applyShadowlessLightsOnModel(modelInstanceComponent);
 		}
 	}
 
@@ -368,6 +368,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		resetDisplay(0F);
 		Camera cam = getSystemsCommonData().getCamera();
 		renderModels(renderBatches.getModelBatchShadows(), families.getModelEntitiesWithShadows(), false, cam);
+		if (DebugSettings.ALLOW_SCREEN_SHOT_OF_DEPTH_MAP) {
+			staticShadowsData.handleScreenshot(shadowFrameBuffer);
+		}
 		shadowFrameBuffer.end();
 	}
 
