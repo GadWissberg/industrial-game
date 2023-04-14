@@ -80,6 +80,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private static final Rectangle auxRect = new Rectangle();
 	private static final Color PLAYER_OUTLINE_COLOR = Color.valueOf("#177331");
 	private static final Color ENEMY_OUTLINE_COLOR = Color.valueOf("#731717");
+	private static final int MAX_SIMPLE_SHADOWS_PER_NODE = 2;
 	private final RenderBatches renderBatches = new RenderBatches();
 	private final RenderSystemRelevantFamilies families = new RenderSystemRelevantFamilies();
 	private final StaticShadowsData staticShadowsData = new StaticShadowsData();
@@ -305,24 +306,32 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		nearbyCharacters.clear();
 		if ((ComponentsMapper.modelInstance.get(entity).getGraySignature() & 16) == 0) {
 			for (Entity thing : families.getSimpleShadowEntities()) {
-				Vector3 pos;
-				if (ComponentsMapper.characterDecal.has(thing)) {
-					pos = ComponentsMapper.characterDecal.get(thing).getDecal().getPosition();
-				} else {
-					pos = ComponentsMapper.modelInstance.get(thing).getModelInstance().transform.getTranslation(auxVector3_1);
-				}
-				auxCircle.set(pos.x, pos.z, CharacterComponent.CHAR_RAD * 3F);
-				GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(entity).getModelInstance();
-				Vector3 floorPos = modelInstance.transform.getTranslation(auxVector3_1);
-				auxRect.set(floorPos.x, floorPos.z, 1F, 1F);
-				if (Intersector.overlaps(auxCircle, auxRect)) {
+				if (checkIfEntityCastsSimpleShadowOnNode(thing, entity)) {
 					nearbyCharacters.add(thing);
-					if (nearbyCharacters.size() >= 2) {
+					if (nearbyCharacters.size() >= MAX_SIMPLE_SHADOWS_PER_NODE) {
 						return;
 					}
 				}
 			}
 		}
+	}
+
+	private boolean checkIfEntityCastsSimpleShadowOnNode(Entity thing, Entity node) {
+		Vector3 pos = getPositionOfEntity(thing);
+		auxCircle.set(pos.x, pos.z, CharacterComponent.CHAR_RAD * 3F);
+		Vector3 floorPos = ComponentsMapper.modelInstance.get(node).getModelInstance().transform.getTranslation(auxVector3_1);
+		auxRect.set(floorPos.x, floorPos.z, 1F, 1F);
+		return Intersector.overlaps(auxCircle, auxRect);
+	}
+
+	private Vector3 getPositionOfEntity(Entity thing) {
+		Vector3 pos;
+		if (ComponentsMapper.characterDecal.has(thing)) {
+			pos = ComponentsMapper.characterDecal.get(thing).getDecal().getPosition();
+		} else {
+			pos = ComponentsMapper.modelInstance.get(thing).getModelInstance().transform.getTranslation(auxVector3_1);
+		}
+		return pos;
 	}
 
 	private boolean shouldSkipRenderModel(Camera camera,

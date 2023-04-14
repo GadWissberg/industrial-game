@@ -21,36 +21,19 @@ import com.gadarts.industrial.systems.render.RenderSystem;
 import static com.gadarts.industrial.systems.SystemsCommonData.CAMERA_LIGHT_FAR;
 
 public class ShadowMapShader extends BaseShader {
-	public static final String UNIFORM_DEPTH_MAP_CUBE = "u_depthMapCube";
-	public static final String UNIFORM_CAMERA_FAR = "u_cameraFar";
-	public static final String UNIFORM_LIGHT_POSITION = "u_lightPosition";
 	public static final float BIAS_MIN_WALL = 0.0021F;
 	public static final float BIAS_MAX_WALL = 0.0022F;
 	public static final float BIAS_MAX_GENERAL = 0.0018F;
 	public static final float BIAS_MIN_GENERAL = 0F;
-	private static final String UNIFORM_LIGHTS_COLORS = "u_lightColor";
 	private static final Vector3 auxVector1 = new Vector3();
 	private static final Vector3 auxVector2 = new Vector3();
-	private static final String UNIFORM_RADIUS = "u_radius";
-	private static final String UNIFORM_DEPTH_MAP_SIZE = "u_depthMapSize";
-	private static final String UNIFORM_INTENSITY = "u_intensity";
-	private static final String UNIFORM_MAX_BIAS = "u_maxBias";
-	private static final String UNIFORM_MIN_BIAS = "u_minBias";
 	private static final int CUBE_MAP_TEXTURE_NUMBER = 8;
 	private static final float BIAS_MAX_FLOOR = 0.00185F;
 	private static final Color auxColor = new Color();
 	private final ImmutableArray<Entity> lights;
 	private final float[] lightColor = new float[3];
+	private final ShadowMapShaderUniforms uniforms = new ShadowMapShaderUniforms();
 	public Renderable renderable;
-	private int uniformLocMaxBias;
-	private int uniformLocMinBias;
-	private int uniformLocLightColor;
-	private int uniformLocCameraFar;
-	private int uniformLocDepthMapCube;
-	private int uniformLocLightPosition;
-	private int uniformLocRadius;
-	private int uniformLocIntensity;
-	private int uniformLocDepthMapSize;
 
 	public ShadowMapShader(final Renderable renderable,
 						   final ShaderProgram shaderProgramModelBorder,
@@ -61,7 +44,7 @@ public class ShadowMapShader extends BaseShader {
 		register(DefaultShader.Inputs.worldTrans, DefaultShader.Setters.worldTrans);
 		register(DefaultShader.Inputs.projViewTrans, DefaultShader.Setters.projViewTrans);
 		register(DefaultShader.Inputs.normalMatrix, DefaultShader.Setters.normalMatrix);
-		fetchUniformsLocations();
+		uniforms.fetchUniformsLocations(program);
 	}
 
 	private void fillStaticLightColorArray(Color color) {
@@ -70,17 +53,6 @@ public class ShadowMapShader extends BaseShader {
 		lightColor[2] = color.b;
 	}
 
-	private void fetchUniformsLocations( ) {
-		uniformLocMaxBias = program.getUniformLocation(UNIFORM_MAX_BIAS);
-		uniformLocMinBias = program.getUniformLocation(UNIFORM_MIN_BIAS);
-		uniformLocLightColor = program.getUniformLocation(UNIFORM_LIGHTS_COLORS);
-		uniformLocCameraFar = program.getUniformLocation(UNIFORM_CAMERA_FAR);
-		uniformLocDepthMapCube = program.getUniformLocation(UNIFORM_DEPTH_MAP_CUBE);
-		uniformLocLightPosition = program.getUniformLocation(UNIFORM_LIGHT_POSITION);
-		uniformLocRadius = program.getUniformLocation(UNIFORM_RADIUS);
-		uniformLocIntensity = program.getUniformLocation(UNIFORM_INTENSITY);
-		uniformLocDepthMapSize = program.getUniformLocation(UNIFORM_DEPTH_MAP_SIZE);
-	}
 
 	@Override
 	public void begin(final Camera camera, final RenderContext context) {
@@ -146,8 +118,8 @@ public class ShadowMapShader extends BaseShader {
 		} else if (ComponentsMapper.floor.has(entity)) {
 			maxBias = BIAS_MAX_FLOOR;
 		}
-		program.setUniformf(uniformLocMinBias, minBias);
-		program.setUniformf(uniformLocMaxBias, maxBias);
+		program.setUniformf(uniforms.getUniformLocMinBias(), minBias);
+		program.setUniformf(uniforms.getUniformLocMaxBias(), maxBias);
 	}
 
 	private void initializeLightForRendering(int lightIndex) {
@@ -158,16 +130,13 @@ public class ShadowMapShader extends BaseShader {
 	}
 
 	private void setUniforms(StaticLightComponent lightComponent) {
-		program.setUniformi(uniformLocDepthMapCube, CUBE_MAP_TEXTURE_NUMBER);
-		program.setUniformf(uniformLocCameraFar, CAMERA_LIGHT_FAR);
-		program.setUniformf(uniformLocLightPosition, lightComponent.getPosition(auxVector1));
-		program.setUniformf(uniformLocRadius, lightComponent.getRadius());
-		program.setUniform3fv(uniformLocLightColor, lightColor, 0, 3);
-		program.setUniformf(uniformLocIntensity, lightComponent.getIntensity());
-		program.setUniformf(uniformLocDepthMapSize, RenderSystem.DEPTH_MAP_SIZE);
+		program.setUniformi(uniforms.getUniformLocDepthMapCube(), CUBE_MAP_TEXTURE_NUMBER);
+		program.setUniformf(uniforms.getUniformLocCameraFar(), CAMERA_LIGHT_FAR);
+		program.setUniformf(uniforms.getUniformLocLightPosition(), lightComponent.getPosition(auxVector1));
+		program.setUniformf(uniforms.getUniformLocRadius(), lightComponent.getRadius());
+		program.setUniform3fv(uniforms.getUniformLocLightColor(), lightColor, 0, 3);
+		program.setUniformf(uniforms.getUniformLocIntensity(), lightComponent.getIntensity());
+		program.setUniformf(uniforms.getUniformLocDepthMapSize(), RenderSystem.DEPTH_MAP_SIZE);
 	}
 
-	private enum StaticLightTypes {
-		POINT
-	}
 }

@@ -25,6 +25,23 @@ public class StaticShadowsData implements Disposable {
 	@Setter
 	private boolean take;
 
+	public void init(GameAssetManager assetsManager, ImmutableArray<Entity> staticLightsEntities) {
+		shadowFrameBuffer = new GameFrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+		createShaderPrograms(assetsManager);
+		this.staticLightsEntities = staticLightsEntities;
+	}
+
+	@Override
+	public void dispose( ) {
+		if (!DebugSettings.ALLOW_STATIC_SHADOWS) return;
+		depthShaderProgram.dispose();
+		shadowsShaderProgram.dispose();
+		shadowFrameBuffer.dispose();
+		for (Entity light : staticLightsEntities) {
+			ComponentsMapper.staticLight.get(light).getShadowFrameBuffer().dispose();
+		}
+	}
+
 	void handleScreenshot(FrameBuffer frameBuffer) {
 		if (take) {
 			ScreenshotFactory.saveScreenshot(frameBuffer.getWidth(), frameBuffer.getHeight(), "depthmap");
@@ -39,34 +56,5 @@ public class StaticShadowsData implements Disposable {
 		shadowsShaderProgram = new ShaderProgram(
 				assetsManager.getShader(SHADOW_VERTEX),
 				assetsManager.getShader(SHADOW_FRAGMENT));
-//		createBlurShader(assetsManager);
-	}
-
-	public void init(GameAssetManager assetsManager, ImmutableArray<Entity> staticLightsEntities) {
-		shadowFrameBuffer = new GameFrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-//		blurTargetA = new GameFrameBuffer(Format.RGBA8888,
-//				Gdx.graphics.getWidth(),
-//				Gdx.graphics.getHeight(),
-//				false);
-//		blurTargetB = new GameFrameBuffer(Format.RGBA8888,
-//				Gdx.graphics.getWidth(),
-//				Gdx.graphics.getHeight(),
-//				false);
-		createShaderPrograms(assetsManager);
-		this.staticLightsEntities = staticLightsEntities;
-	}
-
-	@Override
-	public void dispose( ) {
-		if (!DebugSettings.ALLOW_STATIC_SHADOWS) return;
-		depthShaderProgram.dispose();
-		shadowsShaderProgram.dispose();
-//		blurTargetA.dispose();
-//		blurTargetB.dispose();
-//		blurShader.dispose();
-		shadowFrameBuffer.dispose();
-		for (Entity light : staticLightsEntities) {
-			ComponentsMapper.staticLight.get(light).getShadowFrameBuffer().dispose();
-		}
 	}
 }
