@@ -322,8 +322,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 					}
 				}
 			}
-		} else {
-
 		}
 	}
 
@@ -367,7 +365,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		shadowFrameBuffer.begin();
 		resetDisplay(0F);
 		Camera cam = getSystemsCommonData().getCamera();
-		renderModels(renderBatches.getModelBatchShadows(), families.getModelEntitiesWithShadows(), false, cam);
+		renderModels(renderBatches.getModelBatchShadows(), families.getModelEntitiesWithShadows(), false, cam, true);
 		if (DebugSettings.ALLOW_SCREEN_SHOT_OF_DEPTH_MAP) {
 			staticShadowsData.handleScreenshot(shadowFrameBuffer);
 		}

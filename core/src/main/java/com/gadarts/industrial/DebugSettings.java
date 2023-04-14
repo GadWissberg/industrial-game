@@ -31,5 +31,5 @@ public final class DebugSettings {
 	public static final boolean ENEMY_CANT_MOVE = false;
 	public static final boolean SPACE_BAR_SKIPS_PLAYER = false;
 	public static final String TEST_LEVEL = OFFICE.name();
-	public static final boolean ALLOW_SCREEN_SHOT_OF_DEPTH_MAP = false;
+	public static final boolean ALLOW_SCREEN_SHOT_OF_DEPTH_MAP = true;
 }

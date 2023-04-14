@@ -16,11 +16,11 @@ import com.badlogic.gdx.math.Vector3;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.StaticLightComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
+import com.gadarts.industrial.systems.render.RenderSystem;
 
 import static com.gadarts.industrial.systems.SystemsCommonData.CAMERA_LIGHT_FAR;
 
 public class ShadowMapShader extends BaseShader {
-	public static final String UNIFORM_TYPE = "u_type";
 	public static final String UNIFORM_DEPTH_MAP_CUBE = "u_depthMapCube";
 	public static final String UNIFORM_CAMERA_FAR = "u_cameraFar";
 	public static final String UNIFORM_LIGHT_POSITION = "u_lightPosition";
@@ -32,6 +32,7 @@ public class ShadowMapShader extends BaseShader {
 	private static final Vector3 auxVector1 = new Vector3();
 	private static final Vector3 auxVector2 = new Vector3();
 	private static final String UNIFORM_RADIUS = "u_radius";
+	private static final String UNIFORM_DEPTH_MAP_SIZE = "u_depthMapSize";
 	private static final String UNIFORM_INTENSITY = "u_intensity";
 	private static final String UNIFORM_MAX_BIAS = "u_maxBias";
 	private static final String UNIFORM_MIN_BIAS = "u_minBias";
@@ -44,12 +45,12 @@ public class ShadowMapShader extends BaseShader {
 	private int uniformLocMaxBias;
 	private int uniformLocMinBias;
 	private int uniformLocLightColor;
-	private int uniformLocType;
 	private int uniformLocCameraFar;
 	private int uniformLocDepthMapCube;
 	private int uniformLocLightPosition;
 	private int uniformLocRadius;
 	private int uniformLocIntensity;
+	private int uniformLocDepthMapSize;
 
 	public ShadowMapShader(final Renderable renderable,
 						   final ShaderProgram shaderProgramModelBorder,
@@ -73,12 +74,12 @@ public class ShadowMapShader extends BaseShader {
 		uniformLocMaxBias = program.getUniformLocation(UNIFORM_MAX_BIAS);
 		uniformLocMinBias = program.getUniformLocation(UNIFORM_MIN_BIAS);
 		uniformLocLightColor = program.getUniformLocation(UNIFORM_LIGHTS_COLORS);
-		uniformLocType = program.getUniformLocation(UNIFORM_TYPE);
 		uniformLocCameraFar = program.getUniformLocation(UNIFORM_CAMERA_FAR);
 		uniformLocDepthMapCube = program.getUniformLocation(UNIFORM_DEPTH_MAP_CUBE);
 		uniformLocLightPosition = program.getUniformLocation(UNIFORM_LIGHT_POSITION);
 		uniformLocRadius = program.getUniformLocation(UNIFORM_RADIUS);
 		uniformLocIntensity = program.getUniformLocation(UNIFORM_INTENSITY);
+		uniformLocDepthMapSize = program.getUniformLocation(UNIFORM_DEPTH_MAP_SIZE);
 	}
 
 	@Override
@@ -114,7 +115,7 @@ public class ShadowMapShader extends BaseShader {
 			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(entity).getModelInstance();
 			Vector3 position = modelInstance.transform.getTranslation(auxVector1);
 			StaticLightComponent lightComponent = ComponentsMapper.staticLight.get(lights.get(i));
-			if (position.dst2(lightComponent.getPosition(auxVector2)) <= lightComponent.getRadius()*5) {
+			if (position.dst2(lightComponent.getPosition(auxVector2)) <= lightComponent.getRadius() * 5) {
 				renderLightForShadow(renderable, combinedAttributes, firstCall, i);
 				firstCall = false;
 			}
@@ -157,13 +158,13 @@ public class ShadowMapShader extends BaseShader {
 	}
 
 	private void setUniforms(StaticLightComponent lightComponent) {
-		program.setUniformf(uniformLocType, StaticLightTypes.POINT.ordinal());
 		program.setUniformi(uniformLocDepthMapCube, CUBE_MAP_TEXTURE_NUMBER);
 		program.setUniformf(uniformLocCameraFar, CAMERA_LIGHT_FAR);
 		program.setUniformf(uniformLocLightPosition, lightComponent.getPosition(auxVector1));
 		program.setUniformf(uniformLocRadius, lightComponent.getRadius());
 		program.setUniform3fv(uniformLocLightColor, lightColor, 0, 3);
 		program.setUniformf(uniformLocIntensity, lightComponent.getIntensity());
+		program.setUniformf(uniformLocDepthMapSize, RenderSystem.DEPTH_MAP_SIZE);
 	}
 
 	private enum StaticLightTypes {
