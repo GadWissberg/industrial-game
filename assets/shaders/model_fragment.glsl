@@ -144,9 +144,7 @@ void main() {
     vec3 normal = v_normal;
     #endif// normalFlag
 
-    #if defined(diffuseTextureFlag) && defined(diffuseColorFlag) && defined(colorFlag)
-    vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV) * u_diffuseColor * v_color;
-    #elif defined(diffuseTextureFlag) && defined(diffuseColorFlag)
+    #if defined(diffuseTextureFlag) && defined(diffuseColorFlag)
     vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV) * u_diffuseColor;
     #elif defined(diffuseTextureFlag) && defined(colorFlag)
     vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV) * v_color;
