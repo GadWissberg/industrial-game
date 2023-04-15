@@ -47,9 +47,6 @@ import static com.gadarts.industrial.components.character.CharacterComponent.TUR
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.systems.enemy.EnemyAiStatus.*;
 
-/**
- * Responsible for enemy AI.
- */
 public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> implements
 		CharacterSystemEventsSubscriber,
 		TurnsSystemEventsSubscriber,
@@ -338,7 +335,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 				goAttackAtGivenLocation(enemy, dst, CharacterCommandsDefinitions.DODGE);
 			} else {
 				CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
-				if (characterComponent.getTurnTimeLeft() >= characterComponent.getSkills().getAgility()) {
+				if (characterComponent.getTurnTimeLeft() >= characterComponent.getSkills().getAgility().max()) {
 					MapGraphNode targetLastVisibleNode = enemyComponent.getTargetLastVisibleNode();
 					if (targetLastVisibleNode == null) {
 						applySearchingModeOnEnemy(enemy);
@@ -424,7 +421,8 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private void awakeEnemyIfTargetSpotted(final Entity enemy) {
-		if (!isTargetInFov(enemy)) return;
+		if (!isTargetInFov(enemy) || ComponentsMapper.character.get(enemy).getSkills().getHealthData().getHp() <= 0)
+			return;
 
 		LinkedHashSet<GridPoint2> nodes = GameUtils.findAllNodesToTarget(enemy, bresenhamOutput, true);
 		if (!checkIfFloorNodesBlockSightToTarget(enemy, nodes)) {
@@ -455,7 +453,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			getSystemsCommonData().getSoundPlayer().playSound(awakeSound);
 		}
 		for (EnemySystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onEnemyAwaken(enemy, prevAiStatus);
+			subscriber.onEnemyAwaken(enemy, prevAiStatus, true);
 		}
 	}
 

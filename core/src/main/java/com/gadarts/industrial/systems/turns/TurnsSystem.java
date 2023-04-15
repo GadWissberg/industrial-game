@@ -1,6 +1,7 @@
 package com.gadarts.industrial.systems.turns;
 
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -21,12 +22,13 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 		CharacterSystemEventsSubscriber {
 	private boolean currentTurnDone;
 
+
 	public TurnsSystem(GameAssetManager assetsManager,
 					   GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
 	}
 
-	private static void decideToRemoveOrAddLast(Queue<Entity> turnsQueue, Entity entity) {
+	private void decideToRemoveOrAddLast(Queue<Entity> turnsQueue, Entity entity) {
 		if (ComponentsMapper.door.has(entity)) {
 			if (ComponentsMapper.door.get(entity).getState() != DoorStates.CLOSED) {
 				turnsQueue.addLast(entity);
@@ -38,15 +40,19 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 
 	@Override
 	public void update(float deltaTime) {
-		if (currentTurnDone) {
-			currentTurnDone = false;
+		if (getSystemsCommonData().getCurrentGameMode() == GameMode.COMBAT && currentTurnDone) {
 			Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
 			SystemsCommonData systemsCommonData = getSystemsCommonData();
 			systemsCommonData.setCurrentTurnId(systemsCommonData.getCurrentTurnId() + 1);
 			Entity removeFirst = turnsQueue.removeFirst();
 			decideToRemoveOrAddLast(turnsQueue, removeFirst);
-			subscribers.forEach(s -> s.onNewTurn(turnsQueue.first()));
+			startNextTurn();
 		}
+	}
+
+	private void startNextTurn( ) {
+		currentTurnDone = false;
+		subscribers.forEach(s -> s.onNewTurn(getSystemsCommonData().getTurnsQueue().first()));
 	}
 
 	@Override
@@ -79,10 +85,26 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 	}
 
 	@Override
-	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
+	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus, boolean wokeBySpottingPlayer) {
 		if (prevAiStatus != EnemyAiStatus.IDLE) return;
+
 		Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
-		turnsQueue.addLast(enemy);
+		if (getSystemsCommonData().getCurrentGameMode() == GameMode.EXPLORE) {
+			engageCombatMode(enemy, wokeBySpottingPlayer, turnsQueue);
+		} else {
+			turnsQueue.addLast(enemy);
+		}
+	}
+
+	private void engageCombatMode(Entity enemy, boolean wokeBySpottingPlayer, Queue<Entity> turnsQueue) {
+		getSystemsCommonData().setCurrentGameMode(GameMode.COMBAT);
+		turnsQueue.clear();
+		turnsQueue.addFirst(wokeBySpottingPlayer ? enemy : getSystemsCommonData().getPlayer());
+		turnsQueue.addLast(wokeBySpottingPlayer ? getSystemsCommonData().getPlayer() : enemy);
+		Gdx.app.log("Mode", "Combat mode engaged");
+		currentTurnDone = true;
+		subscribers.forEach(TurnsSystemEventsSubscriber::onCombatModeEngaged);
+		startNextTurn();
 	}
 
 	private void markCurrentTurnAsDone( ) {

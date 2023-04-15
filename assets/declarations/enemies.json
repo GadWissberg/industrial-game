@@ -4,12 +4,15 @@
       "id": "mnt_bot",
       "display_name": "Maintenance-Bot",
       "atlas_definition": "maint_bot",
-      "agility": 0.4,
+      "agility": {
+        "min": 3,
+        "max": 4
+      },
       "health": 2,
       "accuracy": "none",
       "sight": "high",
       "engine": 2,
-      "attack_primary": "cutter",
+      "attack_primary": "ctr",
       "attack_primary_hit_frame_index": 4,
       "height": 1,
       "sound_awake": "guard_bot_awake",
@@ -23,7 +26,10 @@
       "id": "grd_bot",
       "display_name": "Guard-Bot",
       "atlas_definition": "guard_bot",
-      "agility": 1,
+      "agility": {
+        "min": 2,
+        "max": 3
+      },
       "health": 4,
       "accuracy": "med",
       "sight": "high",
@@ -48,7 +54,10 @@
       "id": "trr_glc",
       "display_name": "Terrorist - Glock",
       "atlas_definition": "terrorist_glock",
-      "agility": 0.5,
+      "agility": {
+        "min": 3,
+        "max": 5
+      },
       "health": 3,
       "accuracy": "med",
       "sight": "high",

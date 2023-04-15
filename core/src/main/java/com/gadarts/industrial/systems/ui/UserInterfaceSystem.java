@@ -36,6 +36,7 @@ import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
+import com.gadarts.industrial.systems.turns.GameMode;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.menu.MenuHandler;
 import com.gadarts.industrial.systems.ui.menu.MenuHandlerImpl;
@@ -211,6 +212,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	@Override
 	public void touchDown(final int screenX, final int screenY, final int button) {
 		if (isTouchDisabled()) return;
+
 		SystemsCommonData data = getSystemsCommonData();
 		if (button == Input.Buttons.LEFT) {
 			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(data.getCursor()).getModelInstance();
@@ -250,8 +252,8 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 	private void onUserSelectedNodeToApplyTurn( ) {
 		Entity currentChar = getSystemsCommonData().getTurnsQueue().first();
-		if (ComponentsMapper.player.has(currentChar)
-				&& ComponentsMapper.character.get(currentChar).getCommands().isEmpty()) {
+		if (getSystemsCommonData().getCurrentGameMode() == GameMode.EXPLORE || (ComponentsMapper.player.has(currentChar)
+				&& ComponentsMapper.character.get(currentChar).getCommands().isEmpty())) {
 			MapGraphNode cursorNode = cursorHandler.getCursorNode();
 			for (UserInterfaceSystemEventsSubscriber sub : subscribers) {
 				sub.onUserSelectedNodeToApplyTurn(cursorNode);

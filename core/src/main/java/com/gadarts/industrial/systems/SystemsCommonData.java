@@ -9,6 +9,7 @@ import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.systems.player.PlayerStorage;
 import com.gadarts.industrial.systems.render.DrawFlags;
+import com.gadarts.industrial.systems.turns.GameMode;
 import com.gadarts.industrial.systems.ui.GameStage;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -40,6 +41,7 @@ public class SystemsCommonData implements Disposable {
 	private boolean cameraIsRotating;
 	private long currentTurnId;
 	private Table menuTable;
+	private GameMode currentGameMode = GameMode.EXPLORE;
 
 	@Override
 	public void dispose( ) {

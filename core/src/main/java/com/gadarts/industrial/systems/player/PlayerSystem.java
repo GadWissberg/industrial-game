@@ -21,6 +21,7 @@ import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterAnimation;
 import com.gadarts.industrial.components.character.CharacterAnimations;
+import com.gadarts.industrial.components.character.CharacterSpriteData;
 import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
@@ -34,6 +35,7 @@ import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponsDeclarations;
 import com.gadarts.industrial.shared.model.characters.Direction;
+import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
@@ -45,6 +47,7 @@ import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
+import com.gadarts.industrial.systems.turns.GameMode;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
 import com.gadarts.industrial.utils.GameUtils;
@@ -82,20 +85,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	public PlayerSystem(GameAssetManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
-	}
-
-	private static void endPlayerTurnOnEnemyAwaken(SystemsCommonData systemsCommonData) {
-		Entity currentCharacter = systemsCommonData.getTurnsQueue().first();
-		if (ComponentsMapper.player.has(currentCharacter)) {
-			Queue<CharacterCommand> commands = ComponentsMapper.character.get(currentCharacter).getCommands();
-			if (!commands.isEmpty()) {
-				CharacterCommand currentCommand = commands.get(0);
-				if (currentCommand.getDefinition() == RUN) {
-					currentCommand.setState(CommandStates.ENDED);
-					ComponentsMapper.character.get(currentCharacter).getCharacterSpriteData().setSpriteType(IDLE);
-				}
-			}
-		}
 	}
 
 	@Override
@@ -275,6 +264,11 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		return total;
 	}
 
+	@Override
+	public void onCombatModeEngaged( ) {
+		ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).getCommands().clear();
+	}
+
 	private void revealNodes(MapGraph map, Vector3 src, MapGraphNode playerNode, int dir) {
 		Vector2 maxSight = auxVector2_2.set(src.x, src.z)
 				.add(auxVector2_3.set(1, 0)
@@ -291,9 +285,15 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	@Override
-	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
+	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus, boolean wokeBySpottingPlayer) {
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		endPlayerTurnOnEnemyAwaken(systemsCommonData);
+		if (systemsCommonData.getCurrentGameMode() == GameMode.EXPLORE) {
+			Entity player = systemsCommonData.getPlayer();
+			CharacterSpriteData characterSpriteData = ComponentsMapper.character.get(player).getCharacterSpriteData();
+			if (characterSpriteData.getSpriteType() == SpriteType.RUN) {
+				characterSpriteData.setSpriteType(IDLE);
+			}
+		}
 	}
 
 	private boolean applyLineOfSightOnNode(MapGraph map, MapGraphNode playerNode, boolean blocked, GridPoint2 nodeCoord) {
@@ -399,11 +399,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	@Override
 	public void onUserSelectedNodeToApplyTurn(MapGraphNode node) {
-		applyPlayerTurn(node);
-	}
-
-	private void applyPlayerTurn(final MapGraphNode cursorNode) {
-		planPath(cursorNode);
+		planPath(node);
 	}
 
 	private void planPath(final MapGraphNode cursorNode) {

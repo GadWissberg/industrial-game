@@ -5,7 +5,7 @@ import com.gadarts.industrial.systems.SystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 
 public interface EnemySystemEventsSubscriber extends SystemEventsSubscriber {
-	default void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus) {
+	default void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus, boolean wokeBySpottingPlayer) {
 
 	}
 

@@ -151,7 +151,7 @@ public class RunCharacterCommand extends CharacterCommand {
 		prevNode = getNextNode();
 		setNextNode(path.getNextOf(getNextNode()));
 		setDestinationNode(getNextNode());
-		consumeTurnTime(character, ComponentsMapper.character.get(character).getSkills().getAgility());
+		consumeTurnTime(character, ComponentsMapper.character.get(character).getSkills().getAgility().max());
 		MapGraph map = systemsCommonData.getMap();
 		return isReachedEndOfPath(map.findConnection(prevNode, getNextNode()), map);
 	}

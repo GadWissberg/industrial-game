@@ -36,6 +36,7 @@ import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
 import com.gadarts.industrial.systems.projectiles.AttackSystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
+import com.gadarts.industrial.systems.turns.GameMode;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
 import com.gadarts.industrial.utils.EntityBuilder;
 import com.gadarts.industrial.utils.GameUtils;
@@ -74,23 +75,9 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		super(assetsManager, lifeCycleHandler);
 	}
 
-	private static void freeEndedCommand(Queue<CharacterCommand> commands) {
-		if (commands.isEmpty()) return;
-		while (!commands.isEmpty()) {
-			CharacterCommand currentCommand = commands.first();
-			if (currentCommand.getState() == CommandStates.ENDED) {
-				currentCommand.free();
-				commands.removeFirst();
-			} else {
-				break;
-			}
-		}
-	}
-
 	@Override
 	public void onCharacterStillHasTime(Entity character) {
 		Queue<CharacterCommand> commands = ComponentsMapper.character.get(character).getCommands();
-		freeEndedCommand(commands);
 		if (!commands.isEmpty()) {
 			CharacterCommand command = commands.first();
 			if (command.getState() == CommandStates.READY) {
@@ -104,7 +91,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (!character.has(entity)) return;
 
 		if (ComponentsMapper.player.has(entity)) {
-			freeEndedCommand(character.get(getSystemsCommonData().getPlayer()).getCommands());
 			Queue<CharacterCommand> commands = ComponentsMapper.character.get(entity).getCommands();
 			if (!commands.isEmpty()) {
 				CharacterCommand currentCommand = commands.first();
@@ -135,13 +121,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		smallExpEffect = getAssetsManager().getParticleEffect(Assets.ParticleEffects.SMALL_EXP);
 	}
 
-	/**
-	 * Applies the given commands sequence on the given character.
-	 *
-	 * @param commands
-	 * @param character
-	 */
-	@SuppressWarnings("JavaDoc")
 	public void applyCommands(Queue<CharacterCommand> commands,
 							  Entity character) {
 		if (commands.isEmpty()) return;
@@ -157,13 +136,13 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	@Override
 	public void update(float deltaTime) {
 		super.update(deltaTime);
-		if (character.has(getSystemsCommonData().getTurnsQueue().first())) {
-			Queue<CharacterCommand> commands = character.get(getSystemsCommonData().getTurnsQueue().first()).getCommands();
-			freeEndedCommand(commands);
-			if (!commands.isEmpty()) {
-				CharacterCommand currentCommand = commands.first();
-				handleCurrentCommand(currentCommand);
+		if (getSystemsCommonData().getCurrentGameMode() == GameMode.COMBAT) {
+			Entity current = getSystemsCommonData().getTurnsQueue().first();
+			if (character.has(current)) {
+				handleCharacterCommand(current);
 			}
+		} else {
+			handleCharacterCommand(getSystemsCommonData().getPlayer());
 		}
 		updateCharacters();
 	}
@@ -409,14 +388,17 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		animationComponent.resetStateTime();
 	}
 
-	private void handleCurrentCommand(final CharacterCommand currentCommand) {
-		Entity character = currentCommand.getCharacter();
-		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		SpriteType spriteType = characterComponent.getCharacterSpriteData().getSpriteType();
-		if (spriteType == PICKUP || spriteType == ATTACK_PRIMARY) {
-			handleModeWithNonLoopingAnimation(character);
-		} else {
-			handleRotation(currentCommand, character);
+	private void handleCharacterCommand(Entity character) {
+		Queue<CharacterCommand> commands = ComponentsMapper.character.get(character).getCommands();
+		if (!commands.isEmpty()) {
+			CharacterCommand currentCommand = commands.first();
+			CharacterComponent characterComponent = ComponentsMapper.character.get(character);
+			SpriteType spriteType = characterComponent.getCharacterSpriteData().getSpriteType();
+			if (spriteType == PICKUP || spriteType == ATTACK_PRIMARY) {
+				handleModeWithNonLoopingAnimation(character);
+			} else {
+				handleRotation(currentCommand, character);
+			}
 		}
 	}
 

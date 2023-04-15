@@ -7,4 +7,8 @@ public interface TurnsSystemEventsSubscriber extends SystemEventsSubscriber {
 	default void onNewTurn(Entity entity) {
 
 	}
+
+	default void onCombatModeEngaged( ){
+
+	}
 }
