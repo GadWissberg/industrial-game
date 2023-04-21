@@ -19,4 +19,9 @@ public class MapGraphPath extends DefaultGraphPath<MapGraphNode> {
 			nodes.addAll(path.nodes);
 		}
 	}
+
+	@Override
+	public String toString( ) {
+		return nodes.toString();
+	}
 }

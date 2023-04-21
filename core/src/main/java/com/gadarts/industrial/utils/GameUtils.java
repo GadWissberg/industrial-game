@@ -59,12 +59,6 @@ public class GameUtils {
 		return result;
 	}
 
-	public static boolean calculatePath(CalculatePathRequest request,
-										GamePathFinder pathFinder,
-										GameHeuristic heuristic) {
-		return calculatePath(request, pathFinder, heuristic, 0);
-	}
-
 	public static float calculateCharacterHeight(Entity character) {
 		float height;
 		if (ComponentsMapper.enemy.has(character)) {
@@ -77,16 +71,11 @@ public class GameUtils {
 
 	public static boolean calculatePath(CalculatePathRequest request,
 										GamePathFinder pathFinder,
-										GameHeuristic heuristic,
-										int maxNumberOfNodesInOutput) {
+										GameHeuristic heuristic) {
 		MapGraphPath outputPath = request.getOutputPath();
 		outputPath.clear();
 		pathFinder.searchNodePathBeforeCommand(heuristic, request);
-		boolean foundPath = outputPath.nodes.size > 1;
-		if (maxNumberOfNodesInOutput > 0 && maxNumberOfNodesInOutput < outputPath.nodes.size) {
-			outputPath.nodes.removeRange(maxNumberOfNodesInOutput, outputPath.nodes.size - 1);
-		}
-		return foundPath;
+		return outputPath.nodes.size > 1;
 	}
 
 	public static LinkedHashSet<GridPoint2> findAllNodesToTarget(Entity enemy,

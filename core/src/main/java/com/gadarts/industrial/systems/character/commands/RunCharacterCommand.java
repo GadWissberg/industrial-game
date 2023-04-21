@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.DoorComponent.DoorStates;
@@ -14,7 +13,6 @@ import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphConnection;
 import com.gadarts.industrial.map.MapGraphNode;
-import com.gadarts.industrial.map.MapGraphPath;
 import com.gadarts.industrial.shared.model.characters.CharacterTypes;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -33,7 +31,6 @@ public class RunCharacterCommand extends CharacterCommand {
 	private final static Vector3 auxVector3_2 = new Vector3();
 	private static final float MOVEMENT_EPSILON = 0.02F;
 	private static final float OPEN_DOOR_TIME_CONSUME = 1F;
-	private final MapGraphPath path = new MapGraphPath();
 	private SystemsCommonData systemsCommonData;
 	private MapGraphNode prevNode;
 
@@ -43,17 +40,15 @@ public class RunCharacterCommand extends CharacterCommand {
 	}
 
 	@Override
-	public boolean initialize(Entity character,
-							  SystemsCommonData commonData,
-							  Object additionalData,
-							  List<CharacterSystemEventsSubscriber> subscribers) {
+	public void initialize(Entity character,
+						   SystemsCommonData commonData,
+						   List<CharacterSystemEventsSubscriber> subscribers) {
 		systemsCommonData = commonData;
-		path.set((MapGraphPath) additionalData);
 		Array<MapGraphNode> nodes = path.nodes;
 		prevNode = nodes.removeIndex(0);
 		setNextNode(nodes.get(0));
 		MapGraph map = commonData.getMap();
-		return isReachedEndOfPath(map.findConnection(prevNode, getNextNode()), map);
+		isReachedEndOfPath(map.findConnection(prevNode, getNextNode()), map);
 	}
 
 	@Override
@@ -61,11 +56,6 @@ public class RunCharacterCommand extends CharacterCommand {
 		if (path.nodes.size > 1) {
 			path.nodes.removeRange(1, path.nodes.size - 1);
 		}
-	}
-
-	@Override
-	public void free( ) {
-		Pools.get(RunCharacterCommand.class).free(this);
 	}
 
 	@Override
@@ -151,7 +141,7 @@ public class RunCharacterCommand extends CharacterCommand {
 		prevNode = getNextNode();
 		setNextNode(path.getNextOf(getNextNode()));
 		setDestinationNode(getNextNode());
-		consumeTurnTime(character, ComponentsMapper.character.get(character).getSkills().getAgility().max());
+		consumeTurnTime(character, ComponentsMapper.character.get(character).getSkills().getAgilityDefinition().max());
 		MapGraph map = systemsCommonData.getMap();
 		return isReachedEndOfPath(map.findConnection(prevNode, getNextNode()), map);
 	}

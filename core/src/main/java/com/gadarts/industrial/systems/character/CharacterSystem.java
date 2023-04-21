@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.Queue;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.DebugSettings;
@@ -64,7 +65,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private static final Vector2 auxVector2_3 = new Vector2();
 	private static final long CHARACTER_PAIN_DURATION = 1000L;
 	private static final long MIN_IDLE_ANIMATION_INTERVAL = 2000L;
-	private static final Queue<CharacterCommand> auxCommandQueue = new Queue<>();
 	private ParticleEffect bloodSplatterEffect;
 	private ImmutableArray<Entity> characters;
 	private ParticleEffect smallExpEffect;
@@ -73,6 +73,11 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	public CharacterSystem(GameAssetManager assetsManager,
 						   GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
+	}
+
+	@Override
+	public void onEnemyAppliedCommands(Entity enemy) {
+		onCharacterAppliedCommands(enemy);
 	}
 
 	@Override
@@ -121,11 +126,10 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		smallExpEffect = getAssetsManager().getParticleEffect(Assets.ParticleEffects.SMALL_EXP);
 	}
 
-	public void applyCommands(Queue<CharacterCommand> commands,
-							  Entity character) {
-		if (commands.isEmpty()) return;
+	public void applyCommands(Entity character) {
+		if (ComponentsMapper.character.get(character).getCommands().isEmpty()) return;
+
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		characterComponent.setCommands(commands);
 		CharacterCommand currentCommand = ComponentsMapper.character.get(character).getCommands().first();
 		currentCommand.setState(CommandStates.READY);
 		if (characterComponent.getCharacterSpriteData().getSpriteType() != PAIN) {
@@ -152,12 +156,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		currentCommand.setState(CommandStates.RUNNING);
 		ComponentsMapper.character.get(character).getRotationData().setRotating(true);
 		SystemsCommonData data = getSystemsCommonData();
-		Object additionalData = currentCommand.getAdditionalData();
-		boolean alreadyDone = currentCommand.initialize(character, data, additionalData, getSubscribers());
-		subscribers.forEach(s -> s.onCommandInitialized(character, currentCommand));
-		if (alreadyDone) {
-			commandDone(character);
-		}
+		currentCommand.initialize(character, data, getSubscribers());
 	}
 
 	private void updateCharacters( ) {
@@ -389,15 +388,24 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	private void handleCharacterCommand(Entity character) {
-		Queue<CharacterCommand> commands = ComponentsMapper.character.get(character).getCommands();
+		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
+		Queue<CharacterCommand> commands = characterComponent.getCommands();
 		if (!commands.isEmpty()) {
 			CharacterCommand currentCommand = commands.first();
-			CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-			SpriteType spriteType = characterComponent.getCharacterSpriteData().getSpriteType();
-			if (spriteType == PICKUP || spriteType == ATTACK_PRIMARY) {
-				handleModeWithNonLoopingAnimation(character);
-			} else {
-				handleRotation(currentCommand, character);
+			CommandStates state = currentCommand.getState();
+			if (state == CommandStates.READY) {
+				currentCommand.setState(CommandStates.RUNNING);
+				beginProcessingCommand(character, currentCommand);
+			} else if (state == CommandStates.RUNNING) {
+				SpriteType spriteType = characterComponent.getCharacterSpriteData().getSpriteType();
+				if (spriteType == PICKUP || spriteType == ATTACK_PRIMARY) {
+					handleModeWithNonLoopingAnimation(character);
+				} else {
+					handleRotation(currentCommand, character);
+				}
+			} else if (state == CommandStates.ENDED) {
+				Pools.free(commands.removeFirst());
+				characterComponent.getCharacterSpriteData().setSpriteType(IDLE);
 			}
 		}
 	}
@@ -465,23 +473,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	@Override
-	public void onPlayerPathCreated(MapGraphNode destination) {
-
-	}
-
-	@Override
-	public void onEnemyAppliedCommand(CharacterCommand command, Entity enemy) {
-		auxCommandQueue.clear();
-		auxCommandQueue.addLast(command);
-		onCharacterAppliedCommand(auxCommandQueue, enemy);
-	}
-
-	@Override
-	public void onPlayerAppliedCommand(Queue<CharacterCommand> commands) {
-		onCharacterAppliedCommand(commands, getSystemsCommonData().getPlayer());
-	}
-
-	@Override
 	public void onFrameChanged(final Entity character, final float deltaTime, final TextureAtlas.AtlasRegion newFrame) {
 
 		SpriteType spriteType = ComponentsMapper.characterDecal.get(character).getSpriteType();
@@ -510,8 +501,9 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (turn == character && !commands.isEmpty()) {
 			CharacterCommand currentCommand = commands.first();
 			if (currentCommand.getState() == CommandStates.RUNNING) {
-				if (currentCommand.reactToFrameChange(systemsCommonData, character, newFrame, subscribers)) {
-					commandDone(character);
+				boolean commandDone = currentCommand.reactToFrameChange(systemsCommonData, character, newFrame, subscribers);
+				if (commandDone) {
+					currentCommand.setState(CommandStates.ENDED);
 				}
 			}
 		}
@@ -524,8 +516,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		charSpriteData.setSpriteType(command.getDefinition().getSpriteType());
 	}
 
-	private void onCharacterAppliedCommand(Queue<CharacterCommand> commands, Entity character) {
-		applyCommands(commands, character);
+	private void onCharacterAppliedCommands(Entity character) {
+		applyCommands(character);
 	}
 
 	@Override

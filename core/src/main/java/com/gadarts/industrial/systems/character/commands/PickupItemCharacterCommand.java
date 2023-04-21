@@ -15,26 +15,12 @@ public class PickupItemCharacterCommand extends CharacterCommand {
 	private Entity itemToPickup;
 
 	@Override
-	public boolean initialize(Entity character,
-							  SystemsCommonData commonData,
-							  Object additionalData,
-							  List<CharacterSystemEventsSubscriber> subscribers) {
-		itemToPickup = (Entity) additionalData;
-		return false;
-	}
-
-	@Override
 	public boolean reactToFrameChange(SystemsCommonData systemsCommonData,
 									  Entity character,
 									  TextureAtlas.AtlasRegion newFrame,
 									  List<CharacterSystemEventsSubscriber> subscribers) {
 		handlePickup(character, newFrame, subscribers);
 		return false;
-	}
-
-	@Override
-	public void free( ) {
-
 	}
 
 	private void handlePickup(Entity character,
@@ -51,5 +37,9 @@ public class PickupItemCharacterCommand extends CharacterCommand {
 	@Override
 	public void reset( ) {
 
+	}
+
+	@Override
+	public void initialize(Entity character, SystemsCommonData commonData, List<CharacterSystemEventsSubscriber> subscribers) {
 	}
 }

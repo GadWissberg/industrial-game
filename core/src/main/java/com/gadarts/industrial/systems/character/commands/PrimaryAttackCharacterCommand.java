@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
@@ -34,12 +33,15 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 		return MathUtils.random(primary.numberOfBulletsMin(), primary.numberOfBulletsMax());
 	}
 
+
 	@Override
-	public boolean initialize(Entity character,
-							  SystemsCommonData commonData,
-							  Object additionalData,
-							  List<CharacterSystemEventsSubscriber> subscribers) {
-		if (checkAdjacentForMelee(character, commonData)) return true;
+	public void reset( ) {
+
+	}
+
+	@Override
+	public void initialize(Entity character, SystemsCommonData commonData, List<CharacterSystemEventsSubscriber> subscribers) {
+		if (checkAdjacentForMelee(character, commonData)) return;
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		if (characterComponent.getTarget() != null) {
 			characterComponent.getRotationData().setRotating(true);
@@ -47,12 +49,6 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 		WeaponDeclaration primary = characterComponent.getPrimaryAttack();
 		int bulletsToShoot = primary.melee() ? 1 : randomNumberOfBullets(primary);
 		characterComponent.getOnGoingAttack().initialize(CharacterComponent.AttackType.PRIMARY, bulletsToShoot);
-		return false;
-	}
-
-	@Override
-	public void reset( ) {
-
 	}
 
 	@Override
@@ -62,11 +58,6 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 									  List<CharacterSystemEventsSubscriber> subscribers) {
 		engagePrimaryAttack(character, newFrame, systemsCommonData, subscribers);
 		return false;
-	}
-
-	@Override
-	public void free( ) {
-		Pools.get(PrimaryAttackCharacterCommand.class).free(this);
 	}
 
 	private boolean checkAdjacentForMelee(Entity character, SystemsCommonData commonData) {

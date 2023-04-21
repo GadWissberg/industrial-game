@@ -5,11 +5,9 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.DebugSettings;
@@ -41,7 +39,6 @@ import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
-import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
 import com.gadarts.industrial.systems.character.commands.CommandStates;
 import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
@@ -57,7 +54,7 @@ import java.util.LinkedHashSet;
 import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.IDLE;
-import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.*;
+import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.RUN;
 import static com.gadarts.industrial.utils.GameUtils.calculatePath;
 
 public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> implements
@@ -77,7 +74,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private final static LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
-	private static final Queue<CharacterCommand> auxCommandQueue = new Queue<>();
 	private PathPlanHandler playerPathPlanner;
 	private ImmutableArray<Entity> ambObjects;
 	private ImmutableArray<Entity> pickups;
@@ -94,26 +90,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		}
 	}
 
-	private CharacterCommand initializeCommand(CharacterCommandsDefinitions commandDefinition,
-											   Object additionalData,
-											   MapGraphNode destination) {
-		CharacterCommand command = Pools.get(commandDefinition.getCharacterCommandImplementation()).obtain();
-		command.init(commandDefinition, getSystemsCommonData().getPlayer(), additionalData, destination);
-		return command;
-	}
-
-	@Override
-	public void onCommandInitialized(Entity character, CharacterCommand command) {
-		if (!ComponentsMapper.player.has(character)) return;
-
-		for (Entity entity : getSystemsCommonData().getTurnsQueue()) {
-			boolean isEnemy = ComponentsMapper.enemy.has(entity);
-			if (isEnemy && ComponentsMapper.enemy.get(entity).getAiStatus() == EnemyAiStatus.ATTACKING) {
-				command.onInFight();
-				return;
-			}
-		}
-	}
 
 	@Override
 	public void onDoorStateChanged(Entity doorEntity,
@@ -289,10 +265,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		if (systemsCommonData.getCurrentGameMode() == GameMode.EXPLORE) {
 			Entity player = systemsCommonData.getPlayer();
-			CharacterSpriteData characterSpriteData = ComponentsMapper.character.get(player).getCharacterSpriteData();
-			if (characterSpriteData.getSpriteType() == SpriteType.RUN) {
-				characterSpriteData.setSpriteType(IDLE);
-			}
+			ComponentsMapper.character.get(player).getCommands().forEach(c -> c.setState(CommandStates.ENDED));
 		}
 	}
 
@@ -403,72 +376,26 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	private void planPath(final MapGraphNode cursorNode) {
-		Entity enemyAtNode = getSystemsCommonData().getMap().fetchAliveCharacterFromNode(cursorNode);
-		if (!calculatePathAccordingToSelection(cursorNode, enemyAtNode)) return;
-
-		pathHasCreated(cursorNode, enemyAtNode);
-	}
-
-	private void enemySelected(MapGraphNode targetNode, Entity enemyAtNode) {
-		ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).setTarget(enemyAtNode);
-		Entity targetCharacter = getSystemsCommonData().getMap().fetchAliveCharacterFromNode(targetNode);
-		Decal playerDecal = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer()).getDecal();
-		if (!getSystemsCommonData().getStorage().getSelectedWeapon().isMelee()) {
-			playerPathPlanner.resetPlan();
-			selectedEnemyToAttack(targetNode, targetCharacter);
-		} else {
-			runToMelee(targetNode, targetCharacter, getSystemsCommonData().getMap().getNode(playerDecal.getPosition()));
+		CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer());
+		MapGraphPath plannedPath = playerPathPlanner.getCurrentPath();
+		initializePathPlanRequest(cursorNode, charDecalComp, plannedPath);
+		boolean foundPath = calculatePath(request, playerPathPlanner.getPathFinder(), playerPathPlanner.getHeuristic());
+		if (foundPath) {
+			pathHasCreated(cursorNode, request.getOutputPath());
 		}
 	}
 
-	private void runToMelee(MapGraphNode targetNode, Entity targetCharacter, MapGraphNode playerNode) {
-		calculatePathToEnemy(targetCharacter, playerNode);
+	private void pathHasCreated(MapGraphNode destination, MapGraphPath outputPath) {
 		MapGraphPath currentPath = playerPathPlanner.getCurrentPath();
 		int pathSize = currentPath.getCount();
-		if (!currentPath.nodes.isEmpty() && currentPath.get(pathSize - 1).equals(targetNode)) {
-			auxCommandQueue.clear();
-			auxCommandQueue.addLast(initializeCommand(RUN, currentPath, currentPath.get(1)));
-			auxCommandQueue.addLast(initializeCommand(ATTACK_PRIMARY, targetCharacter, targetNode));
-			shrinkRunCommandInBattle();
-			subscribers.forEach(sub -> sub.onPlayerAppliedCommand(auxCommandQueue));
+		if (!currentPath.nodes.isEmpty() && currentPath.get(pathSize - 1).equals(destination)) {
+			Entity player = getSystemsCommonData().getPlayer();
+			CharacterCommand command = Pools.get(RUN.getCharacterCommandImplementation()).obtain();
+			command.reset(RUN, getSystemsCommonData().getPlayer(), outputPath, destination);
+			Queue<CharacterCommand> commands = ComponentsMapper.character.get(player).getCommands();
+			commands.clear();
+			commands.addFirst(command);
 		}
-	}
-
-	private void selectedEnemyToAttack(final MapGraphNode node, Entity targetCharacter) {
-		Entity player = getSystemsCommonData().getPlayer();
-		ComponentsMapper.character.get(player).setTarget(targetCharacter);
-		auxCommandQueue.clear();
-		auxCommandQueue.addLast(initializeCommand(ATTACK_PRIMARY, targetCharacter, node));
-		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onPlayerAppliedCommand(auxCommandQueue);
-		}
-	}
-
-	private void pathHasCreated(MapGraphNode destination, Entity enemyAtNode) {
-		if (enemyAtNode != null) {
-			enemySelected(destination, enemyAtNode);
-		} else {
-			MapGraphPath currentPath = playerPathPlanner.getCurrentPath();
-			int pathSize = currentPath.getCount();
-			if (!currentPath.nodes.isEmpty() && currentPath.get(pathSize - 1).equals(destination)) {
-				applySingleCommand(RUN, playerPathPlanner.getCurrentPath(), playerPathPlanner.getCurrentPath().get(1));
-			}
-		}
-		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onPlayerPathCreated(destination);
-		}
-	}
-
-	public boolean calculatePathToCharacter(MapGraphNode sourceNode,
-											Entity character,
-											boolean avoidCharactersInCalculation,
-											MapGraphConnectionCosts maxCostPerNodeConnection) {
-		playerPathPlanner.getCurrentPath().clear();
-		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(character);
-		Vector2 cellPosition = characterDecalComponent.getNodePosition(auxVector2_1);
-		MapGraphNode destNode = getSystemsCommonData().getMap().getNode((int) cellPosition.x, (int) cellPosition.y);
-		initializePathPlanRequest(sourceNode, destNode, maxCostPerNodeConnection, avoidCharactersInCalculation, playerPathPlanner.getCurrentPath());
-		return playerPathPlanner.getPathFinder().searchNodePathBeforeCommand(playerPathPlanner.getHeuristic(), request);
 	}
 
 	@Override
@@ -477,7 +404,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(pickup).getModelInstance();
 			Vector3 pickupPosition = modelInstance.transform.getTranslation(auxVector3_1);
 			if (getSystemsCommonData().getMap().getNode(pickupPosition).equals(playerNode)) {
-				applySingleCommand(PICKUP, pickup, playerNode);
 			}
 		}
 	}
@@ -495,22 +421,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		request.setRequester(getSystemsCommonData().getPlayer());
 	}
 
-	private boolean calculatePathAccordingToSelection(final MapGraphNode cursorNode, Entity enemyAtNode) {
-		CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer());
-		MapGraphPath plannedPath = playerPathPlanner.getCurrentPath();
-		initializePathPlanRequest(cursorNode, charDecalComp, plannedPath);
-		Vector2 cellPosition = charDecalComp.getNodePosition(auxVector2_1);
-		MapGraphNode playerNode = getSystemsCommonData().getMap().getNode(cellPosition);
-		return calculatePathToEnemy(enemyAtNode, playerNode)
-				|| calculatePath(request, playerPathPlanner.getPathFinder(), playerPathPlanner.getHeuristic());
-	}
-
-	private boolean calculatePathToEnemy(Entity enemyAtNode, MapGraphNode playerNode) {
-		return enemyAtNode != null
-				&& ComponentsMapper.character.get(enemyAtNode).getSkills().getHealthData().getHp() > 0
-				&& calculatePathToCharacter(playerNode, enemyAtNode, true, CLEAN);
-	}
-
 	private void initializePathPlanRequest(MapGraphNode cursorNode,
 										   CharacterDecalComponent charDecalComp,
 										   MapGraphPath plannedPath) {
@@ -520,48 +430,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				CLEAN,
 				true,
 				plannedPath);
-	}
-
-	private void applySingleCommand(CharacterCommandsDefinitions commandDefinition,
-									Object additionalData,
-									MapGraphNode destinationNode) {
-		MapGraph map = getSystemsCommonData().getMap();
-		Entity player = getSystemsCommonData().getPlayer();
-		MapGraphNode playerNode = map.getNode(ComponentsMapper.characterDecal.get(player).getDecal().getPosition());
-		MapGraphPath path = playerPathPlanner.getCurrentPath();
-		if (!commandDefinition.isRequiresMovement() || path.getCount() > 0 && !playerNode.equals(path.get(path.getCount() - 1))) {
-			CharacterCommand command = initializeCommand(commandDefinition, additionalData, destinationNode);
-			auxCommandQueue.clear();
-			auxCommandQueue.addLast(command);
-			shrinkRunCommandInBattle();
-			subscribers.forEach(sub -> sub.onPlayerAppliedCommand(auxCommandQueue));
-		}
-	}
-
-	private void shrinkRunCommandInBattle( ) {
-		Array<MapGraphNode> nodes = playerPathPlanner.getCurrentPath().nodes;
-		if (nodes.size > 2 && isTurnsQueueHasVisibleEnemies()) {
-			nodes.removeRange(2, nodes.size - 1);
-		}
-	}
-
-	private boolean isTurnsQueueHasVisibleEnemies( ) {
-		Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
-		if (turnsQueue.size <= 1) return false;
-
-		for (int i = 0; i < turnsQueue.size; i++) {
-			Entity entity = turnsQueue.get(i);
-			if (ComponentsMapper.enemy.has(entity)) {
-				Decal decal = ComponentsMapper.characterDecal.get(entity).getDecal();
-				MapGraphNode enemyNode = getSystemsCommonData().getMap().getNode(decal.getPosition());
-				if (enemyNode.getEntity() != null) {
-					if ((ComponentsMapper.floor.get(enemyNode.getEntity()).getFogOfWarSignature() & 16) == 0) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
 	}
 
 	@Override
@@ -579,7 +447,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private void changePlayerStatus(final boolean disabled) {
 		PlayerComponent playerComponent = ComponentsMapper.player.get(getSystemsCommonData().getPlayer());
 		playerComponent.setDisabled(disabled);
-		subscribers.forEach(subscriber -> subscriber.onPlayerStatusChanged(disabled));
+		subscribers.forEach(subscriber -> subscriber.onPlayerStatusChanged());
 	}
 
 

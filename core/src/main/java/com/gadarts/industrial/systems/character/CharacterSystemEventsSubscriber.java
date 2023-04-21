@@ -39,9 +39,7 @@ public interface CharacterSystemEventsSubscriber extends SystemEventsSubscriber 
 
 	}
 
-	default void onCommandInitialized(Entity character, CharacterCommand currentCommand) {
 
-	}
 
 	default void onCharacterStillHasTime(Entity character) {
 
