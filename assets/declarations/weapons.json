@@ -14,6 +14,7 @@
       "frame_duration": 0.1,
       "damage": 2,
       "engine_consumption": 1,
+      "action_points_consumption": 2,
       "melee": true,
       "duration": 0.4,
       "sound_engage": "weapon_cutter"

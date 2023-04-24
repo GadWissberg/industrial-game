@@ -40,7 +40,9 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 	}
 
 	@Override
-	public void initialize(Entity character, SystemsCommonData commonData, List<CharacterSystemEventsSubscriber> subscribers) {
+	public void initialize(Entity character,
+						   SystemsCommonData commonData,
+						   List<CharacterSystemEventsSubscriber> subscribers) {
 		if (checkAdjacentForMelee(character, commonData)) return;
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		if (characterComponent.getTarget() != null) {
@@ -56,6 +58,10 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 									  Entity character,
 									  TextureAtlas.AtlasRegion newFrame,
 									  List<CharacterSystemEventsSubscriber> subscribers) {
+		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
+		if (characterComponent.getSkills().getActionPoints() <= characterComponent.getPrimaryAttack().actionPointsConsumption())
+			return true;
+
 		engagePrimaryAttack(character, newFrame, systemsCommonData, subscribers);
 		return false;
 	}

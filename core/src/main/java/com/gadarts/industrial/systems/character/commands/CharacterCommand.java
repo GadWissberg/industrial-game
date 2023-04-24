@@ -16,6 +16,7 @@ import java.util.List;
 
 @Getter
 public abstract class CharacterCommand implements Pool.Poolable {
+	final MapGraphPath path = new MapGraphPath();
 	private CharacterCommandsDefinitions definition;
 	private Entity character;
 	@Setter
@@ -24,7 +25,6 @@ public abstract class CharacterCommand implements Pool.Poolable {
 	private CommandStates state;
 	@Setter
 	private MapGraphNode nextNode;
-	final MapGraphPath path = new MapGraphPath();
 
 	@Override
 	public void reset( ) {
@@ -55,10 +55,6 @@ public abstract class CharacterCommand implements Pool.Poolable {
 		this.nextNode = destinationNode;
 		this.state = CommandStates.READY;
 		return this;
-	}
-
-	public void onInFight( ) {
-
 	}
 
 	@Override

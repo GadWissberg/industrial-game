@@ -19,7 +19,6 @@ import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterAnimation;
 import com.gadarts.industrial.components.character.CharacterAnimations;
-import com.gadarts.industrial.components.character.CharacterSpriteData;
 import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
@@ -33,7 +32,6 @@ import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponsDeclarations;
 import com.gadarts.industrial.shared.model.characters.Direction;
-import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
@@ -53,7 +51,6 @@ import java.util.LinkedHashSet;
 
 import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
-import static com.gadarts.industrial.shared.model.characters.SpriteType.IDLE;
 import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.RUN;
 import static com.gadarts.industrial.utils.GameUtils.calculatePath;
 
@@ -107,7 +104,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				getLifeCycleHandler().raiseFlagToRestartGame();
 			} else {
 				refreshFogOfWar();
-				notifyPlayerFinishedTurn();
 			}
 		}
 	}
@@ -340,13 +336,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	@Override
-	public void onCharacterFinishedTurn(Entity character) {
-		if (ComponentsMapper.player.has(character)) {
-			notifyPlayerFinishedTurn();
-		}
-	}
-
-	@Override
 	public void onItemPickedUp(final Entity itemPickedUp) {
 		Item item = ComponentsMapper.pickup.get(itemPickedUp).getItem();
 		if (getSystemsCommonData().getStorage().addItem(item)) {
@@ -367,6 +356,15 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		ComponentsMapper.character.get(getSystemsCommonData().getTurnsQueue().first()).setTurnTimeLeft(TURN_DURATION);
 		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onPlayerFinishedTurn();
+		}
+	}
+
+	@Override
+	public void onCharacterCommandDone(Entity character) {
+		if (ComponentsMapper.player.has(character)) {
+			if (ComponentsMapper.character.get(character).getSkills().getActionPoints() <= 0) {
+				subscribers.forEach(PlayerSystemEventsSubscriber::onPlayerFinishedTurn);
+			}
 		}
 	}
 
@@ -447,7 +445,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private void changePlayerStatus(final boolean disabled) {
 		PlayerComponent playerComponent = ComponentsMapper.player.get(getSystemsCommonData().getPlayer());
 		playerComponent.setDisabled(disabled);
-		subscribers.forEach(subscriber -> subscriber.onPlayerStatusChanged());
+		subscribers.forEach(PlayerSystemEventsSubscriber::onPlayerStatusChanged);
 	}
 
 

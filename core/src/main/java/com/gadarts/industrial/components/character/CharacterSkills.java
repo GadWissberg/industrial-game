@@ -4,9 +4,9 @@ import com.badlogic.gdx.math.MathUtils;
 import com.gadarts.industrial.shared.assets.declarations.Agility;
 import com.gadarts.industrial.shared.model.characters.attributes.Accuracy;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Random;
-import java.util.stream.IntStream;
 
 @Getter
 public class CharacterSkills {
@@ -15,15 +15,18 @@ public class CharacterSkills {
 	private final CharacterHealthData healthData = new CharacterHealthData();
 	private Agility agilityDefinition;
 	private Accuracy accuracyDefinition;
-	private int turnAgility;
+
+	@Setter
+	private int actionPoints;
 
 	public void applyParameters(final CharacterSkillsParameters skills) {
 		this.healthData.init(skills.health());
 		this.agilityDefinition = skills.agility();
 		this.accuracyDefinition = skills.accuracy();
+		resetActionPoints();
 	}
 
-	public void resetTurnAgility( ) {
-		this.turnAgility = MathUtils.random(agilityDefinition.min(), agilityDefinition.max());
+	public void resetActionPoints( ) {
+		this.actionPoints = MathUtils.random(agilityDefinition.min(), agilityDefinition.max());
 	}
 }

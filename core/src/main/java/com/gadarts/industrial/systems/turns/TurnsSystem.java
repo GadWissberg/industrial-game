@@ -85,6 +85,11 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 	}
 
 	@Override
+	public void onCharacterFinishedTurn( ) {
+		markCurrentTurnAsDone();
+	}
+
+	@Override
 	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus, boolean wokeBySpottingPlayer) {
 		if (prevAiStatus != EnemyAiStatus.IDLE) return;
 

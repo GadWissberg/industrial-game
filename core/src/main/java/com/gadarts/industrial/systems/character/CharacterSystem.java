@@ -76,34 +76,10 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	@Override
-	public void onEnemyAppliedCommands(Entity enemy) {
-		onCharacterAppliedCommands(enemy);
-	}
-
-	@Override
-	public void onCharacterStillHasTime(Entity character) {
-		Queue<CharacterCommand> commands = ComponentsMapper.character.get(character).getCommands();
-		if (!commands.isEmpty()) {
-			CharacterCommand command = commands.first();
-			if (command.getState() == CommandStates.READY) {
-				beginProcessingCommand(character, command);
-			}
-		}
-	}
-
-	@Override
 	public void onNewTurn(Entity entity) {
 		if (!character.has(entity)) return;
 
-		if (ComponentsMapper.player.has(entity)) {
-			Queue<CharacterCommand> commands = ComponentsMapper.character.get(entity).getCommands();
-			if (!commands.isEmpty()) {
-				CharacterCommand currentCommand = commands.first();
-				if (commands.first().getState() == CommandStates.READY) {
-					beginProcessingCommand(entity, currentCommand);
-				}
-			}
-		}
+		character.get(entity).getCharacterSpriteData().setSpriteType(IDLE);
 	}
 
 	@Override
@@ -126,24 +102,18 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		smallExpEffect = getAssetsManager().getParticleEffect(Assets.ParticleEffects.SMALL_EXP);
 	}
 
-	public void applyCommands(Entity character) {
-		if (ComponentsMapper.character.get(character).getCommands().isEmpty()) return;
-
-		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		CharacterCommand currentCommand = ComponentsMapper.character.get(character).getCommands().first();
-		currentCommand.setState(CommandStates.READY);
-		if (characterComponent.getCharacterSpriteData().getSpriteType() != PAIN) {
-			beginProcessingCommand(character, currentCommand);
-		}
-	}
-
 	@Override
 	public void update(float deltaTime) {
 		super.update(deltaTime);
 		if (getSystemsCommonData().getCurrentGameMode() == GameMode.COMBAT) {
 			Entity current = getSystemsCommonData().getTurnsQueue().first();
 			if (character.has(current)) {
-				handleCharacterCommand(current);
+				if (character.get(current).getSkills().getActionPoints() <= 0) {
+					character.get(current).getSkills().resetActionPoints();
+					subscribers.forEach(subscriber -> subscriber.onCharacterFinishedTurn());
+				} else {
+					handleCharacterCommand(current);
+				}
 			}
 		} else {
 			handleCharacterCommand(getSystemsCommonData().getPlayer());
@@ -290,29 +260,9 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	public void commandDone(Entity character) {
-		commandDone(character, true, true);
-	}
-
-	public void commandDone(Entity character, boolean informTurnTimeLeftStatus, boolean setToIdleSprite) {
-		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		Queue<CharacterCommand> commands = characterComponent.getCommands();
-		if (commands.isEmpty()) return;
-
-		if (setToIdleSprite) {
-			characterComponent.getCharacterSpriteData().setSpriteType(SpriteType.IDLE);
-		}
-		CharacterCommand lastCommand = commands.first();
-		lastCommand.setState(CommandStates.ENDED);
-		characterComponent.getRotationData().setRotating(false);
+		ComponentsMapper.character.get(character).getCharacterSpriteData().setSpriteType(IDLE);
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onCharacterCommandDone(character, lastCommand);
-		}
-		if (informTurnTimeLeftStatus) {
-			if (characterComponent.getTurnTimeLeft() > 0 && characterComponent.getSkills().getHealthData().getHp() > 0) {
-				subscribers.forEach(subscriber -> subscriber.onCharacterStillHasTime(character));
-			} else {
-				subscribers.forEach(subscriber -> subscriber.onCharacterFinishedTurn(character));
-			}
+			subscriber.onCharacterCommandDone(character);
 		}
 	}
 
@@ -405,7 +355,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 				}
 			} else if (state == CommandStates.ENDED) {
 				Pools.free(commands.removeFirst());
-				characterComponent.getCharacterSpriteData().setSpriteType(IDLE);
+				commandDone(character);
 			}
 		}
 	}
@@ -428,7 +378,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (!currentCommand.getDefinition().isRotationForbidden()) {
 			if (rotData.isRotating() && TimeUtils.timeSinceMillis(rotData.getLastRotation()) > ROTATION_INTERVAL) {
 				for (CharacterSystemEventsSubscriber subscriber : subscribers) {
-					subscriber.onCharacterRotated(currentCommand.getCharacter());
+					subscriber.onCharacterRotated();
 				}
 				rotData.setLastRotation(TimeUtils.millis());
 				Direction directionToDest = calculateDirectionToDestination(currentCommand);
@@ -514,10 +464,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		rotationData.setRotating(false);
 		CharacterCommand command = character.get(getSystemsCommonData().getTurnsQueue().first()).getCommands().first();
 		charSpriteData.setSpriteType(command.getDefinition().getSpriteType());
-	}
-
-	private void onCharacterAppliedCommands(Entity character) {
-		applyCommands(character);
 	}
 
 	@Override

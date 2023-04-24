@@ -13,7 +13,4 @@ public interface EnemySystemEventsSubscriber extends SystemEventsSubscriber {
 
 	}
 
-	default void onEnemyAppliedCommands(Entity enemy) {
-
-	}
 }

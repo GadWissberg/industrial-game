@@ -10,6 +10,7 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.DoorComponent.DoorStates;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
+import com.gadarts.industrial.components.character.CharacterSkills;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphConnection;
 import com.gadarts.industrial.map.MapGraphNode;
@@ -17,6 +18,7 @@ import com.gadarts.industrial.shared.model.characters.CharacterTypes;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
+import com.gadarts.industrial.systems.turns.GameMode;
 
 import java.util.List;
 
@@ -33,6 +35,7 @@ public class RunCharacterCommand extends CharacterCommand {
 	private static final float OPEN_DOOR_TIME_CONSUME = 1F;
 	private SystemsCommonData systemsCommonData;
 	private MapGraphNode prevNode;
+	private boolean consumeActionPoints;
 
 	@Override
 	public void reset( ) {
@@ -43,6 +46,7 @@ public class RunCharacterCommand extends CharacterCommand {
 	public void initialize(Entity character,
 						   SystemsCommonData commonData,
 						   List<CharacterSystemEventsSubscriber> subscribers) {
+		consumeActionPoints = commonData.getCurrentGameMode() != GameMode.EXPLORE;
 		systemsCommonData = commonData;
 		Array<MapGraphNode> nodes = path.nodes;
 		prevNode = nodes.removeIndex(0);
@@ -52,18 +56,13 @@ public class RunCharacterCommand extends CharacterCommand {
 	}
 
 	@Override
-	public void onInFight( ) {
-		if (path.nodes.size > 1) {
-			path.nodes.removeRange(1, path.nodes.size - 1);
-		}
-	}
-
-	@Override
 	public boolean reactToFrameChange(SystemsCommonData systemsCommonData,
 									  Entity character,
 									  AtlasRegion newFrame,
 									  List<CharacterSystemEventsSubscriber> subscribers) {
-		if (path.nodes.isEmpty()) return true;
+		if (path.nodes.isEmpty() || ComponentsMapper.character.get(character).getSkills().getActionPoints() <= 0)
+			return true;
+
 		return updateCommand(systemsCommonData, character, subscribers);
 	}
 
@@ -138,17 +137,21 @@ public class RunCharacterCommand extends CharacterCommand {
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onCharacterNodeChanged(character, prevNode, getNextNode());
 		}
+		CharacterSkills skills = ComponentsMapper.character.get(character).getSkills();
+		if (consumeActionPoints) {
+			skills.setActionPoints(skills.getActionPoints() - 1);
+		}
 		prevNode = getNextNode();
 		setNextNode(path.getNextOf(getNextNode()));
 		setDestinationNode(getNextNode());
-		consumeTurnTime(character, ComponentsMapper.character.get(character).getSkills().getAgilityDefinition().max());
 		MapGraph map = systemsCommonData.getMap();
 		return isReachedEndOfPath(map.findConnection(prevNode, getNextNode()), map);
 	}
 
 
 	private boolean isReachedEndOfPath(MapGraphConnection connection, MapGraph map) {
-		return getNextNode() == null
+		return ComponentsMapper.character.get(getCharacter()).getSkills().getActionPoints() <= 0
+				|| getNextNode() == null
 				|| connection == null
 				|| connection.getCost() != CLEAN.getCostValue()
 				|| !map.checkIfNodeIsFreeOfAliveCharacters(getNextNode());

@@ -22,7 +22,7 @@ public final class DebugSettings {
 	public static final int LOG_LEVEL = LOG_DEBUG;
 	public static final String  STARTING_WEAPON = "pnc";
 	public static final boolean ALLOW_STATIC_SHADOWS = true;
-	public static final boolean DISABLE_FOW = false;
+	public static final boolean DISABLE_FOW = true;
 	public static final boolean PARALYZED_ENEMIES = false;
 	public static final boolean LOW_HP_FOR_ENEMIES = false;
 	public static final boolean LOW_HP_FOR_PLAYER = false;

@@ -97,12 +97,10 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	@Override
-	public void onCharacterCommandDone(final Entity character, final CharacterCommand executedCommand) {
+	public void onCharacterCommandDone(final Entity character) {
 		if (ComponentsMapper.enemy.has(character)) {
-			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(character);
-			long currentTurnId = getSystemsCommonData().getCurrentTurnId();
-			if (executedCommand.getDefinition() == CharacterCommandsDefinitions.ATTACK_PRIMARY) {
-				enemyComponent.getTimeStamps().setLastPrimaryAttack(currentTurnId);
+			if (ComponentsMapper.character.get(character).getSkills().getActionPoints() <= 0) {
+				subscribers.forEach(EnemySystemEventsSubscriber::onEnemyFinishedTurn);
 			}
 		}
 	}
@@ -132,6 +130,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		}
 		return result;
 	}
+
 	@Override
 	public void onCharacterGotDamage(final Entity entity) {
 		if (ComponentsMapper.enemy.has(entity)) {
@@ -224,36 +223,51 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	void invokeEnemyTurn(final Entity enemy) {
 		CharacterComponent character = ComponentsMapper.character.get(enemy);
-		character.getSkills().resetTurnAgility();
 		character.getCommands().clear();
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(enemy);
-		int turnAgility = character.getSkills().getTurnAgility();
+		int turnAgility = character.getSkills().getActionPoints();
 		if (turnAgility > 0) {
-			if (enemyComp.getAiStatus() == ATTACKING) {
-				if (character.getPrimaryAttack().melee()) {
-					CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(character.getTarget());
-					MapGraphNode targetNode = getSystemsCommonData().getMap().getNode(characterDecalComponent.getDecal().getPosition());
-					initializePathPlanRequest(targetNode, ComponentsMapper.characterDecal.get(enemy), CLEAN, enemy);
-					if (GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic())) {
-						addCommand(enemy, character, targetNode, CharacterCommandsDefinitions.RUN);
-						addCommand(enemy, character, targetNode, CharacterCommandsDefinitions.ATTACK_PRIMARY);
-						subscribers.forEach(sub -> sub.onEnemyAppliedCommands(enemy));
-					} else {
-						enemyFinishedTurn();
-					}
-				}
+			EnemyAiStatus aiStatus = enemyComp.getAiStatus();
+			if (aiStatus == ATTACKING) {
+				handleAttackingStatus(enemy, character);
+			} else if (aiStatus == RUNNING_TO_LAST_SEEN_POSITION) {
+				handleRunningToLastSeenPositionStatus(enemy, character, enemyComp);
 			}
 		} else {
 			enemyFinishedTurn();
 		}
 	}
 
-	private static void addCommand(Entity enemy,
-								   CharacterComponent character,
-								   MapGraphNode targetNode,
-								   CharacterCommandsDefinitions characterCommandsDefinitions) {
+	private void handleRunningToLastSeenPositionStatus(Entity enemy, CharacterComponent character, EnemyComponent enemyComp) {
+		MapGraphNode targetLastVisibleNode = enemyComp.getTargetLastVisibleNode();
+		initializePathPlanRequest(targetLastVisibleNode, ComponentsMapper.characterDecal.get(enemy), CLEAN, enemy);
+		if (GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic())) {
+			addCommand(enemy, character, targetLastVisibleNode, CharacterCommandsDefinitions.RUN);
+		} else {
+			enemyFinishedTurn();
+		}
+	}
+
+	private void handleAttackingStatus(Entity enemy, CharacterComponent character) {
+		if (character.getPrimaryAttack().melee()) {
+			CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(character.getTarget());
+			MapGraphNode targetNode = getSystemsCommonData().getMap().getNode(characterDecalComponent.getDecal().getPosition());
+			initializePathPlanRequest(targetNode, ComponentsMapper.characterDecal.get(enemy), CLEAN, enemy);
+			if (GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic())) {
+				addCommand(enemy, character, targetNode, CharacterCommandsDefinitions.RUN);
+				addCommand(enemy, character, targetNode, CharacterCommandsDefinitions.ATTACK_PRIMARY);
+			} else {
+				enemyFinishedTurn();
+			}
+		}
+	}
+
+	private void addCommand(Entity enemy,
+							CharacterComponent character,
+							MapGraphNode targetNode,
+							CharacterCommandsDefinitions characterCommandsDefinitions) {
 		CharacterCommand command = Pools.get(characterCommandsDefinitions.getCharacterCommandImplementation()).obtain();
-		command.reset(characterCommandsDefinitions, enemy, null, targetNode);
+		command.reset(characterCommandsDefinitions, enemy, request.getOutputPath(), targetNode);
 		character.getCommands().addLast(command);
 	}
 
@@ -279,13 +293,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		float dirToTarget = auxVector2_2.set(targetPos.x, targetPos.z).sub(enemyPos.x, enemyPos.z).nor().angleDeg();
 		float angleDiff = (enemyDirection.angleDeg() - dirToTarget + 180 + 360) % 360 - 180;
 		return angleDiff <= ENEMY_HALF_FOV_ANGLE && angleDiff >= -ENEMY_HALF_FOV_ANGLE;
-	}
-
-	@Override
-	public void onCharacterFinishedTurn(Entity character) {
-		if (ComponentsMapper.enemy.has(character)) {
-			enemyFinishedTurn();
-		}
 	}
 
 	private boolean checkIfFloorNodesBlockSightToTarget(final Entity enemy) {
@@ -354,13 +361,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		}
 	}
 
-	@Override
-	public void onCharacterStillHasTime(Entity character) {
-		if (ComponentsMapper.enemy.has(character)) {
-			invokeEnemyTurn(character);
-		}
-	}
-
 	private void updateEnemyStatusAccordingToPlayerNewNode(MapGraphNode oldNode, Entity enemy) {
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		if (enemyComponent.getAiStatus() != ATTACKING) {
@@ -383,11 +383,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		super.onSystemReset(systemsCommonData);
 		pathPlanner = new PathPlanHandler(getSystemsCommonData().getMap());
 		enemies = getEngine().getEntitiesFor(Family.all(EnemyComponent.class).get());
-	}
-
-	@Override
-	public void update(final float deltaTime) {
-		super.update(deltaTime);
 	}
 
 	@Override
