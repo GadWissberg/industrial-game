@@ -364,7 +364,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 		return result;
 	}
 
-	public boolean isNodesAdjacent(MapGraphNode srcNode, MapGraphNode targetNode, float maxHeight) {
+	public boolean areNodesAdjacent(MapGraphNode srcNode, MapGraphNode targetNode, float maxHeight) {
 		int row = Math.abs(srcNode.getRow() - targetNode.getRow());
 		int col = Math.abs(srcNode.getCol() - targetNode.getCol());
 		return Math.abs(srcNode.getHeight() - targetNode.getHeight()) <= maxHeight && row <= 1 && col <= 1;

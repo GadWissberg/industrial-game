@@ -40,8 +40,9 @@ public class PickupItemCharacterCommand extends CharacterCommand {
 	}
 
 	@Override
-	public void initialize(Entity character,
-						   SystemsCommonData commonData,
-						   List<CharacterSystemEventsSubscriber> subscribers) {
+	public boolean initialize(Entity character,
+							  SystemsCommonData commonData,
+							  List<CharacterSystemEventsSubscriber> subscribers) {
+		return false;
 	}
 }

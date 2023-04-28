@@ -35,9 +35,9 @@ public abstract class CharacterCommand implements Pool.Poolable {
 		nextNode = null;
 	}
 
-	public abstract void initialize(Entity character,
-									SystemsCommonData commonData,
-									List<CharacterSystemEventsSubscriber> subscribers);
+	public abstract boolean initialize(Entity character,
+									   SystemsCommonData commonData,
+									   List<CharacterSystemEventsSubscriber> subscribers);
 
 	public abstract boolean reactToFrameChange(SystemsCommonData systemsCommonData,
 											   Entity character,

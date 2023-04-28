@@ -108,8 +108,10 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (getSystemsCommonData().getCurrentGameMode() == GameMode.COMBAT) {
 			Entity current = getSystemsCommonData().getTurnsQueue().first();
 			if (character.has(current)) {
-				if (character.get(current).getSkills().getActionPoints() <= 0) {
-					character.get(current).getSkills().resetActionPoints();
+				CharacterComponent characterComponent = character.get(current);
+				if (characterComponent.getSkills().getActionPoints() <= 0) {
+					characterComponent.getSkills().resetActionPoints();
+					characterComponent.getCharacterSpriteData().setSpriteType(IDLE);
 					subscribers.forEach(subscriber -> subscriber.onCharacterFinishedTurn());
 				} else {
 					handleCharacterCommand(current);
@@ -121,12 +123,25 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		updateCharacters();
 	}
 
+	@Override
+	public void onEnemyFinishedTurn( ) {
+		character.get(getSystemsCommonData().getTurnsQueue().first()).getSkills().resetActionPoints();
+	}
+
+	@Override
+	public void onPlayerFinishedTurn( ) {
+		character.get(getSystemsCommonData().getTurnsQueue().first()).getSkills().resetActionPoints();
+	}
+
 	private void beginProcessingCommand(Entity character,
 										CharacterCommand currentCommand) {
 		currentCommand.setState(CommandStates.RUNNING);
 		ComponentsMapper.character.get(character).getRotationData().setRotating(true);
 		SystemsCommonData data = getSystemsCommonData();
-		currentCommand.initialize(character, data, getSubscribers());
+		boolean alreadyDone = currentCommand.initialize(character, data, getSubscribers());
+		if (alreadyDone) {
+			currentCommand.setState(CommandStates.ENDED);
+		}
 	}
 
 	private void updateCharacters( ) {
@@ -153,7 +168,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		long lastDamage = characterComponent.getSkills().getHealthData().getLastDamage();
 		CharacterSpriteData spriteData = characterComponent.getCharacterSpriteData();
 		if (spriteData.getSpriteType() == PAIN && TimeUtils.timeSinceMillis(lastDamage) > CHARACTER_PAIN_DURATION) {
-			painDone(character, spriteData);
+			spriteData.setSpriteType(IDLE);
 		}
 	}
 
@@ -249,7 +264,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		MapGraphNode targetNode = map.getNode(ComponentsMapper.characterDecal.get(target).getDecal().getPosition());
 		float height;
 		height = GameUtils.calculateCharacterHeight(character);
-		if (map.isNodesAdjacent(srcNode, targetNode, height / 2F)) {
+		if (map.areNodesAdjacent(srcNode, targetNode, height / 2F)) {
 			applyDamageToCharacter(target, primaryAttack.damage());
 		}
 	}
@@ -260,23 +275,11 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	public void commandDone(Entity character) {
+		if (getSystemsCommonData().getCurrentGameMode() == GameMode.EXPLORE) return;
+
 		ComponentsMapper.character.get(character).getCharacterSpriteData().setSpriteType(IDLE);
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onCharacterCommandDone(character);
-		}
-	}
-
-	private void painDone(Entity character, CharacterSpriteData spriteData) {
-		spriteData.setSpriteType(IDLE);
-		Entity currentTurn = getSystemsCommonData().getTurnsQueue().first();
-		if (ComponentsMapper.character.has(currentTurn)) {
-			Queue<CharacterCommand> commands = ComponentsMapper.character.get(currentTurn).getCommands();
-			if (!commands.isEmpty()) {
-				CharacterCommand command = commands.first();
-				if (command.getState() == CommandStates.READY) {
-					beginProcessingCommand(character, command);
-				}
-			}
 		}
 	}
 
@@ -339,24 +342,26 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	private void handleCharacterCommand(Entity character) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		Queue<CharacterCommand> commands = characterComponent.getCommands();
-		if (!commands.isEmpty()) {
-			CharacterCommand currentCommand = commands.first();
-			CommandStates state = currentCommand.getState();
-			if (state == CommandStates.READY) {
+		if (characterComponent.getCharacterSpriteData().getSpriteType() == PAIN) return;
+
+		if (!characterComponent.getCommands().isEmpty()) {
+			CharacterCommand currentCommand = characterComponent.getCommands().first();
+			if (currentCommand.getState() == CommandStates.READY) {
 				currentCommand.setState(CommandStates.RUNNING);
 				beginProcessingCommand(character, currentCommand);
-			} else if (state == CommandStates.RUNNING) {
+			} else if (currentCommand.getState() == CommandStates.RUNNING) {
 				SpriteType spriteType = characterComponent.getCharacterSpriteData().getSpriteType();
 				if (spriteType == PICKUP || spriteType == ATTACK_PRIMARY) {
 					handleModeWithNonLoopingAnimation(character);
 				} else {
 					handleRotation(currentCommand, character);
 				}
-			} else if (state == CommandStates.ENDED) {
-				Pools.free(commands.removeFirst());
+			} else if (currentCommand.getState() == CommandStates.ENDED) {
+				Pools.free(characterComponent.getCommands().removeFirst());
 				commandDone(character);
 			}
+		} else {
+			commandDone(character);
 		}
 	}
 
@@ -424,7 +429,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	@Override
 	public void onFrameChanged(final Entity character, final float deltaTime, final TextureAtlas.AtlasRegion newFrame) {
-
 		SpriteType spriteType = ComponentsMapper.characterDecal.get(character).getSpriteType();
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		if (spriteType == RUN) {

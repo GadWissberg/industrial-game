@@ -66,6 +66,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private static final float SMOKE_HEIGHT_BIAS = 0.4F;
 	private final static LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
 	private static final CalculatePathRequest request = new CalculatePathRequest();
+	public static final float MELEE_ATTACK_MAX_HEIGHT = 0.5F;
 	private PathPlanHandler pathPlanner;
 	private ImmutableArray<Entity> enemies;
 	private ParticleEffect smokeEffect;
@@ -99,8 +100,11 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	@Override
 	public void onCharacterCommandDone(final Entity character) {
 		if (ComponentsMapper.enemy.has(character)) {
-			if (ComponentsMapper.character.get(character).getSkills().getActionPoints() <= 0) {
+			CharacterComponent characterComponent = ComponentsMapper.character.get(character);
+			if (characterComponent.getSkills().getActionPoints() <= 0) {
 				subscribers.forEach(EnemySystemEventsSubscriber::onEnemyFinishedTurn);
+			} else if (characterComponent.getCommands().isEmpty()) {
+				invokeEnemyTurn(character);
 			}
 		}
 	}
@@ -251,13 +255,25 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private void handleAttackingStatus(Entity enemy, CharacterComponent character) {
 		if (character.getPrimaryAttack().melee()) {
 			CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(character.getTarget());
-			MapGraphNode targetNode = getSystemsCommonData().getMap().getNode(characterDecalComponent.getDecal().getPosition());
-			initializePathPlanRequest(targetNode, ComponentsMapper.characterDecal.get(enemy), CLEAN, enemy);
-			if (GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic())) {
-				addCommand(enemy, character, targetNode, CharacterCommandsDefinitions.RUN);
-				addCommand(enemy, character, targetNode, CharacterCommandsDefinitions.ATTACK_PRIMARY);
+			MapGraph map = getSystemsCommonData().getMap();
+			MapGraphNode targetNode = map.getNode(characterDecalComponent.getDecal().getPosition());
+			CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
+			MapGraphNode node = map.getNode(ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition());
+			boolean adjacent = map.areNodesAdjacent(node, targetNode, MELEE_ATTACK_MAX_HEIGHT);
+			if (adjacent) {
+				if (characterComponent.getSkills().getActionPoints() >= characterComponent.getPrimaryAttack().actionPointsConsumption()) {
+					addCommand(enemy, character, targetNode, CharacterCommandsDefinitions.ATTACK_PRIMARY);
+				} else {
+					enemyFinishedTurn();
+				}
 			} else {
-				enemyFinishedTurn();
+				initializePathPlanRequest(targetNode, ComponentsMapper.characterDecal.get(enemy), CLEAN, enemy);
+				if (GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic())) {
+					addCommand(enemy, character, targetNode, CharacterCommandsDefinitions.RUN);
+					addCommand(enemy, character, targetNode, CharacterCommandsDefinitions.ATTACK_PRIMARY);
+				} else {
+					enemyFinishedTurn();
+				}
 			}
 		}
 	}

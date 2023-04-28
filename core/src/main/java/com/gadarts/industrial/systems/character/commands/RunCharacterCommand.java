@@ -43,16 +43,16 @@ public class RunCharacterCommand extends CharacterCommand {
 	}
 
 	@Override
-	public void initialize(Entity character,
-						   SystemsCommonData commonData,
-						   List<CharacterSystemEventsSubscriber> subscribers) {
+	public boolean initialize(Entity character,
+							  SystemsCommonData commonData,
+							  List<CharacterSystemEventsSubscriber> subscribers) {
 		consumeActionPoints = commonData.getCurrentGameMode() != GameMode.EXPLORE;
 		systemsCommonData = commonData;
 		Array<MapGraphNode> nodes = path.nodes;
 		prevNode = nodes.removeIndex(0);
 		setNextNode(nodes.get(0));
 		MapGraph map = commonData.getMap();
-		isReachedEndOfPath(map.findConnection(prevNode, getNextNode()), map);
+		return isReachedEndOfPath(map.findConnection(prevNode, getNextNode()), map);
 	}
 
 	@Override

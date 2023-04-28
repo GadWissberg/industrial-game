@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
+import com.gadarts.industrial.components.character.CharacterSkills;
 import com.gadarts.industrial.components.character.OnGoingAttack;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
@@ -20,9 +21,6 @@ import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.List;
 
-/**
- * A character's command that engages its primary attack.
- */
 public class PrimaryAttackCharacterCommand extends CharacterCommand {
 	private final static Vector3 auxVector3_1 = new Vector3();
 
@@ -40,17 +38,21 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 	}
 
 	@Override
-	public void initialize(Entity character,
-						   SystemsCommonData commonData,
-						   List<CharacterSystemEventsSubscriber> subscribers) {
-		if (checkAdjacentForMelee(character, commonData)) return;
+	public boolean initialize(Entity character,
+							  SystemsCommonData commonData,
+							  List<CharacterSystemEventsSubscriber> subscribers) {
+		if (checkAdjacentForMelee(character, commonData)) return false;
+
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
+		WeaponDeclaration primary = characterComponent.getPrimaryAttack();
+		if (primary.actionPointsConsumption() > characterComponent.getSkills().getActionPoints()) return true;
+
 		if (characterComponent.getTarget() != null) {
 			characterComponent.getRotationData().setRotating(true);
 		}
-		WeaponDeclaration primary = characterComponent.getPrimaryAttack();
 		int bulletsToShoot = primary.melee() ? 1 : randomNumberOfBullets(primary);
 		characterComponent.getOnGoingAttack().initialize(CharacterComponent.AttackType.PRIMARY, bulletsToShoot);
+		return false;
 	}
 
 	@Override
@@ -59,11 +61,10 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 									  TextureAtlas.AtlasRegion newFrame,
 									  List<CharacterSystemEventsSubscriber> subscribers) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		if (characterComponent.getSkills().getActionPoints() <= characterComponent.getPrimaryAttack().actionPointsConsumption())
+		if (characterComponent.getSkills().getActionPoints() < characterComponent.getPrimaryAttack().actionPointsConsumption())
 			return true;
 
-		engagePrimaryAttack(character, newFrame, systemsCommonData, subscribers);
-		return false;
+		return engagePrimaryAttack(character, newFrame, systemsCommonData, subscribers);
 	}
 
 	private boolean checkAdjacentForMelee(Entity character, SystemsCommonData commonData) {
@@ -73,7 +74,7 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 		MapGraph map = commonData.getMap();
 		MapGraphNode targetNode = map.getNode(targetDecal.getPosition());
 		MapGraphNode characterNode = map.getNode(ComponentsMapper.characterDecal.get(character).getDecal().getPosition());
-		return !map.isNodesAdjacent(characterNode, targetNode, GameUtils.calculateCharacterHeight(character) / 2F);
+		return !map.areNodesAdjacent(characterNode, targetNode, GameUtils.calculateCharacterHeight(character) / 2F);
 	}
 
 	private Vector3 calculateDirectionToTarget(CharacterComponent characterComp,
@@ -86,13 +87,13 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 		return targetNodeCenterPosition.sub(positionNodeCenterPosition);
 	}
 
-	private void engagePrimaryAttack(Entity character,
-									 TextureAtlas.AtlasRegion newFrame,
-									 SystemsCommonData commonData,
-									 List<CharacterSystemEventsSubscriber> subscribers) {
+	private boolean engagePrimaryAttack(Entity character,
+										TextureAtlas.AtlasRegion newFrame,
+										SystemsCommonData commonData,
+										List<CharacterSystemEventsSubscriber> subscribers) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		OnGoingAttack onGoingAttack = characterComponent.getOnGoingAttack();
-		if (onGoingAttack.isDone()) return;
+		if (onGoingAttack.isDone()) return true;
 
 		int primaryAttackHitFrameIndex = GameUtils.getPrimaryAttackHitFrameIndexForCharacter(character, commonData);
 		if (newFrame.index == primaryAttackHitFrameIndex) {
@@ -105,11 +106,10 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 				subscriber.onCharacterEngagesPrimaryAttack(character, direction, positionNodeCenterPosition);
 			}
 			onGoingAttack.bulletShot();
-			if (onGoingAttack.getBulletsToShoot() <= 0) {
-				WeaponDeclaration primaryAttack = characterComponent.getPrimaryAttack();
-				consumeTurnTime(character, primaryAttack.duration());
-			}
+			CharacterSkills skills = characterComponent.getSkills();
+			skills.setActionPoints(skills.getActionPoints() - characterComponent.getPrimaryAttack().actionPointsConsumption());
 		}
+		return false;
 	}
 
 }
