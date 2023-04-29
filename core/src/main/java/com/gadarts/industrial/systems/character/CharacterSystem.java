@@ -57,7 +57,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		CharacterSystemEventsSubscriber,
 		TurnsSystemEventsSubscriber {
 	public static final long MAX_IDLE_ANIMATION_INTERVAL = 10000L;
-	private static final int ROTATION_INTERVAL = 125;
+	public static final int CHARACTER_ROTATION_INTERVAL = 125;
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final Vector2 auxVector2_1 = new Vector2();
@@ -112,7 +112,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 				if (characterComponent.getSkills().getActionPoints() <= 0) {
 					characterComponent.getSkills().resetActionPoints();
 					characterComponent.getCharacterSpriteData().setSpriteType(IDLE);
-					subscribers.forEach(subscriber -> subscriber.onCharacterFinishedTurn());
+					subscribers.forEach(CharacterSystemEventsSubscriber::onCharacterFinishedTurn);
 				} else {
 					handleCharacterCommand(current);
 				}
@@ -381,10 +381,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 		CharacterRotationData rotData = charComp.getRotationData();
 		if (!currentCommand.getDefinition().isRotationForbidden()) {
-			if (rotData.isRotating() && TimeUtils.timeSinceMillis(rotData.getLastRotation()) > ROTATION_INTERVAL) {
-				for (CharacterSystemEventsSubscriber subscriber : subscribers) {
-					subscriber.onCharacterRotated();
-				}
+			if (rotData.isRotating() && TimeUtils.timeSinceMillis(rotData.getLastRotation()) > CHARACTER_ROTATION_INTERVAL) {
 				rotData.setLastRotation(TimeUtils.millis());
 				Direction directionToDest = calculateDirectionToDestination(currentCommand);
 				rotate(charComp, rotData, directionToDest, currentCommand.getCharacter());

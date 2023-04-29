@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.components.GameComponent;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.declarations.enemies.EnemyDeclaration;
+import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.systems.enemy.EnemyAiStatus;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +23,7 @@ public class EnemyComponent implements GameComponent {
 	private long nextRoamSound;
 	private EnemyDeclaration enemyDeclaration;
 	private EnemyAiStatus aiStatus;
+	private Direction initialSearchingLookingDirection;
 	private EnemyTimeStamps timeStamps = new EnemyTimeStamps();
 	private Animation<TextureAtlas.AtlasRegion> bulletAnimation;
 	private long iconDisplayInFlowerTimeStamp;

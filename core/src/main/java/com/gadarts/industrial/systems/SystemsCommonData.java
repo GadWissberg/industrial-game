@@ -22,14 +22,14 @@ import lombok.Setter;
 public class SystemsCommonData implements Disposable {
 	public static final int CAMERA_LIGHT_FAR = 7;
 	public static final String TABLE_NAME_HUD = "hud";
+	public static final float MELEE_ATTACK_MAX_HEIGHT = 0.5F;
 	private final ModelInstancePools pooledModelInstances = new ModelInstancePools();
-
 	@Setter(AccessLevel.NONE)
 	private final String versionName;
 	private final int versionNumber;
-	private PlayerStorage storage;
 	private final com.badlogic.gdx.utils.Queue<Entity> turnsQueue = new com.badlogic.gdx.utils.Queue<>();
 	private final SoundPlayer soundPlayer;
+	private PlayerStorage storage;
 	private DrawFlags drawFlags;
 	private ParticleSystem particleSystem;
 	private Entity cursor;

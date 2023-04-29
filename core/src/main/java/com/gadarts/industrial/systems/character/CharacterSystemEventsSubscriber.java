@@ -10,10 +10,6 @@ public interface CharacterSystemEventsSubscriber extends SystemEventsSubscriber 
 
 	}
 
-	default void onCharacterRotated( ) {
-
-	}
-
 	default void onCharacterNodeChanged(Entity entity, MapGraphNode oldNode, MapGraphNode newNode) {
 
 	}

@@ -389,7 +389,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		if (!currentPath.nodes.isEmpty() && currentPath.get(pathSize - 1).equals(destination)) {
 			Entity player = getSystemsCommonData().getPlayer();
 			CharacterCommand command = Pools.get(RUN.getCharacterCommandImplementation()).obtain();
-			command.reset(RUN, getSystemsCommonData().getPlayer(), outputPath, destination);
+			command.reset(RUN, getSystemsCommonData().getPlayer(), outputPath);
 			Queue<CharacterCommand> commands = ComponentsMapper.character.get(player).getCommands();
 			commands.clear();
 			commands.addFirst(command);

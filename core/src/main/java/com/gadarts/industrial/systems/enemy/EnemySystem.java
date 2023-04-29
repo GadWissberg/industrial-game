@@ -10,18 +10,14 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Pools;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
-import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.sd.SimpleDecalComponent;
-import com.gadarts.industrial.map.CalculatePathRequest;
 import com.gadarts.industrial.map.MapGraph;
-import com.gadarts.industrial.map.MapGraphConnectionCosts;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
@@ -32,8 +28,6 @@ import com.gadarts.industrial.systems.ModelInstancePools;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
-import com.gadarts.industrial.systems.character.commands.CharacterCommand;
-import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
@@ -44,7 +38,6 @@ import java.util.LinkedHashSet;
 
 import static com.gadarts.industrial.DebugSettings.PARALYZED_ENEMIES;
 import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
-import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.systems.enemy.EnemyAiStatus.*;
 
 public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> implements
@@ -65,11 +58,9 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final float SMOKE_HEIGHT_BIAS = 0.4F;
 	private final static LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
-	private static final CalculatePathRequest request = new CalculatePathRequest();
-	public static final float MELEE_ATTACK_MAX_HEIGHT = 0.5F;
-	private PathPlanHandler pathPlanner;
 	private ImmutableArray<Entity> enemies;
 	private ParticleEffect smokeEffect;
+	private PathPlanHandler pathPlanner;
 
 	public EnemySystem(GameAssetManager assetsManager, GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
@@ -199,92 +190,22 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 				.finishAndAddToEngine();
 	}
 
-	private void initializePathPlanRequest(MapGraphNode destinationNode,
-										   CharacterDecalComponent charDecalComp,
-										   MapGraphConnectionCosts maxCostInclusive,
-										   Entity enemy) {
-		initializePathPlanRequest(
-				getSystemsCommonData().getMap().getNode(charDecalComp.getNodePosition(auxVector2_1)),
-				destinationNode,
-				maxCostInclusive,
-				true,
-				enemy);
-	}
-
-	private void initializePathPlanRequest(MapGraphNode sourceNode,
-										   MapGraphNode destinationNode,
-										   MapGraphConnectionCosts maxCostInclusive,
-										   boolean avoidCharactersInCalculations,
-										   Entity character) {
-		request.setSourceNode(sourceNode);
-		request.setDestNode(destinationNode);
-		request.setOutputPath(pathPlanner.getCurrentPath());
-		request.setAvoidCharactersInCalculations(avoidCharactersInCalculations);
-		request.setMaxCostInclusive(maxCostInclusive);
-		request.setRequester(character);
-	}
-
 
 	void invokeEnemyTurn(final Entity enemy) {
 		CharacterComponent character = ComponentsMapper.character.get(enemy);
 		character.getCommands().clear();
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(enemy);
 		int turnAgility = character.getSkills().getActionPoints();
-		if (turnAgility > 0) {
-			EnemyAiStatus aiStatus = enemyComp.getAiStatus();
-			if (aiStatus == ATTACKING) {
-				handleAttackingStatus(enemy, character);
-			} else if (aiStatus == RUNNING_TO_LAST_SEEN_POSITION) {
-				handleRunningToLastSeenPositionStatus(enemy, character, enemyComp);
-			}
-		} else {
+		EnemyAiStatus aiStatus = enemyComp.getAiStatus();
+		AiStatusLogic logic = aiStatus.getLogic();
+		if (turnAgility <= 0 || logic == null) {
 			enemyFinishedTurn();
-		}
-	}
-
-	private void handleRunningToLastSeenPositionStatus(Entity enemy, CharacterComponent character, EnemyComponent enemyComp) {
-		MapGraphNode targetLastVisibleNode = enemyComp.getTargetLastVisibleNode();
-		initializePathPlanRequest(targetLastVisibleNode, ComponentsMapper.characterDecal.get(enemy), CLEAN, enemy);
-		if (GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic())) {
-			addCommand(enemy, character, targetLastVisibleNode, CharacterCommandsDefinitions.RUN);
 		} else {
-			enemyFinishedTurn();
-		}
-	}
-
-	private void handleAttackingStatus(Entity enemy, CharacterComponent character) {
-		if (character.getPrimaryAttack().melee()) {
-			CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(character.getTarget());
-			MapGraph map = getSystemsCommonData().getMap();
-			MapGraphNode targetNode = map.getNode(characterDecalComponent.getDecal().getPosition());
-			CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
-			MapGraphNode node = map.getNode(ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition());
-			boolean adjacent = map.areNodesAdjacent(node, targetNode, MELEE_ATTACK_MAX_HEIGHT);
-			if (adjacent) {
-				if (characterComponent.getSkills().getActionPoints() >= characterComponent.getPrimaryAttack().actionPointsConsumption()) {
-					addCommand(enemy, character, targetNode, CharacterCommandsDefinitions.ATTACK_PRIMARY);
-				} else {
-					enemyFinishedTurn();
-				}
-			} else {
-				initializePathPlanRequest(targetNode, ComponentsMapper.characterDecal.get(enemy), CLEAN, enemy);
-				if (GameUtils.calculatePath(request, pathPlanner.getPathFinder(), pathPlanner.getHeuristic())) {
-					addCommand(enemy, character, targetNode, CharacterCommandsDefinitions.RUN);
-					addCommand(enemy, character, targetNode, CharacterCommandsDefinitions.ATTACK_PRIMARY);
-				} else {
-					enemyFinishedTurn();
-				}
+			boolean finishedTurn = logic.run(enemy, getSystemsCommonData().getMap(), pathPlanner);
+			if (finishedTurn) {
+				enemyFinishedTurn();
 			}
 		}
-	}
-
-	private void addCommand(Entity enemy,
-							CharacterComponent character,
-							MapGraphNode targetNode,
-							CharacterCommandsDefinitions characterCommandsDefinitions) {
-		CharacterCommand command = Pools.get(characterCommandsDefinitions.getCharacterCommandImplementation()).obtain();
-		command.reset(characterCommandsDefinitions, enemy, request.getOutputPath(), targetNode);
-		character.getCommands().addLast(command);
 	}
 
 	@Override
@@ -382,11 +303,11 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		if (enemyComponent.getAiStatus() != ATTACKING) {
 			awakeEnemyIfTargetSpotted(enemy);
 		} else {
-			tryToToSetToLastSeenPosition(oldNode, enemy, enemyComponent);
+			tryToSetToLastSeenPosition(oldNode, enemy, enemyComponent);
 		}
 	}
 
-	private void tryToToSetToLastSeenPosition(MapGraphNode oldNode, Entity enemy, EnemyComponent enemyComponent) {
+	private void tryToSetToLastSeenPosition(MapGraphNode oldNode, Entity enemy, EnemyComponent enemyComponent) {
 		if (checkIfFloorNodesBlockSightToTarget(enemy)
 				|| checkIfFloorNodesContainObjects(GameUtils.findAllNodesToTarget(enemy, bresenhamOutput, true))) {
 			enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);

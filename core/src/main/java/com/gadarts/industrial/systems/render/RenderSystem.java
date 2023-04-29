@@ -472,7 +472,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 			if (updateCharacterDecal) {
 				updateCharacterDecal(deltaTime, entity);
 			}
-			if (isNodeRevealed(floorEntity) && (shouldRenderPlayer(entity) || shouldRenderEnemy(entity))) {
+			if ((DebugSettings.DISABLE_FOW || isNodeRevealed(floorEntity)) && (shouldRenderPlayer(entity) || shouldRenderEnemy(entity))) {
 				renderCharacterDecal(entity, color, alpha);
 			}
 		}

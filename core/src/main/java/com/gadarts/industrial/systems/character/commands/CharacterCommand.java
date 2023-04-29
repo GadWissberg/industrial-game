@@ -20,15 +20,12 @@ public abstract class CharacterCommand implements Pool.Poolable {
 	private CharacterCommandsDefinitions definition;
 	private Entity character;
 	@Setter
-	private MapGraphNode destinationNode;
-	@Setter
 	private CommandStates state;
 	@Setter
 	private MapGraphNode nextNode;
 
 	@Override
 	public void reset( ) {
-		destinationNode = null;
 		state = CommandStates.READY;
 		definition = null;
 		character = null;
@@ -46,13 +43,11 @@ public abstract class CharacterCommand implements Pool.Poolable {
 
 	public CharacterCommand reset(CharacterCommandsDefinitions type,
 								  Entity character,
-								  MapGraphPath outputPath,
-								  MapGraphNode destinationNode) {
+								  MapGraphPath outputPath) {
 		this.definition = type;
 		this.character = character;
 		this.path.set(outputPath);
-		this.destinationNode = destinationNode;
-		this.nextNode = destinationNode;
+		this.nextNode = path.get(0);
 		this.state = CommandStates.READY;
 		return this;
 	}

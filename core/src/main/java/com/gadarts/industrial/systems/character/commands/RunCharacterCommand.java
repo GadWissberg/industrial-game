@@ -143,7 +143,6 @@ public class RunCharacterCommand extends CharacterCommand {
 		}
 		prevNode = getNextNode();
 		setNextNode(path.getNextOf(getNextNode()));
-		setDestinationNode(getNextNode());
 		MapGraph map = systemsCommonData.getMap();
 		return isReachedEndOfPath(map.findConnection(prevNode, getNextNode()), map);
 	}
