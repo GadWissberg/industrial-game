@@ -1,4 +1,4 @@
-package com.gadarts.industrial.systems.enemy;
+package com.gadarts.industrial.systems.enemy.ai;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector2;
@@ -37,7 +37,7 @@ public abstract class AiStatusLogic {
 				outputPath);
 	}
 
-	abstract boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner);
+	public abstract boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner);
 
 	void addCommand(Entity enemy,
 					CharacterCommandsDefinitions characterCommandsDefinitions,

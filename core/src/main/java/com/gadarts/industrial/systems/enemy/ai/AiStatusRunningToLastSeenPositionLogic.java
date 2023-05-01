@@ -1,4 +1,4 @@
-package com.gadarts.industrial.systems.enemy;
+package com.gadarts.industrial.systems.enemy.ai;
 
 import com.badlogic.ashley.core.Entity;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -9,15 +9,13 @@ import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
-import com.gadarts.industrial.utils.GameUtils;
 
-import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
-import static com.gadarts.industrial.systems.enemy.EnemyAiStatus.SEARCHING_LOOKING;
+import static com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus.SEARCHING_LOOKING;
 
 public class AiStatusRunningToLastSeenPositionLogic extends AiStatusLogic {
 
 	@Override
-	boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner) {
+	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(enemy);
 		MapGraphNode targetLastVisibleNode = enemyComp.getTargetLastVisibleNode();
 		CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(enemy);

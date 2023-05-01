@@ -1,4 +1,4 @@
-package com.gadarts.industrial.systems.enemy;
+package com.gadarts.industrial.systems.enemy.ai;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

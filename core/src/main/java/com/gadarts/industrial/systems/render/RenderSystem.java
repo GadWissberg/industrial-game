@@ -765,25 +765,34 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 														  SpriteType spriteType,
 														  boolean sameSpriteType) {
 		AnimationComponent animationComponent = ComponentsMapper.animation.get(entity);
-		if (spriteType.isSingleDirection()) {
-			if (!animationComponent.getAnimation().isAnimationFinished(animationComponent.getStateTime())) {
-				direction = Direction.SOUTH;
-			}
-		}
+		direction = forceDirectionForAnimationInitialization(direction, spriteType, animationComponent);
 		Animation<AtlasRegion> oldAnimation = ComponentsMapper.animation.get(entity).getAnimation();
 		CharacterAnimation newAnimation = fetchCharacterAnimationByDirectionAndType(entity, direction, spriteType);
 		if (newAnimation != null) {
 			boolean isIdle = spriteType == IDLE;
 			animationComponent.init(isIdle ? 0 : spriteType.getFrameDuration(), newAnimation);
+			boolean differentAnimation = oldAnimation != newAnimation;
 			if (!sameSpriteType || isIdle) {
 				if (spriteType.getPlayMode() != Animation.PlayMode.LOOP) {
 					newAnimation.setPlayMode(Animation.PlayMode.NORMAL);
 				}
 				animationComponent.resetStateTime();
-			} else if (oldAnimation != newAnimation) {
+			} else if (differentAnimation) {
 				newAnimation.setPlayMode(oldAnimation.getPlayMode());
 			}
+			if (differentAnimation) {
+				subscribers.forEach(sub -> sub.onAnimationChanged(entity));
+			}
 		}
+	}
+
+	private static Direction forceDirectionForAnimationInitialization(Direction direction, SpriteType spriteType, AnimationComponent animationComponent) {
+		if (spriteType.isSingleDirection()) {
+			if (!animationComponent.getAnimation().isAnimationFinished(animationComponent.getStateTime())) {
+				direction = Direction.SOUTH;
+			}
+		}
+		return direction;
 	}
 
 	@Override

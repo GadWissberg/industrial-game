@@ -28,6 +28,9 @@ import com.gadarts.industrial.systems.ModelInstancePools;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
+import com.gadarts.industrial.systems.character.commands.CommandStates;
+import com.gadarts.industrial.systems.enemy.ai.AiStatusLogic;
+import com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
@@ -38,7 +41,7 @@ import java.util.LinkedHashSet;
 
 import static com.gadarts.industrial.DebugSettings.PARALYZED_ENEMIES;
 import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
-import static com.gadarts.industrial.systems.enemy.EnemyAiStatus.*;
+import static com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus.*;
 
 public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> implements
 		CharacterSystemEventsSubscriber,
@@ -83,8 +86,18 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	@Override
 	public void onSpriteTypeChanged(Entity entity, SpriteType spriteType) {
-		if (ComponentsMapper.enemy.has(entity) && spriteType == SpriteType.ATTACK_PRIMARY) {
-			consumeEngineEnergy(entity);
+		if (ComponentsMapper.enemy.has(entity)) {
+			if (spriteType == SpriteType.ATTACK_PRIMARY) {
+				consumeEngineEnergy(entity);
+			}
+		}
+	}
+
+	@Override
+	public void onAnimationChanged(Entity entity) {
+		boolean isEnemy = ComponentsMapper.enemy.has(entity);
+		if (isEnemy && ComponentsMapper.character.get(entity).getCharacterSpriteData().getSpriteType() == SpriteType.IDLE) {
+			awakeEnemyIfTargetSpotted(entity);
 		}
 	}
 

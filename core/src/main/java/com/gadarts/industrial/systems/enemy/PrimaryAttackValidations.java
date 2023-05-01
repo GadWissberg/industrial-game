@@ -8,7 +8,7 @@ import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.List;
 
-import static com.gadarts.industrial.systems.enemy.EnemyAiStatus.*;
+import static com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus.*;
 
 final public class PrimaryAttackValidations {
 	public final static List<PrimaryAttackValidation> primaryAttackValidations = List.of(

@@ -12,4 +12,6 @@ public interface RenderSystemEventsSubscriber extends SystemEventsSubscriber {
 	default void onSpriteTypeChanged(Entity entity, SpriteType spriteType) {
 	}
 
+	default void onAnimationChanged(Entity entity) {
+	}
 }

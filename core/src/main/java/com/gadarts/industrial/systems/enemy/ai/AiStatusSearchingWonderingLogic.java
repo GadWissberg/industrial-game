@@ -1,4 +1,4 @@
-package com.gadarts.industrial.systems.enemy;
+package com.gadarts.industrial.systems.enemy.ai;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
@@ -14,11 +14,9 @@ import com.gadarts.industrial.systems.player.PathPlanHandler;
 
 import java.util.List;
 
-import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
-
 public class AiStatusSearchingWonderingLogic extends AiStatusLogic {
 	@Override
-	boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner) {
+	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner) {
 		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(enemy);
 		Decal decal = characterDecalComponent.getDecal();
 		List<MapGraphNode> availableNodes = map.fetchAvailableNodesAroundNode(map.getNode(decal.getPosition()));
