@@ -9,16 +9,16 @@ import com.gadarts.industrial.components.character.CharacterRotationData;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.shared.model.characters.Direction;
-import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
 
 import static com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus.SEARCHING_WONDERING;
 
 public class AiStatusSearchingLookingLogic extends AiStatusLogic {
 	public static final float SEARCHING_LOOKING_STATUS_ROTATION_INTERVAL = 500F;
+	private static final int WONDERING_COUNTER_INITIAL = 4;
 
 	@Override
-	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner) {
+	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
 		CharacterRotationData rotationData = characterComponent.getRotationData();
 		boolean intervalPassed = TimeUtils.timeSinceMillis(rotationData.getLastRotation()) >= SEARCHING_LOOKING_STATUS_ROTATION_INTERVAL;
@@ -32,6 +32,7 @@ public class AiStatusSearchingLookingLogic extends AiStatusLogic {
 				rotationData.setLastRotation(TimeUtils.millis());
 			} else {
 				enemyComponent.setAiStatus(SEARCHING_WONDERING);
+				enemyComponent.setWonderingCounter(WONDERING_COUNTER_INITIAL);
 			}
 		}
 		return false;

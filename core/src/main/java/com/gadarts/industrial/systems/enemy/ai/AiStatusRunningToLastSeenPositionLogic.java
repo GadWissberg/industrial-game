@@ -15,7 +15,7 @@ import static com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus.SEARCHING_LO
 public class AiStatusRunningToLastSeenPositionLogic extends AiStatusLogic {
 
 	@Override
-	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner) {
+	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(enemy);
 		MapGraphNode targetLastVisibleNode = enemyComp.getTargetLastVisibleNode();
 		CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(enemy);

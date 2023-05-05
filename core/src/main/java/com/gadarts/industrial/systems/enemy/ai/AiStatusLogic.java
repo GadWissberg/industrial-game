@@ -37,7 +37,7 @@ public abstract class AiStatusLogic {
 				outputPath);
 	}
 
-	public abstract boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner);
+	public abstract boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId);
 
 	void addCommand(Entity enemy,
 					CharacterCommandsDefinitions characterCommandsDefinitions,

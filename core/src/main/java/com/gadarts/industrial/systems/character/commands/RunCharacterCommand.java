@@ -50,9 +50,9 @@ public class RunCharacterCommand extends CharacterCommand {
 		systemsCommonData = commonData;
 		Array<MapGraphNode> nodes = path.nodes;
 		prevNode = nodes.removeIndex(0);
-		setNextNode(nodes.get(0));
+		setNextNodeIndex(0);
 		MapGraph map = commonData.getMap();
-		return isReachedEndOfPath(map.findConnection(prevNode, getNextNode()), map);
+		return isReachedEndOfPath(map.findConnection(prevNode, path.get(getNextNodeIndex())), map);
 	}
 
 	@Override
@@ -82,8 +82,8 @@ public class RunCharacterCommand extends CharacterCommand {
 		boolean done = false;
 		placeCharacterInNextNodeIfCloseEnough(decal);
 		Vector2 characterPosition = auxVector2_3.set(decal.getX(), decal.getZ());
-		MapGraphNode nextNode = getNextNode();
-		if (nextNode == null || characterPosition.dst2(nextNode.getCenterPosition(auxVector2_2)) < MOVEMENT_EPSILON) {
+		int nextNodeIndex = getNextNodeIndex();
+		if (nextNodeIndex == -1 || characterPosition.dst2(path.get(nextNodeIndex).getCenterPosition(auxVector2_2)) < MOVEMENT_EPSILON) {
 			done = reachedNodeOfPath(subscribers, character);
 		}
 		if (!done) {
@@ -94,7 +94,7 @@ public class RunCharacterCommand extends CharacterCommand {
 
 	private void placeCharacterInNextNodeIfCloseEnough(Decal decal) {
 		Vector3 decalPos = decal.getPosition();
-		float distanceToNextNode = getNextNode().getCenterPosition(auxVector2_1).dst2(decalPos.x, decalPos.z);
+		float distanceToNextNode = path.get(getNextNodeIndex()).getCenterPosition(auxVector2_1).dst2(decalPos.x, decalPos.z);
 		if (distanceToNextNode < CHAR_STEP_SIZE) {
 			placeCharacterInTheNextNode(decal);
 		}
@@ -102,7 +102,8 @@ public class RunCharacterCommand extends CharacterCommand {
 
 	private boolean applyMovementToNextNode(SystemsCommonData systemsCommonData, Entity character) {
 		boolean commandDone = false;
-		MapGraphNode nextNode = getNextNode();
+		int nextNodeIndex = getNextNodeIndex();
+		MapGraphNode nextNode = path.get(nextNodeIndex);
 		if (nextNode.getDoor() != null && ComponentsMapper.door.get(nextNode.getDoor()).getState() != DoorStates.OPEN) {
 			handleDoor(character, nextNode.getDoor());
 			commandDone = true;
@@ -135,25 +136,26 @@ public class RunCharacterCommand extends CharacterCommand {
 	private boolean reachedNodeOfPath(List<CharacterSystemEventsSubscriber> subscribers,
 									  Entity character) {
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onCharacterNodeChanged(character, prevNode, getNextNode());
+			subscriber.onCharacterNodeChanged(character, prevNode, path.nodes.get(getNextNodeIndex()));
 		}
 		CharacterSkills skills = ComponentsMapper.character.get(character).getSkills();
 		if (consumeActionPoints) {
 			skills.setActionPoints(skills.getActionPoints() - 1);
 		}
-		prevNode = getNextNode();
-		setNextNode(path.getNextOf(getNextNode()));
+		prevNode = path.get(getNextNodeIndex());
+		setNextNodeIndex(getNextNodeIndex() + 1);
 		MapGraph map = systemsCommonData.getMap();
-		return isReachedEndOfPath(map.findConnection(prevNode, getNextNode()), map);
+		MapGraphNode nextNode = getNextNodeIndex() < path.nodes.size ? path.get(getNextNodeIndex()) : null;
+		return isReachedEndOfPath(map.findConnection(prevNode, nextNode), map);
 	}
 
 
 	private boolean isReachedEndOfPath(MapGraphConnection connection, MapGraph map) {
 		return ComponentsMapper.character.get(getCharacter()).getSkills().getActionPoints() <= 0
-				|| getNextNode() == null
+				|| getNextNodeIndex() == -1
 				|| connection == null
 				|| connection.getCost() != CLEAN.getCostValue()
-				|| !map.checkIfNodeIsFreeOfAliveCharacters(getNextNode());
+				|| !map.checkIfNodeIsFreeOfAliveCharacters(path.get(getNextNodeIndex()));
 	}
 
 	private void translateCharacter(CharacterDecalComponent characterDecalComponent, SystemsCommonData systemsCommonData) {
@@ -169,7 +171,7 @@ public class RunCharacterCommand extends CharacterCommand {
 	}
 
 	private void placeCharacterInTheNextNode(Decal decal) {
-		Vector3 centerPos = getNextNode().getCenterPosition(auxVector3_1);
+		Vector3 centerPos = path.get(getNextNodeIndex()).getCenterPosition(auxVector3_1);
 		decal.setPosition(auxVector3_2.set(centerPos.x, centerPos.y + CharacterTypes.BILLBOARD_Y, centerPos.z));
 	}
 }

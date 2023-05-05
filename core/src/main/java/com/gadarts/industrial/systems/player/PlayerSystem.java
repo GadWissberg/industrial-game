@@ -370,23 +370,19 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	@Override
 	public void onUserSelectedNodeToApplyTurn(MapGraphNode node) {
-		planPath(node);
-	}
-
-	private void planPath(final MapGraphNode cursorNode) {
 		CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer());
 		MapGraphPath plannedPath = playerPathPlanner.getCurrentPath();
-		initializePathPlanRequest(cursorNode, charDecalComp, plannedPath);
+		initializePathPlanRequest(node, charDecalComp, plannedPath);
 		boolean foundPath = calculatePath(request, playerPathPlanner.getPathFinder(), playerPathPlanner.getHeuristic());
 		if (foundPath) {
-			pathHasCreated(cursorNode, request.getOutputPath());
+			pathHasCreated(node, request.getOutputPath());
 		}
 	}
 
+
 	private void pathHasCreated(MapGraphNode destination, MapGraphPath outputPath) {
-		MapGraphPath currentPath = playerPathPlanner.getCurrentPath();
-		int pathSize = currentPath.getCount();
-		if (!currentPath.nodes.isEmpty() && currentPath.get(pathSize - 1).equals(destination)) {
+		int pathSize = outputPath.getCount();
+		if (!outputPath.nodes.isEmpty() && outputPath.get(pathSize - 1).equals(destination)) {
 			Entity player = getSystemsCommonData().getPlayer();
 			CharacterCommand command = Pools.get(RUN.getCharacterCommandImplementation()).obtain();
 			command.reset(RUN, getSystemsCommonData().getPlayer(), outputPath);

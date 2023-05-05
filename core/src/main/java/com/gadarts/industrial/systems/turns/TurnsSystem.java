@@ -33,19 +33,22 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 			if (ComponentsMapper.door.get(entity).getState() != DoorStates.CLOSED) {
 				turnsQueue.addLast(entity);
 			}
-		} else {
+		} else if (!ComponentsMapper.enemy.has(entity) || ComponentsMapper.enemy.get(entity).getAiStatus() != EnemyAiStatus.IDLE) {
 			turnsQueue.addLast(entity);
 		}
 	}
 
 	@Override
 	public void update(float deltaTime) {
-		if (getSystemsCommonData().getCurrentGameMode() == GameMode.COMBAT && currentTurnDone) {
+		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		if (systemsCommonData.getCurrentGameMode() == GameMode.COMBAT && currentTurnDone) {
 			Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
-			SystemsCommonData systemsCommonData = getSystemsCommonData();
 			systemsCommonData.setCurrentTurnId(systemsCommonData.getCurrentTurnId() + 1);
 			Entity removeFirst = turnsQueue.removeFirst();
 			decideToRemoveOrAddLast(turnsQueue, removeFirst);
+			if (turnsQueue.size == 1) {
+				systemsCommonData.setCurrentGameMode(GameMode.EXPLORE);
+			}
 			startNextTurn();
 		}
 	}

@@ -214,7 +214,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		if (turnAgility <= 0 || logic == null) {
 			enemyFinishedTurn();
 		} else {
-			boolean finishedTurn = logic.run(enemy, getSystemsCommonData().getMap(), pathPlanner);
+			boolean finishedTurn = logic.run(enemy, getSystemsCommonData().getMap(), pathPlanner, getSystemsCommonData().getCurrentTurnId());
 			if (finishedTurn) {
 				enemyFinishedTurn();
 			}

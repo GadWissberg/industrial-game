@@ -10,7 +10,7 @@ public enum CharacterCommandsDefinitions {
 	RUN(RunCharacterCommand.class, SpriteType.RUN),
 	DODGE(RunCharacterCommand.class, SpriteType.RUN, true),
 	PICKUP(PickupItemCharacterCommand.class, SpriteType.PICKUP, false, false),
-	ATTACK_PRIMARY(PrimaryAttackCharacterCommand.class, SpriteType.ATTACK_PRIMARY);
+	ATTACK_PRIMARY(AttackPrimaryCharacterCommand.class, SpriteType.ATTACK_PRIMARY);
 
 	private final Class<? extends CharacterCommand> characterCommandImplementation;
 	private final SpriteType spriteType;

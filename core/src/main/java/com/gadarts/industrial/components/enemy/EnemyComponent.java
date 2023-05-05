@@ -24,6 +24,8 @@ public class EnemyComponent implements GameComponent {
 	private EnemyDeclaration enemyDeclaration;
 	private EnemyAiStatus aiStatus;
 	private Direction initialSearchingLookingDirection;
+	private int wonderingCounter;
+	private long wonderingPrevTurnId;
 	private EnemyTimeStamps timeStamps = new EnemyTimeStamps();
 	private Animation<TextureAtlas.AtlasRegion> bulletAnimation;
 	private long iconDisplayInFlowerTimeStamp;

@@ -13,30 +13,33 @@ import static com.gadarts.industrial.systems.SystemsCommonData.MELEE_ATTACK_MAX_
 
 public class AiStatusAttackingLogic extends AiStatusLogic {
 	@Override
-	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner) {
+	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
+		boolean finishedTurn = false;
 		if (characterComponent.getPrimaryAttack().melee()) {
 			CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(characterComponent.getTarget());
 			MapGraphNode targetNode = map.getNode(characterDecalComponent.getDecal().getPosition());
 			MapGraphNode node = map.getNode(ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition());
-			boolean adjacent = map.areNodesAdjacent(node, targetNode, MELEE_ATTACK_MAX_HEIGHT);
-			if (adjacent) {
+			if (map.areNodesAdjacent(node, targetNode, MELEE_ATTACK_MAX_HEIGHT)) {
 				if (characterComponent.getSkills().getActionPoints() >= characterComponent.getPrimaryAttack().actionPointsConsumption()) {
 					addCommand(enemy, CharacterCommandsDefinitions.ATTACK_PRIMARY, request.getOutputPath());
 				} else {
-					return true;
+					finishedTurn = true;
 				}
 			} else {
-				boolean pathFound = planPath(enemy, map, pathPlanner, targetNode);
-				if (pathFound) {
-					addCommand(enemy, CharacterCommandsDefinitions.RUN, request.getOutputPath());
-					addCommand(enemy, CharacterCommandsDefinitions.ATTACK_PRIMARY, request.getOutputPath());
+				if (planPath(enemy, map, pathPlanner, targetNode)) {
+					goToTargetAndAttack(enemy);
 				} else {
-					return true;
+					finishedTurn = true;
 				}
 			}
 		}
-		return false;
+		return finishedTurn;
+	}
+
+	private void goToTargetAndAttack(Entity enemy) {
+		addCommand(enemy, CharacterCommandsDefinitions.RUN, request.getOutputPath());
+		addCommand(enemy, CharacterCommandsDefinitions.ATTACK_PRIMARY, request.getOutputPath());
 	}
 
 

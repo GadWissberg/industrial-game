@@ -21,7 +21,7 @@ import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.List;
 
-public class PrimaryAttackCharacterCommand extends CharacterCommand {
+public class AttackPrimaryCharacterCommand extends CharacterCommand {
 	private final static Vector3 auxVector3_1 = new Vector3();
 
 	private final static Vector3 auxVector3_2 = new Vector3();
@@ -41,9 +41,12 @@ public class PrimaryAttackCharacterCommand extends CharacterCommand {
 	public boolean initialize(Entity character,
 							  SystemsCommonData commonData,
 							  List<CharacterSystemEventsSubscriber> subscribers) {
-		if (checkAdjacentForMelee(character, commonData)) return false;
+		if (checkAdjacentForMelee(character, commonData)) return true;
 
+		path.clear();
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
+		Vector3 targetPosition = ComponentsMapper.characterDecal.get(characterComponent.getTarget()).getDecal().getPosition();
+		path.nodes.add(commonData.getMap().getNode(targetPosition));
 		WeaponDeclaration primary = characterComponent.getPrimaryAttack();
 		if (primary.actionPointsConsumption() > characterComponent.getSkills().getActionPoints()) return true;
 

@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Pool;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.character.CharacterComponent;
-import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.map.MapGraphPath;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
@@ -22,14 +21,14 @@ public abstract class CharacterCommand implements Pool.Poolable {
 	@Setter
 	private CommandStates state;
 	@Setter
-	private MapGraphNode nextNode;
+	private int nextNodeIndex = -1;
 
 	@Override
 	public void reset( ) {
 		state = CommandStates.READY;
 		definition = null;
 		character = null;
-		nextNode = null;
+		nextNodeIndex = -1;
 	}
 
 	public abstract boolean initialize(Entity character,
@@ -47,7 +46,7 @@ public abstract class CharacterCommand implements Pool.Poolable {
 		this.definition = type;
 		this.character = character;
 		this.path.set(outputPath);
-		this.nextNode = path.get(0);
+		this.nextNodeIndex = 0;
 		this.state = CommandStates.READY;
 		return this;
 	}
