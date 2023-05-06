@@ -4,11 +4,9 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
 import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.player.Weapon;
-import com.gadarts.industrial.map.CalculatePathRequest;
-import com.gadarts.industrial.map.GameHeuristic;
-import com.gadarts.industrial.map.GamePathFinder;
-import com.gadarts.industrial.map.MapGraphPath;
+import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -26,6 +24,8 @@ public class GameUtils {
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Bresenham2 bresenham = new Bresenham2();
+	private static final Vector3 auxVector3_1 = new Vector3();
+	private static final Vector3 auxVector3_2 = new Vector3();
 
 	/**
 	 * Whether given contained is fully inside the container.
@@ -67,6 +67,16 @@ public class GameUtils {
 			height = PLAYER_HEIGHT;
 		}
 		return height;
+	}
+
+	public static Vector3 calculateDirectionToTarget(Entity character,
+													 MapGraph map) {
+		CharacterDecalComponent targetDecalComp = ComponentsMapper.characterDecal.get(ComponentsMapper.character.get(character).getTarget());
+		MapGraphNode targetNode = map.getNode(targetDecalComp.getDecal().getPosition());
+		Vector3 targetNodeCenterPosition = targetNode.getCenterPosition(auxVector3_1);
+		targetNodeCenterPosition.y += 0.5f;
+		MapGraphNode node = map.getNode(characterDecal.get(character).getDecal().getPosition());
+		return targetNodeCenterPosition.sub(node.getCenterPosition(auxVector3_2));
 	}
 
 	public static boolean calculatePath(CalculatePathRequest request,

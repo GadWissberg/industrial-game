@@ -51,6 +51,7 @@ import java.util.LinkedHashSet;
 
 import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
+import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.ATTACK_PRIMARY;
 import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.RUN;
 import static com.gadarts.industrial.utils.GameUtils.calculatePath;
 
@@ -383,12 +384,20 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private void pathHasCreated(MapGraphNode destination, MapGraphPath outputPath) {
 		int pathSize = outputPath.getCount();
 		if (!outputPath.nodes.isEmpty() && outputPath.get(pathSize - 1).equals(destination)) {
-			Entity player = getSystemsCommonData().getPlayer();
+			SystemsCommonData systemsCommonData = getSystemsCommonData();
+			Entity player = systemsCommonData.getPlayer();
 			CharacterCommand command = Pools.get(RUN.getCharacterCommandImplementation()).obtain();
-			command.reset(RUN, getSystemsCommonData().getPlayer(), outputPath);
+			command.reset(RUN, systemsCommonData.getPlayer(), outputPath);
 			Queue<CharacterCommand> commands = ComponentsMapper.character.get(player).getCommands();
 			commands.clear();
 			commands.addFirst(command);
+			Entity enemyAtNode = systemsCommonData.getMap().fetchAliveCharacterFromNode(destination);
+			if (enemyAtNode != null) {
+				ComponentsMapper.character.get(player).setTarget(enemyAtNode);
+				CharacterCommand attackCommand = Pools.get(ATTACK_PRIMARY.getCharacterCommandImplementation()).obtain();
+				attackCommand.reset(ATTACK_PRIMARY, systemsCommonData.getPlayer(), outputPath);
+				commands.addLast(attackCommand);
+			}
 		}
 	}
 

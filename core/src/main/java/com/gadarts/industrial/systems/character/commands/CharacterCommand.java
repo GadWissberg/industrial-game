@@ -41,6 +41,11 @@ public abstract class CharacterCommand implements Pool.Poolable {
 											   List<CharacterSystemEventsSubscriber> subscribers);
 
 	public CharacterCommand reset(CharacterCommandsDefinitions type,
+								  Entity character) {
+		return reset(type, character, null);
+	}
+
+	public CharacterCommand reset(CharacterCommandsDefinitions type,
 								  Entity character,
 								  MapGraphPath outputPath) {
 		this.definition = type;

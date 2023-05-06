@@ -22,13 +22,13 @@ import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
+import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.ModelInstancePools;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
-import com.gadarts.industrial.systems.character.commands.CommandStates;
 import com.gadarts.industrial.systems.enemy.ai.AiStatusLogic;
 import com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
@@ -264,7 +264,9 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private void awakeEnemyIfTargetSpotted(final Entity enemy) {
-		if (!isTargetInFov(enemy) || ComponentsMapper.character.get(enemy).getSkills().getHealthData().getHp() <= 0)
+		if (ComponentsMapper.enemy.get(enemy).getAiStatus() == ATTACKING
+				|| !isTargetInFov(enemy)
+				|| ComponentsMapper.character.get(enemy).getSkills().getHealthData().getHp() <= 0)
 			return;
 
 		LinkedHashSet<GridPoint2> nodes = GameUtils.findAllNodesToTarget(enemy, bresenhamOutput, true);
@@ -286,7 +288,8 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private void awakeEnemy(final Entity enemy) {
-		if (PARALYZED_ENEMIES || ComponentsMapper.character.get(enemy).getSkills().getHealthData().getHp() <= 0) return;
+		CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
+		if (PARALYZED_ENEMIES || characterComponent.getSkills().getHealthData().getHp() <= 0) return;
 
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		EnemyAiStatus prevAiStatus = enemyComponent.getAiStatus();

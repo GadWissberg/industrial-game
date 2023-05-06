@@ -109,7 +109,6 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 		turnsQueue.clear();
 		turnsQueue.addFirst(wokeBySpottingPlayer ? enemy : getSystemsCommonData().getPlayer());
 		turnsQueue.addLast(wokeBySpottingPlayer ? getSystemsCommonData().getPlayer() : enemy);
-		Gdx.app.log("Mode", "Combat mode engaged");
 		currentTurnDone = true;
 		subscribers.forEach(TurnsSystemEventsSubscriber::onCombatModeEngaged);
 		startNextTurn();

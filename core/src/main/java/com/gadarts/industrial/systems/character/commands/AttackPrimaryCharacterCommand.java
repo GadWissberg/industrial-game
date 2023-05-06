@@ -24,7 +24,6 @@ import java.util.List;
 public class AttackPrimaryCharacterCommand extends CharacterCommand {
 	private final static Vector3 auxVector3_1 = new Vector3();
 
-	private final static Vector3 auxVector3_2 = new Vector3();
 	private final static Vector2 auxVector2 = new Vector2();
 
 	private static int randomNumberOfBullets(WeaponDeclaration primary) {
@@ -80,15 +79,6 @@ public class AttackPrimaryCharacterCommand extends CharacterCommand {
 		return !map.areNodesAdjacent(characterNode, targetNode, GameUtils.calculateCharacterHeight(character) / 2F);
 	}
 
-	private Vector3 calculateDirectionToTarget(CharacterComponent characterComp,
-											   Vector3 positionNodeCenterPosition,
-											   SystemsCommonData commonData) {
-		CharacterDecalComponent targetDecalComp = ComponentsMapper.characterDecal.get(characterComp.getTarget());
-		MapGraphNode targetNode = commonData.getMap().getNode(targetDecalComp.getDecal().getPosition());
-		Vector3 targetNodeCenterPosition = targetNode.getCenterPosition(auxVector3_2);
-		targetNodeCenterPosition.y += 0.5f;
-		return targetNodeCenterPosition.sub(positionNodeCenterPosition);
-	}
 
 	private boolean engagePrimaryAttack(Entity character,
 										TextureAtlas.AtlasRegion newFrame,
@@ -103,7 +93,7 @@ public class AttackPrimaryCharacterCommand extends CharacterCommand {
 			CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(character);
 			MapGraphNode positionNode = commonData.getMap().getNode(charDecalComp.getDecal().getPosition());
 			Vector3 positionNodeCenterPosition = positionNode.getCenterPosition(auxVector3_1);
-			Vector3 direction = calculateDirectionToTarget(characterComponent, positionNodeCenterPosition, commonData);
+			Vector3 direction = GameUtils.calculateDirectionToTarget(character, commonData.getMap());
 			characterComponent.setFacingDirection(Direction.findDirection(auxVector2.set(direction.x, direction.z)));
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onCharacterEngagesPrimaryAttack(character, direction, positionNodeCenterPosition);
