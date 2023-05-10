@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum EnemyAiStatus {
 	IDLE,
 	ATTACKING(new AiStatusAttackingLogic()),
-	DODGING,
+	DODGING(new AiStatusDodgingLogic()),
 	SEARCHING_LOOKING(new AiStatusSearchingLookingLogic()),
 	SEARCHING_WONDERING(new AiStatusSearchingWonderingLogic()),
 	RUNNING_TO_LAST_SEEN_POSITION(new AiStatusRunningToLastSeenPositionLogic());

@@ -28,6 +28,7 @@
       "sound_engage": "weapon_rapid_laser_cannon",
       "sound_impact": "small_exp",
       "number_of_bullets_min": 5,
+      "action_points_consumption": 2,
       "number_of_bullets_max": 7,
       "engine_consumption": 4,
       "bullet_model": "laser_bullet",

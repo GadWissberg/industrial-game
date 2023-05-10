@@ -40,6 +40,11 @@ public abstract class AiStatusLogic {
 	public abstract boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId);
 
 	void addCommand(Entity enemy,
+					CharacterCommandsDefinitions characterCommandsDefinitions) {
+		addCommand(enemy, characterCommandsDefinitions, null);
+	}
+
+	void addCommand(Entity enemy,
 					CharacterCommandsDefinitions characterCommandsDefinitions,
 					MapGraphPath path) {
 		CharacterCommand command = Pools.get(characterCommandsDefinitions.getCharacterCommandImplementation()).obtain();

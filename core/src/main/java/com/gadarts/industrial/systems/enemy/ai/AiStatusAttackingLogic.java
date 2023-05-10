@@ -4,9 +4,12 @@ import com.badlogic.ashley.core.Entity;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
+import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
+import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
+import com.gadarts.industrial.systems.enemy.EnemySystem;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
 
 import static com.gadarts.industrial.systems.SystemsCommonData.MELEE_ATTACK_MAX_HEIGHT;
@@ -32,6 +35,13 @@ public class AiStatusAttackingLogic extends AiStatusLogic {
 				} else {
 					finishedTurn = true;
 				}
+			}
+		} else {
+			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
+			if (enemyComponent.getEngineEnergy() >= characterComponent.getPrimaryAttack().engineConsumption()) {
+				addCommand(enemy, CharacterCommandsDefinitions.ATTACK_PRIMARY);
+			} else {
+				enemyComponent.setAiStatus(EnemyAiStatus.DODGING);
 			}
 		}
 		return finishedTurn;

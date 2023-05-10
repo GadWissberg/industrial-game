@@ -224,6 +224,8 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	@Override
 	public void onNewTurn(Entity entity) {
 		if (ComponentsMapper.enemy.has(entity)) {
+			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(entity);
+			enemyComponent.setEngineEnergy(Math.min(enemyComponent.getEngineEnergy() + 1, enemyComponent.getEnemyDeclaration().engine()));
 			invokeEnemyTurn(entity);
 		}
 	}
