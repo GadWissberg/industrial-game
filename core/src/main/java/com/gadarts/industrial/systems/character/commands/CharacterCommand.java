@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Pool;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.character.CharacterComponent;
+import com.gadarts.industrial.components.character.CharacterSkills;
 import com.gadarts.industrial.map.MapGraphPath;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
@@ -22,6 +23,11 @@ public abstract class CharacterCommand implements Pool.Poolable {
 	private CommandStates state;
 	@Setter
 	private int nextNodeIndex = -1;
+
+	protected static void consumeActionPoints(CharacterComponent characterComponent, int pointsConsumption) {
+		CharacterSkills skills = characterComponent.getSkills();
+		skills.setActionPoints(skills.getActionPoints() - pointsConsumption);
+	}
 
 	@Override
 	public void reset( ) {

@@ -98,7 +98,7 @@ public class PlayerStorage {
 		if (definition.getMask()[row * (definition.getWidth()) + (col - leftMost)] == 1) {
 			int currentCellInStorage = row * WIDTH + col;
 			if (storageMap[currentCellInStorage] == 0) {
-				storageMapSketch[currentCellInStorage] = indices.get(definition);
+				storageMapSketch[currentCellInStorage] = indices.get(((PlayerWeaponDeclaration) definition).declaration());
 				return true;
 			} else {
 				return false;

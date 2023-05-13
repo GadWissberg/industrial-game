@@ -1,7 +1,6 @@
 package com.gadarts.industrial.systems.turns;
 
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -47,10 +46,15 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 			Entity removeFirst = turnsQueue.removeFirst();
 			decideToRemoveOrAddLast(turnsQueue, removeFirst);
 			if (turnsQueue.size == 1) {
-				systemsCommonData.setCurrentGameMode(GameMode.EXPLORE);
+				setGameMode(GameMode.EXPLORE);
 			}
 			startNextTurn();
 		}
+	}
+
+	private void setGameMode(GameMode gameMode) {
+		getSystemsCommonData().setCurrentGameMode(gameMode);
+		subscribers.forEach(sub -> sub.onGameModeSet());
 	}
 
 	private void startNextTurn( ) {
@@ -105,7 +109,7 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 	}
 
 	private void engageCombatMode(Entity enemy, boolean wokeBySpottingPlayer, Queue<Entity> turnsQueue) {
-		getSystemsCommonData().setCurrentGameMode(GameMode.COMBAT);
+		setGameMode(GameMode.COMBAT);
 		turnsQueue.clear();
 		turnsQueue.addFirst(wokeBySpottingPlayer ? enemy : getSystemsCommonData().getPlayer());
 		turnsQueue.addLast(wokeBySpottingPlayer ? getSystemsCommonData().getPlayer() : enemy);

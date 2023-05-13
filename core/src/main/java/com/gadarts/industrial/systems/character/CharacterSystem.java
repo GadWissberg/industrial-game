@@ -119,7 +119,9 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 				}
 			}
 		} else {
-			handleCharacterCommand(getSystemsCommonData().getPlayer());
+			Entity player = getSystemsCommonData().getPlayer();
+			character.get(player).getSkills().resetActionPoints();
+			handleCharacterCommand(player);
 		}
 		updateCharacters();
 	}
@@ -387,14 +389,11 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		MapGraphNode characterNode = getSystemsCommonData().getMap().getNode(characterPosition);
 		if (!currentCommand.getDefinition().isRotationForbidden() && !characterNode.equals(commandPath.nodes.get(commandPath.getCount() - 1))) {
 			if (rotData.isRotating() && TimeUtils.timeSinceMillis(rotData.getLastRotation()) > CHARACTER_ROTATION_INTERVAL) {
-				rotData.setLastRotation(TimeUtils.millis());
-				Direction directionToDest = calculateDirectionToDestination(currentCommand);
-				rotate(charComp, rotData, directionToDest, currentCommand.getCharacter());
+				rotate(charComp, rotData, currentCommand);
 			}
 		} else {
-			Entity target = charComp.getTarget();
-			if (target != null) {
-				Vector3 targetPosition = ComponentsMapper.characterDecal.get(target).getDecal().getPosition();
+			if (charComp.getTarget() != null) {
+				Vector3 targetPosition = ComponentsMapper.characterDecal.get(charComp.getTarget()).getDecal().getPosition();
 				Vector3 direction = auxVector3_1.set(targetPosition).sub(characterPosition).nor();
 				charComp.setFacingDirection(findDirection(auxVector2_1.set(direction.x, direction.z)));
 			}
@@ -404,13 +403,14 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	private void rotate(CharacterComponent charComponent,
 						CharacterRotationData rotationData,
-						Direction directionToDest,
-						Entity character) {
+						CharacterCommand currentCommand) {
+		rotationData.setLastRotation(TimeUtils.millis());
+		Direction directionToDest = calculateDirectionToDestination(currentCommand);
 		if (charComponent.getFacingDirection() != directionToDest) {
 			Vector2 currentDirVec = charComponent.getFacingDirection().getDirection(auxVector2_1);
 			float diff = directionToDest.getDirection(auxVector2_2).angleDeg() - currentDirVec.angleDeg();
 			int side = auxVector2_3.set(1, 0).setAngleDeg(diff).angleDeg() > 180 ? -1 : 1;
-			Vector3 charPos = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
+			Vector3 charPos = ComponentsMapper.characterDecal.get(currentCommand.getCharacter()).getDecal().getPosition();
 			Entity floorEntity = getSystemsCommonData().getMap().getNode(charPos).getEntity();
 			int fogOfWarSig = floorEntity != null ? ComponentsMapper.floor.get(floorEntity).getFogOfWarSignature() : 0;
 			boolean isNodeHidden = (fogOfWarSig & 16) == 16;

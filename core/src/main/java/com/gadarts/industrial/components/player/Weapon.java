@@ -1,6 +1,7 @@
 package com.gadarts.industrial.components.player;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +17,7 @@ public class Weapon extends Item {
 	}
 
 	public boolean isMelee( ) {
-		WeaponDeclaration definition = (WeaponDeclaration) getDeclaration();
-		return definition.melee();
+		PlayerWeaponDeclaration definition = (PlayerWeaponDeclaration) getDeclaration();
+		return definition.declaration().melee();
 	}
 }

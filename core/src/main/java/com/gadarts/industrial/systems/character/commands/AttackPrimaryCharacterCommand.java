@@ -9,7 +9,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
-import com.gadarts.industrial.components.character.CharacterSkills;
 import com.gadarts.industrial.components.character.OnGoingAttack;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
@@ -90,8 +89,7 @@ public class AttackPrimaryCharacterCommand extends CharacterCommand {
 
 		if (onGoingAttack.isDone()) {
 			commandDone = true;
-			CharacterSkills skills = characterComponent.getSkills();
-			skills.setActionPoints(skills.getActionPoints() - characterComponent.getPrimaryAttack().actionPointsConsumption());
+			consumeActionPoints(characterComponent, characterComponent.getPrimaryAttack().actionPointsConsumption());
 		} else {
 			int primaryAttackHitFrameIndex = GameUtils.getPrimaryAttackHitFrameIndexForCharacter(character, commonData);
 			if (newFrame.index == primaryAttackHitFrameIndex) {

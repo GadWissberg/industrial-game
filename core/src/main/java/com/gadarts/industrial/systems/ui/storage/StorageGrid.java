@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.gadarts.industrial.components.player.Item;
+import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.model.ItemDeclaration;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.player.PlayerStorage;
@@ -180,9 +181,12 @@ public class StorageGrid extends ItemsTable {
 			int valueInMap = storage.getStorageMap()[auxCoords.row * PlayerStorage.WIDTH + auxCoords.col];
 			ItemDisplay selection = itemSelectionHandler.getSelection();
 			HashMap<ItemDeclaration, Integer> indices = systemsCommonData.getStorage().getIndices();
-			if (selection != null && cellIsBehindSelection && valueInMap > 0 && valueInMap != indices.get(selection.getItem().getDeclaration())) {
-				invalidLocation = true;
-				color = COLOR_INVALID;
+			if (selection != null && cellIsBehindSelection && valueInMap > 0) {
+				PlayerWeaponDeclaration declaration = (PlayerWeaponDeclaration) selection.getItem().getDeclaration();
+				if (valueInMap != indices.get(declaration.declaration())) {
+					invalidLocation = true;
+					color = COLOR_INVALID;
+				}
 			}
 			batch.setColor(color);
 			Vector2 cellPosition = calculateCellPosition(i, auxVector);
@@ -243,14 +247,11 @@ public class StorageGrid extends ItemsTable {
 
 	@Override
 	public void removeItem(final ItemDisplay item) {
-		Integer itemId = systemsCommonData.getStorage().getIndices().get(item.getItem().getDeclaration());
+		PlayerWeaponDeclaration declaration = (PlayerWeaponDeclaration) item.getItem().getDeclaration();
+		Integer itemId = systemsCommonData.getStorage().getIndices().get(declaration.declaration());
 		systemsCommonData.getStorage().removeItem(itemId);
 	}
 
-	/**
-	 * @param id The index of the item.
-	 * @return The given item whether it exists in this actor.
-	 */
 	public ItemDisplay findItemDisplay(final int id) {
 		Actor[] items = StorageGrid.this.getParent().getChildren().items;
 		Optional<ItemDisplay> item = IntStream.range(0, items.length)

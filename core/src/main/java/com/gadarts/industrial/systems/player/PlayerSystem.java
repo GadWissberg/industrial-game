@@ -340,7 +340,8 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	@Override
 	public void onItemPickedUp(final Entity itemPickedUp) {
 		Item item = ComponentsMapper.pickup.get(itemPickedUp).getItem();
-		if (getSystemsCommonData().getStorage().addItem(item)) {
+		boolean added = getSystemsCommonData().getStorage().addItem(item);
+		if (added) {
 			for (PlayerSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onItemAddedToStorage(item);
 			}
@@ -381,6 +382,13 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		}
 	}
 
+	@Override
+	public void onGameModeSet( ) {
+		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		if (systemsCommonData.getCurrentGameMode() == GameMode.EXPLORE) {
+			ComponentsMapper.character.get(systemsCommonData.getPlayer()).getSkills().resetActionPoints();
+		}
+	}
 
 	private void pathHasCreated(MapGraphNode destination, MapGraphPath outputPath) {
 		int pathSize = outputPath.getCount();
@@ -482,7 +490,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		PlayerWeaponDeclaration declaration = weaponsDeclarations.parse(DebugSettings.STARTING_WEAPON);
 		Assets.UiTextures symbol = declaration.declaration().getSymbol();
 		Texture image = symbol != null ? am.getTexture(symbol) : null;
-		weapon.init(declaration.declaration(), 0, 0, image);
+		weapon.init(declaration, 0, 0, image);
 		return weapon;
 	}
 

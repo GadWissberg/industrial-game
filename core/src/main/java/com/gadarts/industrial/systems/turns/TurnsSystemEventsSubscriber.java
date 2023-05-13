@@ -8,7 +8,11 @@ public interface TurnsSystemEventsSubscriber extends SystemEventsSubscriber {
 
 	}
 
-	default void onCombatModeEngaged( ){
+	default void onCombatModeEngaged( ) {
+
+	}
+
+	default void onGameModeSet( ) {
 
 	}
 }
