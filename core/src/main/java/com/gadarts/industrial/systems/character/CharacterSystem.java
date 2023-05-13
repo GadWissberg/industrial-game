@@ -22,6 +22,7 @@ import com.gadarts.industrial.components.character.*;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
+import com.gadarts.industrial.map.MapGraphPath;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.Assets.Sounds;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
@@ -381,17 +382,22 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (charComp.getCharacterSpriteData().getSpriteType() == PAIN) return;
 
 		CharacterRotationData rotData = charComp.getRotationData();
-		if (!currentCommand.getDefinition().isRotationForbidden()) {
+		Vector3 characterPosition = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
+		MapGraphPath commandPath = currentCommand.getPath();
+		MapGraphNode characterNode = getSystemsCommonData().getMap().getNode(characterPosition);
+		if (!currentCommand.getDefinition().isRotationForbidden() && !characterNode.equals(commandPath.nodes.get(commandPath.getCount() - 1))) {
 			if (rotData.isRotating() && TimeUtils.timeSinceMillis(rotData.getLastRotation()) > CHARACTER_ROTATION_INTERVAL) {
 				rotData.setLastRotation(TimeUtils.millis());
 				Direction directionToDest = calculateDirectionToDestination(currentCommand);
 				rotate(charComp, rotData, directionToDest, currentCommand.getCharacter());
 			}
 		} else {
-			Vector3 targetPosition = ComponentsMapper.characterDecal.get(charComp.getTarget()).getDecal().getPosition();
-			Vector3 characterPosition = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
-			Vector3 direction = auxVector3_1.set(targetPosition).sub(characterPosition).nor();
-			charComp.setFacingDirection(findDirection(auxVector2_1.set(direction.x, direction.z)));
+			Entity target = charComp.getTarget();
+			if (target != null) {
+				Vector3 targetPosition = ComponentsMapper.characterDecal.get(target).getDecal().getPosition();
+				Vector3 direction = auxVector3_1.set(targetPosition).sub(characterPosition).nor();
+				charComp.setFacingDirection(findDirection(auxVector2_1.set(direction.x, direction.z)));
+			}
 			rotationDone(rotData, charComp.getCharacterSpriteData());
 		}
 	}
