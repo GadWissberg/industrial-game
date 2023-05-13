@@ -3,35 +3,37 @@ package com.gadarts.industrial.systems.character.commands;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.math.Vector3;
 import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
+import lombok.val;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PickupItemCharacterCommand extends CharacterCommand {
 
-	private static final float PICKUP_CONSUME_TIME = 1F;
-	private Entity itemToPickup;
+	private static final List<Entity> auxEntityList = new ArrayList<>();
 
 	@Override
 	public boolean reactToFrameChange(SystemsCommonData systemsCommonData,
 									  Entity character,
 									  TextureAtlas.AtlasRegion newFrame,
 									  List<CharacterSystemEventsSubscriber> subscribers) {
-		handlePickup(character, newFrame, subscribers);
-		return false;
-	}
 
-	private void handlePickup(Entity character,
-							  TextureAtlas.AtlasRegion newFrame,
-							  List<CharacterSystemEventsSubscriber> subscribers) {
+		boolean done = false;
 		if (newFrame.index == 1 && ComponentsMapper.animation.get(character).getAnimation().getPlayMode() == Animation.PlayMode.REVERSED) {
-			consumeTurnTime(character, PICKUP_CONSUME_TIME);
+			MapGraph map = systemsCommonData.getMap();
+			val characterNode = map.getNode(ComponentsMapper.characterDecal.get(character).getDecal().getPosition());
+			List<Entity> pickups = map.fetchPickupsFromNode(characterNode, auxEntityList);
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
-				subscriber.onItemPickedUp(itemToPickup);
+				subscriber.onItemPickedUp(pickups.get(0));
+				done = true;
 			}
 		}
+		return done;
 	}
 
 	@Override
@@ -43,6 +45,7 @@ public class PickupItemCharacterCommand extends CharacterCommand {
 	public boolean initialize(Entity character,
 							  SystemsCommonData commonData,
 							  List<CharacterSystemEventsSubscriber> subscribers) {
-		return false;
+		Vector3 position = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
+		return !commonData.getMap().getNode(position).equals(path.nodes.get(path.getCount() - 1));
 	}
 }

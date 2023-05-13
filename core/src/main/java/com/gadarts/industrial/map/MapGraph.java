@@ -2,6 +2,7 @@ package com.gadarts.industrial.map;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedGraph;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -16,6 +17,7 @@ import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.shared.model.Coords;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import lombok.Getter;
+import lombok.val;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -381,6 +383,20 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 			}
 		}
 		return true;
+	}
+
+
+	public List<Entity> fetchPickupsFromNode(MapGraphNode destination, List<Entity> auxEntityList) {
+		auxEntityList.clear();
+		ImmutableArray<Entity> pickups = mapGraphRelatedEntities.getPickupEntities();
+		for (Entity pickup : pickups) {
+			val position = ComponentsMapper.modelInstance.get(pickup).getModelInstance().transform.getTranslation(auxVector3);
+			MapGraphNode pickupNode = getNode(position);
+			if (pickupNode.equals(destination)) {
+				auxEntityList.add(pickup);
+			}
+		}
+		return auxEntityList;
 	}
 }
 

@@ -98,15 +98,28 @@ public class GeneralHandler implements
 	private CharacterAnimations createCharacterAnimations(final Assets.Atlases character) {
 		CharacterAnimations animations = new CharacterAnimations();
 		TextureAtlas atlas = assetsManager.getAtlas(character);
-		Arrays.stream(SpriteType.values()).forEach(spriteType -> {
-			if (spriteType.isSingleDirection()) {
-				inflateCharacterAnimation(animations, atlas, spriteType, Direction.SOUTH);
-			} else {
-				Direction[] directions = Direction.values();
-				Arrays.stream(directions).forEach(dir -> inflateCharacterAnimation(animations, atlas, spriteType, dir));
-			}
-		});
+		Arrays.stream(SpriteType.values())
+				.filter(spriteType -> checkIfAtlasContainsSpriteType(spriteType, atlas))
+				.forEach(spriteType -> {
+					if (spriteType.isSingleDirection()) {
+						inflateCharacterAnimation(animations, atlas, spriteType, Direction.SOUTH);
+					} else {
+						Direction[] directions = Direction.values();
+						Arrays.stream(directions).forEach(dir -> inflateCharacterAnimation(animations, atlas, spriteType, dir));
+					}
+				});
 		return animations;
+	}
+
+	private boolean checkIfAtlasContainsSpriteType(SpriteType spriteType, TextureAtlas atlas) {
+		boolean result = false;
+		for (TextureAtlas.AtlasRegion region : atlas.getRegions()) {
+			if (region.name.startsWith(spriteType.name().toLowerCase())) {
+				result = true;
+				break;
+			}
+		}
+		return result;
 	}
 
 	private void applyAlphaOnModels( ) {

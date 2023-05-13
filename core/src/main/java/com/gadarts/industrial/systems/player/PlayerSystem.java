@@ -9,7 +9,6 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
-import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -37,6 +36,7 @@ import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
+import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
 import com.gadarts.industrial.systems.character.commands.CommandStates;
 import com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
@@ -47,12 +47,13 @@ import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
 import com.gadarts.industrial.utils.GameUtils;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 
 import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
-import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.ATTACK_PRIMARY;
-import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.RUN;
+import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.*;
 import static com.gadarts.industrial.utils.GameUtils.calculatePath;
 
 public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> implements
@@ -72,6 +73,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private final static LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
+	private static final List<Entity> auxEntityList = new ArrayList<>();
 	private PathPlanHandler playerPathPlanner;
 	private ImmutableArray<Entity> ambObjects;
 	private ImmutableArray<Entity> pickups;
@@ -81,13 +83,19 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		super(assetsManager, lifeCycleHandler);
 	}
 
+	private static int flipOffDiagonal(int total, int mask, int firstDirMask, int secondDirMask) {
+		if ((total & mask) == mask && ((total & firstDirMask) == firstDirMask || (total & secondDirMask) == secondDirMask)) {
+			total = total & ~mask;
+		}
+		return total;
+	}
+
 	@Override
 	public void spaceKeyPressed( ) {
 		if (ComponentsMapper.player.has(getSystemsCommonData().getTurnsQueue().first())) {
 			notifyPlayerFinishedTurn();
 		}
 	}
-
 
 	@Override
 	public void onDoorStateChanged(Entity doorEntity,
@@ -195,13 +203,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		total = flipOffDiagonal(total, Direction.NORTH_WEST.getMask(), Direction.NORTH.getMask(), Direction.WEST.getMask());
 		total = flipOffDiagonal(total, Direction.SOUTH_EAST.getMask(), Direction.SOUTH.getMask(), Direction.EAST.getMask());
 		total = flipOffDiagonal(total, Direction.SOUTH_WEST.getMask(), Direction.SOUTH.getMask(), Direction.WEST.getMask());
-		return total;
-	}
-
-	private static int flipOffDiagonal(int total, int mask, int firstDirMask, int secondDirMask) {
-		if ((total & mask) == mask && ((total & firstDirMask) == firstDirMask || (total & secondDirMask) == secondDirMask)) {
-			total = total & ~mask;
-		}
 		return total;
 	}
 
@@ -386,19 +387,27 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		if (!outputPath.nodes.isEmpty() && outputPath.get(pathSize - 1).equals(destination)) {
 			SystemsCommonData systemsCommonData = getSystemsCommonData();
 			Entity player = systemsCommonData.getPlayer();
-			CharacterCommand command = Pools.get(RUN.getCharacterCommandImplementation()).obtain();
-			command.reset(RUN, systemsCommonData.getPlayer(), outputPath);
-			Queue<CharacterCommand> commands = ComponentsMapper.character.get(player).getCommands();
-			commands.clear();
-			commands.addFirst(command);
+			ComponentsMapper.character.get(player).getCommands().clear();
+			addCommand(outputPath, RUN);
 			Entity enemyAtNode = systemsCommonData.getMap().fetchAliveCharacterFromNode(destination);
 			if (enemyAtNode != null) {
 				ComponentsMapper.character.get(player).setTarget(enemyAtNode);
-				CharacterCommand attackCommand = Pools.get(ATTACK_PRIMARY.getCharacterCommandImplementation()).obtain();
-				attackCommand.reset(ATTACK_PRIMARY, systemsCommonData.getPlayer(), outputPath);
-				commands.addLast(attackCommand);
+				addCommand(outputPath, ATTACK_PRIMARY);
+			} else {
+				List<Entity> pickupsAtNode = systemsCommonData.getMap().fetchPickupsFromNode(destination, auxEntityList);
+				if (!pickupsAtNode.isEmpty()) {
+					addCommand(outputPath, PICKUP);
+				}
 			}
 		}
+	}
+
+	private void addCommand(MapGraphPath outputPath,
+							CharacterCommandsDefinitions characterCommandDefinition) {
+		CharacterCommand command = Pools.get(characterCommandDefinition.getCharacterCommandImplementation()).obtain();
+		Entity player = getSystemsCommonData().getPlayer();
+		command.reset(characterCommandDefinition, player, outputPath);
+		ComponentsMapper.character.get(player).getCommands().addLast(command);
 	}
 
 	@Override

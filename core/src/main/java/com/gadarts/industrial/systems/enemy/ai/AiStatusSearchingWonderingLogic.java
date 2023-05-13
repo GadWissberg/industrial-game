@@ -1,7 +1,6 @@
 package com.gadarts.industrial.systems.enemy.ai;
 
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.math.MathUtils;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
@@ -32,9 +31,7 @@ public class AiStatusSearchingWonderingLogic extends AiStatusLogic {
 	private boolean wonderAround(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId) {
 		boolean finishedTurn = false;
 		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(enemy);
-		List<MapGraphNode> availableNodes = map.fetchAvailableNodesAroundNode(map.getNode(characterDecalComponent.getDecal().getPosition()));
-		cleanAvailableNodesWithDifferentHeight(map, characterDecalComponent, availableNodes);
-		MapGraphNode dst = availableNodes.size() > 0 ? availableNodes.get(MathUtils.random(availableNodes.size() - 1)) : null;
+		MapGraphNode dst = findAvailableNodeAround(map, characterDecalComponent);
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		if (planPath(enemy, map, pathPlanner, dst)) {
 			if (enemyComponent.getWonderingPrevTurnId() != currentTurnId) {
@@ -49,14 +46,5 @@ public class AiStatusSearchingWonderingLogic extends AiStatusLogic {
 		return finishedTurn;
 	}
 
-	private static void cleanAvailableNodesWithDifferentHeight(MapGraph map, CharacterDecalComponent characterDecalComponent, List<MapGraphNode> availableNodes) {
-		for (int i = 0; i < availableNodes.size(); i++) {
-			float enemyNodeHeight = map.getNode(characterDecalComponent.getDecal().getPosition()).getHeight();
-			float height = availableNodes.get(i).getHeight();
-			if (Math.abs(enemyNodeHeight - height) > CharacterComponent.PASSABLE_MAX_HEIGHT_DIFF) {
-				availableNodes.remove(i);
-				i--;
-			}
-		}
-	}
+
 }
