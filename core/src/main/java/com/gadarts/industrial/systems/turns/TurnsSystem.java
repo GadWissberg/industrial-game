@@ -40,7 +40,7 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 	@Override
 	public void update(float deltaTime) {
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		if (systemsCommonData.getCurrentGameMode() == GameMode.COMBAT && currentTurnDone) {
+		if (systemsCommonData.getCurrentGameMode() == GameMode.TURN_BASED && currentTurnDone) {
 			Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
 			systemsCommonData.setCurrentTurnId(systemsCommonData.getCurrentTurnId() + 1);
 			Entity removeFirst = turnsQueue.removeFirst();
@@ -54,7 +54,7 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 
 	private void setGameMode(GameMode gameMode) {
 		getSystemsCommonData().setCurrentGameMode(gameMode);
-		subscribers.forEach(sub -> sub.onGameModeSet());
+		subscribers.forEach(TurnsSystemEventsSubscriber::onGameModeSet);
 	}
 
 	private void startNextTurn( ) {
@@ -71,6 +71,7 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 	public void onDoorStateChanged(Entity doorEntity, DoorStates oldState, DoorStates newState) {
 		if (newState == DoorStates.OPEN) {
 			getSystemsCommonData().getTurnsQueue().addLast(doorEntity);
+			setGameMode(GameMode.TURN_BASED);
 		} else if (newState == DoorStates.CLOSED) {
 			markCurrentTurnAsDone();
 		}
@@ -102,20 +103,16 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 
 		Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
 		if (getSystemsCommonData().getCurrentGameMode() == GameMode.EXPLORE) {
-			engageCombatMode(enemy, wokeBySpottingPlayer, turnsQueue);
+			setGameMode(GameMode.TURN_BASED);
+			turnsQueue.clear();
+			turnsQueue.addFirst(wokeBySpottingPlayer ? enemy : getSystemsCommonData().getPlayer());
+			turnsQueue.addLast(wokeBySpottingPlayer ? getSystemsCommonData().getPlayer() : enemy);
+			currentTurnDone = true;
+			subscribers.forEach(TurnsSystemEventsSubscriber::onCombatModeEngaged);
+			startNextTurn();
 		} else {
 			turnsQueue.addLast(enemy);
 		}
-	}
-
-	private void engageCombatMode(Entity enemy, boolean wokeBySpottingPlayer, Queue<Entity> turnsQueue) {
-		setGameMode(GameMode.COMBAT);
-		turnsQueue.clear();
-		turnsQueue.addFirst(wokeBySpottingPlayer ? enemy : getSystemsCommonData().getPlayer());
-		turnsQueue.addLast(wokeBySpottingPlayer ? getSystemsCommonData().getPlayer() : enemy);
-		currentTurnDone = true;
-		subscribers.forEach(TurnsSystemEventsSubscriber::onCombatModeEngaged);
-		startNextTurn();
 	}
 
 	private void markCurrentTurnAsDone( ) {

@@ -1,5 +1,5 @@
 package com.gadarts.industrial.systems.turns;
 
 public enum GameMode {
-	EXPLORE, COMBAT
+	EXPLORE, TURN_BASED
 }

@@ -11,7 +11,6 @@ import lombok.Setter;
 @Setter
 public class DoorComponent implements GameComponent {
 
-	private int openCounter;
 	private DoorStates state;
 	@Setter(AccessLevel.NONE)
 	private MapGraphNode node;

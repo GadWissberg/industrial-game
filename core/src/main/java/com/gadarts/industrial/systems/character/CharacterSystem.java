@@ -106,7 +106,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	@Override
 	public void update(float deltaTime) {
 		super.update(deltaTime);
-		if (getSystemsCommonData().getCurrentGameMode() == GameMode.COMBAT) {
+		if (getSystemsCommonData().getCurrentGameMode() == GameMode.TURN_BASED) {
 			Entity current = getSystemsCommonData().getTurnsQueue().first();
 			if (character.has(current)) {
 				CharacterComponent characterComponent = character.get(current);
@@ -119,9 +119,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 				}
 			}
 		} else {
-			Entity player = getSystemsCommonData().getPlayer();
-			character.get(player).getSkills().resetActionPoints();
-			handleCharacterCommand(player);
+			character.get(getSystemsCommonData().getPlayer()).getSkills().resetActionPoints();
+			handleCharacterCommand(getSystemsCommonData().getPlayer());
 		}
 		updateCharacters();
 	}
@@ -279,7 +278,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	public void commandDone(Entity character) {
 		ComponentsMapper.character.get(character).getCharacterSpriteData().setSpriteType(IDLE);
-		if (getSystemsCommonData().getCurrentGameMode() == GameMode.COMBAT) {
+		if (getSystemsCommonData().getCurrentGameMode() == GameMode.TURN_BASED) {
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onCharacterCommandDone(character);
 			}

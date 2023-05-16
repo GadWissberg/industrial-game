@@ -34,7 +34,6 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
-	private static final int DOOR_OPEN_DURATION = 3;
 	private ImmutableArray<Entity> doorEntities;
 	private ImmutableArray<Entity> floorsEntities;
 	private ImmutableArray<Entity> environmentObjectsEntities;
@@ -163,11 +162,10 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 		if (ComponentsMapper.door.has(entity)) {
 			DoorComponent doorComponent = ComponentsMapper.door.get(entity);
 			MapGraph map = getSystemsCommonData().getMap();
-			if (shouldCloseDoor(doorComponent, map)) {
-				closeDoor(doorComponent, entity);
+			if (map.checkIfNodeIsFreeOfCharacters(doorComponent.getNode())) {
+				applyDoorState(entity, doorComponent, CLOSING);
 			} else {
-				doorComponent.setOpenCounter(doorComponent.getOpenCounter() + 1);
-				subscribers.forEach(s -> s.onDoorStayedOpenInTurn(entity));
+				subscribers.forEach(sub -> sub.onDoorStayedOpenInTurn(entity));
 			}
 		}
 	}
@@ -184,13 +182,5 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 		}
 	}
 
-	private boolean shouldCloseDoor(DoorComponent doorComponent, MapGraph map) {
-		int openCounter = doorComponent.getOpenCounter();
-		return openCounter >= DOOR_OPEN_DURATION && map.checkIfNodeIsFreeOfCharacters(doorComponent.getNode());
-	}
 
-	private void closeDoor(DoorComponent doorComponent, Entity doorEntity) {
-		doorComponent.setOpenCounter(0);
-		applyDoorState(doorEntity, doorComponent, CLOSING);
-	}
 }
