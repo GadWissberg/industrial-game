@@ -61,7 +61,7 @@
       "health": 3,
       "accuracy": "med",
       "sight": "high",
-      "attack_primary": "glock",
+      "attack_primary": "glc",
       "attack_primary_hit_frame_index": 3,
       "height": 1.5,
       "sound_melee": "weapon_fist",
@@ -69,7 +69,12 @@
       "sound_death": "player_death",
       "sound_step": "step_concrete",
       "shadow_radius": 0.2,
-      "human": true
+      "human": true,
+      "bullet_creation_offset": {
+        "x": 0.0,
+        "y": 0.95,
+        "z": 0.0
+      }
     }
   ]
 }

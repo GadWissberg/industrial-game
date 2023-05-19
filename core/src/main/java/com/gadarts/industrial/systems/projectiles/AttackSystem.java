@@ -34,6 +34,8 @@ import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.utils.EntityBuilder;
 
+import static com.gadarts.industrial.components.player.PlayerComponent.PLAYER_HEIGHT;
+
 public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> implements CharacterSystemEventsSubscriber {
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final float BULLET_MAX_DISTANCE = 14;
@@ -85,6 +87,9 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		WeaponDeclaration primaryAttack = enemyComp.getEnemyDeclaration().attackPrimary();
 		getSystemsCommonData().getSoundPlayer().playSound(primaryAttack.soundEngage());
 		Vector3 bulletCreationOffset = ComponentsMapper.enemy.get(character).getEnemyDeclaration().bulletCreationOffset();
+		if (bulletCreationOffset == null) {
+			bulletCreationOffset = auxVector3_1.setZero().add(0F, PLAYER_HEIGHT / 2F, 0F);
+		}
 		primaryAttackEngaged(character, direction, charPos, bulletCreationOffset, primaryAttack);
 	}
 
