@@ -159,14 +159,18 @@ public class ModelsShader extends DefaultShader {
 
 	private void insertDataForWallAndDoor(Renderable renderable) {
 		int type;
-		if (ComponentsMapper.wall.has((Entity) renderable.userData)) {
+		boolean grayScale = false;
+		Entity entity = (Entity) renderable.userData;
+		if (ComponentsMapper.wall.has(entity)) {
 			type = 1;
-		} else if (door.has((Entity) renderable.userData)) {
+			grayScale = wall.get(entity).isApplyGrayScale();
+		} else if (door.has(entity)) {
 			type = 2;
 		} else {
 			type = 0;
 		}
 		program.setUniformi(locations.getUniformLocEntityType(), type);
+		program.setUniformi(locations.getUniformLocGrayScale(), grayScale ? 1 : 0);
 	}
 
 	private void insertModelDimensions(AdditionalRenderData additionalRenderData, Entity entity) {

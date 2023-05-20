@@ -17,6 +17,7 @@ public class ModelsShaderUniformsLocations {
 	private static final String UNIFORM_FLAT_COLOR = "u_flatColor";
 	private static final String UNIFORM_FOW_SIGNATURE = "u_fowSignature";
 	private static final String UNIFORM_GRAY_SIGNATURE = "u_graySignature";
+	private static final String UNIFORM_GRAY_SCALE = "u_grayScale";
 	private static final String UNIFORM_MODEL_WIDTH = "u_modelWidth";
 	private static final String UNIFORM_MODEL_HEIGHT = "u_modelHeight";
 	private static final String UNIFORM_MODEL_DEPTH = "u_modelDepth";
@@ -39,6 +40,7 @@ public class ModelsShaderUniformsLocations {
 	private int uniformLocModelY;
 	private int uniformLocModelZ;
 	private int uniformLocEntityType;
+	private int uniformLocGrayScale;
 	private int uniformLocFlatColor;
 	private int uniformLocFowSignature;
 	private int uniformLocGraySignature;
@@ -62,5 +64,6 @@ public class ModelsShaderUniformsLocations {
 		uniformLocFlatColor = program.getUniformLocation(UNIFORM_FLAT_COLOR);
 		uniformLocFowSignature = program.getUniformLocation(UNIFORM_FOW_SIGNATURE);
 		uniformLocGraySignature = program.getUniformLocation(UNIFORM_GRAY_SIGNATURE);
+		uniformLocGrayScale = program.getUniformLocation(UNIFORM_GRAY_SCALE);
 	}
 }

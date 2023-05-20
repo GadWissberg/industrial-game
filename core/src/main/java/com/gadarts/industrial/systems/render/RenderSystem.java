@@ -294,10 +294,15 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		Entity parentNode = ComponentsMapper.wall.get(entity).getParentNode().getEntity();
 		ModelInstanceComponent wallModelInstanceComponent = ComponentsMapper.modelInstance.get(entity);
 		wallModelInstanceComponent.setFlatColor(null);
-		if (parentNode == null
+		boolean noParentNode = parentNode == null;
+		if (noParentNode
 				|| (ComponentsMapper.modelInstance.has(parentNode)
 				&& ComponentsMapper.modelInstance.get(parentNode).getFlatColor() != null)) {
 			wallModelInstanceComponent.setFlatColor(Color.BLACK);
+		} else if ((ComponentsMapper.modelInstance.get(parentNode).getGraySignature() & 16) == 16) {
+			ComponentsMapper.wall.get(entity).setApplyGrayScale(true);
+		} else {
+			ComponentsMapper.wall.get(entity).setApplyGrayScale(false);
 		}
 	}
 

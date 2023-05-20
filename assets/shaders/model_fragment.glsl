@@ -106,6 +106,7 @@ uniform sampler2D u_shadows;
 uniform vec3 u_flatColor;
 uniform int u_fowSignature;
 uniform int u_graySignature;
+uniform int u_grayScale;
 
 //
 
@@ -113,12 +114,16 @@ float map(float value, float min1, float max1, float min2, float max2) {
     return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
 }
 
+vec3 grayScale(vec3 color){
+    float luminance = dot(color.rgb, vec3(0.099, 0.387, 0.014));
+    vec3 grayscaleColor = vec3(luminance);
+    return grayscaleColor;
+}
+
 vec4 grayFadeOneWay(float edgeCoord, float fragCoord){
     float normalized = 1.0 - min(1.0, max(fragCoord-(edgeCoord-0.5), 0.0)*4.0);
     vec4 color = vec4(gl_FragColor.rgb, 1.0);
-    float luminance = dot(color.rgb, vec3(0.099, 0.387, 0.014));
-    vec3 grayscaleColor = vec3(luminance);
-    vec3 shadedColor = mix(color.rgb, grayscaleColor, normalized);
+    vec3 shadedColor = mix(color.rgb, grayScale(color.rgb), normalized);
     color.rgb = shadedColor;
     return color;
 }
@@ -129,10 +134,7 @@ vec4 grayFadeDiagonal(vec2 cornerCoord, vec2 fragCoord){
     vec4 color = vec4(gl_FragColor.rgb, 1.0);
     if (distance < distanceThreshold) {
         float normalized = smoothstep(distanceThreshold, 0.0, distance);
-        float luminance = dot(color.rgb, vec3(0.099, 0.387, 0.014));
-        vec3 grayscaleColor = vec3(luminance);
-        vec3 shadedColor = mix(color.rgb, grayscaleColor, normalized);
-        color.rgb = shadedColor;
+        color.rgb = mix(color.rgb, grayScale(color.rgb), normalized);
     }
     return color;
 }
@@ -173,6 +175,7 @@ void main() {
     gl_FragColor.rgb = (diffuse.rgb * (v_ambientLight + v_lightDiffuse)) + emissive.rgb;
     #else
     gl_FragColor.rgb = vec3(0.0);
+    vec3 finalColor = vec3(0.0);
     if (!gl_FrontFacing){
         return;
     }
@@ -198,16 +201,21 @@ void main() {
                         float intensity = max(dot_value, 0.0);
                         vec3 value_to_add = (diffuse.rgb *light_color.rgb* (attenuation * intensity));
                         value_to_add *= distance > (extra.y*5.0/6.0) ? 0.5 : 1.0;
-                        gl_FragColor.rgb += value_to_add;
+                        finalColor += value_to_add;
                     }
                 }
-                gl_FragColor.rgb += emissive.rgb;
+                finalColor += emissive.rgb;
             }
             vec2 c= gl_FragCoord.xy;
             c.x/=u_screenWidth;
             c.y/=u_screenHeight;
             vec4 staticLightsColor= (u_entityType < 2) ? texture2D(u_shadows, c) : vec4(0.5);
-            gl_FragColor.rgb += (diffuse.rgb * (v_lightDiffuse + staticLightsColor.rgb)) + emissive.rgb;
+            finalColor.rgb += (diffuse.rgb * (v_lightDiffuse + staticLightsColor.rgb)) + emissive.rgb;
+
+            if (u_grayScale == 1){
+                finalColor = grayScale(finalColor);
+            }
+            gl_FragColor.rgb = finalColor;
 
             float minDistToChar = 21390950.0;
             float shadowRadius = 1.0;
