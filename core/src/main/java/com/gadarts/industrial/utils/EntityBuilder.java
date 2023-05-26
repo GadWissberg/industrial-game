@@ -180,21 +180,6 @@ public class EntityBuilder {
 	}
 
 	public EntityBuilder addSimpleDecalComponent(final Vector3 position,
-												 final Texture texture,
-												 final boolean visible,
-												 final boolean billboard) {
-		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
-		SimpleDecalComponent simpleDecalComponent = engine.createComponent(SimpleDecalComponent.class);
-		simpleDecalComponent.init(texture, visible, billboard);
-		Decal decal = simpleDecalComponent.getDecal();
-		decal.setPosition(position);
-		decal.setScale(BILLBOARD_SCALE);
-		currentEntity.add(simpleDecalComponent);
-		return instance;
-	}
-
-
-	public EntityBuilder addSimpleDecalComponent(final Vector3 position,
 												 final TextureRegion textureRegion,
 												 final boolean billboard,
 												 final boolean animatedByAnimationComponent) {

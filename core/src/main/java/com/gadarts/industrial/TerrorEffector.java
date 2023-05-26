@@ -4,7 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.gadarts.industrial.screens.InGameScreen;
 
-public class Industrial extends Game {
+public class TerrorEffector extends Game {
 
 	public static final int FULL_SCREEN_RESOLUTION_WIDTH = 1920;
 	public static final int FULL_SCREEN_RESOLUTION_HEIGHT = 1080;
@@ -12,7 +12,7 @@ public class Industrial extends Game {
 	public static final int WINDOWED_RESOLUTION_HEIGHT = 960;
 	private final GeneralHandler generalHandler;
 
-	public Industrial(String versionName, int versionNumber) {
+	public TerrorEffector(String versionName, int versionNumber) {
 		this.generalHandler = new GeneralHandler(versionName, versionNumber);
 	}
 

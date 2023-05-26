@@ -2,7 +2,7 @@ package com.gadarts.industrial.lwjgl3;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import com.gadarts.industrial.Industrial;
+import com.gadarts.industrial.TerrorEffector;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,7 +34,7 @@ public class Lwjgl3Launcher {
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
-		new Lwjgl3Application(new Industrial(versionName, versionNumber), config);
+		new Lwjgl3Application(new TerrorEffector(versionName, versionNumber), config);
 	}
 
 	private static Lwjgl3ApplicationConfiguration createGameConfig( ) {

@@ -45,8 +45,7 @@ public class PickupItemCharacterCommand extends CharacterCommand {
 
 	@Override
 	public boolean initialize(Entity character,
-							  SystemsCommonData commonData,
-							  List<CharacterSystemEventsSubscriber> subscribers) {
+							  SystemsCommonData commonData) {
 		if (ComponentsMapper.character.get(character).getSkills().getActionPoints() < PICKUP_ACTION_POINT_CONSUME)
 			return true;
 

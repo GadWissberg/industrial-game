@@ -48,7 +48,7 @@ import java.util.ArrayDeque;
 
 import static com.badlogic.gdx.Application.LOG_DEBUG;
 import static com.gadarts.industrial.DebugSettings.FULL_SCREEN;
-import static com.gadarts.industrial.Industrial.*;
+import static com.gadarts.industrial.TerrorEffector.*;
 import static com.gadarts.industrial.systems.SystemsCommonData.TABLE_NAME_HUD;
 
 public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSubscriber> implements

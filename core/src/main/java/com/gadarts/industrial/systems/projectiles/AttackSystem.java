@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -113,12 +114,67 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 							  Vector3 position,
 							  WeaponDeclaration weaponDeclaration,
 							  Vector3 bulletCreationOffset) {
-		Integer damagePoints = weaponDeclaration.damage();
-		GameAssetManager assetsManager = getAssetsManager();
-		Assets.Models modelDefinition = weaponDeclaration.bulletModel();
-		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		ModelInstancePools pooledModelInstances = systemsCommonData.getPooledModelInstances();
-		GameModelInstance modelInstance = pooledModelInstances.obtain(assetsManager, modelDefinition);
+		ModelInstancePools pooledModelInstances = getSystemsCommonData().getPooledModelInstances();
+		GameModelInstance modelInstance = pooledModelInstances.obtain(getAssetsManager(), weaponDeclaration.bulletModel());
+		Vector2 bulletDirection = transformBulletModel(character, direction, position, bulletCreationOffset, modelInstance);
+		createBulletEntity(character, position, weaponDeclaration, modelInstance, bulletDirection);
+		applyBulletLight(position, weaponDeclaration);
+		applyBulletJacket(character, position, weaponDeclaration, pooledModelInstances);
+	}
+
+	private void applyBulletJacket(Entity character,
+								   Vector3 position,
+								   WeaponDeclaration weaponDeclaration,
+								   ModelInstancePools pooledModelInstances) {
+		Assets.Models bulletJacket = weaponDeclaration.bulletJacket();
+		if (bulletJacket != null) {
+			Vector3 nodePosition = ComponentsMapper.characterDecal.get(character).getNodePosition(auxVector3_1);
+			MapGraphNode currentNode = getSystemsCommonData().getMap().getNode(nodePosition);
+			GameModelInstance jacketGameModelInstance = pooledModelInstances.obtain(getAssetsManager(), bulletJacket);
+			jacketGameModelInstance.transform.setToTranslation(position).rotate(Vector3.Y, MathUtils.random(360F));
+			EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
+					.addModelInstanceComponent(jacketGameModelInstance)
+					.addFlyingParticleComponent(
+							currentNode.getHeight(),
+							JACKET_FLY_AWAY_STRENGTH,
+							JACKET_FLY_AWAY_DEC,
+							JACKET_FLY_AWAY_MIN_DEGREE, JACKET_FLY_AWAY_MAX_DEGREE_TO_ADD)
+					.finishAndAddToEngine();
+		}
+	}
+
+	private void applyBulletLight(Vector3 position, WeaponDeclaration weaponDeclaration) {
+		if (weaponDeclaration.lightOnCreation()) {
+			EntityBuilder.beginBuildingEntity((PooledEngine) getEngine()).addShadowlessLightComponent(
+					position,
+					PROJ_LIGHT_INTENSITY,
+					PROJ_LIGHT_RADIUS,
+					weaponDeclaration.bulletLightColor(),
+					BULLET_ENGAGE_LIGHT_DURATION).finishAndAddToEngine();
+		}
+	}
+
+	private void createBulletEntity(Entity character,
+									Vector3 position,
+									WeaponDeclaration declaration,
+									GameModelInstance modelInstance,
+									Vector2 bulletDirection) {
+		EntityBuilder builder = EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
+				.addBulletComponent(
+						position,
+						auxVector3_1.set(bulletDirection.x, 0F, bulletDirection.y),
+						character,
+						declaration.damage(),
+						declaration)
+				.addModelInstanceComponent(modelInstance, true);
+		Color color = declaration.bulletLightColor();
+		if (color != null) {
+			builder.addShadowlessLightComponent(position, PROJ_LIGHT_INTENSITY, PROJ_LIGHT_RADIUS, color);
+		}
+		builder.finishAndAddToEngine();
+	}
+
+	private static Vector2 transformBulletModel(Entity character, Vector3 direction, Vector3 position, Vector3 bulletCreationOffset, GameModelInstance modelInstance) {
 		modelInstance.transform.setToTranslation(position);
 		modelInstance.transform.rotate(Vector3.Y, -auxVector2_1.set(direction.x, direction.z).nor().angleDeg())
 				.translate(bulletCreationOffset);
@@ -131,44 +187,7 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 				.sub(biasedPos.x, biasedPos.z)
 				.nor();
 		modelInstance.transform.rotate(Vector3.Y, -bulletDirectionAfterBias.angleDeg());
-
-		EntityBuilder builder = EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-				.addBulletComponent(
-						position,
-						auxVector3_1.set(bulletDirectionAfterBias.x, 0F, bulletDirectionAfterBias.y),
-						character,
-						damagePoints,
-						weaponDeclaration)
-				.addModelInstanceComponent(modelInstance, true);
-		if (weaponDeclaration.bulletLightColor() != null) {
-			builder.addShadowlessLightComponent(position, PROJ_LIGHT_INTENSITY, PROJ_LIGHT_RADIUS, weaponDeclaration.bulletLightColor());
-		}
-		builder.finishAndAddToEngine();
-
-		if (weaponDeclaration.lightOnCreation()) {
-			EntityBuilder.beginBuildingEntity((PooledEngine) getEngine()).addShadowlessLightComponent(
-					position,
-					PROJ_LIGHT_INTENSITY,
-					PROJ_LIGHT_RADIUS,
-					weaponDeclaration.bulletLightColor(),
-					BULLET_ENGAGE_LIGHT_DURATION).finishAndAddToEngine();
-		}
-
-		Assets.Models bulletJacket = weaponDeclaration.bulletJacket();
-		if (bulletJacket != null) {
-			Vector3 nodePosition = ComponentsMapper.characterDecal.get(character).getNodePosition(auxVector3_1);
-			MapGraphNode currentNode = systemsCommonData.getMap().getNode(nodePosition);
-			GameModelInstance jacketGameModelInstance = pooledModelInstances.obtain(assetsManager, bulletJacket);
-			jacketGameModelInstance.transform.setToTranslation(position).rotate(Vector3.Y, MathUtils.random(360F));
-			EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
-					.addModelInstanceComponent(jacketGameModelInstance)
-					.addFlyingParticleComponent(
-							currentNode.getHeight(),
-							JACKET_FLY_AWAY_STRENGTH,
-							JACKET_FLY_AWAY_DEC,
-							JACKET_FLY_AWAY_MIN_DEGREE, JACKET_FLY_AWAY_MAX_DEGREE_TO_ADD)
-					.finishAndAddToEngine();
-		}
+		return bulletDirectionAfterBias;
 	}
 
 	@Override

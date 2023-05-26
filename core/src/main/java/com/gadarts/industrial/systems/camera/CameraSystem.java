@@ -20,7 +20,7 @@ import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 
 import static com.gadarts.industrial.DebugSettings.FULL_SCREEN;
-import static com.gadarts.industrial.Industrial.*;
+import static com.gadarts.industrial.TerrorEffector.*;
 import static com.gadarts.industrial.shared.utils.CameraUtils.*;
 
 public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> implements InputSystemEventsSubscriber {

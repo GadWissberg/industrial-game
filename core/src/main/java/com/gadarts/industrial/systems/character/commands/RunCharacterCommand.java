@@ -44,8 +44,7 @@ public class RunCharacterCommand extends CharacterCommand {
 
 	@Override
 	public boolean initialize(Entity character,
-							  SystemsCommonData commonData,
-							  List<CharacterSystemEventsSubscriber> subscribers) {
+							  SystemsCommonData commonData) {
 		consumeActionPoints = commonData.getCurrentGameMode() != GameMode.EXPLORE;
 		systemsCommonData = commonData;
 		Array<MapGraphNode> nodes = path.nodes;

@@ -37,8 +37,7 @@ public class AttackPrimaryCharacterCommand extends CharacterCommand {
 
 	@Override
 	public boolean initialize(Entity character,
-							  SystemsCommonData commonData,
-							  List<CharacterSystemEventsSubscriber> subscribers) {
+							  SystemsCommonData commonData) {
 		if (checkAdjacentForMelee(character, commonData)) return true;
 
 		path.clear();

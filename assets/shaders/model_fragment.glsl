@@ -82,7 +82,7 @@ varying vec3 v_ambientLight;
 
 #endif//lightingFlag
 
-// TerrorEffector custom uniforms
+// TerrorEffector uniforms
 
 uniform float u_affectedByLight;
 uniform vec3 u_shadowlessLightsColors[16];
@@ -140,12 +140,6 @@ vec4 grayFadeDiagonal(vec2 cornerCoord, vec2 fragCoord){
 }
 
 void main() {
-
-
-    #if defined(normalFlag)
-    vec3 normal = v_normal;
-    #endif// normalFlag
-
     #if defined(diffuseTextureFlag) && defined(diffuseColorFlag)
     vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV) * u_diffuseColor;
     #elif defined(diffuseTextureFlag) && defined(colorFlag)

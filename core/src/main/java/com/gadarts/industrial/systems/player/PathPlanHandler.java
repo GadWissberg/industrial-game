@@ -22,7 +22,4 @@ public class PathPlanHandler {
 		this.heuristic = new GameHeuristic();
 	}
 
-	public void resetPlan( ) {
-		currentPath.clear();
-	}
 }

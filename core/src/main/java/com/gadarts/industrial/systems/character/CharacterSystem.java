@@ -140,7 +140,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		currentCommand.setState(CommandStates.RUNNING);
 		ComponentsMapper.character.get(character).getRotationData().setRotating(true);
 		SystemsCommonData data = getSystemsCommonData();
-		boolean alreadyDone = currentCommand.initialize(character, data, getSubscribers());
+		boolean alreadyDone = currentCommand.initialize(character, data);
 		if (alreadyDone) {
 			currentCommand.setState(CommandStates.ENDED);
 		}
@@ -431,7 +431,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	@Override
-	public void onFrameChanged(final Entity character, final float deltaTime, final TextureAtlas.AtlasRegion newFrame) {
+	public void onFrameChanged(final Entity character, final TextureAtlas.AtlasRegion newFrame) {
 		SpriteType spriteType = ComponentsMapper.characterDecal.get(character).getSpriteType();
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		if (spriteType == RUN) {

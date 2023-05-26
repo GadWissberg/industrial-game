@@ -30,10 +30,6 @@ public class SimpleDecalComponent implements GameComponent {
 		init(new TextureRegion(texture), visible, billboard, animatedByAnimationComponent);
 	}
 
-	public void init(final TextureRegion textureRegion, final boolean visible) {
-		init(textureRegion, visible, false, animatedByAnimationComponent);
-	}
-
 	public void init(final TextureRegion textureRegion,
 					 final boolean visible,
 					 final boolean billboard,

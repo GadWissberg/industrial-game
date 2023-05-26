@@ -13,6 +13,7 @@ import lombok.Setter;
 public class ModelInstanceComponent implements GameComponent {
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final Vector3 auxVector3_2 = new Vector3();
+
 	private Integer graySignature;
 	private boolean visible;
 	@Setter(AccessLevel.NONE)

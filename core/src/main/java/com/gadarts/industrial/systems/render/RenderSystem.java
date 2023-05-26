@@ -744,7 +744,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		AtlasRegion newFrame = animationComponent.calculateFrame();
 		if (currentFrame.index != newFrame.index) {
 			for (RenderSystemEventsSubscriber subscriber : subscribers) {
-				subscriber.onFrameChanged(entity, deltaTime, newFrame);
+				subscriber.onFrameChanged(entity, newFrame);
 			}
 		}
 		return newFrame;

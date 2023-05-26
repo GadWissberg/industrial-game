@@ -31,13 +31,6 @@ public class CharacterComponent implements GameComponent {
 	private float turnTimeLeft;
 	private Direction facingDirection;
 
-	public void setCommands(Queue<CharacterCommand> commands) {
-		this.commands.clear();
-		for (CharacterCommand command : commands) {
-			this.commands.addLast(command);
-		}
-	}
-
 	@Override
 	public void reset( ) {
 		commands.clear();

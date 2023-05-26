@@ -27,6 +27,7 @@ public class ModelsShader extends DefaultShader {
 	private static final Vector3 auxVector = new Vector3();
 	private static final Color auxColor = new Color();
 	private static final BoundingBox auxBoundingBox = new BoundingBox();
+
 	private final float[] lightsPositions = new float[MAX_LIGHTS * 3];
 	private final float[] shadowlessLightsExtraData = new float[MAX_LIGHTS * LIGHT_EXTRA_DATA_SIZE];
 	private final float[] lightsColors = new float[MAX_LIGHTS * 3];
@@ -39,6 +40,27 @@ public class ModelsShader extends DefaultShader {
 		this.shadowFrameBuffer = shadowFrameBuffer;
 	}
 
+	@Override
+	public void init( ) {
+		super.init();
+		locations.init(program);
+		if (program.getLog().length() != 0) {
+			Gdx.app.log("Shader Compilation:", program.getLog());
+		}
+	}
+
+	@Override
+	public void render(Renderable renderable) {
+		int textureNum = context.textureBinder.bind(shadowFrameBuffer.getColorBufferTexture());
+		program.bind();
+		program.setUniformi("u_shadows", textureNum);
+		program.setUniformf("u_screenWidth", Gdx.graphics.getWidth());
+		program.setUniformf("u_screenHeight", Gdx.graphics.getHeight());
+		Entity entity = (Entity) renderable.userData;
+		insertAdditionalRenderData(renderable, entity);
+		super.render(renderable);
+	}
+
 	private static Vector3 getNearbySimpleShadowPosition(Entity nearby) {
 		Vector3 pos;
 		if (ComponentsMapper.characterDecal.has(nearby)) {
@@ -47,15 +69,6 @@ public class ModelsShader extends DefaultShader {
 			pos = ComponentsMapper.modelInstance.get(nearby).getModelInstance().transform.getTranslation(auxVector);
 		}
 		return pos;
-	}
-
-	@Override
-	public void init( ) {
-		super.init();
-		locations.init(program);
-		if (program.getLog().length() != 0) {
-			Gdx.app.log("Shader Compilation:", program.getLog());
-		}
 	}
 
 	private void applyLights(final AdditionalRenderData renderData) {
@@ -116,18 +129,6 @@ public class ModelsShader extends DefaultShader {
 		boolean white = lightComponent.getColor(auxColor).equals(Color.WHITE);
 		shadowlessLightsExtraData[extraDataInd + 2] = white ? -1F : differentColorIndex;
 		return white;
-	}
-
-	@Override
-	public void render(Renderable renderable) {
-		int textureNum = context.textureBinder.bind(shadowFrameBuffer.getColorBufferTexture());
-		program.bind();
-		program.setUniformi("u_shadows", textureNum);
-		program.setUniformf("u_screenWidth", Gdx.graphics.getWidth());
-		program.setUniformf("u_screenHeight", Gdx.graphics.getHeight());
-		Entity entity = (Entity) renderable.userData;
-		insertAdditionalRenderData(renderable, entity);
-		super.render(renderable);
 	}
 
 	private void insertAdditionalRenderData(Renderable renderable,

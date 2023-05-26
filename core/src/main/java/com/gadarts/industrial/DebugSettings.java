@@ -29,6 +29,6 @@ public final class DebugSettings {
 	public static final boolean GOD_MODE = false;
 	public static final boolean ENEMY_INVULNERABLE = false;
 	public static final boolean SPACE_BAR_SKIPS_PLAYER = false;
-	public static final String TEST_LEVEL = "enemy_test";
+	public static final String TEST_LEVEL = OFFICE.name();
 	public static final boolean ALLOW_SCREEN_SHOT_OF_DEPTH_MAP = true;
 }
