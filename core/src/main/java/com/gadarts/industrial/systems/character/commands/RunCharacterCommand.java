@@ -15,6 +15,7 @@ import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphConnection;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.model.characters.CharacterTypes;
+import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
@@ -104,6 +105,10 @@ public class RunCharacterCommand extends CharacterCommand {
 		int nextNodeIndex = getNextNodeIndex();
 		MapGraphNode nextNode = path.get(nextNodeIndex);
 		if (nextNode.getDoor() != null && ComponentsMapper.door.get(nextNode.getDoor()).getState() != DoorStates.OPEN) {
+			Decal decal = ComponentsMapper.characterDecal.get(character).getDecal();
+			MapGraphNode currentNode = systemsCommonData.getMap().getNode(decal.getPosition());
+			Direction direction = Direction.findDirection(nextNode.getCenterPosition(auxVector2_2).sub(currentNode.getCenterPosition(auxVector2_1)).nor());
+			ComponentsMapper.character.get(character).setFacingDirection(direction);
 			handleDoor(character, nextNode.getDoor());
 			commandDone = true;
 		} else {
