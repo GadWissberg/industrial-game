@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
@@ -58,7 +59,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private static final BoundingBox auxBoundingBox = new BoundingBox();
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final String BUTTON_NAME_STORAGE = "button_storage";
-	private static final float BUTTON_PADDING = 40;
+	private static final float BUTTON_PADDING = 20;
 	private boolean showBorders = DebugSettings.DISPLAY_HUD_OUTLINES;
 	@Getter
 	private MenuHandler menuHandler;
@@ -76,7 +77,15 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		addUiStage();
 		Table hudTable = addTable();
 		hudTable.setName(TABLE_NAME_HUD);
+		addHealthIndicator(hudTable);
 		addStorageButton(hudTable);
+	}
+
+	private void addHealthIndicator(Table hudTable) {
+		GameAssetManager assetsManager = getAssetsManager();
+		Texture texture = assetsManager.getTexture(Assets.UiTextures.HUD_HP);
+		HealthIndicator indicator = new HealthIndicator(texture, assetsManager.getFont(Assets.Fonts.HUD));
+		hudTable.add(indicator).expand().left().bottom().pad(BUTTON_PADDING);
 	}
 
 	@Override
@@ -164,8 +173,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		MapGraph map = systemsCommonData.getMap();
 		Camera camera = systemsCommonData.getCamera();
 		ArrayDeque<Coord3D> nodes = CameraUtils.findAllCoordsOnRay(screenX, screenY, camera);
-		MapGraphNode nearestNodeOnCameraLineOfSight = findNearestNodeOnCameraLineOfSight(map, nodes);
-		return nearestNodeOnCameraLineOfSight;
+		return findNearestNodeOnCameraLineOfSight(map, nodes);
 	}
 
 
