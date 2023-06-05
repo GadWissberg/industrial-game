@@ -45,7 +45,7 @@ public class AttackPrimaryCharacterCommand extends CharacterCommand {
 		Vector3 targetPosition = ComponentsMapper.characterDecal.get(characterComponent.getTarget()).getDecal().getPosition();
 		path.nodes.add(commonData.getMap().getNode(targetPosition));
 		WeaponDeclaration primary = characterComponent.getPrimaryAttack();
-		if (primary.actionPointsConsumption() > characterComponent.getSkills().getActionPoints()) return true;
+		if (primary.actionPointsConsumption() > characterComponent.getAttributes().getActionPoints()) return true;
 
 		if (characterComponent.getTarget() != null) {
 			characterComponent.getRotationData().setRotating(true);
@@ -61,7 +61,7 @@ public class AttackPrimaryCharacterCommand extends CharacterCommand {
 									  TextureAtlas.AtlasRegion newFrame,
 									  List<CharacterSystemEventsSubscriber> subscribers) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		if (characterComponent.getSkills().getActionPoints() < characterComponent.getPrimaryAttack().actionPointsConsumption())
+		if (characterComponent.getAttributes().getActionPoints() < characterComponent.getPrimaryAttack().actionPointsConsumption())
 			return true;
 
 		return engagePrimaryAttack(character, newFrame, systemsCommonData, subscribers);

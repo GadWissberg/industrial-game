@@ -110,8 +110,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			Entity current = getSystemsCommonData().getTurnsQueue().first();
 			if (character.has(current)) {
 				CharacterComponent characterComponent = character.get(current);
-				if (characterComponent.getSkills().getActionPoints() <= 0) {
-					characterComponent.getSkills().resetActionPoints();
+				if (characterComponent.getAttributes().getActionPoints() <= 0) {
+					characterComponent.getAttributes().resetActionPoints();
 					characterComponent.getCharacterSpriteData().setSpriteType(IDLE);
 					subscribers.forEach(CharacterSystemEventsSubscriber::onCharacterFinishedTurn);
 				} else {
@@ -119,7 +119,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 				}
 			}
 		} else {
-			character.get(getSystemsCommonData().getPlayer()).getSkills().resetActionPoints();
+			character.get(getSystemsCommonData().getPlayer()).getAttributes().resetActionPoints();
 			handleCharacterCommand(getSystemsCommonData().getPlayer());
 		}
 		updateCharacters();
@@ -127,12 +127,12 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	@Override
 	public void onEnemyFinishedTurn( ) {
-		character.get(getSystemsCommonData().getTurnsQueue().first()).getSkills().resetActionPoints();
+		character.get(getSystemsCommonData().getTurnsQueue().first()).getAttributes().resetActionPoints();
 	}
 
 	@Override
 	public void onPlayerFinishedTurn( ) {
-		character.get(getSystemsCommonData().getTurnsQueue().first()).getSkills().resetActionPoints();
+		character.get(getSystemsCommonData().getTurnsQueue().first()).getAttributes().resetActionPoints();
 	}
 
 	private void beginProcessingCommand(Entity character,
@@ -167,7 +167,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	private void handlePain(final Entity character) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		long lastDamage = characterComponent.getSkills().getHealthData().getLastDamage();
+		long lastDamage = characterComponent.getAttributes().getHealthData().getLastDamage();
 		CharacterSpriteData spriteData = characterComponent.getCharacterSpriteData();
 		if (spriteData.getSpriteType() == PAIN && TimeUtils.timeSinceMillis(lastDamage) > CHARACTER_PAIN_DURATION) {
 			spriteData.setSpriteType(IDLE);
@@ -214,7 +214,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	private void handleDeath(final Entity character) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		CharacterHealthData healthData = characterComponent.getSkills().getHealthData();
+		CharacterHealthData healthData = characterComponent.getAttributes().getHealthData();
 		CharacterSoundData soundData = characterComponent.getSoundData();
 		if (healthData.getHp() <= 0) {
 			characterDies(character, characterComponent, soundData);

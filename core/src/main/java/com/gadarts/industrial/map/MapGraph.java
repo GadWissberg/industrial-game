@@ -61,7 +61,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 			if (!ComponentsMapper.player.has(character) || includePlayer) {
 				Decal decal = ComponentsMapper.characterDecal.get(character).getDecal();
 				MapGraphNode characterNode = getNode(decal.getPosition());
-				int hp = ComponentsMapper.character.get(character).getSkills().getHealthData().getHp();
+				int hp = ComponentsMapper.character.get(character).getAttributes().getHealthData().getHp();
 				if (hp > 0 && characterNode.equals(node)) {
 					return character;
 				}
@@ -204,7 +204,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 
 		for (Entity c : mapGraphRelatedEntities.getCharacterEntities()) {
 			MapGraphNode node = getNode(ComponentsMapper.characterDecal.get(c).getNodePosition(auxVector2));
-			int hp = ComponentsMapper.character.get(c).getSkills().getHealthData().getHp();
+			int hp = ComponentsMapper.character.get(c).getAttributes().getHealthData().getHp();
 			if ((!alive || hp > 0) && node.equals(destinationNode)) {
 				return false;
 			}

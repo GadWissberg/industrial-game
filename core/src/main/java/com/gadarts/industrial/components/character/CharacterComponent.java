@@ -24,7 +24,7 @@ public class CharacterComponent implements GameComponent {
 	private CharacterRotationData rotationData = new CharacterRotationData();
 	private CharacterSpriteData characterSpriteData;
 	private CharacterSoundData soundData = new CharacterSoundData();
-	private CharacterSkills skills = new CharacterSkills();
+	private CharacterAttributes attributes = new CharacterAttributes();
 	@Setter(AccessLevel.NONE)
 	private OnGoingAttack onGoingAttack = new OnGoingAttack();
 	private WeaponDeclaration primaryAttack;
@@ -44,7 +44,7 @@ public class CharacterComponent implements GameComponent {
 					 WeaponDeclaration primaryAttack,
 					 Direction direction) {
 		this.characterSpriteData = characterSpriteData;
-		this.skills.applyParameters(skills);
+		this.attributes.applyParameters(skills);
 		this.soundData.set(soundData);
 		this.primaryAttack = primaryAttack;
 		this.turnTimeLeft = TURN_DURATION;
@@ -52,7 +52,7 @@ public class CharacterComponent implements GameComponent {
 	}
 
 	public void dealDamage(final int damagePoints) {
-		skills.getHealthData().dealDamage(damagePoints);
+		attributes.getHealthData().dealDamage(damagePoints);
 	}
 
 	public enum AttackType {

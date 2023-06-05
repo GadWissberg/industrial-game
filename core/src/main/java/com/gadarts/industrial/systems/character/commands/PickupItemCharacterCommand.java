@@ -46,7 +46,7 @@ public class PickupItemCharacterCommand extends CharacterCommand {
 	@Override
 	public boolean initialize(Entity character,
 							  SystemsCommonData commonData) {
-		if (ComponentsMapper.character.get(character).getSkills().getActionPoints() < PICKUP_ACTION_POINT_CONSUME)
+		if (ComponentsMapper.character.get(character).getAttributes().getActionPoints() < PICKUP_ACTION_POINT_CONSUME)
 			return true;
 
 		Vector3 position = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();

@@ -35,6 +35,7 @@ import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.shared.utils.CameraUtils;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
+import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.GameMode;
@@ -55,7 +56,8 @@ import static com.gadarts.industrial.systems.SystemsCommonData.TABLE_NAME_HUD;
 public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSubscriber> implements
 		InputSystemEventsSubscriber,
 		TurnsSystemEventsSubscriber,
-		PlayerSystemEventsSubscriber {
+		PlayerSystemEventsSubscriber,
+		CharacterSystemEventsSubscriber {
 	private static final BoundingBox auxBoundingBox = new BoundingBox();
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final String BUTTON_NAME_STORAGE = "button_storage";
@@ -65,10 +67,19 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private MenuHandler menuHandler;
 	private CursorHandler cursorHandler;
 	private ToolTipHandler toolTipHandler;
+	private HealthIndicator healthIndicator;
 
 	public UserInterfaceSystem(GameAssetManager assetsManager,
 							   GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
+	}
+
+	@Override
+	public void onCharacterGotDamage(Entity character) {
+		if (!ComponentsMapper.player.has(character)) return;
+
+		int hp = ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).getAttributes().getHealthData().getHp();
+		healthIndicator.setValue(hp);
 	}
 
 	@Override
@@ -84,8 +95,9 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private void addHealthIndicator(Table hudTable) {
 		GameAssetManager assetsManager = getAssetsManager();
 		Texture texture = assetsManager.getTexture(Assets.UiTextures.HUD_HP);
-		HealthIndicator indicator = new HealthIndicator(texture, assetsManager.getFont(Assets.Fonts.HUD));
-		hudTable.add(indicator).expand().left().bottom().pad(BUTTON_PADDING);
+		int hp = ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).getAttributes().getHealthData().getHp();
+		healthIndicator = new HealthIndicator(texture, assetsManager.getFont(Assets.Fonts.HUD), hp);
+		hudTable.add(healthIndicator).expand().left().bottom().pad(BUTTON_PADDING);
 	}
 
 	@Override

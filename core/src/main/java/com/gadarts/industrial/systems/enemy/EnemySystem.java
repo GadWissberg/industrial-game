@@ -22,7 +22,6 @@ import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
-import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.ModelInstancePools;
@@ -105,7 +104,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	public void onCharacterCommandDone(final Entity character) {
 		if (ComponentsMapper.enemy.has(character)) {
 			CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-			if (characterComponent.getSkills().getActionPoints() <= 0) {
+			if (characterComponent.getAttributes().getActionPoints() <= 0) {
 				subscribers.forEach(EnemySystemEventsSubscriber::onEnemyFinishedTurn);
 			} else if (characterComponent.getCommands().isEmpty()) {
 				invokeEnemyTurn(character);
@@ -208,7 +207,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		CharacterComponent character = ComponentsMapper.character.get(enemy);
 		character.getCommands().clear();
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(enemy);
-		int turnAgility = character.getSkills().getActionPoints();
+		int turnAgility = character.getAttributes().getActionPoints();
 		EnemyAiStatus aiStatus = enemyComp.getAiStatus();
 		AiStatusLogic logic = aiStatus.getLogic();
 		if (turnAgility <= 0 || logic == null) {
@@ -268,7 +267,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	private void awakeEnemyIfTargetSpotted(final Entity enemy) {
 		if (ComponentsMapper.enemy.get(enemy).getAiStatus() == ATTACKING
 				|| !isTargetInFov(enemy)
-				|| ComponentsMapper.character.get(enemy).getSkills().getHealthData().getHp() <= 0)
+				|| ComponentsMapper.character.get(enemy).getAttributes().getHealthData().getHp() <= 0)
 			return;
 
 		LinkedHashSet<GridPoint2> nodes = GameUtils.findAllNodesToTarget(enemy, bresenhamOutput, true);
@@ -291,7 +290,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	private void awakeEnemy(final Entity enemy) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
-		if (PARALYZED_ENEMIES || characterComponent.getSkills().getHealthData().getHp() <= 0) return;
+		if (PARALYZED_ENEMIES || characterComponent.getAttributes().getHealthData().getHp() <= 0) return;
 
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		EnemyAiStatus prevAiStatus = enemyComponent.getAiStatus();

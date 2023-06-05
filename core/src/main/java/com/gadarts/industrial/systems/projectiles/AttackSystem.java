@@ -246,7 +246,7 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 
 	private boolean checkCollisionWithCharacter(GameModelInstance gameModelInstance, Entity collidable) {
 		Vector3 colPos = ComponentsMapper.characterDecal.get(collidable).getDecal().getPosition();
-		boolean alive = ComponentsMapper.character.get(collidable).getSkills().getHealthData().getHp() > 0;
+		boolean alive = ComponentsMapper.character.get(collidable).getAttributes().getHealthData().getHp() > 0;
 		Vector3 position = gameModelInstance.transform.getTranslation(auxVector3_1);
 		float distance = auxVector2_1.set(colPos.x, colPos.z).dst(position.x, position.z);
 		return alive && distance < CharacterComponent.CHAR_RAD;

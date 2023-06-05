@@ -7,9 +7,7 @@ import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
-import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
-import com.gadarts.industrial.systems.enemy.EnemySystem;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
 
 import static com.gadarts.industrial.systems.SystemsCommonData.MELEE_ATTACK_MAX_HEIGHT;
@@ -24,7 +22,7 @@ public class AiStatusAttackingLogic extends AiStatusLogic {
 			MapGraphNode targetNode = map.getNode(characterDecalComponent.getDecal().getPosition());
 			MapGraphNode node = map.getNode(ComponentsMapper.characterDecal.get(enemy).getDecal().getPosition());
 			if (map.areNodesAdjacent(node, targetNode, MELEE_ATTACK_MAX_HEIGHT)) {
-				if (characterComponent.getSkills().getActionPoints() >= characterComponent.getPrimaryAttack().actionPointsConsumption()) {
+				if (characterComponent.getAttributes().getActionPoints() >= characterComponent.getPrimaryAttack().actionPointsConsumption()) {
 					addCommand(enemy, CharacterCommandsDefinitions.ATTACK_PRIMARY, request.getOutputPath());
 				} else {
 					finishedTurn = true;

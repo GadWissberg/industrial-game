@@ -9,7 +9,7 @@ import lombok.Setter;
 import java.util.Random;
 
 @Getter
-public class CharacterSkills {
+public class CharacterAttributes {
 
 	private static final Random random = new Random();
 	private final CharacterHealthData healthData = new CharacterHealthData();

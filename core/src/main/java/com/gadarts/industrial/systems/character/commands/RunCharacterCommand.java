@@ -10,7 +10,7 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.DoorComponent.DoorStates;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
-import com.gadarts.industrial.components.character.CharacterSkills;
+import com.gadarts.industrial.components.character.CharacterAttributes;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphConnection;
 import com.gadarts.industrial.map.MapGraphNode;
@@ -60,7 +60,7 @@ public class RunCharacterCommand extends CharacterCommand {
 									  Entity character,
 									  AtlasRegion newFrame,
 									  List<CharacterSystemEventsSubscriber> subscribers) {
-		if (path.nodes.isEmpty() || ComponentsMapper.character.get(character).getSkills().getActionPoints() <= 0)
+		if (path.nodes.isEmpty() || ComponentsMapper.character.get(character).getAttributes().getActionPoints() <= 0)
 			return true;
 
 		return updateCommand(systemsCommonData, character, subscribers);
@@ -142,7 +142,7 @@ public class RunCharacterCommand extends CharacterCommand {
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onCharacterNodeChanged(character, prevNode, path.nodes.get(getNextNodeIndex()));
 		}
-		CharacterSkills skills = ComponentsMapper.character.get(character).getSkills();
+		CharacterAttributes skills = ComponentsMapper.character.get(character).getAttributes();
 		if (consumeActionPoints) {
 			skills.setActionPoints(skills.getActionPoints() - 1);
 		}
@@ -155,7 +155,7 @@ public class RunCharacterCommand extends CharacterCommand {
 
 
 	private boolean isReachedEndOfPath(MapGraphConnection connection, MapGraph map) {
-		return ComponentsMapper.character.get(getCharacter()).getSkills().getActionPoints() <= 0
+		return ComponentsMapper.character.get(getCharacter()).getAttributes().getActionPoints() <= 0
 				|| getNextNodeIndex() == -1
 				|| connection == null
 				|| connection.getCost() != CLEAN.getCostValue()

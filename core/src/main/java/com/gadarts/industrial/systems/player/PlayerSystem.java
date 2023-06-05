@@ -365,7 +365,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	@Override
 	public void onCharacterCommandDone(Entity character) {
 		if (ComponentsMapper.player.has(character)) {
-			if (ComponentsMapper.character.get(character).getSkills().getActionPoints() <= 0) {
+			if (ComponentsMapper.character.get(character).getAttributes().getActionPoints() <= 0) {
 				subscribers.forEach(PlayerSystemEventsSubscriber::onPlayerFinishedTurn);
 			}
 		}
@@ -386,7 +386,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	public void onGameModeSet( ) {
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		if (systemsCommonData.getCurrentGameMode() == GameMode.EXPLORE) {
-			ComponentsMapper.character.get(systemsCommonData.getPlayer()).getSkills().resetActionPoints();
+			ComponentsMapper.character.get(systemsCommonData.getPlayer()).getAttributes().resetActionPoints();
 		}
 	}
 
