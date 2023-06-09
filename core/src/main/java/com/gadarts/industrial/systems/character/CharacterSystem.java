@@ -183,11 +183,12 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 										int damage,
 										ModelInstanceComponent bulletModelInstanceComponent) {
 		CharacterComponent characterComponent = character.get(attacked);
+		int originalValue = characterComponent.getAttributes().getHealthData().getHp();
 		if ((ComponentsMapper.player.has(attacked) && !DebugSettings.GOD_MODE)
 				|| ComponentsMapper.enemy.has(attacked) && !DebugSettings.ENEMY_INVULNERABLE) {
 			characterComponent.dealDamage(damage);
 		}
-		handleDeath(attacked);
+		handleDeath(attacked, originalValue);
 		if (ComponentsMapper.player.has(attacked) || ComponentsMapper.enemy.get(attacked).getEnemyDeclaration().human()) {
 			addSplatterEffect(bulletModelInstanceComponent, attacked);
 		}
@@ -212,24 +213,24 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		return position;
 	}
 
-	private void handleDeath(final Entity character) {
+	private void handleDeath(final Entity character, int originalValue) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		CharacterHealthData healthData = characterComponent.getAttributes().getHealthData();
 		CharacterSoundData soundData = characterComponent.getSoundData();
 		if (healthData.getHp() <= 0) {
 			characterDies(character, characterComponent, soundData);
 		} else {
-			characterInPain(character, characterComponent, soundData);
+			characterInPain(character, characterComponent, soundData, originalValue);
 		}
 	}
 
 	private void characterInPain(Entity character,
 								 CharacterComponent characterComponent,
-								 CharacterSoundData soundData) {
+								 CharacterSoundData soundData, int originalValue) {
 		getSystemsCommonData().getSoundPlayer().playSound(soundData.getPainSound());
 		characterComponent.getCharacterSpriteData().setSpriteType(PAIN);
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onCharacterGotDamage(character);
+			subscriber.onCharacterGotDamage(character, originalValue);
 		}
 	}
 

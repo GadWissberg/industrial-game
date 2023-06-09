@@ -26,7 +26,7 @@ public interface CharacterSystemEventsSubscriber extends SystemEventsSubscriber 
 
 	}
 
-	default void onCharacterGotDamage(Entity character) {
+	default void onCharacterGotDamage(Entity character, int originalValue) {
 
 	}
 

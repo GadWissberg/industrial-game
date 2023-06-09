@@ -139,7 +139,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	@Override
-	public void onCharacterGotDamage(final Entity entity) {
+	public void onCharacterGotDamage(final Entity entity, int originalValue) {
 		if (ComponentsMapper.enemy.has(entity)) {
 			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(entity);
 			if (enemyComponent.getAiStatus() != ATTACKING) {

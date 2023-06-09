@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
@@ -30,6 +31,7 @@ import com.gadarts.industrial.console.commands.ConsoleCommandsList;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
+import com.gadarts.industrial.shared.assets.Assets.Fonts;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.shared.utils.CameraUtils;
@@ -75,11 +77,11 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	}
 
 	@Override
-	public void onCharacterGotDamage(Entity character) {
+	public void onCharacterGotDamage(Entity character, int originalValue) {
 		if (!ComponentsMapper.player.has(character)) return;
 
 		int hp = ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).getAttributes().getHealthData().getHp();
-		healthIndicator.setValue(hp);
+		healthIndicator.setValue(hp, originalValue);
 	}
 
 	@Override
@@ -94,9 +96,10 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 	private void addHealthIndicator(Table hudTable) {
 		GameAssetManager assetsManager = getAssetsManager();
-		Texture texture = assetsManager.getTexture(Assets.UiTextures.HUD_HP);
+		Texture texture = assetsManager.getTexture(Assets.UiTextures.HUD_HP_BORDER);
 		int hp = ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).getAttributes().getHealthData().getHp();
-		healthIndicator = new HealthIndicator(texture, assetsManager.getFont(Assets.Fonts.HUD), hp);
+		BitmapFont font = assetsManager.getFont(Fonts.HUD);
+		healthIndicator = new HealthIndicator(texture, font, hp, assetsManager.getTexture(Assets.UiTextures.HUD_HP_HEART));
 		hudTable.add(healthIndicator).expand().left().bottom().pad(BUTTON_PADDING);
 	}
 
