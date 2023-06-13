@@ -61,7 +61,8 @@ import static com.gadarts.industrial.systems.SystemsCommonData.CAMERA_LIGHT_FAR;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> implements InputSystemEventsSubscriber {
+public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> implements
+		InputSystemEventsSubscriber {
 	public static final float LIGHT_MAX_RADIUS = 7f;
 	public static final float FLICKER_RANDOM_MIN = 0.95F;
 	public static final float FLICKER_RANDOM_MAX = 1.05F;
@@ -202,6 +203,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		return result;
 	}
 
+
 	private void renderModels(ModelBatch modelBatch,
 							  ImmutableArray<Entity> entitiesToRender,
 							  boolean renderLight,
@@ -299,10 +301,9 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 				|| (ComponentsMapper.modelInstance.has(parentNode)
 				&& ComponentsMapper.modelInstance.get(parentNode).getFlatColor() != null)) {
 			wallModelInstanceComponent.setFlatColor(Color.BLACK);
-		} else if ((ComponentsMapper.modelInstance.get(parentNode).getGraySignature() & 16) == 16) {
-			ComponentsMapper.wall.get(entity).setApplyGrayScale(true);
 		} else {
-			ComponentsMapper.wall.get(entity).setApplyGrayScale(false);
+			Integer graySignature = ComponentsMapper.modelInstance.get(parentNode).getGraySignature();
+			ComponentsMapper.wall.get(entity).setApplyGrayScale((graySignature & 16) == 16);
 		}
 	}
 
@@ -370,7 +371,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	public void update(float deltaTime) {
 		super.update(deltaTime);
 		updateLights((PooledEngine) getEngine());
-		render(deltaTime);
+		render();
 	}
 
 	private void renderShadows( ) {
@@ -386,12 +387,12 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		shadowFrameBuffer.end();
 	}
 
-	private void render(float deltaTime) {
+	private void render() {
 		getSystemsCommonData().setNumberOfVisible(0);
 		renderShadows();
 		resetDisplay();
 		renderModels(renderBatches.getModelBatch(), families.getModelEntities(), true, getSystemsCommonData().getCamera());
-		renderDecals(deltaTime);
+		renderDecals();
 		renderParticleEffects();
 		getSystemsCommonData().getUiStage().draw();
 	}
@@ -402,21 +403,21 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		renderBatches.getModelBatch().end();
 	}
 
-	private void renderDecals(final float deltaTime) {
+	private void renderDecals() {
 		Gdx.gl.glDepthMask(false);
 		DecalBatch decalBatch = renderBatches.getDecalBatch();
 		decalBatch.setGroupStrategy(strategies.getRegularDecalGroupStrategy());
 		renderSimpleDecals();
-		renderLiveCharacters(deltaTime, environment.getAmbientColor());
+		renderLiveCharacters(environment.getAmbientColor());
 		decalBatch.flush();
-		renderCharactersOutline(deltaTime);
+		renderCharactersOutline();
 		Gdx.gl.glDepthMask(true);
 	}
 
-	private void renderCharactersOutline(float deltaTime) {
+	private void renderCharactersOutline() {
 		DecalBatch decalBatch = renderBatches.getDecalBatch();
 		decalBatch.setGroupStrategy(strategies.getOutlineDecalGroupStrategy());
-		renderLiveCharacters(deltaTime, null, OUTLINE_ALPHA, false);
+		renderLiveCharacters(null, OUTLINE_ALPHA, false);
 		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 		Gdx.gl.glDepthFunc(GL20.GL_GREATER);
 		decalBatch.flush();
@@ -466,16 +467,16 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		}
 	}
 
-	private void renderLiveCharacters(final float deltaTime, Color color) {
-		renderLiveCharacters(deltaTime, color, 1F, true);
+	private void renderLiveCharacters(Color color) {
+		renderLiveCharacters(color, 1F, true);
 	}
 
-	private void renderLiveCharacters(final float deltaTime, Color color, float alpha, boolean updateCharacterDecal) {
+	private void renderLiveCharacters(Color color, float alpha, boolean updateCharacterDecal) {
 		for (Entity entity : families.getCharacterDecalsEntities()) {
 			Vector3 position = ComponentsMapper.characterDecal.get(entity).getDecal().getPosition();
 			Entity floorEntity = getSystemsCommonData().getMap().getNode(position).getEntity();
 			if (updateCharacterDecal) {
-				updateCharacterDecal(deltaTime, entity);
+				updateCharacterDecal(entity);
 			}
 			if ((DebugSettings.DISABLE_FOW || isNodeRevealed(floorEntity)) && (shouldRenderPlayer(entity) || shouldRenderEnemy(entity))) {
 				renderCharacterDecal(entity, color, alpha);
@@ -668,7 +669,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		}
 	}
 
-	private void updateCharacterDecal(float deltaTime, Entity entity) {
+	private void updateCharacterDecal(Entity entity) {
 		Camera camera = getSystemsCommonData().getCamera();
 		CharacterComponent characterComp = ComponentsMapper.character.get(entity);
 		CharacterSpriteData charSpriteData = characterComp.getCharacterSpriteData();
@@ -678,12 +679,11 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		if ((!sameSpriteType || !ComponentsMapper.characterDecal.get(entity).getDirection().equals(direction))) {
 			updateCharacterDecalSprite(entity, direction, spriteType, sameSpriteType);
 		} else if (spriteType != RUN || getSystemsCommonData().getTurnsQueue().first() == entity) {
-			updateCharacterDecalFrame(deltaTime, entity, characterComp, spriteType);
+			updateCharacterDecalFrame(entity, characterComp, spriteType);
 		}
 	}
 
-	private void updateCharacterDecalFrame(float delta,
-										   Entity entity,
+	private void updateCharacterDecalFrame(Entity entity,
 										   CharacterComponent characterComponent,
 										   SpriteType spriteType) {
 		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(entity);
@@ -708,7 +708,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 				aniComp.resetStateTime();
 			}
 			AtlasRegion currentFrame = (AtlasRegion) characterDecalComponent.getDecal().getTextureRegion();
-			AtlasRegion newFrame = calculateCharacterDecalNewFrame(delta, entity, aniComp, currentFrame);
+			AtlasRegion newFrame = calculateCharacterDecalNewFrame(entity, aniComp, currentFrame);
 			if (characterDecalComponent.getSpriteType() == spriteType && currentFrame != newFrame) {
 				updateCharacterDecalTextureAccordingToAnimation(entity, characterComponent, spriteType, newFrame);
 			}
@@ -737,8 +737,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		}
 	}
 
-	private AtlasRegion calculateCharacterDecalNewFrame(float deltaTime,
-														Entity entity,
+	private AtlasRegion calculateCharacterDecalNewFrame(Entity entity,
 														AnimationComponent animationComponent,
 														AtlasRegion currentFrame) {
 		AtlasRegion newFrame = animationComponent.calculateFrame();

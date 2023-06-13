@@ -70,6 +70,8 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private CursorHandler cursorHandler;
 	private ToolTipHandler toolTipHandler;
 	private HealthIndicator healthIndicator;
+	private DamageIndicator damageIndicator;
+	private GameStage stage;
 
 	public UserInterfaceSystem(GameAssetManager assetsManager,
 							   GameLifeCycleHandler lifeCycleHandler) {
@@ -80,19 +82,23 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	public void onCharacterGotDamage(Entity character, int originalValue) {
 		if (!ComponentsMapper.player.has(character)) return;
 
+
 		int hp = ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).getAttributes().getHealthData().getHp();
 		healthIndicator.setValue(hp, originalValue);
+		damageIndicator.show();
 	}
 
 	@Override
 	public void onSystemReset(SystemsCommonData systemsCommonData) {
 		super.onSystemReset(systemsCommonData);
-		addUiStage();
+		stage = addUiStage();
+		damageIndicator = new DamageIndicator(stage, getAssetsManager());
 		Table hudTable = addTable();
 		hudTable.setName(TABLE_NAME_HUD);
 		addHealthIndicator(hudTable);
 		addStorageButton(hudTable);
 	}
+
 
 	private void addHealthIndicator(Table hudTable) {
 		GameAssetManager assetsManager = getAssetsManager();
@@ -161,13 +167,14 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		return table;
 	}
 
-	private void addUiStage( ) {
+	private GameStage addUiStage( ) {
 		int width = FULL_SCREEN ? FULL_SCREEN_RESOLUTION_WIDTH : WINDOWED_RESOLUTION_WIDTH;
 		int height = FULL_SCREEN ? FULL_SCREEN_RESOLUTION_HEIGHT : WINDOWED_RESOLUTION_HEIGHT;
 		GameStage stage;
 		stage = new GameStage(new FitViewport(width, height), getSystemsCommonData().getSoundPlayer());
 		getSystemsCommonData().setUiStage(stage);
 		stage.setDebugAll(DebugSettings.DISPLAY_HUD_OUTLINES);
+		return stage;
 	}
 
 	@Override
@@ -296,6 +303,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	public void dispose( ) {
 		cursorHandler.dispose();
 		toolTipHandler.dispose();
+		stage.dispose();
 	}
 
 }
