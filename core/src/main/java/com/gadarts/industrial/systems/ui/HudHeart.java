@@ -19,7 +19,6 @@ public class HudHeart extends Image {
 	public static final float PADDING_RIGHT = 62F;
 	private final Array<RepeatAction> heartAnimationsArray;
 	private int updateHeartAnimation = -1;
-	private Color color;
 
 	public HudHeart(Texture heartTexture, Texture borderTexture, Color color) {
 		super(heartTexture);
@@ -79,7 +78,6 @@ public class HudHeart extends Image {
 		if (updateHeartAnimation >= 0) {
 			clearActions();
 			int i = updateHeartAnimation / healthDivisions();
-			setColor(color);
 			addAction(heartAnimationsArray.get(Math.min(i, heartAnimationsArray.size - 1)));
 			updateHeartAnimation = -1;
 		}
@@ -89,10 +87,9 @@ public class HudHeart extends Image {
 		return MAX_HEALTH / heartAnimationsArray.size + 1;
 	}
 
-	public void updateAnimation(int hp, int originalValue, Color color) {
+	public void updateAnimation(int hp, int originalValue) {
 		if (originalValue / healthDivisions() != hp / healthDivisions()) {
 			updateHeartAnimation = hp;
-			this.color = color;
 		}
 	}
 

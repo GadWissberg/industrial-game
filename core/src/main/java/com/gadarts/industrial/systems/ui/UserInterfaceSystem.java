@@ -71,7 +71,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private ToolTipHandler toolTipHandler;
 	private HealthIndicator healthIndicator;
 	private DamageIndicator damageIndicator;
-	private GameStage stage;
 
 	public UserInterfaceSystem(GameAssetManager assetsManager,
 							   GameLifeCycleHandler lifeCycleHandler) {
@@ -91,7 +90,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	@Override
 	public void onSystemReset(SystemsCommonData systemsCommonData) {
 		super.onSystemReset(systemsCommonData);
-		stage = addUiStage();
+		GameStage stage = addUiStage();
 		damageIndicator = new DamageIndicator(stage, getAssetsManager());
 		Table hudTable = addTable();
 		hudTable.setName(TABLE_NAME_HUD);
@@ -303,7 +302,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	public void dispose( ) {
 		cursorHandler.dispose();
 		toolTipHandler.dispose();
-		stage.dispose();
 	}
 
 }
