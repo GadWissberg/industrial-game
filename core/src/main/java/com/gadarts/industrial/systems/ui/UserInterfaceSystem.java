@@ -32,6 +32,7 @@ import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.Assets.Fonts;
+import com.gadarts.industrial.shared.assets.Assets.UiTextures;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.shared.utils.CameraUtils;
@@ -63,7 +64,8 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private static final BoundingBox auxBoundingBox = new BoundingBox();
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final String BUTTON_NAME_STORAGE = "button_storage";
-	private static final float BUTTON_PADDING = 20;
+	private static final float PADDING = 20;
+	private static final float PADDING_BOTTOM_INVENTORY_BUTTON = 10;
 	private boolean showBorders = DebugSettings.DISPLAY_HUD_OUTLINES;
 	@Getter
 	private MenuHandler menuHandler;
@@ -91,21 +93,45 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	public void onSystemReset(SystemsCommonData systemsCommonData) {
 		super.onSystemReset(systemsCommonData);
 		GameStage stage = addUiStage();
-		damageIndicator = new DamageIndicator(stage, getAssetsManager());
+		GameAssetManager assetsManager = getAssetsManager();
+		damageIndicator = new DamageIndicator(stage, assetsManager);
 		Table hudTable = addTable();
 		hudTable.setName(TABLE_NAME_HUD);
+		addInventoryButton(assetsManager, hudTable);
 		addHealthIndicator(hudTable);
-		addStorageButton(hudTable);
+	}
+
+	private void addInventoryButton(GameAssetManager assetsManager, Table hudTable) {
+		Button.ButtonStyle style = new Button.ButtonStyle();
+		style.up = new TextureRegionDrawable(assetsManager.getTexture(UiTextures.HUD_INVENTORY_BUTTON));
+		style.down = new TextureRegionDrawable(assetsManager.getTexture(UiTextures.HUD_INVENTORY_BUTTON_CLICKED));
+		style.over = new TextureRegionDrawable(assetsManager.getTexture(UiTextures.HUD_INVENTORY_BUTTON_HOVER));
+		Button inventoryButton = new Button(style);
+		hudTable.add(inventoryButton).expand().bottom().left().pad(
+						0F,
+						PADDING,
+						PADDING_BOTTOM_INVENTORY_BUTTON,
+						0F)
+				.row();
+		inventoryButton.addListener(new ClickListener() {
+			@Override
+			public void clicked(final InputEvent event, final float x, final float y) {
+				super.clicked(event, x, y);
+				SystemsCommonData commonData = getSystemsCommonData();
+				commonData.getUiStage().openStorageWindow(assetsManager, commonData, subscribers);
+				getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.UI_CLICK);
+			}
+		});
 	}
 
 
 	private void addHealthIndicator(Table hudTable) {
 		GameAssetManager assetsManager = getAssetsManager();
-		Texture texture = assetsManager.getTexture(Assets.UiTextures.HUD_HP_BORDER);
+		Texture texture = assetsManager.getTexture(UiTextures.HUD_HP_BORDER);
 		int hp = ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).getAttributes().getHealthData().getHp();
 		BitmapFont font = assetsManager.getFont(Fonts.HUD);
-		healthIndicator = new HealthIndicator(texture, font, hp, assetsManager.getTexture(Assets.UiTextures.HUD_HP_HEART));
-		hudTable.add(healthIndicator).expand().left().bottom().pad(BUTTON_PADDING);
+		healthIndicator = new HealthIndicator(texture, font, hp, assetsManager.getTexture(UiTextures.HUD_HP_HEART));
+		hudTable.add(healthIndicator).left().bottom().pad(0F, PADDING, PADDING, 0F);
 	}
 
 	@Override
@@ -130,31 +156,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	public void onNewTurn(Entity entity) {
 		Button button = getSystemsCommonData().getUiStage().getRoot().findActor(BUTTON_NAME_STORAGE);
 		button.setTouchable(ComponentsMapper.player.has(entity) ? Touchable.enabled : Touchable.disabled);
-	}
-
-
-	private void addStorageButton(final Table table) {
-		Button.ButtonStyle buttonStyle = new Button.ButtonStyle();
-		GameAssetManager assetsManager = getAssetsManager();
-		Button button = createButtonStyle(buttonStyle, assetsManager);
-		button.setName(BUTTON_NAME_STORAGE);
-		button.addListener(new ClickListener() {
-			@Override
-			public void clicked(final InputEvent event, final float x, final float y) {
-				super.clicked(event, x, y);
-				SystemsCommonData commonData = getSystemsCommonData();
-				commonData.getUiStage().openStorageWindow(assetsManager, commonData, subscribers);
-				getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.UI_CLICK);
-			}
-		});
-		table.add(button).expand().left().bottom().pad(BUTTON_PADDING);
-	}
-
-	private Button createButtonStyle(Button.ButtonStyle buttonStyle, GameAssetManager assetsManager) {
-		buttonStyle.up = new TextureRegionDrawable(assetsManager.getTexture(Assets.UiTextures.BUTTON_STORAGE));
-		buttonStyle.down = new TextureRegionDrawable(assetsManager.getTexture(Assets.UiTextures.BUTTON_STORAGE_DOWN));
-		buttonStyle.over = new TextureRegionDrawable(assetsManager.getTexture(Assets.UiTextures.BUTTON_STORAGE_HOVER));
-		return new Button(buttonStyle);
 	}
 
 	private Table addTable( ) {
