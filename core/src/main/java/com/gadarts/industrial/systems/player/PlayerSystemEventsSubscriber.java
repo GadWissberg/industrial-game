@@ -7,7 +7,7 @@ public interface PlayerSystemEventsSubscriber extends SystemEventsSubscriber {
 
 
 
-	default void onItemAddedToStorage(Item item) {
+	default void onItemAddedToStorage(Item item, boolean firstTime) {
 
 	}
 

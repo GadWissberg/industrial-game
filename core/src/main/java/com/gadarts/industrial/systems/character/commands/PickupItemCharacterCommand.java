@@ -1,7 +1,7 @@
 package com.gadarts.industrial.systems.character.commands;
 
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector3;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -25,12 +25,13 @@ public class PickupItemCharacterCommand extends CharacterCommand {
 									  List<CharacterSystemEventsSubscriber> subscribers) {
 
 		boolean done = false;
-		if (newFrame.index == 1 && ComponentsMapper.animation.get(character).getAnimation().getPlayMode() == Animation.PlayMode.REVERSED) {
+		if (newFrame.index == 1 && ComponentsMapper.animation.get(character).getAnimation().getPlayMode() == PlayMode.REVERSED) {
 			MapGraph map = systemsCommonData.getMap();
 			val characterNode = map.getNode(ComponentsMapper.characterDecal.get(character).getDecal().getPosition());
 			List<Entity> pickups = map.fetchPickupsFromNode(characterNode, auxEntityList);
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
-				subscriber.onItemPickedUp(pickups.get(0));
+				Entity itemPickedUp = pickups.get(0);
+				subscriber.onItemPickedUp(itemPickedUp);
 				consumeActionPoints(ComponentsMapper.character.get(character), PICKUP_ACTION_POINT_CONSUME);
 				done = true;
 			}

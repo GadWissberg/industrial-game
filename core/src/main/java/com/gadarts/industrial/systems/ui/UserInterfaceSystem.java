@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -63,7 +64,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		CharacterSystemEventsSubscriber {
 	private static final BoundingBox auxBoundingBox = new BoundingBox();
 	private static final Vector3 auxVector3_2 = new Vector3();
-	private static final String BUTTON_NAME_STORAGE = "button_storage";
 	private static final float PADDING = 20;
 	private static final float PADDING_BOTTOM_INVENTORY_BUTTON = 10;
 	private boolean showBorders = DebugSettings.DISPLAY_HUD_OUTLINES;
@@ -73,6 +73,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private ToolTipHandler toolTipHandler;
 	private HealthIndicator healthIndicator;
 	private DamageIndicator damageIndicator;
+	private Button inventoryButton;
 
 	public UserInterfaceSystem(GameAssetManager assetsManager,
 							   GameLifeCycleHandler lifeCycleHandler) {
@@ -106,7 +107,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		style.up = new TextureRegionDrawable(assetsManager.getTexture(UiTextures.HUD_INVENTORY_BUTTON));
 		style.down = new TextureRegionDrawable(assetsManager.getTexture(UiTextures.HUD_INVENTORY_BUTTON_CLICKED));
 		style.over = new TextureRegionDrawable(assetsManager.getTexture(UiTextures.HUD_INVENTORY_BUTTON_HOVER));
-		Button inventoryButton = new Button(style);
+		inventoryButton = new Button(style);
 		hudTable.add(inventoryButton).expand().bottom().left().pad(
 						0F,
 						PADDING,
@@ -118,6 +119,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 			public void clicked(final InputEvent event, final float x, final float y) {
 				super.clicked(event, x, y);
 				SystemsCommonData commonData = getSystemsCommonData();
+				inventoryButton.clearActions();
 				commonData.getUiStage().openStorageWindow(assetsManager, commonData, subscribers);
 				getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.UI_CLICK);
 			}
@@ -148,14 +150,26 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	}
 
 	@Override
-	public void onItemAddedToStorage(Item item) {
+	public void onItemAddedToStorage(Item item, boolean firstTime) {
 		getSystemsCommonData().getUiStage().onItemAddedToStorage(item);
+		InputEvent overEvent = new InputEvent();
+		overEvent.setType(InputEvent.Type.enter);
+		overEvent.setPointer(-1);
+		InputEvent defocusEvent = new InputEvent();
+		defocusEvent.setType(InputEvent.Type.exit);
+		defocusEvent.setPointer(-1);
+		inventoryButton.addAction(Actions.repeat(
+				10,
+				Actions.sequence(
+						Actions.run(( ) -> inventoryButton.fire(overEvent)),
+						Actions.delay(1F),
+						Actions.run(( ) -> inventoryButton.fire(defocusEvent)),
+						Actions.delay(1F))));
 	}
 
 	@Override
 	public void onNewTurn(Entity entity) {
-		Button button = getSystemsCommonData().getUiStage().getRoot().findActor(BUTTON_NAME_STORAGE);
-		button.setTouchable(ComponentsMapper.player.has(entity) ? Touchable.enabled : Touchable.disabled);
+		inventoryButton.setTouchable(ComponentsMapper.player.has(entity) ? Touchable.enabled : Touchable.disabled);
 	}
 
 	private Table addTable( ) {

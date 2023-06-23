@@ -28,6 +28,7 @@ public class PlayerStorage {
 	private final int[] storageMapSketch = new int[SIZE];
 	private final HashMap<WeaponDeclaration, PlayerWeaponDeclaration> playerWeaponsDeclarations = new HashMap<>();
 	private final HashMap<ItemDeclaration, Integer> indices;
+	private final Set<ItemDeclaration> pickupHistory = new HashSet<>();
 	@Setter(AccessLevel.PACKAGE)
 	private Weapon selectedWeapon;
 
@@ -42,6 +43,7 @@ public class PlayerStorage {
 
 	public void clear( ) {
 		items.clear();
+		pickupHistory.clear();
 		IntStream.range(0, storageMap.length).forEach(i -> storageMap[i] = 0);
 	}
 
@@ -57,6 +59,9 @@ public class PlayerStorage {
 			} else {
 				index++;
 			}
+		}
+		if (result) {
+			pickupHistory.add(item.getDeclaration());
 		}
 		return result;
 	}
@@ -120,5 +125,9 @@ public class PlayerStorage {
 				}
 			}
 		}
+	}
+
+	public boolean isFirstTimePickup(Item item) {
+		return pickupHistory.contains(item);
 	}
 }

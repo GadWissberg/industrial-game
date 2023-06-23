@@ -340,13 +340,16 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	@Override
 	public void onItemPickedUp(final Entity itemPickedUp) {
 		Item item = ComponentsMapper.pickup.get(itemPickedUp).getItem();
-		boolean added = getSystemsCommonData().getStorage().addItem(item);
+		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		PlayerStorage storage = systemsCommonData.getStorage();
+		var firstTime = storage.isFirstTimePickup(item);
+		boolean added = storage.addItem(item);
 		if (added) {
 			for (PlayerSystemEventsSubscriber subscriber : subscribers) {
-				subscriber.onItemAddedToStorage(item);
+				subscriber.onItemAddedToStorage(item, firstTime);
 			}
 		}
-		getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.PICKUP);
+		systemsCommonData.getSoundPlayer().playSound(Assets.Sounds.PICKUP);
 	}
 
 	private boolean checkIfNodeBlocks(MapGraphNode playerNode, MapGraphNode currentNode) {
