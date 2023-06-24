@@ -32,9 +32,11 @@ import com.gadarts.industrial.console.commands.ConsoleCommandsList;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
+import com.gadarts.industrial.shared.assets.Assets.Declarations;
 import com.gadarts.industrial.shared.assets.Assets.Fonts;
 import com.gadarts.industrial.shared.assets.Assets.UiTextures;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
+import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponsDeclarations;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.shared.utils.CameraUtils;
 import com.gadarts.industrial.systems.GameSystem;
@@ -71,9 +73,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private MenuHandler menuHandler;
 	private CursorHandler cursorHandler;
 	private ToolTipHandler toolTipHandler;
-	private HealthIndicator healthIndicator;
-	private DamageIndicator damageIndicator;
-	private Button inventoryButton;
 
 	public UserInterfaceSystem(GameAssetManager assetsManager,
 							   GameLifeCycleHandler lifeCycleHandler) {
@@ -85,9 +84,10 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		if (!ComponentsMapper.player.has(character)) return;
 
 
-		int hp = ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).getAttributes().getHealthData().getHp();
-		healthIndicator.setValue(hp, originalValue);
-		damageIndicator.show();
+		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		int hp = ComponentsMapper.character.get(systemsCommonData.getPlayer()).getAttributes().getHealthData().getHp();
+		systemsCommonData.getHealthIndicator().setValue(hp, originalValue);
+		systemsCommonData.getDamageIndicator().show();
 	}
 
 	@Override
@@ -95,19 +95,31 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		super.onSystemReset(systemsCommonData);
 		GameStage stage = addUiStage();
 		GameAssetManager assetsManager = getAssetsManager();
-		damageIndicator = new DamageIndicator(stage, assetsManager);
+		systemsCommonData.setDamageIndicator(new DamageIndicator(stage, assetsManager));
 		Table hudTable = addTable();
 		hudTable.setName(TABLE_NAME_HUD);
-		addInventoryButton(assetsManager, hudTable);
+		addInventoryButton(hudTable);
 		addHealthIndicator(hudTable);
+		addWeaponIndicator(hudTable);
 	}
 
-	private void addInventoryButton(GameAssetManager assetsManager, Table hudTable) {
+	private void addWeaponIndicator(Table hudTable) {
+		GameAssetManager assetsManager = getAssetsManager();
+		Texture texture = assetsManager.getTexture(UiTextures.HUD_WEAPON_BORDER);
+		PlayerWeaponsDeclarations weapons = (PlayerWeaponsDeclarations) assetsManager.getDeclaration(Declarations.PLAYER_WEAPONS);
+		WeaponIndicator weaponIndicator = new WeaponIndicator(texture, weapons, assetsManager);
+		getSystemsCommonData().setWeaponIndicator(weaponIndicator);
+		hudTable.add(weaponIndicator).right().bottom().pad(0F, PADDING, PADDING, PADDING);
+	}
+
+	private void addInventoryButton(Table hudTable) {
 		Button.ButtonStyle style = new Button.ButtonStyle();
+		GameAssetManager assetsManager = getAssetsManager();
 		style.up = new TextureRegionDrawable(assetsManager.getTexture(UiTextures.HUD_INVENTORY_BUTTON));
 		style.down = new TextureRegionDrawable(assetsManager.getTexture(UiTextures.HUD_INVENTORY_BUTTON_CLICKED));
 		style.over = new TextureRegionDrawable(assetsManager.getTexture(UiTextures.HUD_INVENTORY_BUTTON_HOVER));
-		inventoryButton = new Button(style);
+		Button inventoryButton = new Button(style);
+		getSystemsCommonData().setInventoryButton(inventoryButton);
 		hudTable.add(inventoryButton).expand().bottom().left().pad(
 						0F,
 						PADDING,
@@ -132,7 +144,8 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		Texture texture = assetsManager.getTexture(UiTextures.HUD_HP_BORDER);
 		int hp = ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).getAttributes().getHealthData().getHp();
 		BitmapFont font = assetsManager.getFont(Fonts.HUD);
-		healthIndicator = new HealthIndicator(texture, font, hp, assetsManager.getTexture(UiTextures.HUD_HP_HEART));
+		HealthIndicator healthIndicator = new HealthIndicator(texture, font, hp, assetsManager.getTexture(UiTextures.HUD_HP_HEART));
+		getSystemsCommonData().setHealthIndicator(healthIndicator);
 		hudTable.add(healthIndicator).left().bottom().pad(0F, PADDING, PADDING, 0F);
 	}
 
@@ -158,6 +171,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		InputEvent defocusEvent = new InputEvent();
 		defocusEvent.setType(InputEvent.Type.exit);
 		defocusEvent.setPointer(-1);
+		Button inventoryButton = getSystemsCommonData().getInventoryButton();
 		inventoryButton.addAction(Actions.repeat(
 				10,
 				Actions.sequence(
@@ -169,6 +183,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 	@Override
 	public void onNewTurn(Entity entity) {
+		Button inventoryButton = getSystemsCommonData().getInventoryButton();
 		inventoryButton.setTouchable(ComponentsMapper.player.has(entity) ? Touchable.enabled : Touchable.disabled);
 	}
 

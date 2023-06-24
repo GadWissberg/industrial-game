@@ -11,6 +11,8 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.gadarts.industrial.components.player.Weapon;
+import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
+import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.window.GameWindowEvent;
 import com.gadarts.industrial.systems.ui.window.GameWindowEventType;
@@ -31,7 +33,7 @@ public class PlayerLayout extends ItemsTable {
 	public PlayerLayout(Texture texture,
 						Weapon weaponChoice,
 						ItemSelectionHandler itemSelectionHandler,
-						List<UserInterfaceSystemEventsSubscriber> subscribers) {
+						List<UserInterfaceSystemEventsSubscriber> subscribers, SystemsCommonData systemsCommonData) {
 		super(itemSelectionHandler);
 		if (weaponChoice.getImage() != null) {
 			this.weaponChoice = new ItemDisplay(weaponChoice, this.itemSelectionHandler, PlayerLayout.class);
@@ -42,7 +44,7 @@ public class PlayerLayout extends ItemsTable {
 		addListener(event -> {
 			boolean result = false;
 			if (event instanceof GameWindowEvent) {
-				result = onGameWindowEvent(event, subscribers);
+				result = onGameWindowEvent(event, subscribers, systemsCommonData);
 			}
 			return result;
 		});
@@ -85,14 +87,15 @@ public class PlayerLayout extends ItemsTable {
 	}
 
 	private boolean onGameWindowEvent(Event event,
-									  List<UserInterfaceSystemEventsSubscriber> subscribers) {
+									  List<UserInterfaceSystemEventsSubscriber> subscribers,
+									  SystemsCommonData systemsCommonData) {
 		GameWindowEventType type = ((GameWindowEvent) event).getType();
 		boolean result = false;
 		if (type == GameWindowEventType.ITEM_PLACED) {
 			ItemsTable itemsTable = (ItemsTable) event.getTarget();
 			ItemDisplay selection = itemSelectionHandler.getSelection();
 			if (event.getTarget() instanceof PlayerLayout) {
-				applySelectionToSelectedWeapon(itemsTable, selection, subscribers);
+				applySelectionToSelectedWeapon(itemsTable, selection, subscribers, systemsCommonData);
 			} else {
 				if (selection == weaponChoice) {
 					removeItem(selection);
@@ -105,12 +108,15 @@ public class PlayerLayout extends ItemsTable {
 
 	void applySelectionToSelectedWeapon(ItemsTable itemsTableToRemoveFrom,
 										ItemDisplay selection,
-										List<UserInterfaceSystemEventsSubscriber> subscribers) {
+										List<UserInterfaceSystemEventsSubscriber> subscribers,
+										SystemsCommonData systemsCommonData) {
 		itemsTableToRemoveFrom.removeItem(selection);
 		PlayerLayout.this.weaponChoice = selection;
-		subscribers.forEach(sub -> sub.onSelectedWeaponChanged((Weapon) weaponChoice.getItem()));
 		selection.setLocatedIn(PlayerLayout.class);
 		placeWeapon();
+		PlayerWeaponDeclaration declaration = (PlayerWeaponDeclaration) selection.getItem().getDeclaration();
+		systemsCommonData.getWeaponIndicator().setIcon(declaration);
+		subscribers.forEach(sub -> sub.onSelectedWeaponChanged((Weapon) weaponChoice.getItem()));
 	}
 
 	@Override

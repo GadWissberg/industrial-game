@@ -6,7 +6,8 @@
       "melee": true,
       "hidden_from_map": true,
       "declaration": "pnc",
-      "related_atlas": "player_melee"
+      "related_atlas": "player_melee",
+      "hud_icon": "hud_weapon_icon_fist"
     },
     {
       "id": "glc",
@@ -22,7 +23,8 @@
         1,
         0
       ],
-      "model_declaration": "glock"
+      "model_declaration": "glock",
+      "hud_icon": "hud_weapon_icon_glock"
     }
   ]
 }

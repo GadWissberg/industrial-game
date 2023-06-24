@@ -27,22 +27,10 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-/**
- * Responsible for handling the storage bag display.
- */
 public class StorageGrid extends ItemsTable {
 
-	/**
-	 * Size of the grid in pixels.
-	 */
 	public static final int GRID_SIZE = 256;
-	/**
-	 * Size of a grid cell size in pixels.
-	 */
 	public static final int GRID_CELL_SIZE = 32;
-	/**
-	 * Name of this actor.
-	 */
 	static final String NAME = "storage_grid";
 	private static final Rectangle auxRectangle_1 = new Rectangle();
 	private static final Rectangle selectedItemRectangle = new Rectangle();

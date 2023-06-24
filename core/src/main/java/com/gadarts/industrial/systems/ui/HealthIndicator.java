@@ -6,12 +6,10 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
-public class HealthIndicator extends Table {
+public class HealthIndicator extends HudIndicator {
 
 	public static final Color FONT_COLOR_HEALTHY = Color.valueOf("#48b416");
 	public static final Color FONT_COLOR_DAMAGED = Color.valueOf("#bdc724");
@@ -22,8 +20,7 @@ public class HealthIndicator extends Table {
 	private final Label label;
 
 	public HealthIndicator(Texture borderTexture, BitmapFont font, int hp, Texture heartTexture) {
-		setBackground(new TextureRegionDrawable(borderTexture));
-		setSize(borderTexture.getWidth(), borderTexture.getHeight());
+		super(borderTexture);
 		String hpString = Integer.toString(hp);
 		GlyphLayout layout = new GlyphLayout();
 		layout.setText(font, hpString);

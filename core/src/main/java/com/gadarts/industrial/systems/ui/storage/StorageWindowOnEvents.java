@@ -51,9 +51,14 @@ enum StorageWindowOnEvents {
 			if (playerLayout.getWeaponChoice() == null) {
 				StorageGrid storageGrid = storageWindow.getStorageGrid();
 				WeaponsDeclarations declarations = (WeaponsDeclarations) assetsManager.getDeclaration(Declarations.WEAPONS);
-				Optional.ofNullable(storageGrid.findItemDisplay(storage.getIndices().get(declarations.parse("glc")))).ifPresent(itemDisplay -> {
+				ItemDisplay glc = storageGrid.findItemDisplay(storage.getIndices().get(declarations.parse("glc")));
+				Optional.ofNullable(glc).ifPresent(itemDisplay -> {
 							List<UserInterfaceSystemEventsSubscriber> subscribers = parameters.getSubscribers();
-							playerLayout.applySelectionToSelectedWeapon(storageGrid, itemDisplay, subscribers);
+							playerLayout.applySelectionToSelectedWeapon(
+									storageGrid,
+									itemDisplay,
+									subscribers,
+									parameters.getSystemsCommonData());
 						}
 				);
 			}

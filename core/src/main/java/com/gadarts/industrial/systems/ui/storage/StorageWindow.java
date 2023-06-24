@@ -33,14 +33,8 @@ import static com.gadarts.industrial.systems.ui.storage.StorageGrid.GRID_CELL_SI
 import static com.gadarts.industrial.systems.ui.storage.StorageGrid.GRID_SIZE;
 import static com.gadarts.industrial.systems.ui.storage.StorageWindowOnEvents.*;
 
-/**
- * The player's storage management GUI.
- */
 public class StorageWindow extends GameWindow {
 
-	/**
-	 * Window identifier.
-	 */
 	public static final String NAME = "storage";
 	private static final int PLAYER_LAYOUT_PADDING = 40;
 	private static final WindowEventParameters auxWindowEventParameters = new WindowEventParameters();
@@ -186,7 +180,7 @@ public class StorageWindow extends GameWindow {
 								 List<UserInterfaceSystemEventsSubscriber> subscribers) {
 		Texture texture = assetsManager.getTexture(Assets.UiTextures.PLAYER_LAYOUT);
 		Weapon selectedWeapon = systemsCommonData.getStorage().getSelectedWeapon();
-		playerLayout = new PlayerLayout(texture, selectedWeapon, selectedItem, subscribers);
+		playerLayout = new PlayerLayout(texture, selectedWeapon, selectedItem, subscribers, systemsCommonData);
 		add(playerLayout).pad(PLAYER_LAYOUT_PADDING);
 	}
 

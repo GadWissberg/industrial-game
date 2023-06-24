@@ -3,6 +3,7 @@ package com.gadarts.industrial.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Disposable;
 import com.gadarts.industrial.SoundPlayer;
@@ -10,7 +11,10 @@ import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.systems.player.PlayerStorage;
 import com.gadarts.industrial.systems.render.DrawFlags;
 import com.gadarts.industrial.systems.turns.GameMode;
+import com.gadarts.industrial.systems.ui.DamageIndicator;
 import com.gadarts.industrial.systems.ui.GameStage;
+import com.gadarts.industrial.systems.ui.HealthIndicator;
+import com.gadarts.industrial.systems.ui.WeaponIndicator;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +46,10 @@ public class SystemsCommonData implements Disposable {
 	private long currentTurnId;
 	private Table menuTable;
 	private GameMode currentGameMode = GameMode.EXPLORE;
+	private HealthIndicator healthIndicator;
+	private DamageIndicator damageIndicator;
+	private Button inventoryButton;
+	private WeaponIndicator weaponIndicator;
 
 	@Override
 	public void dispose( ) {
