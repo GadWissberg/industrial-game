@@ -1,4 +1,4 @@
-package com.gadarts.industrial.systems.ui;
+package com.gadarts.industrial.systems.ui.indicators;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;

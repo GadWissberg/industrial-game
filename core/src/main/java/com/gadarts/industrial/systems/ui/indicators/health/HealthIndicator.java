@@ -1,4 +1,4 @@
-package com.gadarts.industrial.systems.ui;
+package com.gadarts.industrial.systems.ui.indicators.health;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -8,13 +8,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.gadarts.industrial.systems.ui.indicators.HudIndicator;
 
 public class HealthIndicator extends HudIndicator {
 
-	public static final Color FONT_COLOR_HEALTHY = Color.valueOf("#48b416");
-	public static final Color FONT_COLOR_DAMAGED = Color.valueOf("#bdc724");
-	public static final Color FONT_COLOR_DEAD = Color.valueOf("#d23333");
-	private static final Array<Color> colorScale = Array.with(FONT_COLOR_DEAD, FONT_COLOR_DAMAGED, FONT_COLOR_HEALTHY);
+	private static final Array<Color> colorScale = Array.with(FONT_COLOR_BAD, FONT_COLOR_OK, FONT_COLOR_GOOD);
 	public static final float LABEL_PADDING_RIGHT = 25F;
 	private final HudHeart heart;
 	private final Label label;
@@ -24,10 +22,10 @@ public class HealthIndicator extends HudIndicator {
 		String hpString = Integer.toString(hp);
 		GlyphLayout layout = new GlyphLayout();
 		layout.setText(font, hpString);
-		label = new Label(hpString, new Label.LabelStyle(font, FONT_COLOR_HEALTHY));
+		label = new Label(hpString, new Label.LabelStyle(font, FONT_COLOR_GOOD));
 		label.setAlignment(Align.center);
 		add(label).size(layout.width, layout.height).expandX().pad(0F, 0F, 0F, LABEL_PADDING_RIGHT);
-		heart = new HudHeart(heartTexture, borderTexture, FONT_COLOR_HEALTHY);
+		heart = new HudHeart(heartTexture, borderTexture, FONT_COLOR_GOOD);
 		addActor(heart);
 	}
 

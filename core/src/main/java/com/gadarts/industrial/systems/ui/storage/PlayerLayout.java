@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.systems.SystemsCommonData;
+import com.gadarts.industrial.systems.ui.indicators.AmmoIndicator;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.window.GameWindowEvent;
 import com.gadarts.industrial.systems.ui.window.GameWindowEventType;
@@ -116,6 +117,9 @@ public class PlayerLayout extends ItemsTable {
 		placeWeapon();
 		PlayerWeaponDeclaration declaration = (PlayerWeaponDeclaration) selection.getItem().getDeclaration();
 		systemsCommonData.getWeaponIndicator().setIcon(declaration);
+		AmmoIndicator ammoIndicator = systemsCommonData.getAmmoIndicator();
+		ammoIndicator.setVisible(!declaration.declaration().melee());
+		ammoIndicator.setValues(100, 100);
 		subscribers.forEach(sub -> sub.onSelectedWeaponChanged((Weapon) weaponChoice.getItem()));
 	}
 

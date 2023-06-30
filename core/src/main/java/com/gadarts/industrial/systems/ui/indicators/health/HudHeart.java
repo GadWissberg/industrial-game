@@ -1,4 +1,4 @@
-package com.gadarts.industrial.systems.ui;
+package com.gadarts.industrial.systems.ui.indicators.health;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;

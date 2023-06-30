@@ -421,6 +421,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		ComponentsMapper.character.get(player).getCommands().addLast(command);
 	}
 
+
 	@Override
 	public void onUserLeftClickedThePlayer(MapGraphNode playerNode) {
 		for (Entity pickup : pickups) {

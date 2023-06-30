@@ -11,10 +11,11 @@ import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.systems.player.PlayerStorage;
 import com.gadarts.industrial.systems.render.DrawFlags;
 import com.gadarts.industrial.systems.turns.GameMode;
-import com.gadarts.industrial.systems.ui.DamageIndicator;
-import com.gadarts.industrial.systems.ui.GameStage;
-import com.gadarts.industrial.systems.ui.HealthIndicator;
-import com.gadarts.industrial.systems.ui.WeaponIndicator;
+import com.gadarts.industrial.systems.ui.*;
+import com.gadarts.industrial.systems.ui.indicators.AmmoIndicator;
+import com.gadarts.industrial.systems.ui.indicators.DamageIndicator;
+import com.gadarts.industrial.systems.ui.indicators.health.HealthIndicator;
+import com.gadarts.industrial.systems.ui.indicators.WeaponIndicator;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +51,7 @@ public class SystemsCommonData implements Disposable {
 	private DamageIndicator damageIndicator;
 	private Button inventoryButton;
 	private WeaponIndicator weaponIndicator;
+	private AmmoIndicator ammoIndicator;
 
 	@Override
 	public void dispose( ) {
