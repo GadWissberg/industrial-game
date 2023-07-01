@@ -12,7 +12,7 @@ import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.character.OnGoingAttack;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
-import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;

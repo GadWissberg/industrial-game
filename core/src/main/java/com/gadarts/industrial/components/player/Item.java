@@ -2,7 +2,7 @@ package com.gadarts.industrial.components.player;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Pool;
-import com.gadarts.industrial.shared.model.ItemDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.pickups.ItemDeclaration;
 import lombok.Getter;
 import lombok.Setter;
 

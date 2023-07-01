@@ -3,7 +3,7 @@ package com.gadarts.industrial.systems.ui.storage;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.Assets.Declarations;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
-import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponsDeclarations;
+import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.WeaponsDeclarations;
 import com.gadarts.industrial.systems.player.PlayerStorage;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.window.GameWindowEventType;

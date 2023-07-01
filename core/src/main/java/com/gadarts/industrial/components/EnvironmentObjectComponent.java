@@ -1,7 +1,7 @@
 package com.gadarts.industrial.components;
 
 import com.badlogic.gdx.math.Vector2;
-import com.gadarts.industrial.shared.model.env.EnvironmentObjectDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.EnvironmentObjectDeclaration;
 import lombok.Getter;
 
 @Getter

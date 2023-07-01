@@ -4,7 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.components.GameComponent;
-import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import lombok.AccessLevel;

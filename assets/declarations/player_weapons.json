@@ -24,7 +24,8 @@
         0
       ],
       "model_declaration": "glock",
-      "hud_icon": "hud_weapon_icon_glock"
+      "hud_icon": "hud_weapon_icon_glock",
+      "ammo_type": "bullet"
     }
   ]
 }

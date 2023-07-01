@@ -3,7 +3,7 @@ package com.gadarts.industrial.components;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.WeaponDeclaration;
 import lombok.AccessLevel;
 import lombok.Getter;
 

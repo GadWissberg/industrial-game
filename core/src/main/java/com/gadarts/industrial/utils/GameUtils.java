@@ -8,7 +8,7 @@ import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.player.PlayerStorage;
 import com.google.gson.JsonObject;

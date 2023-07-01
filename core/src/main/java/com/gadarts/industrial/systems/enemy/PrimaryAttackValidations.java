@@ -2,8 +2,8 @@ package com.gadarts.industrial.systems.enemy;
 
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
-import com.gadarts.industrial.shared.assets.declarations.enemies.EnemyDeclaration;
-import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.characters.enemies.EnemyDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.WeaponDeclaration;
 import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.List;

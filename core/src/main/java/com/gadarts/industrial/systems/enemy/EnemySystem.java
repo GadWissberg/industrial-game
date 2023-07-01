@@ -21,7 +21,7 @@ import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
-import com.gadarts.industrial.shared.assets.declarations.weapons.WeaponDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.ModelInstancePools;

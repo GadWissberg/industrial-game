@@ -1,5 +1,6 @@
 package com.gadarts.industrial.systems.ui.storage;
 
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -10,8 +11,11 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.components.player.Ammo;
 import com.gadarts.industrial.components.player.Weapon;
-import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponDeclaration;
+import com.gadarts.industrial.shared.model.pickups.BulletTypes;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.ui.indicators.AmmoIndicator;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
@@ -20,6 +24,7 @@ import com.gadarts.industrial.systems.ui.window.GameWindowEventType;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Map;
 
 public class PlayerLayout extends ItemsTable {
 	public static final int WEAPON_POSITION_PARENT_X = 100;
@@ -119,7 +124,9 @@ public class PlayerLayout extends ItemsTable {
 		systemsCommonData.getWeaponIndicator().setIcon(declaration);
 		AmmoIndicator ammoIndicator = systemsCommonData.getAmmoIndicator();
 		ammoIndicator.setVisible(!declaration.declaration().melee());
-		ammoIndicator.setValues(100, 100);
+		Entity player = systemsCommonData.getPlayer();
+		Ammo ammo = ComponentsMapper.player.get(player).getAmmo().get(declaration.bulletType());
+		ammoIndicator.setValues(ammo);
 		subscribers.forEach(sub -> sub.onSelectedWeaponChanged((Weapon) weaponChoice.getItem()));
 	}
 

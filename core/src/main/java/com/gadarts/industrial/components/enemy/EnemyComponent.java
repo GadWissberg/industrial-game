@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.components.GameComponent;
 import com.gadarts.industrial.map.MapGraphNode;
-import com.gadarts.industrial.shared.assets.declarations.enemies.EnemyDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.characters.enemies.EnemyDeclaration;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus;
 import lombok.Getter;

@@ -5,9 +5,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
-import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponDeclaration;
-import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponsDeclarations;
-
+import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponsDeclarations;
+import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponDeclaration;
 import java.util.Map;
 import java.util.stream.Collectors;
 

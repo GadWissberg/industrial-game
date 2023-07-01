@@ -36,7 +36,7 @@ import com.gadarts.industrial.shared.assets.Assets.Declarations;
 import com.gadarts.industrial.shared.assets.Assets.Fonts;
 import com.gadarts.industrial.shared.assets.Assets.UiTextures;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
-import com.gadarts.industrial.shared.assets.declarations.weapons.PlayerWeaponsDeclarations;
+import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponsDeclarations;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.shared.utils.CameraUtils;
 import com.gadarts.industrial.systems.GameSystem;

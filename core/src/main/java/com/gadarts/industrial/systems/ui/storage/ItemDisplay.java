@@ -13,7 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.gadarts.industrial.components.player.Item;
-import com.gadarts.industrial.shared.model.ItemDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.pickups.ItemDeclaration;
 import com.gadarts.industrial.systems.ui.window.GameWindowEvent;
 import com.gadarts.industrial.systems.ui.window.GameWindowEventType;
 import lombok.Getter;
