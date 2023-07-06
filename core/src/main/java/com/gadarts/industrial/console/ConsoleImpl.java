@@ -78,6 +78,11 @@ public class ConsoleImpl extends Table implements Console, InputProcessor, Dispo
 	}
 
 	@Override
+	public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+		return false;
+	}
+
+	@Override
 	public boolean touchDragged(final int screenX, final int screenY, final int pointer) {
 		return false;
 	}

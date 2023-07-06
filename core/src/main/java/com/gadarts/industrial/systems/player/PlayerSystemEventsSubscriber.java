@@ -1,5 +1,6 @@
 package com.gadarts.industrial.systems.player;
 
+import com.gadarts.industrial.components.player.Ammo;
 import com.gadarts.industrial.components.player.Item;
 import com.gadarts.industrial.systems.SystemEventsSubscriber;
 
@@ -16,6 +17,10 @@ public interface PlayerSystemEventsSubscriber extends SystemEventsSubscriber {
 	}
 
 	default void onPlayerStatusChanged() {
+
+	}
+
+	default void onPlayerConsumedAmmo(Ammo ammo){
 
 	}
 }

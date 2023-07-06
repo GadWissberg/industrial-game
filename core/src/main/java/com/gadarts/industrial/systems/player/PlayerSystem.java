@@ -21,16 +21,17 @@ import com.gadarts.industrial.components.character.CharacterAnimations;
 import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
+import com.gadarts.industrial.components.player.Ammo;
 import com.gadarts.industrial.components.player.Item;
 import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.Assets.Declarations;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponsDeclarations;
 import com.gadarts.industrial.shared.model.characters.Direction;
+import com.gadarts.industrial.shared.model.pickups.BulletTypes;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
@@ -38,8 +39,8 @@ import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
 import com.gadarts.industrial.systems.character.commands.CommandStates;
-import com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
+import com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.GameMode;
@@ -50,9 +51,11 @@ import com.gadarts.industrial.utils.GameUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 
 import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
+import static com.gadarts.industrial.shared.assets.Assets.Declarations.PLAYER_WEAPONS;
 import static com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions.*;
 import static com.gadarts.industrial.utils.GameUtils.calculatePath;
 
@@ -74,6 +77,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private final static LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
 	private static final List<Entity> auxEntityList = new ArrayList<>();
+	public static final int PICKUP_WEAPON_AMMO_AMOUNT = 15;
 	private PathPlanHandler playerPathPlanner;
 	private ImmutableArray<Entity> ambObjects;
 	private ImmutableArray<Entity> pickups;
@@ -81,6 +85,17 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	public PlayerSystem(GameAssetManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
+	}
+
+	@Override
+	public void onCharacterEngagesPrimaryAttack(Entity character, Vector3 direction, Vector3 positionNodeCenterPosition) {
+		if (ComponentsMapper.player.has(character)) {
+			Weapon selectedWeapon = getSystemsCommonData().getStorage().getSelectedWeapon();
+			PlayerWeaponDeclaration declaration = (PlayerWeaponDeclaration) selectedWeapon.getDeclaration();
+			Ammo ammo = ComponentsMapper.player.get(character).getAmmo().get(declaration.ammoType());
+			ammo.setLoaded(ammo.getLoaded() - 1);
+			subscribers.forEach(sub -> sub.onPlayerConsumedAmmo(ammo));
+		}
 	}
 
 	private static int flipOffDiagonal(int total, int mask, int firstDirMask, int secondDirMask) {
@@ -344,6 +359,14 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		PlayerStorage storage = systemsCommonData.getStorage();
 		var firstTime = storage.isFirstTimePickup(item);
 		boolean added = storage.addItem(item);
+		if (item.isWeapon()) {
+			Map<BulletTypes, Ammo> ammo = ComponentsMapper.player.get(systemsCommonData.getPlayer()).getAmmo();
+			PlayerWeaponDeclaration declaration = (PlayerWeaponDeclaration) item.getDeclaration();
+			BulletTypes ammoType = declaration.ammoType();
+			if (ammo.containsKey(ammoType)) {
+				ammo.get(ammoType).setLoaded(PICKUP_WEAPON_AMMO_AMOUNT);
+			}
+		}
 		if (added) {
 			for (PlayerSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onItemAddedToStorage(item, firstTime);
@@ -490,7 +513,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		Weapon weapon = Pools.obtain(Weapon.class);
 
 		GameAssetManager am = getAssetsManager();
-		PlayerWeaponsDeclarations weaponsDeclarations = (PlayerWeaponsDeclarations) am.getDeclaration(Declarations.PLAYER_WEAPONS);
+		PlayerWeaponsDeclarations weaponsDeclarations = (PlayerWeaponsDeclarations) am.getDeclaration(PLAYER_WEAPONS);
 		PlayerWeaponDeclaration declaration = weaponsDeclarations.parse(DebugSettings.STARTING_WEAPON);
 		Assets.UiTextures symbol = declaration.declaration().getSymbol();
 		Texture image = symbol != null ? am.getTexture(symbol) : null;

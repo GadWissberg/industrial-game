@@ -7,6 +7,7 @@ import com.gadarts.industrial.shared.model.pickups.BulletTypes;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,10 +23,11 @@ public class PlayerComponent implements GameComponent {
 
 	@Override
 	public void reset( ) {
-
 	}
 
 	public void init(final CharacterAnimations general) {
 		this.generalAnimations = general;
+		ammo.clear();
+		Arrays.stream(BulletTypes.values()).forEach(type -> ammo.put(type, new Ammo(0, 0)));
 	}
 }

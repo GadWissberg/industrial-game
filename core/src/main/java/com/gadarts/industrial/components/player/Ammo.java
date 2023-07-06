@@ -1,5 +1,14 @@
 package com.gadarts.industrial.components.player;
 
-public record Ammo(int loaded, int total) {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+@AllArgsConstructor
+@Setter
+@Getter
+public class Ammo {
+	private int loaded;
+	private int total;
 
 }

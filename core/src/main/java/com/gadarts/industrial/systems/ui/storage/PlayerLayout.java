@@ -15,16 +15,14 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.player.Ammo;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponDeclaration;
-import com.gadarts.industrial.shared.model.pickups.BulletTypes;
 import com.gadarts.industrial.systems.SystemsCommonData;
-import com.gadarts.industrial.systems.ui.indicators.AmmoIndicator;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
+import com.gadarts.industrial.systems.ui.indicators.AmmoIndicator;
 import com.gadarts.industrial.systems.ui.window.GameWindowEvent;
 import com.gadarts.industrial.systems.ui.window.GameWindowEventType;
 import lombok.Getter;
 
 import java.util.List;
-import java.util.Map;
 
 public class PlayerLayout extends ItemsTable {
 	public static final int WEAPON_POSITION_PARENT_X = 100;
@@ -125,7 +123,7 @@ public class PlayerLayout extends ItemsTable {
 		AmmoIndicator ammoIndicator = systemsCommonData.getAmmoIndicator();
 		ammoIndicator.setVisible(!declaration.declaration().melee());
 		Entity player = systemsCommonData.getPlayer();
-		Ammo ammo = ComponentsMapper.player.get(player).getAmmo().get(declaration.bulletType());
+		Ammo ammo = ComponentsMapper.player.get(player).getAmmo().get(declaration.ammoType());
 		ammoIndicator.setValues(ammo);
 		subscribers.forEach(sub -> sub.onSelectedWeaponChanged((Weapon) weaponChoice.getItem()));
 	}

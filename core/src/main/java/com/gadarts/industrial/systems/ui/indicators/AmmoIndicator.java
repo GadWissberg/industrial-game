@@ -8,16 +8,15 @@ import com.gadarts.industrial.components.player.Ammo;
 public class AmmoIndicator extends HudIndicator {
 	private static final String FORMAT = "%s/%s";
 	private final Label label;
-	private Ammo ammo;
 
 	public AmmoIndicator(Texture borderTexture, BitmapFont font) {
 		super(borderTexture);
 		Label.LabelStyle style = new Label.LabelStyle(font, FONT_COLOR_GOOD);
-		this.label = new Label(String.format(FORMAT, ammo.loaded(), ammo.total()), style);
+		this.label = new Label("-", style);
 		add(label);
 	}
 
 	public void setValues(Ammo ammo) {
-		this.ammo = ammo;
+		this.label.setText(String.format(FORMAT, ammo.getLoaded(), ammo.getTotal()));
 	}
 }

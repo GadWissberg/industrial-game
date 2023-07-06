@@ -25,6 +25,7 @@ import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
+import com.gadarts.industrial.components.player.Ammo;
 import com.gadarts.industrial.components.player.Item;
 import com.gadarts.industrial.console.commands.ConsoleCommandResult;
 import com.gadarts.industrial.console.commands.ConsoleCommands;
@@ -123,10 +124,8 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	}
 
 	@Override
-	public void onCharacterEngagesPrimaryAttack(Entity character, Vector3 direction, Vector3 positionNodeCenterPosition) {
-//		if (ComponentsMapper.player.has(character)) {
-//			ComponentsMapper.character.get(character)
-//		}
+	public void onPlayerConsumedAmmo(Ammo ammo) {
+		getSystemsCommonData().getAmmoIndicator().setValues(ammo);
 	}
 
 	private void addWeaponIndicator(Table armsIndicatorsTable) {
