@@ -55,7 +55,6 @@ public abstract class AiStatusLogic {
 				map.getNode(charDecalComp.getNodePosition(auxVector2_1)),
 				destinationNode,
 				maxCostInclusive,
-				true,
 				enemy,
 				pathToDestination);
 	}
@@ -78,13 +77,11 @@ public abstract class AiStatusLogic {
 	void initializePathPlanRequest(MapGraphNode sourceNode,
 								   MapGraphNode destinationNode,
 								   MapGraphConnectionCosts maxCostInclusive,
-								   boolean avoidCharactersInCalculations,
 								   Entity character,
 								   MapGraphPath outputPath) {
 		request.setSourceNode(sourceNode);
 		request.setDestNode(destinationNode);
 		request.setOutputPath(outputPath);
-		request.setAvoidCharactersInCalculations(avoidCharactersInCalculations);
 		request.setMaxCostInclusive(maxCostInclusive);
 		request.setRequester(character);
 	}

@@ -148,7 +148,8 @@ public class GameUtils {
 		if (ComponentsMapper.player.has(character)) {
 			PlayerStorage storage = commonData.getStorage();
 			Weapon selectedWeapon = storage.getSelectedWeapon();
-			PlayerWeaponDeclaration definition = storage.getPlayerWeaponsDeclarations().get(selectedWeapon.getDeclaration());
+			PlayerWeaponDeclaration playerWeaponDeclaration = (PlayerWeaponDeclaration) selectedWeapon.getDeclaration();
+			PlayerWeaponDeclaration definition = storage.getPlayerWeaponsDeclarations().get(playerWeaponDeclaration.declaration());
 			return definition.hitFrameIndex();
 		} else {
 			return ComponentsMapper.character.get(character).getCharacterSpriteData().getPrimaryAttackHitFrameIndex();

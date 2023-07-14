@@ -14,7 +14,6 @@ import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.EnvironmentObjectComponent;
-import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterAnimation;
 import com.gadarts.industrial.components.character.CharacterAnimations;
@@ -69,6 +68,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		InputSystemEventsSubscriber {
 	public static final float LOS_MAX = 24F;
 	public static final int LOS_CHECK_DELTA = 5;
+	public static final int PICKUP_WEAPON_AMMO_AMOUNT = 15;
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Vector2 auxVector2_3 = new Vector2();
@@ -77,14 +77,18 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private final static LinkedHashSet<GridPoint2> bresenhamOutput = new LinkedHashSet<>();
 	private static final List<Entity> auxEntityList = new ArrayList<>();
-	public static final int PICKUP_WEAPON_AMMO_AMOUNT = 15;
 	private PathPlanHandler playerPathPlanner;
 	private ImmutableArray<Entity> ambObjects;
-	private ImmutableArray<Entity> pickups;
-
 	public PlayerSystem(GameAssetManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
+	}
+
+	private static int flipOffDiagonal(int total, int mask, int firstDirMask, int secondDirMask) {
+		if ((total & mask) == mask && ((total & firstDirMask) == firstDirMask || (total & secondDirMask) == secondDirMask)) {
+			total = total & ~mask;
+		}
+		return total;
 	}
 
 	@Override
@@ -96,13 +100,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			ammo.setLoaded(ammo.getLoaded() - 1);
 			subscribers.forEach(sub -> sub.onPlayerConsumedAmmo(ammo));
 		}
-	}
-
-	private static int flipOffDiagonal(int total, int mask, int firstDirMask, int secondDirMask) {
-		if ((total & mask) == mask && ((total & firstDirMask) == firstDirMask || (total & secondDirMask) == secondDirMask)) {
-			total = total & ~mask;
-		}
-		return total;
 	}
 
 	@Override
@@ -399,13 +396,46 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	@Override
 	public void onUserSelectedNodeToApplyTurn(MapGraphNode node) {
-		CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer());
-		MapGraphPath plannedPath = playerPathPlanner.getCurrentPath();
-		initializePathPlanRequest(node, charDecalComp, plannedPath);
-		boolean foundPath = calculatePath(request, playerPathPlanner.getPathFinder(), playerPathPlanner.getHeuristic());
-		if (foundPath) {
-			pathHasCreated(node, request.getOutputPath());
+		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(systemsCommonData.getPlayer());
+		Entity enemyAtNode = systemsCommonData.getMap().fetchAliveCharacterFromNode(node);
+		if (systemsCommonData.getStorage().getSelectedWeapon().isMelee() || enemyAtNode == null) {
+			MapGraphPath plannedPath = request.getOutputPath();
+			initializePathPlanRequest(node, charDecalComp, plannedPath);
+			boolean foundPath = calculatePath(request, playerPathPlanner.getPathFinder(), playerPathPlanner.getHeuristic());
+			if (foundPath) {
+				applyCommandsWithPath(node, enemyAtNode, plannedPath);
+			}
+		} else {
+			applyPrimaryAttack(enemyAtNode);
 		}
+	}
+
+	private void applyCommandsWithPath(MapGraphNode node, Entity enemyAtNode, MapGraphPath plannedPath) {
+		int pathSize = plannedPath.getCount();
+		if (!plannedPath.nodes.isEmpty() && plannedPath.get(pathSize - 1).equals(node)) {
+			SystemsCommonData systemsCommonData = getSystemsCommonData();
+			Entity player = systemsCommonData.getPlayer();
+			ComponentsMapper.character.get(player).getCommands().clear();
+			addCommand(plannedPath, RUN);
+			if (enemyAtNode != null) {
+				applyPrimaryAttack(enemyAtNode, plannedPath);
+			} else {
+				List<Entity> pickupsAtNode = systemsCommonData.getMap().fetchPickupsFromNode(node, auxEntityList);
+				if (!pickupsAtNode.isEmpty()) {
+					addCommand(plannedPath, PICKUP);
+				}
+			}
+		}
+	}
+
+	private void applyPrimaryAttack(Entity enemyAtNode) {
+		applyPrimaryAttack(enemyAtNode, null);
+	}
+
+	private void applyPrimaryAttack(Entity enemyAtNode, MapGraphPath plannedPath) {
+		ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).setTarget(enemyAtNode);
+		addCommand(plannedPath, ATTACK_PRIMARY);
 	}
 
 	@Override
@@ -413,26 +443,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		if (systemsCommonData.getCurrentGameMode() == GameMode.EXPLORE) {
 			ComponentsMapper.character.get(systemsCommonData.getPlayer()).getAttributes().resetActionPoints();
-		}
-	}
-
-	private void pathHasCreated(MapGraphNode destination, MapGraphPath outputPath) {
-		int pathSize = outputPath.getCount();
-		if (!outputPath.nodes.isEmpty() && outputPath.get(pathSize - 1).equals(destination)) {
-			SystemsCommonData systemsCommonData = getSystemsCommonData();
-			Entity player = systemsCommonData.getPlayer();
-			ComponentsMapper.character.get(player).getCommands().clear();
-			addCommand(outputPath, RUN);
-			Entity enemyAtNode = systemsCommonData.getMap().fetchAliveCharacterFromNode(destination);
-			if (enemyAtNode != null) {
-				ComponentsMapper.character.get(player).setTarget(enemyAtNode);
-				addCommand(outputPath, ATTACK_PRIMARY);
-			} else {
-				List<Entity> pickupsAtNode = systemsCommonData.getMap().fetchPickupsFromNode(destination, auxEntityList);
-				if (!pickupsAtNode.isEmpty()) {
-					addCommand(outputPath, PICKUP);
-				}
-			}
 		}
 	}
 
@@ -444,26 +454,13 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		ComponentsMapper.character.get(player).getCommands().addLast(command);
 	}
 
-
-	@Override
-	public void onUserLeftClickedThePlayer(MapGraphNode playerNode) {
-		for (Entity pickup : pickups) {
-			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(pickup).getModelInstance();
-			Vector3 pickupPosition = modelInstance.transform.getTranslation(auxVector3_1);
-			if (getSystemsCommonData().getMap().getNode(pickupPosition).equals(playerNode)) {
-			}
-		}
-	}
-
 	private void initializePathPlanRequest(MapGraphNode sourceNode,
 										   MapGraphNode destinationNode,
 										   MapGraphConnectionCosts maxCostInclusive,
-										   boolean avoidCharactersInCalculations,
 										   MapGraphPath outputPath) {
 		request.setSourceNode(sourceNode);
 		request.setDestNode(destinationNode);
 		request.setOutputPath(outputPath);
-		request.setAvoidCharactersInCalculations(avoidCharactersInCalculations);
 		request.setMaxCostInclusive(maxCostInclusive);
 		request.setRequester(getSystemsCommonData().getPlayer());
 	}
@@ -475,7 +472,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				getSystemsCommonData().getMap().getNode(charDecalComp.getNodePosition(auxVector2_1)),
 				cursorNode,
 				CLEAN,
-				true,
 				plannedPath);
 	}
 
@@ -506,7 +502,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		getSystemsCommonData().setStorage(new PlayerStorage(getAssetsManager()));
 		getSystemsCommonData().getStorage().setSelectedWeapon(weapon);
 		ambObjects = getEngine().getEntitiesFor(Family.all(EnvironmentObjectComponent.class).exclude(DoorComponent.class).get());
-		pickups = getEngine().getEntitiesFor(Family.all(PickUpComponent.class).get());
 	}
 
 	private Weapon initializeStartingWeapon( ) {

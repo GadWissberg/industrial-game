@@ -10,7 +10,6 @@ import lombok.Setter;
 public class CalculatePathRequest {
 	private MapGraphNode sourceNode;
 	private MapGraphNode destNode;
-	private boolean avoidCharactersInCalculations;
 	private MapGraphConnectionCosts maxCostInclusive;
 	private Entity requester;
 

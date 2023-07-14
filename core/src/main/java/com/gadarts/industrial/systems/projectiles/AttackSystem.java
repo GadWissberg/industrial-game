@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gadarts.industrial.GameLifeCycleHandler;
+import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.BulletComponent;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.character.CharacterComponent;
@@ -26,6 +27,7 @@ import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.characters.CharacterDeclaration;
+import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.model.characters.player.PlayerDeclaration;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
@@ -58,6 +60,22 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		super(assetsManager, lifeCycleHandler);
 	}
 
+	private static Vector2 transformBulletModel(Entity character, Vector3 direction, Vector3 position, Vector3 bulletCreationOffset, GameModelInstance modelInstance) {
+		modelInstance.transform.setToTranslation(position);
+		modelInstance.transform.rotate(Vector3.Y, -auxVector2_1.set(direction.x, direction.z).nor().angleDeg())
+				.translate(bulletCreationOffset);
+
+		Vector3 biasedPos = modelInstance.transform.getTranslation(auxVector3_1);
+		modelInstance.transform.setToTranslation(biasedPos);
+		Entity target = ComponentsMapper.character.get(character).getTarget();
+		Vector3 targetPos = ComponentsMapper.characterDecal.get(target).getDecal().getPosition();
+		Vector2 bulletDirectionAfterBias = auxVector2_1.set(targetPos.x, targetPos.z)
+				.sub(biasedPos.x, biasedPos.z)
+				.nor();
+		modelInstance.transform.rotate(Vector3.Y, -bulletDirectionAfterBias.angleDeg());
+		return bulletDirectionAfterBias;
+	}
+
 	@Override
 	public void onCharacterEngagesPrimaryAttack(final Entity character,
 												final Vector3 direction,
@@ -72,9 +90,12 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 
 	private void playerEngagesSelectedWeapon(Entity character, Vector3 direction, Vector3 charPos) {
 		Weapon selectedWeapon = getSystemsCommonData().getStorage().getSelectedWeapon();
-		WeaponDeclaration weaponDeclaration = (WeaponDeclaration) selectedWeapon.getDeclaration();
+		PlayerWeaponDeclaration playerWeaponDeclaration = (PlayerWeaponDeclaration) selectedWeapon.getDeclaration();
 		CharacterDeclaration playerDefinition = PlayerDeclaration.getInstance();
-		getSystemsCommonData().getSoundPlayer().playSound(weaponDeclaration.melee() ? playerDefinition.getSoundMelee() : weaponDeclaration.soundEngage());
+		SoundPlayer soundPlayer = getSystemsCommonData().getSoundPlayer();
+		WeaponDeclaration weaponDeclaration = playerWeaponDeclaration.declaration();
+		boolean melee = weaponDeclaration.melee();
+		soundPlayer.playSound(melee ? playerDefinition.getSoundMelee() : weaponDeclaration.soundEngage());
 		primaryAttackEngaged(
 				character,
 				direction,
@@ -172,22 +193,6 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 			builder.addShadowlessLightComponent(position, PROJ_LIGHT_INTENSITY, PROJ_LIGHT_RADIUS, color);
 		}
 		builder.finishAndAddToEngine();
-	}
-
-	private static Vector2 transformBulletModel(Entity character, Vector3 direction, Vector3 position, Vector3 bulletCreationOffset, GameModelInstance modelInstance) {
-		modelInstance.transform.setToTranslation(position);
-		modelInstance.transform.rotate(Vector3.Y, -auxVector2_1.set(direction.x, direction.z).nor().angleDeg())
-				.translate(bulletCreationOffset);
-
-		Vector3 biasedPos = modelInstance.transform.getTranslation(auxVector3_1);
-		modelInstance.transform.setToTranslation(biasedPos);
-		Entity target = ComponentsMapper.character.get(character).getTarget();
-		Vector3 targetPos = ComponentsMapper.characterDecal.get(target).getDecal().getPosition();
-		Vector2 bulletDirectionAfterBias = auxVector2_1.set(targetPos.x, targetPos.z)
-				.sub(biasedPos.x, biasedPos.z)
-				.nor();
-		modelInstance.transform.rotate(Vector3.Y, -bulletDirectionAfterBias.angleDeg());
-		return bulletDirectionAfterBias;
 	}
 
 	@Override

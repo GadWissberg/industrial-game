@@ -10,18 +10,16 @@ public class GamePathFinder extends IndexedAStarPathFinder<MapGraphNode> {
 		this.map = graph;
 	}
 
-	public boolean searchNodePathBeforeCommand(final GameHeuristic heuristic,
-											   final CalculatePathRequest req) {
+	public void searchNodePathBeforeCommand(final GameHeuristic heuristic,
+											final CalculatePathRequest req) {
 		MapGraphStates mapGraphStates = map.getMapGraphStates();
 		MapGraphNode oldDest = mapGraphStates.getCurrentPathFinalDestination();
-		mapGraphStates.setIncludeCharactersInGetConnections(req.isAvoidCharactersInCalculations());
 		mapGraphStates.setCurrentPathFinalDestination(req.getDestNode());
 		mapGraphStates.setMaxConnectionCostInSearch(req.getMaxCostInclusive());
 		mapGraphStates.setCurrentCharacterPathPlanner(req.getRequester());
-		boolean result = searchNodePath(req.getSourceNode(), req.getDestNode(), heuristic, req.getOutputPath());
+		searchNodePath(req.getSourceNode(), req.getDestNode(), heuristic, req.getOutputPath());
 		mapGraphStates.setMaxConnectionCostInSearch(MapGraphConnectionCosts.CLEAN);
 		mapGraphStates.setCurrentPathFinalDestination(oldDest);
 		mapGraphStates.setIncludeCharactersInGetConnections(true);
-		return result;
 	}
 }
