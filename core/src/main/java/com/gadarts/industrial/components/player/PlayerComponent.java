@@ -28,6 +28,6 @@ public class PlayerComponent implements GameComponent {
 	public void init(final CharacterAnimations general) {
 		this.generalAnimations = general;
 		ammo.clear();
-		Arrays.stream(BulletTypes.values()).forEach(type -> ammo.put(type, new Ammo(0, 0)));
+		Arrays.stream(BulletTypes.values()).forEach(type -> ammo.put(type, new Ammo(0, 0, null)));
 	}
 }

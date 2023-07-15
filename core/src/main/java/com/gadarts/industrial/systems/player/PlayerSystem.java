@@ -79,6 +79,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private static final List<Entity> auxEntityList = new ArrayList<>();
 	private PathPlanHandler playerPathPlanner;
 	private ImmutableArray<Entity> ambObjects;
+
 	public PlayerSystem(GameAssetManager assetsManager,
 						GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
@@ -362,6 +363,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			BulletTypes ammoType = declaration.ammoType();
 			if (ammo.containsKey(ammoType)) {
 				ammo.get(ammoType).setLoaded(PICKUP_WEAPON_AMMO_AMOUNT);
+				ammo.get(ammoType).setPlayerWeaponDeclaration(declaration);
 			}
 		}
 		if (added) {

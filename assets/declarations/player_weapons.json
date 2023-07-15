@@ -25,7 +25,8 @@
       ],
       "model_declaration": "glock",
       "hud_icon": "hud_weapon_icon_glock",
-      "ammo_type": "bullet"
+      "ammo_type": "bullet",
+      "magazine_size": 17
     }
   ]
 }
