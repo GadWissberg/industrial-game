@@ -117,7 +117,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		GameAssetManager assetsManager = getAssetsManager();
 		Texture texture = assetsManager.getTexture(UiTextures.HUD_BORDER);
 		BitmapFont font = assetsManager.getFont(Fonts.HUD);
-		AmmoIndicator ammoIndicator = new AmmoIndicator(texture, font);
+		AmmoIndicator ammoIndicator = new AmmoIndicator(texture, font, assetsManager);
 		ammoIndicator.setVisible(false);
 		getSystemsCommonData().setAmmoIndicator(ammoIndicator);
 		armsIndicatorsTable.add(ammoIndicator).right().bottom().pad(0F, PADDING, 0F, PADDING).row();

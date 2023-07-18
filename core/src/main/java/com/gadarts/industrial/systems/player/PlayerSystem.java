@@ -30,7 +30,7 @@ import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponsDeclarations;
 import com.gadarts.industrial.shared.model.characters.Direction;
-import com.gadarts.industrial.shared.model.pickups.BulletTypes;
+import com.gadarts.industrial.shared.model.pickups.AmmoTypes;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
@@ -358,9 +358,9 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		var firstTime = storage.isFirstTimePickup(item);
 		boolean added = storage.addItem(item);
 		if (item.isWeapon()) {
-			Map<BulletTypes, Ammo> ammo = ComponentsMapper.player.get(systemsCommonData.getPlayer()).getAmmo();
+			Map<AmmoTypes, Ammo> ammo = ComponentsMapper.player.get(systemsCommonData.getPlayer()).getAmmo();
 			PlayerWeaponDeclaration declaration = (PlayerWeaponDeclaration) item.getDeclaration();
-			BulletTypes ammoType = declaration.ammoType();
+			AmmoTypes ammoType = declaration.ammoType();
 			if (ammo.containsKey(ammoType)) {
 				ammo.get(ammoType).setLoaded(PICKUP_WEAPON_AMMO_AMOUNT);
 				ammo.get(ammoType).setPlayerWeaponDeclaration(declaration);
