@@ -1,7 +1,6 @@
 package com.gadarts.industrial.systems.ui.indicators;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -25,8 +24,8 @@ public class AmmoIndicator extends HudIndicator {
 	private final Image ammoTypeImage = new Image();
 	private final Map<PlayerWeaponDeclaration, Drawable> ammoTypeDrawables = new HashMap<>();
 
-	public AmmoIndicator(Texture borderTexture, BitmapFont font, GameAssetManager assetsManager) {
-		super(borderTexture);
+	public AmmoIndicator(ButtonStyle buttonStyle, BitmapFont font, GameAssetManager assetsManager) {
+		super(buttonStyle);
 		Label.LabelStyle style = new Label.LabelStyle(font, new Color(FONT_COLOR_GOOD));
 		this.label = new Label("-", style);
 		add(label).pad(0F, 0F, 0F, 20F);

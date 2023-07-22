@@ -20,12 +20,12 @@ public class HudHeart extends Image {
 	private final Array<RepeatAction> heartAnimationsArray;
 	private int updateHeartAnimation = -1;
 
-	public HudHeart(Texture heartTexture, Texture borderTexture, Color color) {
+	public HudHeart(Texture heartTexture, float width, float height, Color color) {
 		super(heartTexture);
 		setColor(color);
 		Vector2 heartOriginalPosition = new Vector2(
-				borderTexture.getWidth() - PADDING_RIGHT,
-				borderTexture.getHeight() / 2F - heartTexture.getHeight() / 2F);
+				width - PADDING_RIGHT,
+				height / 2F - heartTexture.getHeight() / 2F);
 		RepeatAction heartAnimation_0 = createHeartAnimation(HEART_ANIMATION_INTERVAL_0, heartOriginalPosition, heartTexture);
 		RepeatAction heartAnimation_1 = createHeartAnimation(HEART_ANIMATION_INTERVAL_1, heartOriginalPosition, heartTexture);
 		RepeatAction heartAnimation_2 = createHeartAnimation(HEART_ANIMATION_INTERVAL_2, heartOriginalPosition, heartTexture);

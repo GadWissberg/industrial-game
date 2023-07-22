@@ -17,15 +17,15 @@ public class HealthIndicator extends HudIndicator {
 	private final HudHeart heart;
 	private final Label label;
 
-	public HealthIndicator(Texture borderTexture, BitmapFont font, int hp, Texture heartTexture) {
-		super(borderTexture);
+	public HealthIndicator(ButtonStyle style, BitmapFont font, int hp, Texture heartTexture) {
+		super(style);
 		String hpString = Integer.toString(hp);
 		GlyphLayout layout = new GlyphLayout();
 		layout.setText(font, hpString);
 		label = new Label(hpString, new Label.LabelStyle(font, new Color(FONT_COLOR_GOOD)));
 		label.setAlignment(Align.center);
 		add(label).size(layout.width, layout.height).expandX().pad(0F, 0F, 0F, LABEL_PADDING_RIGHT);
-		heart = new HudHeart(heartTexture, borderTexture, FONT_COLOR_GOOD);
+		heart = new HudHeart(heartTexture, getPrefWidth(),getPrefHeight(), FONT_COLOR_GOOD);
 		addActor(heart);
 	}
 

@@ -5,7 +5,6 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -49,8 +48,8 @@ import com.gadarts.industrial.systems.turns.GameMode;
 import com.gadarts.industrial.systems.turns.TurnsSystemEventsSubscriber;
 import com.gadarts.industrial.systems.ui.indicators.AmmoIndicator;
 import com.gadarts.industrial.systems.ui.indicators.DamageIndicator;
-import com.gadarts.industrial.systems.ui.indicators.health.HealthIndicator;
 import com.gadarts.industrial.systems.ui.indicators.WeaponIndicator;
+import com.gadarts.industrial.systems.ui.indicators.health.HealthIndicator;
 import com.gadarts.industrial.systems.ui.menu.MenuHandler;
 import com.gadarts.industrial.systems.ui.menu.MenuHandlerImpl;
 import com.gadarts.industrial.utils.EntityBuilder;
@@ -115,9 +114,8 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 	private void addAmmoIndicator(Table armsIndicatorsTable) {
 		GameAssetManager assetsManager = getAssetsManager();
-		Texture texture = assetsManager.getTexture(UiTextures.HUD_BORDER);
 		BitmapFont font = assetsManager.getFont(Fonts.HUD);
-		AmmoIndicator ammoIndicator = new AmmoIndicator(texture, font, assetsManager);
+		AmmoIndicator ammoIndicator = new AmmoIndicator(createHudBorderStyle(), font, assetsManager);
 		ammoIndicator.setVisible(false);
 		getSystemsCommonData().setAmmoIndicator(ammoIndicator);
 		armsIndicatorsTable.add(ammoIndicator).right().bottom().pad(0F, PADDING, 0F, PADDING).row();
@@ -130,11 +128,28 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 	private void addWeaponIndicator(Table armsIndicatorsTable) {
 		GameAssetManager assetsManager = getAssetsManager();
-		Texture texture = assetsManager.getTexture(UiTextures.HUD_BORDER);
 		PlayerWeaponsDeclarations weapons = (PlayerWeaponsDeclarations) assetsManager.getDeclaration(Declarations.PLAYER_WEAPONS);
-		WeaponIndicator weaponIndicator = new WeaponIndicator(texture, weapons, assetsManager);
+		Button.ButtonStyle style = createHudBorderStyle();
+		WeaponIndicator weaponIndicator = new WeaponIndicator(style, weapons, assetsManager);
+		weaponIndicator.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				super.clicked(event, x, y);
+				SystemsCommonData commonData = getSystemsCommonData();
+				commonData.getUiStage().openStorageWindow(assetsManager, commonData, subscribers);
+			}
+		});
 		getSystemsCommonData().setWeaponIndicator(weaponIndicator);
 		armsIndicatorsTable.add(weaponIndicator).right().bottom().pad(0F, PADDING, PADDING, PADDING);
+	}
+
+	private Button.ButtonStyle createHudBorderStyle( ) {
+		Button.ButtonStyle style = new Button.ButtonStyle();
+		GameAssetManager assetsManager = getAssetsManager();
+		style.up = new TextureRegionDrawable(assetsManager.getTexture(UiTextures.HUD_BORDER));
+		style.down = new TextureRegionDrawable(assetsManager.getTexture(UiTextures.HUD_BORDER_DOWN));
+		style.over = new TextureRegionDrawable(assetsManager.getTexture(UiTextures.HUD_BORDER_OVER));
+		return style;
 	}
 
 	private void addInventoryButton(Table table) {
@@ -165,10 +180,13 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 	private void addHealthIndicator(Table hudTable) {
 		GameAssetManager assetsManager = getAssetsManager();
-		Texture texture = assetsManager.getTexture(UiTextures.HUD_BORDER);
 		int hp = ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).getAttributes().getHealthData().getHp();
 		BitmapFont font = assetsManager.getFont(Fonts.HUD);
-		HealthIndicator healthIndicator = new HealthIndicator(texture, font, hp, assetsManager.getTexture(UiTextures.HUD_HP_HEART));
+		HealthIndicator healthIndicator = new HealthIndicator(
+				createHudBorderStyle(),
+				font,
+				hp,
+				assetsManager.getTexture(UiTextures.HUD_HP_HEART));
 		getSystemsCommonData().setHealthIndicator(healthIndicator);
 		hudTable.add(healthIndicator).left().bottom().pad(0F, PADDING, PADDING, 0F);
 	}
