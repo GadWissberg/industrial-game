@@ -20,7 +20,8 @@
       "sound_pain": "guard_bot_pain",
       "sound_death": "guard_bot_death",
       "explosion_effect_on_destroy": "small_exp",
-      "shadow_radius": 0.45
+      "shadow_radius": 0.45,
+      "hud_icon": "hud_icon_maint_bot"
     },
     {
       "id": "grd_bot",
@@ -48,7 +49,8 @@
         "x": 0.3,
         "y": 1,
         "z": -0.3
-      }
+      },
+      "hud_icon": "hud_icon_guard_bot"
     },
     {
       "id": "trr_glc",
@@ -74,7 +76,8 @@
         "x": 0.0,
         "y": 0.95,
         "z": 0.0
-      }
+      },
+      "hud_icon": "hud_icon_player"
     }
   ]
 }

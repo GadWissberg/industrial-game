@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -36,6 +37,7 @@ import com.gadarts.industrial.shared.assets.Assets.Declarations;
 import com.gadarts.industrial.shared.assets.Assets.Fonts;
 import com.gadarts.industrial.shared.assets.Assets.UiTextures;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
+import com.gadarts.industrial.shared.assets.declarations.characters.enemies.EnemiesDeclarations;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponsDeclarations;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.shared.utils.CameraUtils;
@@ -50,6 +52,7 @@ import com.gadarts.industrial.systems.ui.indicators.AmmoIndicator;
 import com.gadarts.industrial.systems.ui.indicators.DamageIndicator;
 import com.gadarts.industrial.systems.ui.indicators.WeaponIndicator;
 import com.gadarts.industrial.systems.ui.indicators.health.HealthIndicator;
+import com.gadarts.industrial.systems.ui.indicators.turns.TurnsIndicator;
 import com.gadarts.industrial.systems.ui.menu.MenuHandler;
 import com.gadarts.industrial.systems.ui.menu.MenuHandlerImpl;
 import com.gadarts.industrial.utils.EntityBuilder;
@@ -57,6 +60,7 @@ import lombok.Getter;
 import squidpony.squidmath.Coord3D;
 
 import java.util.ArrayDeque;
+import java.util.HashMap;
 
 import static com.badlogic.gdx.Application.LOG_DEBUG;
 import static com.gadarts.industrial.DebugSettings.FULL_SCREEN;
@@ -72,11 +76,13 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final float PADDING = 20;
 	private static final float PADDING_BOTTOM_INVENTORY_BUTTON = 10;
+	public static final float TURNS_INDICATOR_PADDING_RIGHT = 20F;
 	private boolean showBorders = DebugSettings.DISPLAY_HUD_OUTLINES;
 	@Getter
 	private MenuHandler menuHandler;
 	private CursorHandler cursorHandler;
 	private ToolTipHandler toolTipHandler;
+	private TurnsIndicator turnsIndicator;
 
 	public UserInterfaceSystem(GameAssetManager assetsManager,
 							   GameLifeCycleHandler lifeCycleHandler) {
@@ -110,6 +116,28 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		addAmmoIndicator(rightSideIndicatorsTable);
 		addWeaponIndicator(rightSideIndicatorsTable);
 		hudTable.add(rightSideIndicatorsTable).expand().bottom().right();
+		addTurnsIndicator();
+	}
+
+	@Override
+	public void onCombatModeEngaged( ) {
+		turnsIndicator.applyCombatMode(getSystemsCommonData().getTurnsQueue());
+	}
+
+	private void addTurnsIndicator( ) {
+		Texture barTexture = getAssetsManager().getTexture(UiTextures.HUD_TURNS_INDICATOR_BAR);
+		Texture greenIconTexture = getAssetsManager().getTexture(UiTextures.HUD_ICON_CIRCLE_GREEN);
+		Texture redIconTexture = getAssetsManager().getTexture(UiTextures.HUD_ICON_CIRCLE_RED);
+		EnemiesDeclarations enemiesDeclarations = (EnemiesDeclarations) getAssetsManager().getDeclaration(Declarations.ENEMIES);
+		HashMap<String, Texture> icons = new HashMap<>();
+		enemiesDeclarations.enemiesDeclarations().forEach(dec -> icons.put(dec.id(), getAssetsManager().getTexture(dec.getHudIcon())));
+		turnsIndicator = new TurnsIndicator(barTexture, greenIconTexture, redIconTexture, icons);
+		turnsIndicator.getColor().a = 0;
+		GameStage uiStage = getSystemsCommonData().getUiStage();
+		uiStage.addActor(turnsIndicator);
+		float x = uiStage.getWidth() - (turnsIndicator.getPrefWidth() + TURNS_INDICATOR_PADDING_RIGHT);
+		float y = uiStage.getHeight() / 2F - turnsIndicator.getPrefHeight() / 2F;
+		turnsIndicator.setPosition(x, y);
 	}
 
 	private void addAmmoIndicator(Table armsIndicatorsTable) {
