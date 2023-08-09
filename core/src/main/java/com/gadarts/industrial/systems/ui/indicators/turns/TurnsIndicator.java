@@ -6,8 +6,10 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.components.ComponentsMapper;
+import com.gadarts.industrial.shared.model.characters.player.PlayerDeclaration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,10 +24,10 @@ public class TurnsIndicator extends Image {
 	private static final float PADDING_ICON_TOP = 10F;
 	private final Texture greenIconTexture;
 	private final Texture redIconTexture;
-	private final HashMap<String, Texture> charactersIcons;
+	private final HashMap<String, TextureRegionDrawable> charactersIcons;
 	private final List<TurnsIndicatorIcon> icons = new ArrayList<>();
 
-	public TurnsIndicator(Texture barTexture, Texture greenIconTexture, Texture redIconTexture, HashMap<String, Texture> icons) {
+	public TurnsIndicator(Texture barTexture, Texture greenIconTexture, Texture redIconTexture, HashMap<String, TextureRegionDrawable> icons) {
 		super(barTexture);
 		this.greenIconTexture = greenIconTexture;
 		this.redIconTexture = redIconTexture;
@@ -37,6 +39,8 @@ public class TurnsIndicator extends Image {
 		turnsQueue.forEach(character -> {
 			boolean isPlayer = ComponentsMapper.player.has(character);
 			TurnsIndicatorIcon icon = new TurnsIndicatorIcon(isPlayer ? greenIconTexture : redIconTexture);
+			String playerId = PlayerDeclaration.getInstance().id();
+			icon.applyIcon(charactersIcons.get(isPlayer ? playerId : ComponentsMapper.enemy.get(character).getEnemyDeclaration().id()));
 			icon.getColor().a = 0F;
 			icon.addAction(Actions.fadeIn(ICON_FADING_DURATION, Interpolation.smoother));
 			icons.add(icon);

@@ -39,6 +39,7 @@ import com.gadarts.industrial.shared.assets.Assets.UiTextures;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.characters.enemies.EnemiesDeclarations;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponsDeclarations;
+import com.gadarts.industrial.shared.model.characters.player.PlayerDeclaration;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
 import com.gadarts.industrial.shared.utils.CameraUtils;
 import com.gadarts.industrial.systems.GameSystem;
@@ -125,12 +126,14 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	}
 
 	private void addTurnsIndicator( ) {
-		Texture barTexture = getAssetsManager().getTexture(UiTextures.HUD_TURNS_INDICATOR_BAR);
-		Texture greenIconTexture = getAssetsManager().getTexture(UiTextures.HUD_ICON_CIRCLE_GREEN);
-		Texture redIconTexture = getAssetsManager().getTexture(UiTextures.HUD_ICON_CIRCLE_RED);
-		EnemiesDeclarations enemiesDeclarations = (EnemiesDeclarations) getAssetsManager().getDeclaration(Declarations.ENEMIES);
-		HashMap<String, Texture> icons = new HashMap<>();
-		enemiesDeclarations.enemiesDeclarations().forEach(dec -> icons.put(dec.id(), getAssetsManager().getTexture(dec.getHudIcon())));
+		GameAssetManager am = getAssetsManager();
+		Texture barTexture = am.getTexture(UiTextures.HUD_TURNS_INDICATOR_BAR);
+		Texture greenIconTexture = am.getTexture(UiTextures.HUD_ICON_CIRCLE_GREEN);
+		Texture redIconTexture = am.getTexture(UiTextures.HUD_ICON_CIRCLE_RED);
+		EnemiesDeclarations enemiesDeclarations = (EnemiesDeclarations) am.getDeclaration(Declarations.ENEMIES);
+		HashMap<String, TextureRegionDrawable> icons = new HashMap<>();
+		enemiesDeclarations.enemiesDeclarations().forEach(dec -> icons.put(dec.id(), new TextureRegionDrawable(am.getTexture(dec.getHudIcon()))));
+		icons.put(PlayerDeclaration.getInstance().id(), new TextureRegionDrawable(am.getTexture(PlayerDeclaration.getInstance().getHudIcon())));
 		turnsIndicator = new TurnsIndicator(barTexture, greenIconTexture, redIconTexture, icons);
 		turnsIndicator.getColor().a = 0;
 		GameStage uiStage = getSystemsCommonData().getUiStage();
