@@ -45,6 +45,8 @@ import com.gadarts.industrial.shared.utils.CameraUtils;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
+import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
+import com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.GameMode;
@@ -72,7 +74,8 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		InputSystemEventsSubscriber,
 		TurnsSystemEventsSubscriber,
 		PlayerSystemEventsSubscriber,
-		CharacterSystemEventsSubscriber {
+		CharacterSystemEventsSubscriber,
+		EnemySystemEventsSubscriber {
 	private static final BoundingBox auxBoundingBox = new BoundingBox();
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final float PADDING = 20;
@@ -88,6 +91,11 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	public UserInterfaceSystem(GameAssetManager assetsManager,
 							   GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
+	}
+
+	@Override
+	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus, boolean wokeBySpottingPlayer) {
+		turnsIndicator.addCharacter(enemy);
 	}
 
 	@Override
@@ -134,7 +142,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		HashMap<String, TextureRegionDrawable> icons = new HashMap<>();
 		enemiesDeclarations.enemiesDeclarations().forEach(dec -> icons.put(dec.id(), new TextureRegionDrawable(am.getTexture(dec.getHudIcon()))));
 		icons.put(PlayerDeclaration.getInstance().id(), new TextureRegionDrawable(am.getTexture(PlayerDeclaration.getInstance().getHudIcon())));
-		turnsIndicator = new TurnsIndicator(barTexture, greenIconTexture, redIconTexture, icons);
+		turnsIndicator = new TurnsIndicator(barTexture, greenIconTexture, redIconTexture, icons, am.getTexture(UiTextures.HUD_ICON_CIRCLE_BORDER));
 		turnsIndicator.getColor().a = 0;
 		GameStage uiStage = getSystemsCommonData().getUiStage();
 		uiStage.addActor(turnsIndicator);
@@ -258,6 +266,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	public void onNewTurn(Entity entity) {
 		Button inventoryButton = getSystemsCommonData().getInventoryButton();
 		inventoryButton.setTouchable(ComponentsMapper.player.has(entity) ? Touchable.enabled : Touchable.disabled);
+		turnsIndicator.applyBorderForNewTurn(entity);
 	}
 
 	private Table addTable( ) {
