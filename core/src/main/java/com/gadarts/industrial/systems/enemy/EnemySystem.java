@@ -187,10 +187,16 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			}
 			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(character);
 			if (enemyComponent.getAiStatus() != IDLE) {
-				enemyComponent.setAiStatus(IDLE);
+				updateEnemyAiStatus(character, IDLE);
 			}
 			character.remove(SimpleDecalComponent.class);
 		}
+	}
+
+	private void updateEnemyAiStatus(Entity enemy, EnemyAiStatus enemyAiStatus) {
+		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
+		enemyComponent.setAiStatus(enemyAiStatus);
+		subscribers.forEach(sub -> sub.onEnemyAiStatusChange(enemy, enemyAiStatus));
 	}
 
 	private void createSmoke(Entity character) {
@@ -213,7 +219,12 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		if (turnAgility <= 0 || logic == null) {
 			enemyFinishedTurn();
 		} else {
-			boolean finishedTurn = logic.run(enemy, getSystemsCommonData().getMap(), pathPlanner, getSystemsCommonData().getCurrentTurnId());
+			boolean finishedTurn = logic.run(
+					enemy,
+					getSystemsCommonData().getMap(),
+					pathPlanner,
+					getSystemsCommonData().getCurrentTurnId(),
+					subscribers);
 			if (finishedTurn) {
 				enemyFinishedTurn();
 			}
@@ -294,7 +305,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 		EnemyComponent enemyComponent = ComponentsMapper.enemy.get(enemy);
 		EnemyAiStatus prevAiStatus = enemyComponent.getAiStatus();
-		enemyComponent.setAiStatus(ATTACKING);
+		updateEnemyAiStatus(enemy, ATTACKING);
 		Assets.Sounds awakeSound = enemyComponent.getEnemyDeclaration().soundAwake();
 		if (prevAiStatus == IDLE && awakeSound != null) {
 			getSystemsCommonData().getSoundPlayer().playSound(awakeSound);
@@ -324,10 +335,15 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		}
 	}
 
-	private void tryToSetToLastSeenPosition(MapGraphNode oldNode, Entity enemy, EnemyComponent enemyComponent) {
+	private void tryToSetToLastSeenPosition(MapGraphNode oldNode,
+											Entity enemy,
+											EnemyComponent enemyComponent) {
 		if (checkIfFloorNodesBlockSightToTarget(enemy)
-				|| checkIfFloorNodesContainObjects(GameUtils.findAllNodesToTarget(enemy, bresenhamOutput, true))) {
-			enemyComponent.setAiStatus(RUNNING_TO_LAST_SEEN_POSITION);
+				|| checkIfFloorNodesContainObjects(GameUtils.findAllNodesToTarget(
+				enemy,
+				bresenhamOutput,
+				true))) {
+			updateEnemyAiStatus(enemy, RUNNING_TO_LAST_SEEN_POSITION);
 			enemyComponent.setTargetLastVisibleNode(oldNode);
 		}
 	}

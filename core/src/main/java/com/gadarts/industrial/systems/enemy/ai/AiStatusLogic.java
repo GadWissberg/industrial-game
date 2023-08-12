@@ -10,6 +10,7 @@ import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
+import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
 import com.gadarts.industrial.utils.GameUtils;
 
@@ -37,7 +38,7 @@ public abstract class AiStatusLogic {
 	protected MapGraphNode findAvailableNodeAround(MapGraph map, CharacterDecalComponent characterDecalComponent) {
 		List<MapGraphNode> availableNodes = map.fetchAvailableNodesAroundNode(map.getNode(characterDecalComponent.getDecal().getPosition()));
 		cleanAvailableNodesWithDifferentHeight(map, characterDecalComponent, availableNodes);
-		return availableNodes.size() > 0 ? availableNodes.get(MathUtils.random(availableNodes.size() - 1)) : null;
+		return !availableNodes.isEmpty() ? availableNodes.get(MathUtils.random(availableNodes.size() - 1)) : null;
 	}
 
 	boolean planPath(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, MapGraphNode targetNode) {
@@ -47,7 +48,7 @@ public abstract class AiStatusLogic {
 
 	void initializePathPlanRequest(MapGraphNode destinationNode,
 								   CharacterDecalComponent charDecalComp,
-								   MapGraphConnectionCosts maxCostInclusive,
+								   @SuppressWarnings("SameParameterValue") MapGraphConnectionCosts maxCostInclusive,
 								   Entity enemy,
 								   MapGraphPath pathToDestination,
 								   MapGraph map) {
@@ -59,10 +60,9 @@ public abstract class AiStatusLogic {
 				pathToDestination);
 	}
 
-	public abstract boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId);
+	public abstract boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId, List<EnemySystemEventsSubscriber> subscribers);
 
-	void addCommand(Entity enemy,
-					CharacterCommandsDefinitions characterCommandsDefinitions) {
+	void addCommand(Entity enemy, @SuppressWarnings("SameParameterValue") CharacterCommandsDefinitions characterCommandsDefinitions) {
 		addCommand(enemy, characterCommandsDefinitions, null);
 	}
 
@@ -84,5 +84,12 @@ public abstract class AiStatusLogic {
 		request.setOutputPath(outputPath);
 		request.setMaxCostInclusive(maxCostInclusive);
 		request.setRequester(character);
+	}
+
+	protected void updateEnemyAiStatus(Entity enemy,
+									   EnemyAiStatus enemyAiStatus,
+									   List<EnemySystemEventsSubscriber> subscribers) {
+		ComponentsMapper.enemy.get(enemy).setAiStatus(enemyAiStatus);
+		subscribers.forEach(sub -> sub.onEnemyAiStatusChange(enemy, enemyAiStatus));
 	}
 }

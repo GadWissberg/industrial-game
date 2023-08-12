@@ -8,13 +8,16 @@ import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
+import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
+
+import java.util.List;
 
 import static com.gadarts.industrial.systems.SystemsCommonData.MELEE_ATTACK_MAX_HEIGHT;
 
 public class AiStatusAttackingLogic extends AiStatusLogic {
 	@Override
-	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId) {
+	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId, List<EnemySystemEventsSubscriber> subscribers) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
 		boolean finishedTurn = false;
 		if (characterComponent.getPrimaryAttack().melee()) {
@@ -39,7 +42,7 @@ public class AiStatusAttackingLogic extends AiStatusLogic {
 			if (enemyComponent.getEngineEnergy() >= characterComponent.getPrimaryAttack().engineConsumption()) {
 				addCommand(enemy, CharacterCommandsDefinitions.ATTACK_PRIMARY);
 			} else {
-				enemyComponent.setAiStatus(EnemyAiStatus.DODGING);
+				updateEnemyAiStatus(enemy,EnemyAiStatus.DODGING,subscribers);
 			}
 		}
 		return finishedTurn;

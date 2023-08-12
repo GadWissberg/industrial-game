@@ -67,6 +67,7 @@ public class TurnsIndicator extends Image {
 	}
 
 	private void addIcon(Entity character) {
+		if (icons.containsKey(character)) return;
 		boolean isPlayer = ComponentsMapper.player.has(character);
 		TurnsIndicatorIcon icon = new TurnsIndicatorIcon(isPlayer ? greenIconTexture : redIconTexture, borderTexture);
 		String playerId = PlayerDeclaration.getInstance().id();
@@ -91,5 +92,13 @@ public class TurnsIndicator extends Image {
 		if (icons.containsKey(enemy)) return;
 		addIcon(enemy);
 		initPositionForIcon(icons.size() - 1, icons.get(enemy));
+	}
+
+	public void removeCharacter(Entity character) {
+		if (icons.containsKey(character)) {
+			TurnsIndicatorIcon icon = icons.get(character);
+			icon.addAction(Actions.sequence(Actions.fadeOut(ICON_FADING_DURATION), Actions.removeActor()));
+		}
+		icons.remove(character);
 	}
 }

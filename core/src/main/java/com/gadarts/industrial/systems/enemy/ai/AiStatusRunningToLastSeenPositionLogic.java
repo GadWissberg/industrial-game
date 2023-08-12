@@ -8,20 +8,23 @@ import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
+import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
+
+import java.util.List;
 
 import static com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus.SEARCHING_LOOKING;
 
 public class AiStatusRunningToLastSeenPositionLogic extends AiStatusLogic {
 
 	@Override
-	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId) {
+	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId, List<EnemySystemEventsSubscriber> subscribers) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(enemy);
 		MapGraphNode targetLastVisibleNode = enemyComp.getTargetLastVisibleNode();
 		CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(enemy);
 		MapGraphNode node = map.getNode(charDecalComp.getDecal().getPosition());
 		if (node.equals(targetLastVisibleNode)) {
-			enemyComp.setAiStatus(SEARCHING_LOOKING);
+			updateEnemyAiStatus(enemy, SEARCHING_LOOKING, subscribers);
 			Direction facingDirection = ComponentsMapper.character.get(enemy).getFacingDirection();
 			enemyComp.setInitialSearchingLookingDirection(Direction.findDirection(facingDirection.getDirection(auxVector2_1).rotateDeg(-45)));
 		} else {

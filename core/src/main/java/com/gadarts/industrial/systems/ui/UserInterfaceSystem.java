@@ -99,6 +99,11 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	}
 
 	@Override
+	public void onCharacterDies(Entity character) {
+		turnsIndicator.removeCharacter(character);
+	}
+
+	@Override
 	public void onCharacterGotDamage(Entity character, int originalValue) {
 		if (!ComponentsMapper.player.has(character)) return;
 
@@ -131,6 +136,13 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	@Override
 	public void onCombatModeEngaged( ) {
 		turnsIndicator.applyCombatMode(getSystemsCommonData().getTurnsQueue());
+	}
+
+	@Override
+	public void onEnemyAiStatusChange(Entity enemy, EnemyAiStatus enemyAiStatus) {
+		if (enemyAiStatus == EnemyAiStatus.IDLE) {
+			turnsIndicator.removeCharacter(enemy);
+		}
 	}
 
 	private void addTurnsIndicator( ) {

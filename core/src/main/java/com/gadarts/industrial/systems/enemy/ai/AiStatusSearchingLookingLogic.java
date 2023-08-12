@@ -9,7 +9,10 @@ import com.gadarts.industrial.components.character.CharacterRotationData;
 import com.gadarts.industrial.components.enemy.EnemyComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.shared.model.characters.Direction;
+import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
+
+import java.util.List;
 
 import static com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus.SEARCHING_WONDERING;
 
@@ -18,7 +21,7 @@ public class AiStatusSearchingLookingLogic extends AiStatusLogic {
 	private static final int WONDERING_COUNTER_INITIAL = 4;
 
 	@Override
-	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId) {
+	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId, List<EnemySystemEventsSubscriber> subscribers) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
 		CharacterRotationData rotationData = characterComponent.getRotationData();
 		boolean intervalPassed = TimeUtils.timeSinceMillis(rotationData.getLastRotation()) >= SEARCHING_LOOKING_STATUS_ROTATION_INTERVAL;
@@ -31,7 +34,7 @@ public class AiStatusSearchingLookingLogic extends AiStatusLogic {
 				characterComponent.setFacingDirection(newDirection);
 				rotationData.setLastRotation(TimeUtils.millis());
 			} else {
-				enemyComponent.setAiStatus(SEARCHING_WONDERING);
+				updateEnemyAiStatus(enemy, SEARCHING_WONDERING, subscribers);
 				enemyComponent.setWonderingCounter(WONDERING_COUNTER_INITIAL);
 			}
 		}

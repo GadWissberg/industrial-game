@@ -8,12 +8,15 @@ import com.gadarts.industrial.map.MapGraphConnectionCosts;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.map.MapGraphPath;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
+import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.player.PathPlanHandler;
 import lombok.val;
 
+import java.util.List;
+
 public class AiStatusDodgingLogic extends AiStatusLogic {
 	@Override
-	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId) {
+	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId, List<EnemySystemEventsSubscriber> subscribers) {
 		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(enemy);
 		MapGraphNode dst = findAvailableNodeAround(map, characterDecalComponent);
 		var finishedTurn = false;
@@ -31,7 +34,7 @@ public class AiStatusDodgingLogic extends AiStatusLogic {
 				finishedTurn = true;
 			}
 			if (finishedTurn) {
-				ComponentsMapper.enemy.get(enemy).setAiStatus(EnemyAiStatus.ATTACKING);
+				updateEnemyAiStatus(enemy, EnemyAiStatus.ATTACKING, subscribers);
 			}
 		}
 		return finishedTurn;

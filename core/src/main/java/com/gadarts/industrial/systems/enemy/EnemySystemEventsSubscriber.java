@@ -14,4 +14,7 @@ public interface EnemySystemEventsSubscriber extends SystemEventsSubscriber {
 	}
 
 
+	default void onEnemyAiStatusChange(Entity enemy, EnemyAiStatus enemyAiStatus){
+
+	}
 }
