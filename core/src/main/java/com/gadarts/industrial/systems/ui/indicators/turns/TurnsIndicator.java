@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -100,5 +101,14 @@ public class TurnsIndicator extends Image {
 			icon.addAction(Actions.sequence(Actions.fadeOut(ICON_FADING_DURATION), Actions.removeActor()));
 		}
 		icons.remove(character);
+		if (icons.size() <= 1) {
+			turnOffCombatMode();
+		}
+	}
+
+	private void turnOffCombatMode( ) {
+		addAction(Actions.fadeOut(TURNS_INDICATOR_FADING_DURATION, Interpolation.swing));
+		icons.values().forEach(Actor::remove);
+		icons.clear();
 	}
 }
