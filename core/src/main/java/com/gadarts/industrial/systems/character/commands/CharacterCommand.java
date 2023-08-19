@@ -4,8 +4,8 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Pool;
 import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.character.CharacterAttributes;
+import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.map.MapGraphPath;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
@@ -24,9 +24,13 @@ public abstract class CharacterCommand implements Pool.Poolable {
 	@Setter
 	private int nextNodeIndex = -1;
 
-	protected static void consumeActionPoints(CharacterComponent characterComponent, int pointsConsumption) {
-		CharacterAttributes skills = characterComponent.getAttributes();
-		skills.setActionPoints(skills.getActionPoints() - pointsConsumption);
+	protected void consumeActionPoints(Entity character,
+									   int pointsConsumption,
+									   List<CharacterSystemEventsSubscriber> subscribers) {
+		CharacterAttributes skills = ComponentsMapper.character.get(character).getAttributes();
+		int newValue = skills.getActionPoints() - pointsConsumption;
+		skills.setActionPoints(newValue);
+		subscribers.forEach(sub -> sub.onCharacterConsumedActionPoint(character, newValue));
 	}
 
 	@Override

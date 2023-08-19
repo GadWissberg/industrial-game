@@ -37,4 +37,8 @@ public interface CharacterSystemEventsSubscriber extends SystemEventsSubscriber 
 	default void onCharacterFinishedTurn( ) {
 
 	}
+
+	default void onCharacterConsumedActionPoint(Entity character, int newValue) {
+
+	}
 }

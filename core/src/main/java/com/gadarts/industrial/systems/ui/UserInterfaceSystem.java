@@ -5,7 +5,6 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -147,14 +146,11 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 	private void addTurnsIndicator( ) {
 		GameAssetManager am = getAssetsManager();
-		Texture barTexture = am.getTexture(UiTextures.HUD_TURNS_INDICATOR_BAR);
-		Texture greenIconTexture = am.getTexture(UiTextures.HUD_ICON_CIRCLE_GREEN);
-		Texture redIconTexture = am.getTexture(UiTextures.HUD_ICON_CIRCLE_RED);
 		EnemiesDeclarations enemiesDeclarations = (EnemiesDeclarations) am.getDeclaration(Declarations.ENEMIES);
 		HashMap<String, TextureRegionDrawable> icons = new HashMap<>();
 		enemiesDeclarations.enemiesDeclarations().forEach(dec -> icons.put(dec.id(), new TextureRegionDrawable(am.getTexture(dec.getHudIcon()))));
 		icons.put(PlayerDeclaration.getInstance().id(), new TextureRegionDrawable(am.getTexture(PlayerDeclaration.getInstance().getHudIcon())));
-		turnsIndicator = new TurnsIndicator(barTexture, greenIconTexture, redIconTexture, icons, am.getTexture(UiTextures.HUD_ICON_CIRCLE_BORDER));
+		turnsIndicator = new TurnsIndicator(getAssetsManager(), icons);
 		turnsIndicator.getColor().a = 0;
 		GameStage uiStage = getSystemsCommonData().getUiStage();
 		uiStage.addActor(turnsIndicator);
@@ -344,6 +340,11 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		systemsCommonData.getUiStage().act();
 		cursorHandler.handleCursorFlicker(deltaTime);
 		toolTipHandler.handleToolTip(systemsCommonData.getMap(), cursorHandler.getCursorNode());
+	}
+
+	@Override
+	public void onCharacterConsumedActionPoint(Entity character, int newValue) {
+		turnsIndicator.updateCurrentActionPointsIndicator(character,newValue);
 	}
 
 	@Override

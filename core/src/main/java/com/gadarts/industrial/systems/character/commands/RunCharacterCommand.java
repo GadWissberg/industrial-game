@@ -10,7 +10,6 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.DoorComponent.DoorStates;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
-import com.gadarts.industrial.components.character.CharacterAttributes;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphConnection;
 import com.gadarts.industrial.map.MapGraphNode;
@@ -142,9 +141,8 @@ public class RunCharacterCommand extends CharacterCommand {
 		for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onCharacterNodeChanged(character, prevNode, path.nodes.get(getNextNodeIndex()));
 		}
-		CharacterAttributes skills = ComponentsMapper.character.get(character).getAttributes();
 		if (consumeActionPoints) {
-			skills.setActionPoints(skills.getActionPoints() - 1);
+			consumeActionPoints(character, 1, subscribers);
 		}
 		prevNode = path.get(getNextNodeIndex());
 		setNextNodeIndex(getNextNodeIndex() + 1);

@@ -88,7 +88,7 @@ public class AttackPrimaryCharacterCommand extends CharacterCommand {
 
 		if (onGoingAttack.isDone()) {
 			commandDone = true;
-			consumeActionPoints(characterComponent, characterComponent.getPrimaryAttack().actionPointsConsumption());
+			consumeActionPoints(character, characterComponent.getPrimaryAttack().actionPointsConsumption(), subscribers);
 		} else {
 			int primaryAttackHitFrameIndex = GameUtils.getPrimaryAttackHitFrameIndexForCharacter(character, commonData);
 			if (newFrame.index == primaryAttackHitFrameIndex) {

@@ -32,7 +32,7 @@ public class PickupItemCharacterCommand extends CharacterCommand {
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				Entity itemPickedUp = pickups.get(0);
 				subscriber.onItemPickedUp(itemPickedUp);
-				consumeActionPoints(ComponentsMapper.character.get(character), PICKUP_ACTION_POINT_CONSUME);
+				consumeActionPoints(character, PICKUP_ACTION_POINT_CONSUME, subscribers);
 				done = true;
 			}
 		}
