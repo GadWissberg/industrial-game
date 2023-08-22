@@ -128,8 +128,14 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		var rightSideIndicatorsTable = new Table();
 		addAmmoIndicator(rightSideIndicatorsTable);
 		addWeaponIndicator(rightSideIndicatorsTable);
+		addLogger(hudTable);
 		hudTable.add(rightSideIndicatorsTable).expand().bottom().right();
 		addTurnsIndicator();
+	}
+
+	private void addLogger(Table hudTable) {
+		var logger = new Logger(getAssetsManager().getTexture(UiTextures.HUD_LOGGER));
+		hudTable.add(logger).pad(0F, 0F, PADDING, 0F).expandY().bottom();
 	}
 
 	@Override
@@ -344,7 +350,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 	@Override
 	public void onCharacterConsumedActionPoint(Entity character, int newValue) {
-		turnsIndicator.updateCurrentActionPointsIndicator(character,newValue);
+		turnsIndicator.updateCurrentActionPointsIndicator(character, newValue);
 	}
 
 	@Override
