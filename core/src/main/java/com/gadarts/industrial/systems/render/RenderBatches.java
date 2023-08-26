@@ -11,15 +11,15 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
-import com.gadarts.industrial.systems.render.shaders.ModelsShaderProvider;
-import com.gadarts.industrial.systems.render.shaders.ShadowMapDepthMapShader;
-import com.gadarts.industrial.systems.render.shaders.ShadowMapShader;
+import com.gadarts.industrial.systems.render.shaders.models.ModelsShaderProvider;
+import com.gadarts.industrial.systems.render.shaders.shadow.ShadowMapDepthMapShader;
+import com.gadarts.industrial.systems.render.shaders.shadow.ShadowMapShader;
 import lombok.Getter;
 
 @Getter
 public class RenderBatches implements Disposable {
 	private static final int DECALS_POOL_SIZE = 200;
-	private ModelsShaderProvider shaderProvider;
+	private ModelsShaderProvider modelsShaderProvider;
 	private ModelBatch depthModelBatch;
 	private ModelBatch modelBatchShadows;
 	private ModelBatch modelBatch;
@@ -28,7 +28,7 @@ public class RenderBatches implements Disposable {
 	void createBatches(StaticShadowsData staticShadowsData,
 					   ImmutableArray<Entity> staticLightsEntities,
 					   GameCameraGroupStrategy regularDecalGroupStrategy) {
-		this.modelBatch = new ModelBatch(shaderProvider);
+		this.modelBatch = new ModelBatch(modelsShaderProvider);
 		if (DebugSettings.ALLOW_STATIC_SHADOWS) {
 			depthModelBatch = new ModelBatch(new DefaultShaderProvider() {
 				@Override
@@ -49,7 +49,7 @@ public class RenderBatches implements Disposable {
 
 	@Override
 	public void dispose( ) {
-		shaderProvider.dispose();
+		modelsShaderProvider.dispose();
 		decalBatch.dispose();
 		modelBatch.dispose();
 		if (DebugSettings.ALLOW_STATIC_SHADOWS) {
@@ -59,6 +59,6 @@ public class RenderBatches implements Disposable {
 	}
 
 	public void createShaderProvider(GameAssetManager assetsManager, GameFrameBuffer shadowFrameBuffer) {
-		shaderProvider = new ModelsShaderProvider(assetsManager, shadowFrameBuffer);
+		modelsShaderProvider = new ModelsShaderProvider(assetsManager, shadowFrameBuffer);
 	}
 }

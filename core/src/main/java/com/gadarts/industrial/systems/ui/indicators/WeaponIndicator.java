@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponsDeclarations;
+import com.gadarts.industrial.systems.ui.NoiseEffectHandler;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -14,9 +15,11 @@ public class WeaponIndicator extends HudIndicator {
 	private final Image icon;
 	private final Map<String, Drawable> iconsDrawables;
 
-
-	public WeaponIndicator(ButtonStyle style, PlayerWeaponsDeclarations declarations, GameAssetManager assetsManager) {
-		super(style);
+	public WeaponIndicator(ButtonStyle style,
+						   PlayerWeaponsDeclarations declarations,
+						   GameAssetManager assetsManager,
+						   NoiseEffectHandler noiseEffectHandler) {
+		super(style, noiseEffectHandler);
 		iconsDrawables = declarations.playerWeaponsDeclarations()
 				.stream()
 				.collect(Collectors.toMap(

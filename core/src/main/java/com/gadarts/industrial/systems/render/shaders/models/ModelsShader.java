@@ -1,4 +1,4 @@
-package com.gadarts.industrial.systems.render.shaders;
+package com.gadarts.industrial.systems.render.shaders.models;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
@@ -44,7 +44,7 @@ public class ModelsShader extends DefaultShader {
 	public void init( ) {
 		super.init();
 		locations.init(program);
-		if (program.getLog().length() != 0) {
+		if (!program.getLog().isEmpty()) {
 			Gdx.app.log("Shader Compilation:", program.getLog());
 		}
 	}

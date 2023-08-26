@@ -9,10 +9,10 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.player.Item;
+import com.gadarts.industrial.shared.assets.Assets;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.ui.storage.StorageWindow;
 import com.gadarts.industrial.systems.ui.window.GameWindow;
@@ -27,7 +27,7 @@ public class GameStage extends Stage {
 	private final SoundPlayer soundPlayer;
 	private final List<GameWindow> windows = new ArrayList<>();
 
-	public GameStage(final FitViewport fitViewport, final SoundPlayer soundPlayer) {
+	public GameStage(FitViewport fitViewport, SoundPlayer soundPlayer) {
 		super(fitViewport);
 		this.soundPlayer = soundPlayer;
 		addListener(event -> {

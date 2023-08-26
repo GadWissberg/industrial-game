@@ -1,4 +1,4 @@
-package com.gadarts.industrial.systems.render.shaders;
+package com.gadarts.industrial.systems.render.shaders.models;
 
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import lombok.Getter;

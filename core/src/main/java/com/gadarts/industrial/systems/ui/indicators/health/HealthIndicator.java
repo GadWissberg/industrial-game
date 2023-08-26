@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.gadarts.industrial.systems.ui.NoiseEffectHandler;
 import com.gadarts.industrial.systems.ui.indicators.HudIndicator;
 
 public class HealthIndicator extends HudIndicator {
@@ -17,18 +18,20 @@ public class HealthIndicator extends HudIndicator {
 	private final HudHeart heart;
 	private final Label label;
 
-	public HealthIndicator(ButtonStyle style, BitmapFont font, int hp, Texture heartTexture) {
-		super(style);
+	public HealthIndicator(ButtonStyle style,
+						   BitmapFont font,
+						   int hp,
+						   Texture heartTexture, NoiseEffectHandler noiseEffectHandler) {
+		super(style, noiseEffectHandler);
 		String hpString = Integer.toString(hp);
 		GlyphLayout layout = new GlyphLayout();
 		layout.setText(font, hpString);
 		label = new Label(hpString, new Label.LabelStyle(font, new Color(FONT_COLOR_GOOD)));
 		label.setAlignment(Align.center);
 		add(label).size(layout.width, layout.height).expandX().pad(0F, 0F, 0F, LABEL_PADDING_RIGHT);
-		heart = new HudHeart(heartTexture, getPrefWidth(),getPrefHeight(), FONT_COLOR_GOOD);
+		heart = new HudHeart(heartTexture, getPrefWidth(), getPrefHeight(), FONT_COLOR_GOOD);
 		addActor(heart);
 	}
-
 
 	public void setValue(int hp, int originalValue) {
 		label.setText(hp);

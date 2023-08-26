@@ -1,4 +1,4 @@
-package com.gadarts.industrial.systems.render.shaders;
+package com.gadarts.industrial.systems.render.shaders.shadow;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;

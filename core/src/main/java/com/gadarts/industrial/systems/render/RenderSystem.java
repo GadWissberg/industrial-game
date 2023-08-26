@@ -159,9 +159,10 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	@Override
 	public void initializeData( ) {
-		staticShadowsData.init(getAssetsManager(), families.getStaticLightsEntities());
-		renderBatches.createShaderProvider(getAssetsManager(), staticShadowsData.getShadowFrameBuffer());
-		strategies.createDecalGroupStrategies(getSystemsCommonData().getCamera(), getAssetsManager());
+		GameAssetManager assetsManager = getAssetsManager();
+		staticShadowsData.init(assetsManager, families.getStaticLightsEntities());
+		renderBatches.createShaderProvider(assetsManager, staticShadowsData.getShadowFrameBuffer());
+		strategies.createDecalGroupStrategies(getSystemsCommonData().getCamera(), assetsManager);
 		renderBatches.createBatches(
 				staticShadowsData, families.getStaticLightsEntities(),
 				strategies.getRegularDecalGroupStrategy());
@@ -387,7 +388,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		shadowFrameBuffer.end();
 	}
 
-	private void render() {
+	private void render( ) {
 		getSystemsCommonData().setNumberOfVisible(0);
 		renderShadows();
 		resetDisplay();
@@ -403,7 +404,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		renderBatches.getModelBatch().end();
 	}
 
-	private void renderDecals() {
+	private void renderDecals( ) {
 		Gdx.gl.glDepthMask(false);
 		DecalBatch decalBatch = renderBatches.getDecalBatch();
 		decalBatch.setGroupStrategy(strategies.getRegularDecalGroupStrategy());
@@ -414,7 +415,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		Gdx.gl.glDepthMask(true);
 	}
 
-	private void renderCharactersOutline() {
+	private void renderCharactersOutline( ) {
 		DecalBatch decalBatch = renderBatches.getDecalBatch();
 		decalBatch.setGroupStrategy(strategies.getOutlineDecalGroupStrategy());
 		renderLiveCharacters(null, OUTLINE_ALPHA, false);

@@ -2,6 +2,7 @@ package com.gadarts.industrial.systems.ui.indicators.turns;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
@@ -14,6 +15,7 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.model.characters.player.PlayerDeclaration;
+import com.gadarts.industrial.systems.ui.NoiseEffectHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,10 +36,12 @@ public class TurnsIndicator extends Image {
 	private final Texture borderTexture;
 	private final Texture actionsPointsTexture;
 	private final BitmapFont font;
+	private final NoiseEffectHandler noiseEffectHandler;
 	private Entity currentBorder;
 
 	public TurnsIndicator(GameAssetManager assetsManager,
-						  HashMap<String, TextureRegionDrawable> icons) {
+						  HashMap<String, TextureRegionDrawable> icons,
+						  NoiseEffectHandler noiseEffectHandler) {
 		super(assetsManager.getTexture(Assets.UiTextures.HUD_TURNS_INDICATOR_BAR));
 		this.greenIconTexture = assetsManager.getTexture(Assets.UiTextures.HUD_ICON_CIRCLE_GREEN);
 		this.redIconTexture = assetsManager.getTexture(Assets.UiTextures.HUD_ICON_CIRCLE_RED);
@@ -45,6 +49,7 @@ public class TurnsIndicator extends Image {
 		this.borderTexture = assetsManager.getTexture(Assets.UiTextures.HUD_ICON_CIRCLE_BORDER);
 		this.actionsPointsTexture = assetsManager.getTexture(Assets.UiTextures.HUD_ACTION_POINTS_INDICATOR);
 		this.font = assetsManager.getFont(Assets.Fonts.HUD_SMALL);
+		this.noiseEffectHandler = noiseEffectHandler;
 	}
 
 	public void applyCombatMode(Queue<Entity> turnsQueue) {
@@ -76,7 +81,13 @@ public class TurnsIndicator extends Image {
 		boolean isPlayer = ComponentsMapper.player.has(character);
 		Texture circleTexture = isPlayer ? greenIconTexture : redIconTexture;
 		int actionPoints = ComponentsMapper.character.get(character).getAttributes().getActionPoints();
-		TurnsIndicatorIcon icon = new TurnsIndicatorIcon(circleTexture, borderTexture, actionsPointsTexture, font, actionPoints);
+		TurnsIndicatorIcon icon = new TurnsIndicatorIcon(
+				circleTexture,
+				borderTexture,
+				actionsPointsTexture,
+				font,
+				actionPoints,
+				noiseEffectHandler);
 		String playerId = PlayerDeclaration.getInstance().id();
 		icon.applyIcon(charactersIcons.get(isPlayer ? playerId : ComponentsMapper.enemy.get(character).getEnemyDeclaration().id()));
 		icon.getColor().a = 0F;
@@ -120,9 +131,17 @@ public class TurnsIndicator extends Image {
 		icons.clear();
 	}
 
+	@Override
+	public void draw(Batch batch, float parentAlpha) {
+		noiseEffectHandler.begin(batch);
+		super.draw(batch, parentAlpha);
+		noiseEffectHandler.end(batch);
+	}
+
 	public void updateCurrentActionPointsIndicator(Entity character, int newValue) {
 		if (!icons.containsKey(character)) return;
 
 		icons.get(character).updateActionPointsIndicator(newValue);
 	}
+
 }

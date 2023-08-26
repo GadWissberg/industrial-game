@@ -5,8 +5,8 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.SoundPlayer;
+import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
 
 import java.util.List;
@@ -57,4 +57,5 @@ public class MenuOption extends Label {
 			}
 		});
 	}
+
 }

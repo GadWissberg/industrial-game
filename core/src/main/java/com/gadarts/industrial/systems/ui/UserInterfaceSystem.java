@@ -75,17 +75,18 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		PlayerSystemEventsSubscriber,
 		CharacterSystemEventsSubscriber,
 		EnemySystemEventsSubscriber {
+	public static final float TURNS_INDICATOR_PADDING_RIGHT = 20F;
 	private static final BoundingBox auxBoundingBox = new BoundingBox();
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final float PADDING = 20;
 	private static final float PADDING_BOTTOM_INVENTORY_BUTTON = 10;
-	public static final float TURNS_INDICATOR_PADDING_RIGHT = 20F;
 	private boolean showBorders = DebugSettings.DISPLAY_HUD_OUTLINES;
 	@Getter
 	private MenuHandler menuHandler;
 	private CursorHandler cursorHandler;
 	private ToolTipHandler toolTipHandler;
 	private TurnsIndicator turnsIndicator;
+	private NoiseEffectHandler noiseEffectHandler;
 
 	public UserInterfaceSystem(GameAssetManager assetsManager,
 							   GameLifeCycleHandler lifeCycleHandler) {
@@ -116,8 +117,10 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	@Override
 	public void onSystemReset(SystemsCommonData systemsCommonData) {
 		super.onSystemReset(systemsCommonData);
-		GameStage stage = addUiStage();
 		GameAssetManager assetsManager = getAssetsManager();
+		noiseEffectHandler = new NoiseEffectHandler(assetsManager.getShader(Assets.Shaders.BASIC_VERTEX),
+				assetsManager.getShader(Assets.Shaders.NOISE_FRAGMENT));
+		GameStage stage = addUiStage();
 		systemsCommonData.setDamageIndicator(new DamageIndicator(stage, assetsManager));
 		Table hudTable = addTable();
 		hudTable.setName(TABLE_NAME_HUD);
@@ -128,14 +131,8 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		var rightSideIndicatorsTable = new Table();
 		addAmmoIndicator(rightSideIndicatorsTable);
 		addWeaponIndicator(rightSideIndicatorsTable);
-		addLogger(hudTable);
 		hudTable.add(rightSideIndicatorsTable).expand().bottom().right();
 		addTurnsIndicator();
-	}
-
-	private void addLogger(Table hudTable) {
-		var logger = new Logger(getAssetsManager().getTexture(UiTextures.HUD_LOGGER));
-		hudTable.add(logger).pad(0F, 0F, PADDING, 0F).expandY().bottom();
 	}
 
 	@Override
@@ -151,12 +148,12 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	}
 
 	private void addTurnsIndicator( ) {
-		GameAssetManager am = getAssetsManager();
-		EnemiesDeclarations enemiesDeclarations = (EnemiesDeclarations) am.getDeclaration(Declarations.ENEMIES);
+		GameAssetManager assetsManager = getAssetsManager();
+		EnemiesDeclarations enemiesDeclarations = (EnemiesDeclarations) assetsManager.getDeclaration(Declarations.ENEMIES);
 		HashMap<String, TextureRegionDrawable> icons = new HashMap<>();
-		enemiesDeclarations.enemiesDeclarations().forEach(dec -> icons.put(dec.id(), new TextureRegionDrawable(am.getTexture(dec.getHudIcon()))));
-		icons.put(PlayerDeclaration.getInstance().id(), new TextureRegionDrawable(am.getTexture(PlayerDeclaration.getInstance().getHudIcon())));
-		turnsIndicator = new TurnsIndicator(getAssetsManager(), icons);
+		enemiesDeclarations.enemiesDeclarations().forEach(dec -> icons.put(dec.id(), new TextureRegionDrawable(assetsManager.getTexture(dec.getHudIcon()))));
+		icons.put(PlayerDeclaration.getInstance().id(), new TextureRegionDrawable(assetsManager.getTexture(PlayerDeclaration.getInstance().getHudIcon())));
+		turnsIndicator = new TurnsIndicator(assetsManager, icons, noiseEffectHandler);
 		turnsIndicator.getColor().a = 0;
 		GameStage uiStage = getSystemsCommonData().getUiStage();
 		uiStage.addActor(turnsIndicator);
@@ -168,7 +165,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private void addAmmoIndicator(Table armsIndicatorsTable) {
 		GameAssetManager assetsManager = getAssetsManager();
 		BitmapFont font = assetsManager.getFont(Fonts.HUD);
-		AmmoIndicator ammoIndicator = new AmmoIndicator(createHudBorderStyle(), font, assetsManager);
+		AmmoIndicator ammoIndicator = new AmmoIndicator(createHudBorderStyle(), font, assetsManager, noiseEffectHandler);
 		ammoIndicator.setVisible(false);
 		getSystemsCommonData().setAmmoIndicator(ammoIndicator);
 		armsIndicatorsTable.add(ammoIndicator).right().bottom().pad(0F, PADDING, 0F, PADDING).row();
@@ -183,7 +180,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		GameAssetManager assetsManager = getAssetsManager();
 		PlayerWeaponsDeclarations weapons = (PlayerWeaponsDeclarations) assetsManager.getDeclaration(Declarations.PLAYER_WEAPONS);
 		Button.ButtonStyle style = createHudBorderStyle();
-		WeaponIndicator weaponIndicator = new WeaponIndicator(style, weapons, assetsManager);
+		WeaponIndicator weaponIndicator = new WeaponIndicator(style, weapons, assetsManager, noiseEffectHandler);
 		weaponIndicator.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
@@ -211,7 +208,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		style.up = new TextureRegionDrawable(assetsManager.getTexture(UiTextures.HUD_INVENTORY_BUTTON));
 		style.down = new TextureRegionDrawable(assetsManager.getTexture(UiTextures.HUD_INVENTORY_BUTTON_CLICKED));
 		style.over = new TextureRegionDrawable(assetsManager.getTexture(UiTextures.HUD_INVENTORY_BUTTON_HOVER));
-		Button inventoryButton = new Button(style);
+		Button inventoryButton = new StorageButton(style, noiseEffectHandler);
 		getSystemsCommonData().setInventoryButton(inventoryButton);
 		table.add(inventoryButton).expand().bottom().left().pad(
 				0F,
@@ -239,7 +236,8 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 				createHudBorderStyle(),
 				font,
 				hp,
-				assetsManager.getTexture(UiTextures.HUD_HP_HEART));
+				assetsManager.getTexture(UiTextures.HUD_HP_HEART),
+				noiseEffectHandler);
 		getSystemsCommonData().setHealthIndicator(healthIndicator);
 		hudTable.add(healthIndicator).left().bottom().pad(0F, PADDING, PADDING, 0F);
 	}
@@ -433,6 +431,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	public void dispose( ) {
 		cursorHandler.dispose();
 		toolTipHandler.dispose();
+		noiseEffectHandler.dispose();
 	}
 
 }
