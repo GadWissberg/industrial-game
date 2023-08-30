@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 public class TurnsIndicator extends Image {
-	public static final float TURNS_INDICATOR_FADING_DURATION = 0.5F;
-	public static final float ICON_FADING_DURATION = 2F;
+	public static final float TURNS_INDICATOR_FADING_DURATION = 0.2F;
+	public static final float ICON_FADING_DURATION = 0.5F;
 	private static final Vector2 auxVector = new Vector2();
 	private static final float PADDING_EDGE = 120F;
 	private static final float PADDING_ICON_RIGHT = 25F;

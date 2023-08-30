@@ -41,6 +41,6 @@ void main()
 {
     vec4 textureColor = texture2D(u_texture, v_texCoords);
     vec4 color = v_color * textureColor;
-    color = mix(color, vec4(noise(v_texCoords * 75.)), 0.05);
+    color = color.a * mix(color, vec4(noise(v_texCoords * 75.)), 0.1);
     gl_FragColor = color;
 }
