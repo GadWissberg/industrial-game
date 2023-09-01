@@ -5,20 +5,24 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.gadarts.industrial.systems.ui.NoiseEffectHandler;
 
-import static com.badlogic.gdx.math.Interpolation.smooth2;
+import static com.badlogic.gdx.math.Interpolation.*;
 
 public class TurnsIndicatorIcon extends Table {
 	public static final float FADING_DURATION = 1F;
 	public static final float RELATIVE_POSITION_X = -10F;
 	public static final float RELATIVE_POSITION_Y = -10F;
 	private static final Vector2 auxVector = new Vector2();
+	private static final float DAMAGE_EFFECT_SCALE_TO = 1.2F;
+	private static final float DAMAGE_EFFECT_DURATION = 0.1F;
 	private final Image icon;
 	private final Image border;
 	private final ActionPointsIndicator actionPointsIndicator;
@@ -45,6 +49,8 @@ public class TurnsIndicatorIcon extends Table {
 		actionPointsIndicator.setPosition(position.x, position.y);
 		actionPointsIndicator.getColor().a = 0;
 		addActor(actionPointsIndicator);
+		setOrigin(Align.center);
+		setTransform(true);
 	}
 
 	@Override
@@ -59,11 +65,23 @@ public class TurnsIndicatorIcon extends Table {
 	}
 
 	public void setBorderVisibility(boolean borderVisibility) {
-		border.addAction(borderVisibility ? Actions.fadeIn(FADING_DURATION, smooth2) : Actions.fadeOut(FADING_DURATION, smooth2));
+		AlphaAction action;
+		if (borderVisibility) {
+			action = Actions.fadeIn(FADING_DURATION, smooth2);
+		} else {
+			action = Actions.fadeOut(FADING_DURATION, smooth2);
+		}
+		border.addAction(action);
 		actionPointsIndicator.applyVisibility(borderVisibility);
 	}
 
 	public void updateActionPointsIndicator(int newValue) {
 		actionPointsIndicator.updateValue(newValue);
+	}
+
+	public void applyDamageEffect( ) {
+		addAction(Actions.sequence(
+				Actions.scaleTo(DAMAGE_EFFECT_SCALE_TO, DAMAGE_EFFECT_SCALE_TO, DAMAGE_EFFECT_DURATION, slowFast),
+				Actions.scaleTo(1F, 1F, DAMAGE_EFFECT_DURATION, sine)));
 	}
 }

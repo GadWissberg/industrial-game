@@ -2,19 +2,18 @@ package com.gadarts.industrial.systems.ui.indicators.turns;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.model.characters.player.PlayerDeclaration;
+import com.gadarts.industrial.systems.ui.GameStage;
 import com.gadarts.industrial.systems.ui.NoiseEffectHandler;
 
 import java.util.ArrayList;
@@ -22,13 +21,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TurnsIndicator extends Image {
-	public static final float TURNS_INDICATOR_FADING_DURATION = 0.2F;
+public class TurnsIndicatorsHandler {
 	public static final float ICON_FADING_DURATION = 0.5F;
 	private static final Vector2 auxVector = new Vector2();
-	private static final float PADDING_EDGE = 120F;
-	private static final float PADDING_ICON_RIGHT = 25F;
 	private static final float PADDING_ICON_TOP = 10F;
+	private static final float PADDING_ICON_RIGHT = 50F;
+	private static final float PADDING_FIRST_ICON_TOP = 100F;
 	private final Texture greenIconTexture;
 	private final Texture redIconTexture;
 	private final HashMap<String, TextureRegionDrawable> charactersIcons;
@@ -37,12 +35,13 @@ public class TurnsIndicator extends Image {
 	private final Texture actionsPointsTexture;
 	private final BitmapFont font;
 	private final NoiseEffectHandler noiseEffectHandler;
+	private final GameStage stage;
 	private Entity currentBorder;
 
-	public TurnsIndicator(GameAssetManager assetsManager,
-						  HashMap<String, TextureRegionDrawable> icons,
-						  NoiseEffectHandler noiseEffectHandler) {
-		super(assetsManager.getTexture(Assets.UiTextures.HUD_TURNS_INDICATOR_BAR));
+	public TurnsIndicatorsHandler(GameAssetManager assetsManager,
+								  HashMap<String, TextureRegionDrawable> icons,
+								  NoiseEffectHandler noiseEffectHandler,
+								  GameStage stage) {
 		this.greenIconTexture = assetsManager.getTexture(Assets.UiTextures.HUD_ICON_CIRCLE_GREEN);
 		this.redIconTexture = assetsManager.getTexture(Assets.UiTextures.HUD_ICON_CIRCLE_RED);
 		this.charactersIcons = icons;
@@ -50,10 +49,10 @@ public class TurnsIndicator extends Image {
 		this.actionsPointsTexture = assetsManager.getTexture(Assets.UiTextures.HUD_ACTION_POINTS_INDICATOR);
 		this.font = assetsManager.getFont(Assets.Fonts.HUD_SMALL);
 		this.noiseEffectHandler = noiseEffectHandler;
+		this.stage = stage;
 	}
 
 	public void applyCombatMode(Queue<Entity> turnsQueue) {
-		addAction(Actions.fadeIn(TURNS_INDICATOR_FADING_DURATION, Interpolation.swing));
 		turnsQueue.forEach(this::addIcon);
 		turnsQueue.forEach(character -> {
 			if (turnsQueue.first().equals(character)) {
@@ -67,12 +66,11 @@ public class TurnsIndicator extends Image {
 	}
 
 	private void initPositionForIcon(int i, TurnsIndicatorIcon icon) {
-		auxVector.set(0F, PADDING_EDGE);
 		float iconPrefHeight = icon.getPrefHeight();
-		auxVector.x = auxVector.x - icon.getPrefWidth() / 2F - PADDING_ICON_RIGHT;
+		auxVector.set(stage.getWidth() - PADDING_ICON_RIGHT, stage.getHeight() - PADDING_FIRST_ICON_TOP - iconPrefHeight);
+		auxVector.x = auxVector.x - icon.getPrefWidth() / 2F;
 		float interval = i * (iconPrefHeight + PADDING_ICON_TOP);
 		auxVector.y = auxVector.y - iconPrefHeight / 2F + interval;
-		localToScreenCoordinates(auxVector);
 		icon.setPosition(auxVector.x, auxVector.y);
 	}
 
@@ -93,7 +91,7 @@ public class TurnsIndicator extends Image {
 		icon.getColor().a = 0F;
 		icon.addAction(Actions.fadeIn(ICON_FADING_DURATION, Interpolation.smoother));
 		icons.put(character, icon);
-		getParent().addActor(icon);
+		stage.addActor(icon);
 	}
 
 	public void applyBorderForNewTurn(Entity entity) {
@@ -126,16 +124,8 @@ public class TurnsIndicator extends Image {
 	}
 
 	private void turnOffCombatMode( ) {
-		addAction(Actions.fadeOut(TURNS_INDICATOR_FADING_DURATION, Interpolation.swing));
 		icons.values().forEach(Actor::remove);
 		icons.clear();
-	}
-
-	@Override
-	public void draw(Batch batch, float parentAlpha) {
-		noiseEffectHandler.begin(batch);
-		super.draw(batch, parentAlpha);
-		noiseEffectHandler.end(batch);
 	}
 
 	public void updateCurrentActionPointsIndicator(Entity character, int newValue) {
@@ -144,4 +134,9 @@ public class TurnsIndicator extends Image {
 		icons.get(character).updateActionPointsIndicator(newValue);
 	}
 
+	public void applyDamageEffect(Entity character) {
+		if (!icons.containsKey(character)) return;
+
+		icons.get(character).applyDamageEffect();
+	}
 }

@@ -54,7 +54,7 @@ import com.gadarts.industrial.systems.ui.indicators.AmmoIndicator;
 import com.gadarts.industrial.systems.ui.indicators.DamageIndicator;
 import com.gadarts.industrial.systems.ui.indicators.WeaponIndicator;
 import com.gadarts.industrial.systems.ui.indicators.health.HealthIndicator;
-import com.gadarts.industrial.systems.ui.indicators.turns.TurnsIndicator;
+import com.gadarts.industrial.systems.ui.indicators.turns.TurnsIndicatorsHandler;
 import com.gadarts.industrial.systems.ui.menu.MenuHandler;
 import com.gadarts.industrial.systems.ui.menu.MenuHandlerImpl;
 import com.gadarts.industrial.utils.EntityBuilder;
@@ -75,7 +75,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		PlayerSystemEventsSubscriber,
 		CharacterSystemEventsSubscriber,
 		EnemySystemEventsSubscriber {
-	public static final float TURNS_INDICATOR_PADDING_RIGHT = 20F;
 	private static final BoundingBox auxBoundingBox = new BoundingBox();
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final float PADDING = 20;
@@ -85,7 +84,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private MenuHandler menuHandler;
 	private CursorHandler cursorHandler;
 	private ToolTipHandler toolTipHandler;
-	private TurnsIndicator turnsIndicator;
+	private TurnsIndicatorsHandler turnsIndicatorsHandler;
 	private NoiseEffectHandler noiseEffectHandler;
 
 	public UserInterfaceSystem(GameAssetManager assetsManager,
@@ -95,23 +94,23 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 	@Override
 	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus, boolean wokeBySpottingPlayer) {
-		turnsIndicator.addCharacter(enemy);
+		turnsIndicatorsHandler.addCharacter(enemy);
 	}
 
 	@Override
 	public void onCharacterDies(Entity character) {
-		turnsIndicator.removeCharacter(character);
+		turnsIndicatorsHandler.removeCharacter(character);
 	}
 
 	@Override
 	public void onCharacterGotDamage(Entity character, int originalValue) {
-		if (!ComponentsMapper.player.has(character)) return;
-
-
-		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		int hp = ComponentsMapper.character.get(systemsCommonData.getPlayer()).getAttributes().getHealthData().getHp();
-		systemsCommonData.getHealthIndicator().setValue(hp, originalValue);
-		systemsCommonData.getDamageIndicator().show();
+		if (ComponentsMapper.player.has(character)) {
+			SystemsCommonData systemsCommonData = getSystemsCommonData();
+			int hp = ComponentsMapper.character.get(systemsCommonData.getPlayer()).getAttributes().getHealthData().getHp();
+			systemsCommonData.getHealthIndicator().setValue(hp, originalValue);
+			systemsCommonData.getDamageIndicator().show();
+		}
+		turnsIndicatorsHandler.applyDamageEffect(character);
 	}
 
 	@Override
@@ -137,13 +136,13 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 	@Override
 	public void onCombatModeEngaged( ) {
-		turnsIndicator.applyCombatMode(getSystemsCommonData().getTurnsQueue());
+		turnsIndicatorsHandler.applyCombatMode(getSystemsCommonData().getTurnsQueue());
 	}
 
 	@Override
 	public void onEnemyAiStatusChange(Entity enemy, EnemyAiStatus enemyAiStatus) {
 		if (enemyAiStatus == EnemyAiStatus.IDLE) {
-			turnsIndicator.removeCharacter(enemy);
+			turnsIndicatorsHandler.removeCharacter(enemy);
 		}
 	}
 
@@ -151,15 +150,12 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		GameAssetManager assetsManager = getAssetsManager();
 		EnemiesDeclarations enemiesDeclarations = (EnemiesDeclarations) assetsManager.getDeclaration(Declarations.ENEMIES);
 		HashMap<String, TextureRegionDrawable> icons = new HashMap<>();
-		enemiesDeclarations.enemiesDeclarations().forEach(dec -> icons.put(dec.id(), new TextureRegionDrawable(assetsManager.getTexture(dec.getHudIcon()))));
-		icons.put(PlayerDeclaration.getInstance().id(), new TextureRegionDrawable(assetsManager.getTexture(PlayerDeclaration.getInstance().getHudIcon())));
-		turnsIndicator = new TurnsIndicator(assetsManager, icons, noiseEffectHandler);
-		turnsIndicator.getColor().a = 0;
+		enemiesDeclarations.enemiesDeclarations()
+				.forEach(dec -> icons.put(dec.id(), new TextureRegionDrawable(assetsManager.getTexture(dec.getHudIcon()))));
+		UiTextures hudIcon = PlayerDeclaration.getInstance().getHudIcon();
+		icons.put(PlayerDeclaration.getInstance().id(), new TextureRegionDrawable(assetsManager.getTexture(hudIcon)));
 		GameStage uiStage = getSystemsCommonData().getUiStage();
-		uiStage.addActor(turnsIndicator);
-		float x = uiStage.getWidth() - (turnsIndicator.getPrefWidth() + TURNS_INDICATOR_PADDING_RIGHT);
-		float y = uiStage.getHeight() / 2F - turnsIndicator.getPrefHeight() / 2F;
-		turnsIndicator.setPosition(x, y);
+		turnsIndicatorsHandler = new TurnsIndicatorsHandler(assetsManager, icons, noiseEffectHandler, uiStage);
 	}
 
 	private void addAmmoIndicator(Table armsIndicatorsTable) {
@@ -278,7 +274,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	public void onNewTurn(Entity entity) {
 		Button inventoryButton = getSystemsCommonData().getInventoryButton();
 		inventoryButton.setTouchable(ComponentsMapper.player.has(entity) ? Touchable.enabled : Touchable.disabled);
-		turnsIndicator.applyBorderForNewTurn(entity);
+		turnsIndicatorsHandler.applyBorderForNewTurn(entity);
 	}
 
 	private Table addTable( ) {
@@ -348,7 +344,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 	@Override
 	public void onCharacterConsumedActionPoint(Entity character, int newValue) {
-		turnsIndicator.updateCurrentActionPointsIndicator(character, newValue);
+		turnsIndicatorsHandler.updateCurrentActionPointsIndicator(character, newValue);
 	}
 
 	@Override
