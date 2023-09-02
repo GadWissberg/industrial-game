@@ -106,7 +106,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	@Override
 	public void update(float deltaTime) {
 		super.update(deltaTime);
-		if (getSystemsCommonData().getCurrentGameMode() == GameMode.TURN_BASED) {
+		if (getSystemsCommonData().getCurrentGameMode() != GameMode.EXPLORE) {
 			Entity current = getSystemsCommonData().getTurnsQueue().first();
 			if (character.has(current)) {
 				CharacterComponent characterComponent = character.get(current);
@@ -279,7 +279,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	public void commandDone(Entity character) {
 		ComponentsMapper.character.get(character).getCharacterSpriteData().setSpriteType(IDLE);
-		if (getSystemsCommonData().getCurrentGameMode() == GameMode.TURN_BASED) {
+		if (getSystemsCommonData().getCurrentGameMode() == GameMode.EXPLORE_TURN_BASED) {
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onCharacterCommandDone(character);
 			}

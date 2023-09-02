@@ -10,8 +10,8 @@ import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
-import com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
+import com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
 
 public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> implements
@@ -40,7 +40,7 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 	@Override
 	public void update(float deltaTime) {
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		if (systemsCommonData.getCurrentGameMode() == GameMode.TURN_BASED && currentTurnDone) {
+		if (systemsCommonData.getCurrentGameMode() != GameMode.EXPLORE && currentTurnDone) {
 			Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
 			systemsCommonData.setCurrentTurnId(systemsCommonData.getCurrentTurnId() + 1);
 			Entity removeFirst = turnsQueue.removeFirst();
@@ -53,7 +53,10 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 	}
 
 	private void setGameMode(GameMode gameMode) {
-		getSystemsCommonData().setCurrentGameMode(gameMode);
+		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		if (systemsCommonData.getCurrentGameMode() == gameMode) return;
+
+		systemsCommonData.setCurrentGameMode(gameMode);
 		subscribers.forEach(TurnsSystemEventsSubscriber::onGameModeSet);
 	}
 
@@ -69,9 +72,12 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 
 	@Override
 	public void onDoorStateChanged(Entity doorEntity, DoorStates oldState, DoorStates newState) {
-		if (newState == DoorStates.OPEN) {
+		if (newState == DoorStates.OPENING) {
 			getSystemsCommonData().getTurnsQueue().addLast(doorEntity);
-			setGameMode(GameMode.TURN_BASED);
+			GameMode currentGameMode = getSystemsCommonData().getCurrentGameMode();
+			if (currentGameMode == GameMode.EXPLORE) {
+				setGameMode(GameMode.EXPLORE_TURN_BASED);
+			}
 		} else if (newState == DoorStates.CLOSED) {
 			markCurrentTurnAsDone();
 		}
@@ -102,8 +108,9 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 		if (prevAiStatus != EnemyAiStatus.IDLE) return;
 
 		Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
-		if (getSystemsCommonData().getCurrentGameMode() == GameMode.EXPLORE) {
-			setGameMode(GameMode.TURN_BASED);
+		GameMode currentGameMode = getSystemsCommonData().getCurrentGameMode();
+		if (currentGameMode != GameMode.COMBAT_MODE) {
+			setGameMode(GameMode.COMBAT_MODE);
 			turnsQueue.clear();
 			turnsQueue.addFirst(wokeBySpottingPlayer ? enemy : getSystemsCommonData().getPlayer());
 			turnsQueue.addLast(wokeBySpottingPlayer ? getSystemsCommonData().getPlayer() : enemy);

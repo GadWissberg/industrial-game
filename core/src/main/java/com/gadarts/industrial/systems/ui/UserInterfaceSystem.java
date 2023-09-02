@@ -18,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Queue;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
@@ -136,7 +137,8 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 	@Override
 	public void onCombatModeEngaged( ) {
-		turnsIndicatorsHandler.applyCombatMode(getSystemsCommonData().getTurnsQueue());
+		Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
+		turnsIndicatorsHandler.applyCombatMode(turnsQueue);
 	}
 
 	@Override

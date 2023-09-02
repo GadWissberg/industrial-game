@@ -70,15 +70,16 @@ public class TurnsIndicatorsHandler {
 		auxVector.set(stage.getWidth() - PADDING_ICON_RIGHT, stage.getHeight() - PADDING_FIRST_ICON_TOP - iconPrefHeight);
 		auxVector.x = auxVector.x - icon.getPrefWidth() / 2F;
 		float interval = i * (iconPrefHeight + PADDING_ICON_TOP);
-		auxVector.y = auxVector.y - iconPrefHeight / 2F + interval;
+		auxVector.y = auxVector.y - iconPrefHeight / 2F - interval;
 		icon.setPosition(auxVector.x, auxVector.y);
 	}
 
-	private void addIcon(Entity character) {
-		if (icons.containsKey(character)) return;
-		boolean isPlayer = ComponentsMapper.player.has(character);
+	private void addIcon(Entity entity) {
+		if (icons.containsKey(entity) || !ComponentsMapper.character.has(entity)) return;
+
+		boolean isPlayer = ComponentsMapper.player.has(entity);
 		Texture circleTexture = isPlayer ? greenIconTexture : redIconTexture;
-		int actionPoints = ComponentsMapper.character.get(character).getAttributes().getActionPoints();
+		int actionPoints = ComponentsMapper.character.get(entity).getAttributes().getActionPoints();
 		TurnsIndicatorIcon icon = new TurnsIndicatorIcon(
 				circleTexture,
 				borderTexture,
@@ -87,10 +88,10 @@ public class TurnsIndicatorsHandler {
 				actionPoints,
 				noiseEffectHandler);
 		String playerId = PlayerDeclaration.getInstance().id();
-		icon.applyIcon(charactersIcons.get(isPlayer ? playerId : ComponentsMapper.enemy.get(character).getEnemyDeclaration().id()));
+		icon.applyIcon(charactersIcons.get(isPlayer ? playerId : ComponentsMapper.enemy.get(entity).getEnemyDeclaration().id()));
 		icon.getColor().a = 0F;
 		icon.addAction(Actions.fadeIn(ICON_FADING_DURATION, Interpolation.smoother));
-		icons.put(character, icon);
+		icons.put(entity, icon);
 		stage.addActor(icon);
 	}
 
