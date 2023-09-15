@@ -20,17 +20,17 @@ import com.gadarts.industrial.components.character.CharacterAnimations;
 import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
-import com.gadarts.industrial.components.player.Ammo;
 import com.gadarts.industrial.components.player.Item;
 import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.components.player.Weapon;
+import com.gadarts.industrial.components.player.WeaponAmmo;
 import com.gadarts.industrial.map.*;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponsDeclarations;
+import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.WeaponDeclaration;
 import com.gadarts.industrial.shared.model.characters.Direction;
-import com.gadarts.industrial.shared.model.pickups.AmmoTypes;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.amb.AmbSystemEventsSubscriber;
@@ -97,9 +97,9 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		if (ComponentsMapper.player.has(character)) {
 			Weapon selectedWeapon = getSystemsCommonData().getStorage().getSelectedWeapon();
 			PlayerWeaponDeclaration declaration = (PlayerWeaponDeclaration) selectedWeapon.getDeclaration();
-			Ammo ammo = ComponentsMapper.player.get(character).getAmmo().get(declaration.ammoType());
-			ammo.setLoaded(ammo.getLoaded() - 1);
-			subscribers.forEach(sub -> sub.onPlayerConsumedAmmo(ammo));
+			WeaponAmmo weaponAmmo = ComponentsMapper.player.get(character).getAmmo().get(declaration);
+			weaponAmmo.setLoaded(weaponAmmo.getLoaded() - 1);
+			subscribers.forEach(sub -> sub.onPlayerConsumedAmmo(weaponAmmo));
 		}
 	}
 
@@ -358,12 +358,13 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		var firstTime = storage.isFirstTimePickup(item);
 		boolean added = storage.addItem(item);
 		if (item.isWeapon()) {
-			Map<AmmoTypes, Ammo> ammo = ComponentsMapper.player.get(systemsCommonData.getPlayer()).getAmmo();
+			Entity player = systemsCommonData.getPlayer();
+			Map<PlayerWeaponDeclaration, WeaponAmmo> ammo = ComponentsMapper.player.get(player).getAmmo();
 			PlayerWeaponDeclaration declaration = (PlayerWeaponDeclaration) item.getDeclaration();
-			AmmoTypes ammoType = declaration.ammoType();
-			if (ammo.containsKey(ammoType)) {
-				ammo.get(ammoType).setLoaded(PICKUP_WEAPON_AMMO_AMOUNT);
-				ammo.get(ammoType).setPlayerWeaponDeclaration(declaration);
+			if (ammo.containsKey(declaration)) {
+				WeaponAmmo weaponAmmo = ammo.get(declaration);
+				weaponAmmo.setLoaded(PICKUP_WEAPON_AMMO_AMOUNT);
+				weaponAmmo.setPlayerWeaponDeclaration(declaration);
 			}
 		}
 		if (added) {
@@ -508,13 +509,13 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 
 	private Weapon initializeStartingWeapon( ) {
 		Weapon weapon = Pools.obtain(Weapon.class);
-
 		GameAssetManager am = getAssetsManager();
 		PlayerWeaponsDeclarations weaponsDeclarations = (PlayerWeaponsDeclarations) am.getDeclaration(PLAYER_WEAPONS);
-		PlayerWeaponDeclaration declaration = weaponsDeclarations.parse(DebugSettings.STARTING_WEAPON);
-		Assets.UiTextures symbol = declaration.declaration().getSymbol();
+		PlayerWeaponDeclaration playerWeaponDeclaration = weaponsDeclarations.parse(DebugSettings.STARTING_WEAPON);
+		WeaponDeclaration declaration = playerWeaponDeclaration.declaration();
+		Assets.UiTextures symbol = declaration.getSymbol();
 		Texture image = symbol != null ? am.getTexture(symbol) : null;
-		weapon.init(declaration, 0, 0, image);
+		weapon.init(playerWeaponDeclaration, 0, 0, image);
 		return weapon;
 	}
 

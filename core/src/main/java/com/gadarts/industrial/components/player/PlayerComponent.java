@@ -3,11 +3,10 @@ package com.gadarts.industrial.components.player;
 import com.gadarts.industrial.components.GameComponent;
 import com.gadarts.industrial.components.character.CharacterAnimations;
 import com.gadarts.industrial.shared.assets.declarations.Agility;
-import com.gadarts.industrial.shared.model.pickups.AmmoTypes;
+import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponDeclaration;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +15,7 @@ public class PlayerComponent implements GameComponent {
 	public static final float PLAYER_HEIGHT = 1;
 	public static final Agility PLAYER_AGILITY = new Agility(4, 5);
 	private CharacterAnimations generalAnimations;
-	private final Map<AmmoTypes, Ammo> ammo = new HashMap<>();
+	private final Map<PlayerWeaponDeclaration, WeaponAmmo> ammo = new HashMap<>();
 
 	@Setter
 	private boolean disabled;
@@ -25,9 +24,8 @@ public class PlayerComponent implements GameComponent {
 	public void reset( ) {
 	}
 
-	public void init(final CharacterAnimations general) {
+	public void init(CharacterAnimations general) {
 		this.generalAnimations = general;
 		ammo.clear();
-		Arrays.stream(AmmoTypes.values()).forEach(type -> ammo.put(type, new Ammo(0, 0, null)));
 	}
 }

@@ -27,9 +27,12 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.TriggerComponent;
 import com.gadarts.industrial.components.character.CharacterData;
-import com.gadarts.industrial.components.character.*;
+import com.gadarts.industrial.components.character.CharacterSkillsParameters;
+import com.gadarts.industrial.components.character.CharacterSoundData;
+import com.gadarts.industrial.components.character.CharacterSpriteData;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.player.PlayerComponent;
+import com.gadarts.industrial.components.player.WeaponAmmo;
 import com.gadarts.industrial.shared.WallCreator;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
@@ -69,6 +72,7 @@ import static com.gadarts.industrial.components.ComponentsMapper.*;
 import static com.gadarts.industrial.shared.assets.Assets.*;
 import static com.gadarts.industrial.shared.assets.Assets.Atlases.GUARD_BOT;
 import static com.gadarts.industrial.shared.assets.Assets.Atlases.PLAYER_GENERIC;
+import static com.gadarts.industrial.shared.assets.Assets.Declarations.*;
 import static com.gadarts.industrial.shared.assets.Assets.SurfaceTextures.MISSING;
 import static com.gadarts.industrial.shared.assets.MapJsonKeys.*;
 import static com.gadarts.industrial.shared.model.characters.CharacterTypes.*;
@@ -77,6 +81,7 @@ import static com.gadarts.industrial.shared.model.characters.Direction.SOUTH;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.IDLE;
 import static com.gadarts.industrial.shared.model.env.light.LightConstants.*;
 import static com.gadarts.industrial.shared.model.map.MapNodesTypes.OBSTACLE_KEY_DIAGONAL_FORBIDDEN;
+import static com.gadarts.industrial.systems.player.PlayerSystem.PICKUP_WEAPON_AMMO_AMOUNT;
 import static com.gadarts.industrial.utils.EntityBuilder.beginBuildingEntity;
 import static java.lang.String.format;
 
@@ -317,13 +322,13 @@ public class MapBuilder implements Disposable {
 	private void avoidZeroDimensions(final BoundingBox bBox) {
 		Vector3 center = bBox.getCenter(auxVector3_1);
 		if (bBox.getWidth() == 0) {
-			center.x += 0.01;
+			center.x += 0.01F;
 		}
 		if (bBox.getHeight() == 0) {
-			center.y += 0.01;
+			center.y += 0.01F;
 		}
 		if (bBox.getDepth() == 0) {
-			center.z += 0.01;
+			center.z += 0.01F;
 		}
 		bBox.ext(center);
 	}
@@ -654,7 +659,7 @@ public class MapBuilder implements Disposable {
 
 	private void inflatePickups(final JsonObject mapJsonObject, final MapGraph mapGraph) {
 		JsonArray pickups = mapJsonObject.getAsJsonArray(KEY_PICKUPS);
-		PlayerWeaponsDeclarations declarations = (PlayerWeaponsDeclarations) assetsManager.getDeclaration(Declarations.PLAYER_WEAPONS);
+		PlayerWeaponsDeclarations declarations = (PlayerWeaponsDeclarations) assetsManager.getDeclaration(PLAYER_WEAPONS);
 		pickups.forEach(element -> {
 			JsonObject pickJsonObject = element.getAsJsonObject();
 			PlayerWeaponDeclaration type = declarations.playerWeaponsDeclarations()
@@ -704,31 +709,31 @@ public class MapBuilder implements Disposable {
 	}
 
 	private void inflatePlayer(final JsonObject characterJsonObject, final MapGraph mapGraph) {
-		CharacterAnimations general = assetsManager.get(PLAYER_GENERIC.name());
-		EntityBuilder builder = beginBuildingEntity(engine).addPlayerComponent(general);
-		Vector3 position = inflateCharacterPosition(characterJsonObject, mapGraph);
+		EntityBuilder builder = beginBuildingEntity(engine).addPlayerComponent(assetsManager.get(PLAYER_GENERIC.name()));
 		auxCharacterSoundData.set(Sounds.PLAYER_PAIN, Sounds.PLAYER_DEATH);
 		CharacterSkillsParameters skills = new CharacterSkillsParameters(
 				!DebugSettings.LOW_HP_FOR_PLAYER ? PLAYER_HEALTH : 1,
 				PlayerComponent.PLAYER_AGILITY,
 				Accuracy.LOW);
 		CharacterData data = new CharacterData(
-				position,
+				inflateCharacterPosition(characterJsonObject, mapGraph),
 				Direction.values()[characterJsonObject.get(DIRECTION).getAsInt()],
 				skills,
 				auxCharacterSoundData);
-		PlayerWeaponDeclaration weaponDec = ((PlayerWeaponsDeclarations) assetsManager.getDeclaration(Declarations.PLAYER_WEAPONS))
+		PlayerWeaponDeclaration weaponDec = ((PlayerWeaponsDeclarations) assetsManager.getDeclaration(PLAYER_WEAPONS))
 				.parse(DebugSettings.STARTING_WEAPON);
 		Atlases atlas = weaponDec.relatedAtlas();
-
 		addCharBaseComponents(
 				builder,
 				data,
 				PlayerDeclaration.getInstance(),
 				atlas,
 				weaponDec.declaration());
-
-		builder.finishAndAddToEngine();
+		var player = builder.finishAndAddToEngine();
+		if (!weaponDec.id().equals("pnc")) {
+			WeaponAmmo weaponAmmo = new WeaponAmmo(PICKUP_WEAPON_AMMO_AMOUNT, 0, weaponDec);
+			ComponentsMapper.player.get(player).getAmmo().put(weaponDec, weaponAmmo);
+		}
 	}
 
 	private CharacterSpriteData createCharacterSpriteData(CharacterDeclaration declaration) {
@@ -779,7 +784,7 @@ public class MapBuilder implements Disposable {
 	private Animation<TextureAtlas.AtlasRegion> inflateEnemyBulletFrames(EnemyDeclaration type) {
 		Animation<TextureAtlas.AtlasRegion> bulletAnimation = enemyBulletsTextureRegions.get(type);
 		if (type.attackPrimary() != null && !enemyBulletsTextureRegions.containsKey(type)) {
-			WeaponsDeclarations weapons = (WeaponsDeclarations) assetsManager.getDeclaration(Declarations.WEAPONS);
+			WeaponsDeclarations weapons = (WeaponsDeclarations) assetsManager.getDeclaration(WEAPONS);
 			String name = weapons.parse("rlc").name();
 			Array<TextureAtlas.AtlasRegion> regions = assetsManager.getAtlas(GUARD_BOT).findRegions(name);
 			bulletAnimation = new Animation<>(type.attackPrimary().frameDuration(), regions);
@@ -790,7 +795,7 @@ public class MapBuilder implements Disposable {
 
 	private EnemyDeclaration inflateEnemyType(JsonObject characterJsonObject) {
 		EnemyDeclaration type;
-		EnemiesDeclarations declaration = (EnemiesDeclarations) assetsManager.getDeclaration(Declarations.ENEMIES);
+		EnemiesDeclarations declaration = (EnemiesDeclarations) assetsManager.getDeclaration(ENEMIES);
 		List<EnemyDeclaration> enemies = declaration.enemiesDeclarations();
 		String asString = characterJsonObject.get(TYPE).getAsString();
 		type = enemies.stream().filter(def -> def.id().equalsIgnoreCase(asString)).findFirst().orElseThrow();

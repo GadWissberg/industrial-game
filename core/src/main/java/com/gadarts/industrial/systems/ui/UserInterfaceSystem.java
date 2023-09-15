@@ -25,19 +25,19 @@ import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
-import com.gadarts.industrial.components.player.Ammo;
 import com.gadarts.industrial.components.player.Item;
+import com.gadarts.industrial.components.player.WeaponAmmo;
 import com.gadarts.industrial.console.commands.ConsoleCommandResult;
 import com.gadarts.industrial.console.commands.ConsoleCommands;
 import com.gadarts.industrial.console.commands.ConsoleCommandsList;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.Assets.Declarations;
 import com.gadarts.industrial.shared.assets.Assets.Fonts;
 import com.gadarts.industrial.shared.assets.Assets.UiTextures;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.characters.enemies.EnemiesDeclarations;
+import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponsDeclarations;
 import com.gadarts.industrial.shared.model.characters.player.PlayerDeclaration;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
@@ -68,6 +68,8 @@ import java.util.HashMap;
 import static com.badlogic.gdx.Application.LOG_DEBUG;
 import static com.gadarts.industrial.DebugSettings.FULL_SCREEN;
 import static com.gadarts.industrial.TerrorEffector.*;
+import static com.gadarts.industrial.shared.assets.Assets.Declarations.ENEMIES;
+import static com.gadarts.industrial.shared.assets.Assets.Declarations.PLAYER_WEAPONS;
 import static com.gadarts.industrial.systems.SystemsCommonData.TABLE_NAME_HUD;
 
 public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSubscriber> implements
@@ -129,8 +131,15 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		addHealthIndicator(leftSideIndicatorsTable);
 		hudTable.add(leftSideIndicatorsTable).expand().bottom().left();
 		var rightSideIndicatorsTable = new Table();
-		addAmmoIndicator(rightSideIndicatorsTable);
-		addWeaponIndicator(rightSideIndicatorsTable);
+		var ammoIndicator = addAmmoIndicator(rightSideIndicatorsTable);
+		var weaponIndicator = addWeaponIndicator(rightSideIndicatorsTable);
+		PlayerWeaponDeclaration weapon = (PlayerWeaponDeclaration) systemsCommonData.getStorage().getSelectedWeapon().getDeclaration();
+		if (!weapon.id().equals("pnc")) {
+			WeaponAmmo weaponAmmo = ComponentsMapper.player.get(systemsCommonData.getPlayer()).getAmmo().get(weapon);
+			ammoIndicator.setValues(weaponAmmo);
+			ammoIndicator.setVisible(!weapon.declaration().melee());
+			weaponIndicator.setIcon(weapon);
+		}
 		hudTable.add(rightSideIndicatorsTable).expand().bottom().right();
 		addTurnsIndicator();
 	}
@@ -150,7 +159,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 	private void addTurnsIndicator( ) {
 		GameAssetManager assetsManager = getAssetsManager();
-		EnemiesDeclarations enemiesDeclarations = (EnemiesDeclarations) assetsManager.getDeclaration(Declarations.ENEMIES);
+		EnemiesDeclarations enemiesDeclarations = (EnemiesDeclarations) assetsManager.getDeclaration(ENEMIES);
 		HashMap<String, TextureRegionDrawable> icons = new HashMap<>();
 		enemiesDeclarations.enemiesDeclarations()
 				.forEach(dec -> icons.put(dec.id(), new TextureRegionDrawable(assetsManager.getTexture(dec.getHudIcon()))));
@@ -160,23 +169,24 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		turnsIndicatorsHandler = new TurnsIndicatorsHandler(assetsManager, icons, noiseEffectHandler, uiStage);
 	}
 
-	private void addAmmoIndicator(Table armsIndicatorsTable) {
+	private AmmoIndicator addAmmoIndicator(Table armsIndicatorsTable) {
 		GameAssetManager assetsManager = getAssetsManager();
 		BitmapFont font = assetsManager.getFont(Fonts.HUD);
 		AmmoIndicator ammoIndicator = new AmmoIndicator(createHudBorderStyle(), font, assetsManager, noiseEffectHandler);
 		ammoIndicator.setVisible(false);
 		getSystemsCommonData().setAmmoIndicator(ammoIndicator);
 		armsIndicatorsTable.add(ammoIndicator).right().bottom().pad(0F, PADDING, 0F, PADDING).row();
+		return ammoIndicator;
 	}
 
 	@Override
-	public void onPlayerConsumedAmmo(Ammo ammo) {
-		getSystemsCommonData().getAmmoIndicator().setValues(ammo);
+	public void onPlayerConsumedAmmo(WeaponAmmo weaponAmmo) {
+		getSystemsCommonData().getAmmoIndicator().setValues(weaponAmmo);
 	}
 
-	private void addWeaponIndicator(Table armsIndicatorsTable) {
+	private WeaponIndicator addWeaponIndicator(Table armsIndicatorsTable) {
 		GameAssetManager assetsManager = getAssetsManager();
-		PlayerWeaponsDeclarations weapons = (PlayerWeaponsDeclarations) assetsManager.getDeclaration(Declarations.PLAYER_WEAPONS);
+		PlayerWeaponsDeclarations weapons = (PlayerWeaponsDeclarations) assetsManager.getDeclaration(PLAYER_WEAPONS);
 		Button.ButtonStyle style = createHudBorderStyle();
 		WeaponIndicator weaponIndicator = new WeaponIndicator(style, weapons, assetsManager, noiseEffectHandler);
 		weaponIndicator.addListener(new ClickListener() {
@@ -187,8 +197,10 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 				commonData.getUiStage().openStorageWindow(assetsManager, commonData, subscribers);
 			}
 		});
-		getSystemsCommonData().setWeaponIndicator(weaponIndicator);
+		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		systemsCommonData.setWeaponIndicator(weaponIndicator);
 		armsIndicatorsTable.add(weaponIndicator).right().bottom().pad(0F, PADDING, PADDING, PADDING);
+		return weaponIndicator;
 	}
 
 	private Button.ButtonStyle createHudBorderStyle( ) {

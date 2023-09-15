@@ -85,11 +85,11 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addShadowlessLightComponent(final Vector3 position,
-													 final float intensity,
-													 final float radius,
-													 final Color color) {
-		return addShadowlessLightComponent(position, intensity, radius, color, 0F, false);
+	public void addShadowlessLightComponent(final Vector3 position,
+											final float intensity,
+											final float radius,
+											final Color color) {
+		addShadowlessLightComponent(position, intensity, radius, color, 0F, false);
 	}
 
 	public EntityBuilder addShadowlessLightComponent(final Vector3 position,
@@ -117,14 +117,13 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addEnvironmentObjectComponent(Vector2 topLeft,
-													   Vector2 bottomRight,
-													   EnvironmentObjectDeclaration type) {
+	public void addEnvironmentObjectComponent(Vector2 topLeft,
+											  Vector2 bottomRight,
+											  EnvironmentObjectDeclaration type) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		EnvironmentObjectComponent environmentObjectComponent = engine.createComponent(EnvironmentObjectComponent.class);
 		environmentObjectComponent.init(topLeft, bottomRight, type);
 		currentEntity.add(environmentObjectComponent);
-		return instance;
 	}
 
 	public EntityBuilder addModelInstanceComponent(GameModelInstance modelInstance) {
@@ -200,11 +199,10 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addAnimationComponent( ) {
+	public void addAnimationComponent( ) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		AnimationComponent animComponent = engine.createComponent(AnimationComponent.class);
 		currentEntity.add(animComponent);
-		return instance;
 	}
 
 	public EntityBuilder addCollisionComponent( ) {
@@ -265,7 +263,7 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addPlayerComponent(final CharacterAnimations general) {
+	public EntityBuilder addPlayerComponent(CharacterAnimations general) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		PlayerComponent playerComponent = engine.createComponent(PlayerComponent.class);
 		playerComponent.init(general);
@@ -285,21 +283,19 @@ public class EntityBuilder {
 		return instance;
 	}
 
-	public EntityBuilder addAppendixModelInstanceComponent(GameModelInstance modelInstance) {
+	public void addAppendixModelInstanceComponent(GameModelInstance modelInstance) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		AppendixModelInstanceComponent component = engine.createComponent(AppendixModelInstanceComponent.class);
 		component.init(modelInstance);
 		component.getModelInstance().userData = currentEntity;
 		currentEntity.add(component);
-		return instance;
 	}
 
-	public EntityBuilder addDoorComponent(MapGraphNode node, DoorsDefinitions type) {
+	public void addDoorComponent(MapGraphNode node, DoorsDefinitions type) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		DoorComponent doorComponent = engine.createComponent(DoorComponent.class);
 		doorComponent.init(node, type);
 		currentEntity.add(doorComponent);
-		return instance;
 	}
 
 	public EntityBuilder addFlyingParticleComponent(float nodeHeight,
@@ -327,9 +323,9 @@ public class EntityBuilder {
 		this.currentEntity = engine.createEntity();
 	}
 
-	private Item addPickUpComponent( Class<? extends Item> type,
-									 ItemDeclaration declaration,
-									 Texture displayImage) {
+	private Item addPickUpComponent(Class<? extends Item> type,
+									ItemDeclaration declaration,
+									Texture displayImage) {
 		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
 		Item pickup = Pools.obtain(type);
 		pickup.init(declaration, 0, 0, displayImage);

@@ -48,7 +48,7 @@ public class ActionPointsIndicator extends Table {
 	}
 
 	public void updateValue(int newValue) {
-		label.setText(newValue);
+		label.setText(Math.max(newValue, 0));
 		addAction(Actions.sequence(
 				Actions.scaleTo(
 						SIZE_BY_EFFECT_SCALE_TO,

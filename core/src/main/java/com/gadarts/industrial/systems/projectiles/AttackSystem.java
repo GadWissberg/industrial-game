@@ -100,7 +100,7 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 				character,
 				direction,
 				charPos,
-				playerDefinition.getBulletCreationOffset(auxVector3_1),
+				playerDefinition.getBulletCreationOffset(auxVector3_1.setZero()),
 				weaponDeclaration);
 	}
 

@@ -6,7 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.gadarts.industrial.components.player.Ammo;
+import com.gadarts.industrial.components.player.WeaponAmmo;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponsDeclarations;
@@ -45,11 +45,10 @@ public class AmmoIndicator extends HudIndicator {
 	}
 
 
-
-	public void setValues(Ammo ammo) {
-		this.label.setText(String.format(FORMAT, ammo.getLoaded(), ammo.getTotal()));
-		float badThreshold = ammo.getPlayerWeaponDeclaration().magazineSize() * LOW_VALUE_THRESHOLD;
-		label.getStyle().fontColor.set(ammo.getLoaded() <= badThreshold ? FONT_COLOR_BAD : FONT_COLOR_GOOD);
-		ammoTypeImage.setDrawable(ammoTypeDrawables.get(ammo.getPlayerWeaponDeclaration()));
+	public void setValues(WeaponAmmo weaponAmmo) {
+		this.label.setText(String.format(FORMAT, weaponAmmo.getLoaded(), weaponAmmo.getTotal()));
+		float badThreshold = weaponAmmo.getPlayerWeaponDeclaration().magazineSize() * LOW_VALUE_THRESHOLD;
+		label.getStyle().fontColor.set(weaponAmmo.getLoaded() <= badThreshold ? FONT_COLOR_BAD : FONT_COLOR_GOOD);
+		ammoTypeImage.setDrawable(ammoTypeDrawables.get(weaponAmmo.getPlayerWeaponDeclaration()));
 	}
 }

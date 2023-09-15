@@ -279,7 +279,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	public void commandDone(Entity character) {
 		ComponentsMapper.character.get(character).getCharacterSpriteData().setSpriteType(IDLE);
-		if (getSystemsCommonData().getCurrentGameMode() == GameMode.EXPLORE_TURN_BASED) {
+		if (getSystemsCommonData().getCurrentGameMode() != GameMode.EXPLORE) {
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onCharacterCommandDone(character);
 			}

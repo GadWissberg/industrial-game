@@ -12,7 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.player.Ammo;
+import com.gadarts.industrial.components.player.WeaponAmmo;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -24,6 +24,7 @@ import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public class PlayerLayout extends ItemsTable {
 	public static final int WEAPON_POSITION_PARENT_X = 100;
 	public static final int WEAPON_POSITION_PARENT_Y = 200;
@@ -31,7 +32,6 @@ public class PlayerLayout extends ItemsTable {
 	private static final Vector2 auxVector = new Vector2();
 	private static final float SPOT_RADIUS = 25;
 
-	@Getter
 	private ItemDisplay weaponChoice;
 
 	public PlayerLayout(Texture texture,
@@ -123,8 +123,8 @@ public class PlayerLayout extends ItemsTable {
 		AmmoIndicator ammoIndicator = systemsCommonData.getAmmoIndicator();
 		ammoIndicator.setVisible(!declaration.declaration().melee());
 		Entity player = systemsCommonData.getPlayer();
-		Ammo ammo = ComponentsMapper.player.get(player).getAmmo().get(declaration.ammoType());
-		ammoIndicator.setValues(ammo);
+		WeaponAmmo weaponAmmo = ComponentsMapper.player.get(player).getAmmo().get(declaration);
+		ammoIndicator.setValues(weaponAmmo);
 		subscribers.forEach(sub -> sub.onSelectedWeaponChanged((Weapon) weaponChoice.getItem()));
 	}
 

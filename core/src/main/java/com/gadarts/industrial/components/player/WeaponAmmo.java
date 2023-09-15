@@ -8,7 +8,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Setter
 @Getter
-public class Ammo {
+public class WeaponAmmo {
 	private int loaded;
 	private int total;
 	private PlayerWeaponDeclaration playerWeaponDeclaration;
