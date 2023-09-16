@@ -187,7 +187,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			}
 			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(character);
 			if (enemyComponent.getAiStatus() != IDLE) {
-				updateEnemyAiStatus(character, IDLE);
+				updateEnemyAiStatus(character, null);
 			}
 			character.remove(SimpleDecalComponent.class);
 		}

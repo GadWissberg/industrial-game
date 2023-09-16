@@ -1,5 +1,6 @@
 package com.gadarts.industrial.systems.ui.indicators.turns;
 
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.gadarts.industrial.systems.ui.NoiseEffectHandler;
+import lombok.Getter;
 
 import static com.badlogic.gdx.math.Interpolation.*;
 
@@ -28,29 +30,33 @@ public class TurnsIndicatorIcon extends Table {
 	private final ActionPointsIndicator actionPointsIndicator;
 	private final NoiseEffectHandler noiseEffectHandler;
 
-	public TurnsIndicatorIcon(Texture texture,
-							  Texture borderTexture,
-							  Texture actionsPointsTexture,
+	@Getter
+	private final Entity character;
+
+	public TurnsIndicatorIcon(TurnsIndicatorIconTextures textures,
 							  BitmapFont font,
 							  int actionPoints,
-							  NoiseEffectHandler noiseEffectHandler) {
+							  NoiseEffectHandler noiseEffectHandler,
+							  Entity character) {
 		super();
 		this.noiseEffectHandler = noiseEffectHandler;
-		setBackground(new TextureRegionDrawable(texture));
-		setSize(texture.getWidth(), texture.getHeight());
+		Texture circleTexture = textures.circleTexture();
+		setBackground(new TextureRegionDrawable(circleTexture));
+		setSize(circleTexture.getWidth(), circleTexture.getHeight());
 		icon = new Image();
 		icon.setScaling(Scaling.none);
-		border = new Image(borderTexture);
+		border = new Image(textures.borderTexture());
 		Stack stack = new Stack(icon, border);
 		add(stack);
 		border.getColor().a = 0F;
-		actionPointsIndicator = new ActionPointsIndicator(actionsPointsTexture, font, actionPoints, noiseEffectHandler);
+		actionPointsIndicator = new ActionPointsIndicator(textures.actionsPointsTexture(), font, actionPoints, noiseEffectHandler);
 		Vector2 position = localToScreenCoordinates(auxVector.setZero().add(RELATIVE_POSITION_X, RELATIVE_POSITION_Y));
 		actionPointsIndicator.setPosition(position.x, position.y);
 		actionPointsIndicator.getColor().a = 0;
 		addActor(actionPointsIndicator);
 		setOrigin(Align.center);
 		setTransform(true);
+		this.character = character;
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -30,21 +31,22 @@ public class TurnsIndicatorsHandler {
 	private final Texture greenIconTexture;
 	private final Texture redIconTexture;
 	private final HashMap<String, TextureRegionDrawable> charactersIcons;
-	private final Map<Entity, TurnsIndicatorIcon> icons = new HashMap<>();
+	private final Map<Entity, TurnsIndicatorIcon> iconsMap = new HashMap<>();
 	private final Texture borderTexture;
 	private final Texture actionsPointsTexture;
 	private final BitmapFont font;
 	private final NoiseEffectHandler noiseEffectHandler;
 	private final GameStage stage;
+	private final List<TurnsIndicatorIcon> iconsList = new ArrayList<>();
 	private Entity currentBorder;
 
 	public TurnsIndicatorsHandler(GameAssetManager assetsManager,
-								  HashMap<String, TextureRegionDrawable> icons,
+								  HashMap<String, TextureRegionDrawable> iconsMap,
 								  NoiseEffectHandler noiseEffectHandler,
 								  GameStage stage) {
 		this.greenIconTexture = assetsManager.getTexture(Assets.UiTextures.HUD_ICON_CIRCLE_GREEN);
 		this.redIconTexture = assetsManager.getTexture(Assets.UiTextures.HUD_ICON_CIRCLE_RED);
-		this.charactersIcons = icons;
+		this.charactersIcons = iconsMap;
 		this.borderTexture = assetsManager.getTexture(Assets.UiTextures.HUD_ICON_CIRCLE_BORDER);
 		this.actionsPointsTexture = assetsManager.getTexture(Assets.UiTextures.HUD_ACTION_POINTS_INDICATOR);
 		this.font = assetsManager.getFont(Assets.Fonts.HUD_SMALL);
@@ -59,7 +61,7 @@ public class TurnsIndicatorsHandler {
 				applyBorderForNewTurn(character);
 			}
 		});
-		List<TurnsIndicatorIcon> entries = new ArrayList<>(icons.values());
+		List<TurnsIndicatorIcon> entries = new ArrayList<>(iconsMap.values());
 		for (int i = 0; i < entries.size(); i++) {
 			initPositionForIcon(i, entries.get(i));
 		}
@@ -75,69 +77,82 @@ public class TurnsIndicatorsHandler {
 	}
 
 	private void addIcon(Entity entity) {
-		if (icons.containsKey(entity) || !ComponentsMapper.character.has(entity)) return;
+		if (iconsMap.containsKey(entity) || !ComponentsMapper.character.has(entity)) return;
 
 		boolean isPlayer = ComponentsMapper.player.has(entity);
 		Texture circleTexture = isPlayer ? greenIconTexture : redIconTexture;
 		int actionPoints = ComponentsMapper.character.get(entity).getAttributes().getActionPoints();
-		TurnsIndicatorIcon icon = new TurnsIndicatorIcon(
-				circleTexture,
+		TurnsIndicatorIconTextures textures = new TurnsIndicatorIconTextures(circleTexture,
 				borderTexture,
-				actionsPointsTexture,
+				actionsPointsTexture);
+		TurnsIndicatorIcon icon = new TurnsIndicatorIcon(
+				textures,
 				font,
 				actionPoints,
-				noiseEffectHandler);
+				noiseEffectHandler,
+				entity);
 		String playerId = PlayerDeclaration.getInstance().id();
 		icon.applyIcon(charactersIcons.get(isPlayer ? playerId : ComponentsMapper.enemy.get(entity).getEnemyDeclaration().id()));
 		icon.getColor().a = 0F;
 		icon.addAction(Actions.fadeIn(ICON_FADING_DURATION, Interpolation.smoother));
-		icons.put(entity, icon);
+		iconsMap.put(entity, icon);
+		iconsList.add(icon);
 		stage.addActor(icon);
 	}
 
 	public void applyBorderForNewTurn(Entity entity) {
-		if (!icons.containsKey(entity)) return;
-		TurnsIndicatorIcon current = icons.get(currentBorder);
+		if (!iconsMap.containsKey(entity)) return;
+		TurnsIndicatorIcon current = iconsMap.get(currentBorder);
 		if (current != null) {
 			current.setBorderVisibility(false);
 		}
-		TurnsIndicatorIcon turnsIndicatorIcon = icons.get(entity);
+		TurnsIndicatorIcon turnsIndicatorIcon = iconsMap.get(entity);
 		turnsIndicatorIcon.setBorderVisibility(true);
 		turnsIndicatorIcon.updateActionPointsIndicator(ComponentsMapper.character.get(entity).getAttributes().getActionPoints());
 		currentBorder = entity;
 	}
 
 	public void addCharacter(Entity enemy) {
-		if (icons.containsKey(enemy)) return;
+		if (iconsMap.containsKey(enemy)) return;
 		addIcon(enemy);
-		initPositionForIcon(icons.size() - 1, icons.get(enemy));
+		initPositionForIcon(iconsMap.size() - 1, iconsMap.get(enemy));
 	}
 
 	public void removeCharacter(Entity character) {
-		if (icons.containsKey(character)) {
-			TurnsIndicatorIcon icon = icons.get(character);
-			icon.addAction(Actions.sequence(Actions.fadeOut(ICON_FADING_DURATION), Actions.removeActor()));
-		}
-		icons.remove(character);
-		if (icons.size() <= 1) {
+		TurnsIndicatorIcon icon = iconsMap.get(character);
+		icon.addAction(Actions.sequence(Actions.fadeOut(ICON_FADING_DURATION), Actions.removeActor()));
+		int removedIndex = iconsList.indexOf(iconsMap.get(character));
+		iconsMap.remove(character);
+		iconsList.remove(icon);
+		if (iconsMap.size() <= 1) {
 			turnOffCombatMode();
+		} else {
+			for (int i = removedIndex; i < iconsList.size(); i++) {
+				icon = iconsList.get(i);
+				MoveByAction action = Actions.moveBy(
+						0F,
+						icon.getPrefHeight() + PADDING_ICON_TOP,
+						1F,
+						Interpolation.slowFast);
+				iconsMap.get(icon.getCharacter()).addAction(action);
+			}
 		}
 	}
 
 	private void turnOffCombatMode( ) {
-		icons.values().forEach(Actor::remove);
-		icons.clear();
+		iconsMap.values().forEach(Actor::remove);
+		iconsMap.clear();
 	}
 
 	public void updateCurrentActionPointsIndicator(Entity character, int newValue) {
-		if (!icons.containsKey(character)) return;
+		if (!iconsMap.containsKey(character)) return;
 
-		icons.get(character).updateActionPointsIndicator(newValue);
+		iconsMap.get(character).updateActionPointsIndicator(newValue);
 	}
 
 	public void applyDamageEffect(Entity character) {
-		if (!icons.containsKey(character)) return;
+		if (!iconsMap.containsKey(character)) return;
 
-		icons.get(character).applyDamageEffect();
+		iconsMap.get(character).applyDamageEffect();
 	}
 }
