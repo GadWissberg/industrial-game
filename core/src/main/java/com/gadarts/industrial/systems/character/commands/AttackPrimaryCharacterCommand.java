@@ -85,23 +85,22 @@ public class AttackPrimaryCharacterCommand extends CharacterCommand {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		OnGoingAttack onGoingAttack = characterComponent.getOnGoingAttack();
 		boolean commandDone = false;
+		int primaryAttackHitFrameIndex = GameUtils.getPrimaryAttackHitFrameIndexForCharacter(character, commonData);
+		if (newFrame.index == primaryAttackHitFrameIndex) {
+			CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(character);
+			MapGraphNode positionNode = commonData.getMap().getNode(charDecalComp.getDecal().getPosition());
+			Vector3 positionNodeCenterPosition = positionNode.getCenterPosition(auxVector3_1);
+			Vector3 direction = GameUtils.calculateDirectionToTarget(character, commonData.getMap());
+			characterComponent.setFacingDirection(Direction.findDirection(auxVector2.set(direction.x, direction.z)));
+			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
+				subscriber.onCharacterEngagesPrimaryAttack(character, direction, positionNodeCenterPosition);
+			}
+			onGoingAttack.bulletShot();
+		}
 
 		if (onGoingAttack.isDone()) {
 			commandDone = true;
 			consumeActionPoints(character, characterComponent.getPrimaryAttack().actionPointsConsumption(), subscribers);
-		} else {
-			int primaryAttackHitFrameIndex = GameUtils.getPrimaryAttackHitFrameIndexForCharacter(character, commonData);
-			if (newFrame.index == primaryAttackHitFrameIndex) {
-				CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(character);
-				MapGraphNode positionNode = commonData.getMap().getNode(charDecalComp.getDecal().getPosition());
-				Vector3 positionNodeCenterPosition = positionNode.getCenterPosition(auxVector3_1);
-				Vector3 direction = GameUtils.calculateDirectionToTarget(character, commonData.getMap());
-				characterComponent.setFacingDirection(Direction.findDirection(auxVector2.set(direction.x, direction.z)));
-				for (CharacterSystemEventsSubscriber subscriber : subscribers) {
-					subscriber.onCharacterEngagesPrimaryAttack(character, direction, positionNodeCenterPosition);
-				}
-				onGoingAttack.bulletShot();
-			}
 		}
 
 		return commandDone;

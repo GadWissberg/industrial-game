@@ -47,6 +47,7 @@
       "number_of_bullets_max": 1,
       "bullet_model": "gun_bullet",
       "bullet_speed": 0.6,
+      "action_points_consumption": 1,
       "light_on_creation": true,
       "bullet_explosion": "bullet_ricochet"
     }
