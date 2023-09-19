@@ -241,10 +241,12 @@ public class StorageGrid extends ItemsTable {
 	}
 
 	public ItemDisplay findItemDisplay(final int id) {
-		Actor[] items = StorageGrid.this.getParent().getChildren().items;
+		Actor[] items = getChildren().items;
 		Optional<ItemDisplay> item = IntStream.range(0, items.length)
 				.filter(i -> {
 					Actor actor = items[i];
+					if (actor == null) return false;
+
 					Integer itemId = systemsCommonData.getStorage().getIndices().get(((ItemDisplay) actor).getItem().getDeclaration());
 					return itemId == id;
 				})

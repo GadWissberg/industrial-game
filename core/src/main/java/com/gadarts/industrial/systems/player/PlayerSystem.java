@@ -97,9 +97,11 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		if (ComponentsMapper.player.has(character)) {
 			Weapon selectedWeapon = getSystemsCommonData().getStorage().getSelectedWeapon();
 			PlayerWeaponDeclaration declaration = (PlayerWeaponDeclaration) selectedWeapon.getDeclaration();
-			WeaponAmmo weaponAmmo = ComponentsMapper.player.get(character).getAmmo().get(declaration);
-			weaponAmmo.setLoaded(weaponAmmo.getLoaded() - 1);
-			subscribers.forEach(sub -> sub.onPlayerConsumedAmmo(weaponAmmo));
+			if (!declaration.declaration().melee()) {
+				WeaponAmmo weaponAmmo = ComponentsMapper.player.get(character).getAmmo().get(declaration);
+				weaponAmmo.setLoaded(weaponAmmo.getLoaded() - 1);
+				subscribers.forEach(sub -> sub.onPlayerConsumedAmmo(weaponAmmo));
+			}
 		}
 	}
 
