@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
+import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -52,6 +53,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import static com.gadarts.industrial.components.ComponentsMapper.player;
 import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 import static com.gadarts.industrial.shared.assets.Assets.Declarations.PLAYER_WEAPONS;
@@ -128,6 +130,17 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				getLifeCycleHandler().raiseFlagToRestartGame();
 			} else {
 				refreshFogOfWar();
+			}
+			if (player.has(entity)) {
+				if (getSystemsCommonData().getCurrentGameMode() == GameMode.EXPLORE) {
+					Queue<CharacterCommand> commands = ComponentsMapper.character.get(entity).getCommands();
+					if (commands.size > 1) {
+						CharacterCommand nextCommand = commands.get(1);
+						if (nextCommand.getDefinition() == RUN) {
+							commands.first().setState(CommandStates.ENDED);
+						}
+					}
+				}
 			}
 		}
 	}
@@ -420,8 +433,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		int pathSize = plannedPath.getCount();
 		if (!plannedPath.nodes.isEmpty() && plannedPath.get(pathSize - 1).equals(node)) {
 			SystemsCommonData systemsCommonData = getSystemsCommonData();
-			Entity player = systemsCommonData.getPlayer();
-			ComponentsMapper.character.get(player).getCommands().clear();
 			addCommand(plannedPath, RUN);
 			if (enemyAtNode != null) {
 				applyPrimaryAttack(enemyAtNode, plannedPath);

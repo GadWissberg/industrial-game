@@ -423,7 +423,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	@Override
 	public void onCharacterNodeChanged(Entity entity, MapGraphNode oldNode, MapGraphNode newNode) {
-		character.get(entity).getRotationData().setRotating(true);
+		CharacterComponent characterComponent = character.get(entity);
+		characterComponent.getRotationData().setRotating(true);
 	}
 
 	@Override
@@ -435,7 +436,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	public void onFrameChanged(final Entity character, final TextureAtlas.AtlasRegion newFrame) {
 		SpriteType spriteType = ComponentsMapper.characterDecal.get(character).getSpriteType();
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		if (spriteType == RUN) {
+		if (spriteType == SpriteType.RUN) {
 			boolean isPlayer = ComponentsMapper.player.has(character);
 			if ((newFrame.index == 0 || newFrame.index == 5)) {
 				if (isPlayer || ComponentsMapper.enemy.get(character).getEnemyDeclaration().human()) {

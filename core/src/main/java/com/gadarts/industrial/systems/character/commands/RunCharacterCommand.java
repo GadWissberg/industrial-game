@@ -106,7 +106,8 @@ public class RunCharacterCommand extends CharacterCommand {
 		if (nextNode.getDoor() != null && ComponentsMapper.door.get(nextNode.getDoor()).getState() != DoorStates.OPEN) {
 			Decal decal = ComponentsMapper.characterDecal.get(character).getDecal();
 			MapGraphNode currentNode = systemsCommonData.getMap().getNode(decal.getPosition());
-			Direction direction = Direction.findDirection(nextNode.getCenterPosition(auxVector2_2).sub(currentNode.getCenterPosition(auxVector2_1)).nor());
+			Vector2 centerPosition = nextNode.getCenterPosition(auxVector2_2);
+			Direction direction = Direction.findDirection(centerPosition.sub(currentNode.getCenterPosition(auxVector2_1)).nor());
 			ComponentsMapper.character.get(character).setFacingDirection(direction);
 			handleDoor(character, nextNode.getDoor());
 			commandDone = true;
