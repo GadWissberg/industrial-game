@@ -711,29 +711,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 			AtlasRegion currentFrame = (AtlasRegion) characterDecalComponent.getDecal().getTextureRegion();
 			AtlasRegion newFrame = calculateCharacterDecalNewFrame(entity, aniComp, currentFrame);
 			if (characterDecalComponent.getSpriteType() == spriteType && currentFrame != newFrame) {
-				updateCharacterDecalTextureAccordingToAnimation(entity, characterComponent, spriteType, newFrame);
-			}
-		}
-	}
-
-	private void updateCharacterDecalTextureAccordingToAnimation(Entity entity,
-																 CharacterComponent characterComponent,
-																 SpriteType spriteType,
-																 AtlasRegion newFrame) {
-		CharacterDecalComponent characterDecalComponent = ComponentsMapper.characterDecal.get(entity);
-		CharacterAnimations animations = characterDecalComponent.getAnimations();
-		Decal decal = characterDecalComponent.getDecal();
-		decal.setTextureRegion(newFrame);
-		Direction facingDirection = characterComponent.getFacingDirection();
-		if (spriteType.isSingleDirection()) {
-			facingDirection = Direction.SOUTH;
-		}
-		if (animations.contains(spriteType)) {
-			animations.get(spriteType, facingDirection);
-		} else {
-			if (ComponentsMapper.player.has(entity)) {
-				CharacterAnimations generalAnim = ComponentsMapper.player.get(entity).getGeneralAnimations();
-				generalAnim.get(spriteType, facingDirection);
+				Decal decal = characterDecalComponent.getDecal();
+				decal.setTextureRegion(newFrame);
 			}
 		}
 	}

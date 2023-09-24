@@ -278,7 +278,9 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	public void commandDone(Entity character) {
-		ComponentsMapper.character.get(character).getCharacterSpriteData().setSpriteType(IDLE);
+		if (ComponentsMapper.animation.get(character).getAnimation().getPlayMode() != Animation.PlayMode.REVERSED) {
+			ComponentsMapper.character.get(character).getCharacterSpriteData().setSpriteType(IDLE);
+		}
 		if (getSystemsCommonData().getCurrentGameMode() != GameMode.EXPLORE) {
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onCharacterCommandDone(character);
@@ -364,8 +366,6 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 				Pools.free(characterComponent.getCommands().removeFirst());
 				commandDone(character);
 			}
-		} else {
-			commandDone(character);
 		}
 	}
 
