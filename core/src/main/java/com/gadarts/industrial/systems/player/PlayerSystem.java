@@ -40,7 +40,6 @@ import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
 import com.gadarts.industrial.systems.character.commands.CommandStates;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
-import com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
 import com.gadarts.industrial.systems.turns.GameMode;
@@ -283,15 +282,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		boolean blocked = false;
 		for (GridPoint2 nodeCoord : nodes) {
 			blocked = applyLineOfSightOnNode(map, playerNode, blocked, nodeCoord);
-		}
-	}
-
-	@Override
-	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus, boolean wokeBySpottingPlayer) {
-		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		if (systemsCommonData.getCurrentGameMode() == GameMode.EXPLORE) {
-			Entity player = systemsCommonData.getPlayer();
-			ComponentsMapper.character.get(player).getCommands().forEach(c -> c.setState(CommandStates.ENDED));
 		}
 	}
 

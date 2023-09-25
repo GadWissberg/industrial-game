@@ -23,9 +23,9 @@ public class PickupItemCharacterCommand extends CharacterCommand {
 									  Entity character,
 									  TextureAtlas.AtlasRegion newFrame,
 									  List<CharacterSystemEventsSubscriber> subscribers) {
+		if (ComponentsMapper.animation.get(character).getAnimation().getPlayMode() != PlayMode.REVERSED) return false;
 
-		boolean done = false;
-		if (newFrame.index == 1 && ComponentsMapper.animation.get(character).getAnimation().getPlayMode() == PlayMode.REVERSED) {
+		if (newFrame.index == 1) {
 			MapGraph map = systemsCommonData.getMap();
 			val characterNode = map.getNode(ComponentsMapper.characterDecal.get(character).getDecal().getPosition());
 			List<Entity> pickups = map.fetchPickupsFromNode(characterNode, auxEntityList);
@@ -33,10 +33,9 @@ public class PickupItemCharacterCommand extends CharacterCommand {
 				Entity itemPickedUp = pickups.get(0);
 				subscriber.onItemPickedUp(itemPickedUp);
 				consumeActionPoints(character, PICKUP_ACTION_POINT_CONSUME, subscribers);
-				done = true;
 			}
 		}
-		return done;
+		return false;
 	}
 
 	@Override

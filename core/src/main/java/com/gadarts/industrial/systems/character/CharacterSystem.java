@@ -35,6 +35,7 @@ import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
 import com.gadarts.industrial.systems.character.commands.CommandStates;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
+import com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus;
 import com.gadarts.industrial.systems.player.PlayerSystemEventsSubscriber;
 import com.gadarts.industrial.systems.projectiles.AttackSystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.RenderSystemEventsSubscriber;
@@ -110,8 +111,10 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			Entity current = getSystemsCommonData().getTurnsQueue().first();
 			if (character.has(current)) {
 				CharacterComponent characterComponent = character.get(current);
-				if (characterComponent.getAttributes().getActionPoints() <= 0) {
-					characterComponent.getAttributes().resetActionPoints();
+				Queue<CharacterCommand> commands = characterComponent.getCommands();
+				CharacterAttributes attributes = characterComponent.getAttributes();
+				if (attributes.getActionPoints() <= 0 && (commands.isEmpty() || commands.first().getState() == CommandStates.ENDED)) {
+					attributes.resetActionPoints();
 					characterComponent.getCharacterSpriteData().setSpriteType(IDLE);
 					subscribers.forEach(CharacterSystemEventsSubscriber::onCharacterFinishedTurn);
 				} else {
@@ -278,15 +281,13 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 	public void commandDone(Entity character) {
-		if (ComponentsMapper.animation.get(character).getAnimation().getPlayMode() != Animation.PlayMode.REVERSED) {
-			ComponentsMapper.character.get(character).getCharacterSpriteData().setSpriteType(IDLE);
-		}
+		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
+		characterComponent.getCharacterSpriteData().setSpriteType(IDLE);
 		if (getSystemsCommonData().getCurrentGameMode() != GameMode.EXPLORE) {
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onCharacterCommandDone(character);
 			}
 		}
-
 	}
 
 	private void handleModeWithNonLoopingAnimation(final Entity character) {
@@ -327,12 +328,15 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	}
 
 
-	private void handleAnimationReverse(Entity character, AnimationComponent animationComponent,
+	private void handleAnimationReverse(Entity character,
+										AnimationComponent animationComponent,
 										Animation<TextureAtlas.AtlasRegion> animation,
 										SpriteType spriteType) {
 		if (animationComponent.getAnimation().getPlayMode() == Animation.PlayMode.REVERSED) {
 			if (spriteType.isCommandDoneOnReverseEnd()) {
-				commandDone(character);
+				CharacterComponent characterComponent = ComponentsMapper.character.get(character);
+				characterComponent.getCharacterSpriteData().setSpriteType(IDLE);
+				characterComponent.getCommands().first().setState(CommandStates.ENDED);
 			}
 			animation.setPlayMode(Animation.PlayMode.NORMAL);
 		} else {
@@ -365,6 +369,22 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			} else if (currentCommand.getState() == CommandStates.ENDED) {
 				Pools.free(characterComponent.getCommands().removeFirst());
 				commandDone(character);
+			}
+		} else if (ComponentsMapper.enemy.has(character)) {
+			commandDone(character);
+		}
+	}
+
+	@Override
+	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus, boolean wokeBySpottingPlayer) {
+		if (!wokeBySpottingPlayer) return;
+
+		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		if (systemsCommonData.getCurrentGameMode() == GameMode.EXPLORE) {
+			Entity player = systemsCommonData.getPlayer();
+			Queue<CharacterCommand> commands = character.get(player).getCommands();
+			if (!commands.isEmpty()) {
+				commandDone(player);
 			}
 		}
 	}
