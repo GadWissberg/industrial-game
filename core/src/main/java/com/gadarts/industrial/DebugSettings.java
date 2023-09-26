@@ -19,7 +19,7 @@ public final class DebugSettings {
 	public static final boolean FULL_SCREEN = false;
 	public static final boolean DISABLE_FRUSTUM_CULLING = false;
 	public static final int LOG_LEVEL = LOG_DEBUG;
-	public static final String STARTING_WEAPON = "pnc";
+	public static final String STARTING_WEAPON = "glc";
 	public static final boolean ALLOW_STATIC_SHADOWS = true;
 	public static final boolean DISABLE_FOW = false;
 	public static final boolean PARALYZED_ENEMIES = false;
@@ -30,4 +30,5 @@ public final class DebugSettings {
 	public static final boolean SPACE_BAR_SKIPS_PLAYER = false;
 	public static final String TEST_LEVEL = "enemy_test";
 	public static final boolean ALLOW_SCREEN_SHOT_OF_DEPTH_MAP = true;
+	public static final boolean DISABLE_BULLET_COLLISION_WITH_CHARACTERS = true;
 }

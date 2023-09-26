@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.BulletComponent;
@@ -37,12 +38,14 @@ import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.utils.EntityBuilder;
 
+import static com.gadarts.industrial.components.DoorComponent.DoorStates;
 import static com.gadarts.industrial.components.player.PlayerComponent.PLAYER_HEIGHT;
 
 public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> implements CharacterSystemEventsSubscriber {
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final float BULLET_MAX_DISTANCE = 14;
 	private static final Vector3 auxVector3_1 = new Vector3();
+	private static final Vector3 auxVector3_2 = new Vector3();
 	private final static float PROJ_LIGHT_INTENSITY = 0.05F;
 	private final static float PROJ_LIGHT_RADIUS = 1F;
 	private static final float BULLET_ENGAGE_LIGHT_DURATION = 0.1F;
@@ -52,6 +55,7 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 	private static final float JACKET_FLY_AWAY_DEC = 0.9F;
 	private static final BoundingBox auxBoundingBox1 = new BoundingBox();
 	private static final BoundingBox auxBoundingBox2 = new BoundingBox();
+	private static final float BULLET_BOUNDING_BOX_SIZE = 0.1F;
 	private ImmutableArray<Entity> bullets;
 	private ImmutableArray<Entity> collidables;
 
@@ -262,28 +266,33 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 			return checkCollisionWithCharacter(gameModelInstance, collidable);
 		} else if (ComponentsMapper.environmentObject.has(collidable)) {
 			MapNodesTypes nodeType = ComponentsMapper.environmentObject.get(collidable).getType().getNodeType();
-			if (nodeType != MapNodesTypes.PASSABLE_NODE) {
+			boolean isDoor = ComponentsMapper.door.has(collidable);
+			if (nodeType != MapNodesTypes.PASSABLE_NODE || (isDoor && ComponentsMapper.door.get(collidable).getState() == DoorStates.CLOSED)) {
 				return checkCollisionWithEnvObject(gameModelInstance, collidable);
 			}
 		}
 		return false;
 	}
 
-	private boolean checkCollisionWithEnvObject(GameModelInstance gameModelInstance, Entity collidable) {
+	private boolean checkCollisionWithEnvObject(GameModelInstance bulletGameModelInstance, Entity collidable) {
 		GameModelInstance envModelInstance = ComponentsMapper.modelInstance.get(collidable).getModelInstance();
 		AdditionalRenderData envRenderData = envModelInstance.getAdditionalRenderData();
 		BoundingBox collidableBoundingBox = envRenderData.getBoundingBox(auxBoundingBox1).mul(envModelInstance.transform);
-		AdditionalRenderData bulletRenderData = gameModelInstance.getAdditionalRenderData();
-		BoundingBox bulletBoundingBox = bulletRenderData.getBoundingBox(auxBoundingBox2).mul(gameModelInstance.transform);
+		float halfSize = BULLET_BOUNDING_BOX_SIZE / 2F;
+		Vector3 min = auxVector3_1.set(-halfSize, -halfSize, -halfSize);
+		Vector3 max = auxVector3_2.set(halfSize, halfSize, halfSize);
+		var bulletBoundingBox = auxBoundingBox2.set(min, max).mul(bulletGameModelInstance.transform);
 		return collidableBoundingBox.intersects(bulletBoundingBox);
 	}
 
 	private void handleCollisionsWithOtherEntities(GameModelInstance gameModelInstance, Entity bullet) {
 		for (Entity collidable : collidables) {
-			if (ComponentsMapper.bullet.get(bullet).getOwner() != collidable) {
-				if (checkCollision(gameModelInstance, collidable)) {
-					onProjectileCollisionWithAnotherEntity(bullet, collidable);
-					break;
+			if ((!DebugSettings.DISABLE_BULLET_COLLISION_WITH_CHARACTERS || !ComponentsMapper.character.has(collidable))) {
+				if (ComponentsMapper.bullet.get(bullet).getOwner() != collidable) {
+					if (checkCollision(gameModelInstance, collidable)) {
+						onProjectileCollisionWithAnotherEntity(bullet, collidable);
+						break;
+					}
 				}
 			}
 		}
