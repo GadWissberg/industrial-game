@@ -9,7 +9,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterComponent;
-import com.gadarts.industrial.components.character.OnGoingAttack;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.WeaponDeclaration;
@@ -83,7 +82,6 @@ public class AttackPrimaryCharacterCommand extends CharacterCommand {
 										SystemsCommonData commonData,
 										List<CharacterSystemEventsSubscriber> subscribers) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		OnGoingAttack onGoingAttack = characterComponent.getOnGoingAttack();
 		boolean commandDone = false;
 		int primaryAttackHitFrameIndex = GameUtils.getPrimaryAttackHitFrameIndexForCharacter(character, commonData);
 		if (newFrame.index == primaryAttackHitFrameIndex) {
@@ -95,10 +93,13 @@ public class AttackPrimaryCharacterCommand extends CharacterCommand {
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onCharacterEngagesPrimaryAttack(character, direction, positionNodeCenterPosition);
 			}
-			onGoingAttack.bulletShot();
+			characterComponent.getOnGoingAttack().bulletShot();
 		}
 
-		if (onGoingAttack.isDone()) {
+		if (characterComponent.getOnGoingAttack().isDone()) {
+			if (ComponentsMapper.player.has(character)) {
+				characterComponent.setTarget(null);
+			}
 			commandDone = true;
 			consumeActionPoints(character, characterComponent.getPrimaryAttack().actionPointsConsumption(), subscribers);
 		}
