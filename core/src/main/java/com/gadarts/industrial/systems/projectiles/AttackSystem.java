@@ -8,6 +8,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -56,6 +57,7 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 	private static final BoundingBox auxBoundingBox1 = new BoundingBox();
 	private static final BoundingBox auxBoundingBox2 = new BoundingBox();
 	private static final float BULLET_BOUNDING_BOX_SIZE = 0.1F;
+	private final static Quaternion rotationQuaternion = new Quaternion();
 	private ImmutableArray<Entity> bullets;
 	private ImmutableArray<Entity> collidables;
 
@@ -64,19 +66,20 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		super(assetsManager, lifeCycleHandler);
 	}
 
-	private static Vector2 transformBulletModel(Entity character, Vector3 direction, Vector3 position, Vector3 bulletCreationOffset, GameModelInstance modelInstance) {
-		modelInstance.transform.setToTranslation(position);
-		modelInstance.transform.rotate(Vector3.Y, -auxVector2_1.set(direction.x, direction.z).nor().angleDeg())
-				.translate(bulletCreationOffset);
-
-		Vector3 biasedPos = modelInstance.transform.getTranslation(auxVector3_1);
-		modelInstance.transform.setToTranslation(biasedPos);
+	private Vector3 transformBulletModel(Entity character,
+										 Vector3 position,
+										 Vector3 bulletCreationOffset,
+										 GameModelInstance modelInstance) {
 		Entity target = ComponentsMapper.character.get(character).getTarget();
 		Vector3 targetPos = ComponentsMapper.characterDecal.get(target).getDecal().getPosition();
-		Vector2 bulletDirectionAfterBias = auxVector2_1.set(targetPos.x, targetPos.z)
-				.sub(biasedPos.x, biasedPos.z)
+		var biasedPosition = modelInstance.transform.setToTranslation(position).translate(bulletCreationOffset).getTranslation(auxVector3_1);
+		Vector3 bulletDirectionAfterBias = auxVector3_2.set(targetPos.x, targetPos.y, targetPos.z)
+				.sub(biasedPosition.x, biasedPosition.y, biasedPosition.z)
 				.nor();
-		modelInstance.transform.rotate(Vector3.Y, -bulletDirectionAfterBias.angleDeg());
+		rotationQuaternion.setFromCross(Vector3.X, bulletDirectionAfterBias);
+		modelInstance.transform
+				.set(bulletDirectionAfterBias, rotationQuaternion)
+				.setTranslation(auxVector3_1.set(biasedPosition.x, biasedPosition.y, biasedPosition.z));
 		return bulletDirectionAfterBias;
 	}
 
@@ -86,13 +89,13 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 												final Vector3 charPos) {
 
 		if (ComponentsMapper.enemy.has(character)) {
-			enemyEngagesPrimaryAttack(character, direction, charPos);
+			enemyEngagesPrimaryAttack(character, charPos);
 		} else if (ComponentsMapper.player.has(character)) {
-			playerEngagesSelectedWeapon(character, direction, charPos);
+			playerEngagesSelectedWeapon(character, charPos);
 		}
 	}
 
-	private void playerEngagesSelectedWeapon(Entity character, Vector3 direction, Vector3 charPos) {
+	private void playerEngagesSelectedWeapon(Entity character, Vector3 charPos) {
 		Weapon selectedWeapon = getSystemsCommonData().getStorage().getSelectedWeapon();
 		PlayerWeaponDeclaration playerWeaponDeclaration = (PlayerWeaponDeclaration) selectedWeapon.getDeclaration();
 		CharacterDeclaration playerDefinition = PlayerDeclaration.getInstance();
@@ -102,13 +105,12 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		soundPlayer.playSound(melee ? playerDefinition.getSoundMelee() : weaponDeclaration.soundEngage());
 		primaryAttackEngaged(
 				character,
-				direction,
 				charPos,
 				playerDefinition.getBulletCreationOffset(auxVector3_1.setZero()),
 				weaponDeclaration);
 	}
 
-	private void enemyEngagesPrimaryAttack(final Entity character, final Vector3 direction, final Vector3 charPos) {
+	private void enemyEngagesPrimaryAttack(Entity character, Vector3 charPos) {
 		EnemyComponent enemyComp = ComponentsMapper.enemy.get(character);
 		WeaponDeclaration primaryAttack = enemyComp.getEnemyDeclaration().attackPrimary();
 		getSystemsCommonData().getSoundPlayer().playSound(primaryAttack.soundEngage());
@@ -116,11 +118,10 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 		if (bulletCreationOffset == null) {
 			bulletCreationOffset = auxVector3_1.setZero().add(0F, PLAYER_HEIGHT / 2F, 0F);
 		}
-		primaryAttackEngaged(character, direction, charPos, bulletCreationOffset, primaryAttack);
+		primaryAttackEngaged(character, charPos, bulletCreationOffset, primaryAttack);
 	}
 
 	private void primaryAttackEngaged(Entity character,
-									  Vector3 direction,
 									  Vector3 charPos,
 									  Vector3 bulletCreationOffset,
 									  WeaponDeclaration primaryAttack) {
@@ -130,18 +131,17 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 				subscriber.onMeleeAttackAppliedOnTarget(character, target, primaryAttack);
 			});
 		} else {
-			createBullet(character, direction, charPos, primaryAttack, bulletCreationOffset);
+			createBullet(character, charPos, primaryAttack, bulletCreationOffset);
 		}
 	}
 
 	private void createBullet(Entity character,
-							  Vector3 direction,
 							  Vector3 position,
 							  WeaponDeclaration weaponDeclaration,
 							  Vector3 bulletCreationOffset) {
 		ModelInstancePools pooledModelInstances = getSystemsCommonData().getPooledModelInstances();
 		GameModelInstance modelInstance = pooledModelInstances.obtain(getAssetsManager(), weaponDeclaration.bulletModel());
-		Vector2 bulletDirection = transformBulletModel(character, direction, position, bulletCreationOffset, modelInstance);
+		Vector3 bulletDirection = transformBulletModel(character, position, bulletCreationOffset, modelInstance);
 		createBulletEntity(character, position, weaponDeclaration, modelInstance, bulletDirection);
 		applyBulletLight(position, weaponDeclaration);
 		applyBulletJacket(character, position, weaponDeclaration, pooledModelInstances);
@@ -183,11 +183,11 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 									Vector3 position,
 									WeaponDeclaration declaration,
 									GameModelInstance modelInstance,
-									Vector2 bulletDirection) {
+									Vector3 bulletDirection) {
 		EntityBuilder builder = EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
 				.addBulletComponent(
 						position,
-						auxVector3_1.set(bulletDirection.x, 0F, bulletDirection.y),
+						auxVector3_1.set(bulletDirection.x, bulletDirection.y, bulletDirection.z),
 						character,
 						declaration.damage(),
 						declaration)

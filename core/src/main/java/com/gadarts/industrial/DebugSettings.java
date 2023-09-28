@@ -30,5 +30,5 @@ public final class DebugSettings {
 	public static final boolean SPACE_BAR_SKIPS_PLAYER = false;
 	public static final String TEST_LEVEL = "enemy_test";
 	public static final boolean ALLOW_SCREEN_SHOT_OF_DEPTH_MAP = true;
-	public static final boolean DISABLE_BULLET_COLLISION_WITH_CHARACTERS = true;
+	public static final boolean DISABLE_BULLET_COLLISION_WITH_CHARACTERS = false;
 }
