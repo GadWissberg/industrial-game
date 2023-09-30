@@ -24,9 +24,6 @@ import com.gadarts.industrial.shared.assets.GameAssetManager;
 
 import java.util.ArrayList;
 
-/**
- * Handles the particle effects lifecycle and the libGdx Particle System object.
- */
 public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 	public static final float GRAVITY_COEFF = 1.05F;
 	private static final int BULLET_JACKET_TIME_TO_LEAVE = 5000;
@@ -55,7 +52,11 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 		flyingParticlesEntities = getEngine().getEntitiesFor(Family.all(FlyingParticleComponent.class).get());
 		particleEntitiesToRemove.clear();
 		particleEffectsToFollow.clear();
-		getEngine().addEntityListener(new EntityListener() {
+		getEngine().addEntityListener(createEntityListener(systemsCommonData));
+	}
+
+	private EntityListener createEntityListener(SystemsCommonData systemsCommonData) {
+		return new EntityListener() {
 			@Override
 			public void entityAdded(final Entity entity) {
 				if (ComponentsMapper.particleEffect.has(entity)) {
@@ -78,7 +79,7 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 					particleEffectsToFollow.add(ComponentsMapper.particleEffect.get(entity).getParticleEffect());
 				}
 			}
-		});
+		};
 	}
 
 	@Override

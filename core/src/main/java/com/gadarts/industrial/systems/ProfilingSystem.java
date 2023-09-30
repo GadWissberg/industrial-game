@@ -53,9 +53,6 @@ public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 		return onCommandRun(command, consoleCommandResult, null);
 	}
 
-	/**
-	 * Toggles the GLProfiler.
-	 */
 	private void toggle( ) {
 		if (glProfiler.isEnabled()) {
 			glProfiler.disable();

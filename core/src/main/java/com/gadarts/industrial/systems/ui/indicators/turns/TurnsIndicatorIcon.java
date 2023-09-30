@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
+import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.systems.ui.NoiseEffectHandler;
 import lombok.Getter;
 
@@ -89,5 +90,10 @@ public class TurnsIndicatorIcon extends Table {
 		addAction(Actions.sequence(
 				Actions.scaleTo(DAMAGE_EFFECT_SCALE_TO, DAMAGE_EFFECT_SCALE_TO, DAMAGE_EFFECT_DURATION, slowFast),
 				Actions.scaleTo(1F, 1F, DAMAGE_EFFECT_DURATION, sine)));
+	}
+
+	@Override
+	public String toString( ) {
+		return ComponentsMapper.player.has(character) ? "Player" : "Enemy";
 	}
 }

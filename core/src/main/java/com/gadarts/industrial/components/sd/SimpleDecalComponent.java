@@ -38,7 +38,7 @@ public class SimpleDecalComponent implements GameComponent {
 		decal = Decal.newDecal(textureRegion, true);
 		this.visible = visible;
 		this.billboard = billboard;
-		if (relatedDecals.size() > 0) {
+		if (!relatedDecals.isEmpty()) {
 			for (Decal decal : relatedDecals) {
 				Pools.get(Decal.class).free(decal);
 			}

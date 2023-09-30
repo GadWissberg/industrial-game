@@ -25,12 +25,12 @@ public class FlyingParticleComponent implements GameComponent {
 		return output.set(gravityForce);
 	}
 
-	public Vector3 setFlyAwayForce(Vector3 velocity) {
-		return flyAwayForce.set(velocity);
+	public void setFlyAwayForce(Vector3 velocity) {
+		flyAwayForce.set(velocity);
 	}
 
-	public Vector3 setGravityForce(Vector3 velocity) {
-		return gravityForce.set(velocity);
+	public void setGravityForce(Vector3 velocity) {
+		gravityForce.set(velocity);
 	}
 
 	@Override

@@ -16,10 +16,10 @@ public abstract class ConsoleCommandParameter {
 		this.alias = alias;
 	}
 
-	public boolean defineParameterValue(final String value,
-										final Console console,
-										final String messageOnParameterActivation,
-										final String messageOnParameterDeactivation) {
+	public void defineParameterValue(final String value,
+									 final Console console,
+									 final String messageOnParameterActivation,
+									 final String messageOnParameterDeactivation) {
 		boolean result;
 		try {
 			result = Integer.parseInt(value) == 1;
@@ -29,7 +29,6 @@ public abstract class ConsoleCommandParameter {
 		String msg = String.format(result ? messageOnParameterActivation : messageOnParameterDeactivation, alias);
 		console.insertNewLog(msg, false);
 		setParameterValue(result);
-		return result;
 	}
 
 	public abstract void run(String value, Console console);

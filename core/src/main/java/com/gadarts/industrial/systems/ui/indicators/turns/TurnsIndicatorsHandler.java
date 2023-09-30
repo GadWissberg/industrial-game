@@ -28,27 +28,23 @@ public class TurnsIndicatorsHandler {
 	private static final float PADDING_ICON_TOP = 10F;
 	private static final float PADDING_ICON_RIGHT = 50F;
 	private static final float PADDING_FIRST_ICON_TOP = 100F;
-	private final Texture greenIconTexture;
-	private final Texture redIconTexture;
-	private final HashMap<String, TextureRegionDrawable> charactersIcons;
-	private final Map<Entity, TurnsIndicatorIcon> iconsMap = new HashMap<>();
-	private final Texture borderTexture;
-	private final Texture actionsPointsTexture;
+	private final TurnsIndicatorsHandlerTextures textures;
 	private final BitmapFont font;
 	private final NoiseEffectHandler noiseEffectHandler;
 	private final GameStage stage;
-	private final List<TurnsIndicatorIcon> iconsList = new ArrayList<>();
-	private Entity currentBorder;
+	private final HashMap<String, TextureRegionDrawable> charactersIcons;
+	private final TurnsIndicatorsHandlerState state = new TurnsIndicatorsHandlerState();
 
 	public TurnsIndicatorsHandler(GameAssetManager assetsManager,
 								  HashMap<String, TextureRegionDrawable> iconsMap,
 								  NoiseEffectHandler noiseEffectHandler,
 								  GameStage stage) {
-		this.greenIconTexture = assetsManager.getTexture(Assets.UiTextures.HUD_ICON_CIRCLE_GREEN);
-		this.redIconTexture = assetsManager.getTexture(Assets.UiTextures.HUD_ICON_CIRCLE_RED);
+		this.textures = new TurnsIndicatorsHandlerTextures(
+				assetsManager.getTexture(Assets.UiTextures.HUD_ICON_CIRCLE_GREEN),
+				assetsManager.getTexture(Assets.UiTextures.HUD_ICON_CIRCLE_RED),
+				assetsManager.getTexture(Assets.UiTextures.HUD_ICON_CIRCLE_BORDER),
+				assetsManager.getTexture(Assets.UiTextures.HUD_ACTION_POINTS_INDICATOR));
 		this.charactersIcons = iconsMap;
-		this.borderTexture = assetsManager.getTexture(Assets.UiTextures.HUD_ICON_CIRCLE_BORDER);
-		this.actionsPointsTexture = assetsManager.getTexture(Assets.UiTextures.HUD_ACTION_POINTS_INDICATOR);
 		this.font = assetsManager.getFont(Assets.Fonts.HUD_SMALL);
 		this.noiseEffectHandler = noiseEffectHandler;
 		this.stage = stage;
@@ -61,7 +57,7 @@ public class TurnsIndicatorsHandler {
 				applyBorderForNewTurn(character);
 			}
 		});
-		List<TurnsIndicatorIcon> entries = new ArrayList<>(iconsMap.values());
+		List<TurnsIndicatorIcon> entries = new ArrayList<>(state.getIconsMap().values());
 		for (int i = 0; i < entries.size(); i++) {
 			initPositionForIcon(i, entries.get(i));
 		}
@@ -77,14 +73,15 @@ public class TurnsIndicatorsHandler {
 	}
 
 	private void addIcon(Entity entity) {
-		if (iconsMap.containsKey(entity) || !ComponentsMapper.character.has(entity)) return;
+		if (state.getIconsMap().containsKey(entity) || !ComponentsMapper.character.has(entity)) return;
 
 		boolean isPlayer = ComponentsMapper.player.has(entity);
-		Texture circleTexture = isPlayer ? greenIconTexture : redIconTexture;
+		Texture circleTexture = isPlayer ? textures.greenIconTexture() : textures.redIconTexture();
 		int actionPoints = ComponentsMapper.character.get(entity).getAttributes().getActionPoints();
-		TurnsIndicatorIconTextures textures = new TurnsIndicatorIconTextures(circleTexture,
-				borderTexture,
-				actionsPointsTexture);
+		TurnsIndicatorIconTextures textures = new TurnsIndicatorIconTextures(
+				circleTexture,
+				this.textures.borderTexture(),
+				this.textures.actionsPointsTexture());
 		TurnsIndicatorIcon icon = new TurnsIndicatorIcon(
 				textures,
 				font,
@@ -95,32 +92,38 @@ public class TurnsIndicatorsHandler {
 		icon.applyIcon(charactersIcons.get(isPlayer ? playerId : ComponentsMapper.enemy.get(entity).getEnemyDeclaration().id()));
 		icon.getColor().a = 0F;
 		icon.addAction(Actions.fadeIn(ICON_FADING_DURATION, Interpolation.smoother));
-		iconsMap.put(entity, icon);
-		iconsList.add(icon);
+		state.getIconsMap().put(entity, icon);
+		state.getIconsList().add(icon);
 		stage.addActor(icon);
 	}
 
 	public void applyBorderForNewTurn(Entity entity) {
+		Map<Entity, TurnsIndicatorIcon> iconsMap = state.getIconsMap();
 		if (!iconsMap.containsKey(entity)) return;
-		TurnsIndicatorIcon current = iconsMap.get(currentBorder);
+
+		TurnsIndicatorIcon current = iconsMap.get(state.getCurrentBorder());
 		if (current != null) {
 			current.setBorderVisibility(false);
 		}
 		TurnsIndicatorIcon turnsIndicatorIcon = iconsMap.get(entity);
 		turnsIndicatorIcon.setBorderVisibility(true);
 		turnsIndicatorIcon.updateActionPointsIndicator(ComponentsMapper.character.get(entity).getAttributes().getActionPoints());
-		currentBorder = entity;
+		state.setCurrentBorder(entity);
 	}
 
 	public void addCharacter(Entity enemy) {
+		Map<Entity, TurnsIndicatorIcon> iconsMap = state.getIconsMap();
 		if (iconsMap.containsKey(enemy)) return;
+
 		addIcon(enemy);
 		initPositionForIcon(iconsMap.size() - 1, iconsMap.get(enemy));
 	}
 
 	public void removeCharacter(Entity character) {
+		Map<Entity, TurnsIndicatorIcon> iconsMap = state.getIconsMap();
 		TurnsIndicatorIcon icon = iconsMap.get(character);
 		icon.addAction(Actions.sequence(Actions.fadeOut(ICON_FADING_DURATION), Actions.removeActor()));
+		List<TurnsIndicatorIcon> iconsList = state.getIconsList();
 		int removedIndex = iconsList.indexOf(iconsMap.get(character));
 		iconsMap.remove(character);
 		iconsList.remove(icon);
@@ -140,17 +143,20 @@ public class TurnsIndicatorsHandler {
 	}
 
 	private void turnOffCombatMode( ) {
+		Map<Entity, TurnsIndicatorIcon> iconsMap = state.getIconsMap();
 		iconsMap.values().forEach(Actor::remove);
 		iconsMap.clear();
 	}
 
 	public void updateCurrentActionPointsIndicator(Entity character, int newValue) {
+		Map<Entity, TurnsIndicatorIcon> iconsMap = state.getIconsMap();
 		if (!iconsMap.containsKey(character)) return;
 
 		iconsMap.get(character).updateActionPointsIndicator(newValue);
 	}
 
 	public void applyDamageEffect(Entity character) {
+		Map<Entity, TurnsIndicatorIcon> iconsMap = state.getIconsMap();
 		if (!iconsMap.containsKey(character)) return;
 
 		iconsMap.get(character).applyDamageEffect();

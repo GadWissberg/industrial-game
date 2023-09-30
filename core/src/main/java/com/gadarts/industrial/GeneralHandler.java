@@ -54,6 +54,81 @@ public class GeneralHandler implements
 	private Console console;
 	private boolean restartGame;
 
+	private static String formatNameForVariation(Direction dir,
+												 String sprTypeName,
+												 int vars,
+												 int variationIndex,
+												 boolean singleDirection) {
+		return String.format("%s%s%s",
+				sprTypeName,
+				vars > 1 ? "_" + variationIndex : "",
+				singleDirection ? "" : "_" + dir.name().toLowerCase());
+	}
+
+	public void createAndSetMap(String mapName) {
+		if (mapBuilder == null) {
+			mapBuilder = new MapBuilder(engine, assetsManager);
+		} else {
+			mapBuilder.reset(engine);
+		}
+		systemsCommonData.setMap(mapBuilder.inflateTestMap(mapName));
+	}
+
+	public void resetSystems( ) {
+		engine.getSystems().forEach(system -> ((GameSystem<? extends SystemEventsSubscriber>) system).reset());
+		initializeSystems();
+	}
+
+	public void startNewGame(String mapName) {
+		createAndSetEngine();
+		inGame = true;
+		initializeSystemsCommonData(mapName);
+		resetSystems();
+		createConsole();
+		engine.getSystem(UserInterfaceSystem.class).getMenuHandler().toggleMenu(false);
+	}
+
+	@Override
+	public void onNewGameSelectedInMenu( ) {
+		startNewGame(DebugSettings.TEST_LEVEL);
+	}
+
+	public void init( ) {
+		initializeAssets();
+		soundPlayer = new SoundPlayer(assetsManager);
+		createAndSetEngine();
+		initializeSystemsCommonData(DebugSettings.TEST_LEVEL);
+		initializeSystems();
+		createConsole();
+	}
+
+	public void update(float delta) {
+		if (restartGame) {
+			restartGame = false;
+			onNewGameSelectedInMenu();
+		}
+		engine.update(delta);
+	}
+
+	@Override
+	public boolean isInGame( ) {
+		return inGame;
+	}
+
+	@Override
+	public void raiseFlagToRestartGame( ) {
+		restartGame = true;
+	}
+
+	@Override
+	public void dispose( ) {
+		engine.getSystems().forEach(system -> ((GameSystem<? extends SystemEventsSubscriber>) system).dispose());
+		assetsManager.dispose();
+		mapBuilder.dispose();
+		console.dispose();
+		systemsCommonData.dispose();
+	}
+
 	private void addSystems( ) {
 		Arrays.stream(Systems.values()).forEach(systemDefinition -> {
 			try {
@@ -65,15 +140,6 @@ public class GeneralHandler implements
 				e.printStackTrace();
 			}
 		});
-	}
-
-	public void createAndSetMap(String mapName) {
-		if (mapBuilder == null) {
-			mapBuilder = new MapBuilder(engine, assetsManager);
-		} else {
-			mapBuilder.reset(engine);
-		}
-		systemsCommonData.setMap(mapBuilder.inflateTestMap(mapName));
 	}
 
 	private void generateModelsBoundingBoxes( ) {
@@ -130,20 +196,6 @@ public class GeneralHandler implements
 					material.set(attribute);
 					attribute.opacity = def.getAlpha();
 				});
-	}
-
-	public void resetSystems( ) {
-		engine.getSystems().forEach(system -> ((GameSystem<? extends SystemEventsSubscriber>) system).reset());
-		initializeSystems();
-	}
-
-	public void startNewGame(String mapName) {
-		createAndSetEngine();
-		inGame = true;
-		initializeSystemsCommonData(mapName);
-		resetSystems();
-		createConsole();
-		engine.getSystem(UserInterfaceSystem.class).getMenuHandler().toggleMenu(false);
 	}
 
 	private void initializeSystemsCommonData(String mapName) {
@@ -204,20 +256,6 @@ public class GeneralHandler implements
 		engine.getSystems().forEach(system -> system.setProcessing(true));
 	}
 
-	@Override
-	public void onNewGameSelectedInMenu( ) {
-		startNewGame(DebugSettings.TEST_LEVEL);
-	}
-
-	public void init( ) {
-		initializeAssets();
-		soundPlayer = new SoundPlayer(assetsManager);
-		createAndSetEngine();
-		initializeSystemsCommonData(DebugSettings.TEST_LEVEL);
-		initializeSystems();
-		createConsole();
-	}
-
 	private void createConsole( ) {
 		Optional.ofNullable(console).ifPresent(Console::dispose);
 		ConsoleImpl console = new ConsoleImpl();
@@ -239,15 +277,6 @@ public class GeneralHandler implements
 		console.subscribeForEvents(soundPlayer);
 	}
 
-	@Override
-	public void dispose( ) {
-		engine.getSystems().forEach(system -> ((GameSystem<? extends SystemEventsSubscriber>) system).dispose());
-		assetsManager.dispose();
-		mapBuilder.dispose();
-		console.dispose();
-		systemsCommonData.dispose();
-	}
-
 	private void inflateCharacterAnimation(final CharacterAnimations animations,
 										   final TextureAtlas atlas,
 										   final SpriteType spriteType,
@@ -267,17 +296,6 @@ public class GeneralHandler implements
 		});
 	}
 
-	private static String formatNameForVariation(Direction dir,
-												 String sprTypeName,
-												 int vars,
-												 int variationIndex,
-												 boolean singleDirection) {
-		return String.format("%s%s%s",
-				sprTypeName,
-				vars > 1 ? "_" + variationIndex : "",
-				singleDirection ? "" : "_" + dir.name().toLowerCase());
-	}
-
 	private CharacterAnimation createAnimation(final TextureAtlas atlas,
 											   final SpriteType spriteType,
 											   final String name,
@@ -292,23 +310,5 @@ public class GeneralHandler implements
 					dir);
 		}
 		return animation;
-	}
-
-	public void update(float delta) {
-		if (restartGame) {
-			restartGame = false;
-			onNewGameSelectedInMenu();
-		}
-		engine.update(delta);
-	}
-
-	@Override
-	public boolean isInGame( ) {
-		return inGame;
-	}
-
-	@Override
-	public void raiseFlagToRestartGame( ) {
-		restartGame = true;
 	}
 }

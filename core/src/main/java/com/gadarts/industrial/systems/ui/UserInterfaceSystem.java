@@ -97,7 +97,12 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 
 	@Override
 	public void onEnemyAwaken(Entity enemy, EnemyAiStatus prevAiStatus, boolean wokeBySpottingPlayer) {
-		turnsIndicatorsHandler.addCharacter(enemy);
+		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		if (systemsCommonData.getCurrentGameMode() != GameMode.COMBAT_MODE) {
+			turnsIndicatorsHandler.applyCombatMode(systemsCommonData.getTurnsQueue());
+		} else {
+			turnsIndicatorsHandler.addCharacter(enemy);
+		}
 	}
 
 	@Override
