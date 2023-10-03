@@ -24,7 +24,7 @@ public class AttackPrimaryCharacterCommand extends CharacterCommand {
 
 	private final static Vector2 auxVector2 = new Vector2();
 
-	private static int randomNumberOfBullets(WeaponDeclaration primary) {
+	private int randomNumberOfBullets(WeaponDeclaration primary) {
 		return MathUtils.random(primary.numberOfBulletsMin(), primary.numberOfBulletsMax());
 	}
 

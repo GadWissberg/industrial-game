@@ -18,6 +18,7 @@ import com.gadarts.industrial.components.EnvironmentObjectComponent;
 import com.gadarts.industrial.components.cd.CharacterDecalComponent;
 import com.gadarts.industrial.components.character.CharacterAnimation;
 import com.gadarts.industrial.components.character.CharacterAnimations;
+import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
@@ -69,7 +70,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		InputSystemEventsSubscriber {
 	public static final float LOS_MAX = 24F;
 	public static final int LOS_CHECK_DELTA = 5;
-	public static final int PICKUP_WEAPON_AMMO_AMOUNT = 15;
+	public static final int PICKUP_WEAPON_AMMO_AMOUNT = 1;
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Vector2 auxVector2_3 = new Vector2();
@@ -440,8 +441,17 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	private void applyPrimaryAttack(Entity enemyAtNode, MapGraphPath plannedPath) {
-		ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).setTarget(enemyAtNode);
-		addCommand(plannedPath, ATTACK_PRIMARY);
+		Entity player = getSystemsCommonData().getPlayer();
+		PlayerComponent playerComponent = ComponentsMapper.player.get(player);
+		Weapon selectedWeapon = getSystemsCommonData().getStorage().getSelectedWeapon();
+		PlayerWeaponDeclaration declaration = (PlayerWeaponDeclaration) selectedWeapon.getDeclaration();
+		if (playerComponent.getAmmo().get(declaration).getLoaded() > 0) {
+			CharacterComponent characterComponent = ComponentsMapper.character.get(player);
+			characterComponent.setTarget(enemyAtNode);
+			addCommand(plannedPath, ATTACK_PRIMARY);
+		} else {
+			getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.WEAPON_GLOCK_NO_AMMO);
+		}
 	}
 
 	@Override
