@@ -34,7 +34,7 @@
         <key>dataFormat</key>
         <string>libgdx</string>
         <key>textureFileName</key>
-        <filename>../../assets/atlases/player_colt.png</filename>
+        <filename>../../assets/atlases/player_glock-{n}.png</filename>
         <key>flipPVR</key>
         <false/>
         <key>pvrCompressionQuality</key>
@@ -132,11 +132,11 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../../assets/atlases/player_colt.txt</filename>
+                <filename>../../assets/atlases/player_glock.txt</filename>
             </struct>
         </map>
         <key>multiPack</key>
-        <false/>
+        <true/>
         <key>forceIdenticalLayout</key>
         <false/>
         <key>outputFormat</key>
@@ -309,6 +309,86 @@
             <key type="filename">../sprites/player/pistol/pain_west_0.png</key>
             <key type="filename">../sprites/player/pistol/pain_west_1.png</key>
             <key type="filename">../sprites/player/pistol/pain_west_2.png</key>
+            <key type="filename">../sprites/player/pistol/reload_east_0.png</key>
+            <key type="filename">../sprites/player/pistol/reload_east_1.png</key>
+            <key type="filename">../sprites/player/pistol/reload_east_2.png</key>
+            <key type="filename">../sprites/player/pistol/reload_east_3.png</key>
+            <key type="filename">../sprites/player/pistol/reload_east_4.png</key>
+            <key type="filename">../sprites/player/pistol/reload_east_5.png</key>
+            <key type="filename">../sprites/player/pistol/reload_east_6.png</key>
+            <key type="filename">../sprites/player/pistol/reload_east_7.png</key>
+            <key type="filename">../sprites/player/pistol/reload_east_8.png</key>
+            <key type="filename">../sprites/player/pistol/reload_east_9.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_0.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_1.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_2.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_3.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_4.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_5.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_6.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_7.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_8.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_9.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_east_0.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_east_1.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_east_2.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_east_3.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_east_4.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_east_5.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_east_6.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_east_7.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_east_8.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_east_9.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_west_0.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_west_1.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_west_2.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_west_3.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_west_4.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_west_5.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_west_6.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_west_7.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_west_8.png</key>
+            <key type="filename">../sprites/player/pistol/reload_north_west_9.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_0.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_1.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_2.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_3.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_4.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_5.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_6.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_7.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_8.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_9.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_east_0.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_east_1.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_east_2.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_east_3.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_east_4.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_east_5.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_east_6.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_east_7.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_east_8.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_east_9.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_west_0.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_west_1.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_west_2.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_west_3.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_west_4.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_west_5.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_west_6.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_west_7.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_west_8.png</key>
+            <key type="filename">../sprites/player/pistol/reload_south_west_9.png</key>
+            <key type="filename">../sprites/player/pistol/reload_west_0.png</key>
+            <key type="filename">../sprites/player/pistol/reload_west_1.png</key>
+            <key type="filename">../sprites/player/pistol/reload_west_2.png</key>
+            <key type="filename">../sprites/player/pistol/reload_west_3.png</key>
+            <key type="filename">../sprites/player/pistol/reload_west_4.png</key>
+            <key type="filename">../sprites/player/pistol/reload_west_5.png</key>
+            <key type="filename">../sprites/player/pistol/reload_west_6.png</key>
+            <key type="filename">../sprites/player/pistol/reload_west_7.png</key>
+            <key type="filename">../sprites/player/pistol/reload_west_8.png</key>
+            <key type="filename">../sprites/player/pistol/reload_west_9.png</key>
             <key type="filename">../sprites/player/pistol/run_east_0.png</key>
             <key type="filename">../sprites/player/pistol/run_east_1.png</key>
             <key type="filename">../sprites/player/pistol/run_east_2.png</key>
@@ -582,6 +662,86 @@
             <filename>../sprites/player/pistol/run_west_5.png</filename>
             <filename>../sprites/player/pistol/run_west_6.png</filename>
             <filename>../sprites/player/pistol/run_west_7.png</filename>
+            <filename>../sprites/player/pistol/reload_east_0.png</filename>
+            <filename>../sprites/player/pistol/reload_east_1.png</filename>
+            <filename>../sprites/player/pistol/reload_east_2.png</filename>
+            <filename>../sprites/player/pistol/reload_east_3.png</filename>
+            <filename>../sprites/player/pistol/reload_east_4.png</filename>
+            <filename>../sprites/player/pistol/reload_east_5.png</filename>
+            <filename>../sprites/player/pistol/reload_east_6.png</filename>
+            <filename>../sprites/player/pistol/reload_east_7.png</filename>
+            <filename>../sprites/player/pistol/reload_east_8.png</filename>
+            <filename>../sprites/player/pistol/reload_east_9.png</filename>
+            <filename>../sprites/player/pistol/reload_north_0.png</filename>
+            <filename>../sprites/player/pistol/reload_north_1.png</filename>
+            <filename>../sprites/player/pistol/reload_north_2.png</filename>
+            <filename>../sprites/player/pistol/reload_north_3.png</filename>
+            <filename>../sprites/player/pistol/reload_north_4.png</filename>
+            <filename>../sprites/player/pistol/reload_north_5.png</filename>
+            <filename>../sprites/player/pistol/reload_north_6.png</filename>
+            <filename>../sprites/player/pistol/reload_north_7.png</filename>
+            <filename>../sprites/player/pistol/reload_north_8.png</filename>
+            <filename>../sprites/player/pistol/reload_north_9.png</filename>
+            <filename>../sprites/player/pistol/reload_north_east_0.png</filename>
+            <filename>../sprites/player/pistol/reload_north_east_1.png</filename>
+            <filename>../sprites/player/pistol/reload_north_east_2.png</filename>
+            <filename>../sprites/player/pistol/reload_north_east_3.png</filename>
+            <filename>../sprites/player/pistol/reload_north_east_4.png</filename>
+            <filename>../sprites/player/pistol/reload_north_east_5.png</filename>
+            <filename>../sprites/player/pistol/reload_north_east_6.png</filename>
+            <filename>../sprites/player/pistol/reload_north_east_7.png</filename>
+            <filename>../sprites/player/pistol/reload_north_east_8.png</filename>
+            <filename>../sprites/player/pistol/reload_north_east_9.png</filename>
+            <filename>../sprites/player/pistol/reload_north_west_0.png</filename>
+            <filename>../sprites/player/pistol/reload_north_west_1.png</filename>
+            <filename>../sprites/player/pistol/reload_north_west_2.png</filename>
+            <filename>../sprites/player/pistol/reload_north_west_3.png</filename>
+            <filename>../sprites/player/pistol/reload_north_west_4.png</filename>
+            <filename>../sprites/player/pistol/reload_north_west_5.png</filename>
+            <filename>../sprites/player/pistol/reload_north_west_6.png</filename>
+            <filename>../sprites/player/pistol/reload_north_west_7.png</filename>
+            <filename>../sprites/player/pistol/reload_north_west_8.png</filename>
+            <filename>../sprites/player/pistol/reload_north_west_9.png</filename>
+            <filename>../sprites/player/pistol/reload_south_0.png</filename>
+            <filename>../sprites/player/pistol/reload_south_1.png</filename>
+            <filename>../sprites/player/pistol/reload_south_2.png</filename>
+            <filename>../sprites/player/pistol/reload_south_3.png</filename>
+            <filename>../sprites/player/pistol/reload_south_4.png</filename>
+            <filename>../sprites/player/pistol/reload_south_5.png</filename>
+            <filename>../sprites/player/pistol/reload_south_6.png</filename>
+            <filename>../sprites/player/pistol/reload_south_7.png</filename>
+            <filename>../sprites/player/pistol/reload_south_8.png</filename>
+            <filename>../sprites/player/pistol/reload_south_9.png</filename>
+            <filename>../sprites/player/pistol/reload_south_east_0.png</filename>
+            <filename>../sprites/player/pistol/reload_south_east_1.png</filename>
+            <filename>../sprites/player/pistol/reload_south_east_2.png</filename>
+            <filename>../sprites/player/pistol/reload_south_east_3.png</filename>
+            <filename>../sprites/player/pistol/reload_south_east_4.png</filename>
+            <filename>../sprites/player/pistol/reload_south_east_5.png</filename>
+            <filename>../sprites/player/pistol/reload_south_east_6.png</filename>
+            <filename>../sprites/player/pistol/reload_south_east_7.png</filename>
+            <filename>../sprites/player/pistol/reload_south_east_8.png</filename>
+            <filename>../sprites/player/pistol/reload_south_east_9.png</filename>
+            <filename>../sprites/player/pistol/reload_south_west_0.png</filename>
+            <filename>../sprites/player/pistol/reload_south_west_1.png</filename>
+            <filename>../sprites/player/pistol/reload_south_west_2.png</filename>
+            <filename>../sprites/player/pistol/reload_south_west_3.png</filename>
+            <filename>../sprites/player/pistol/reload_south_west_4.png</filename>
+            <filename>../sprites/player/pistol/reload_south_west_5.png</filename>
+            <filename>../sprites/player/pistol/reload_south_west_6.png</filename>
+            <filename>../sprites/player/pistol/reload_south_west_7.png</filename>
+            <filename>../sprites/player/pistol/reload_south_west_8.png</filename>
+            <filename>../sprites/player/pistol/reload_south_west_9.png</filename>
+            <filename>../sprites/player/pistol/reload_west_0.png</filename>
+            <filename>../sprites/player/pistol/reload_west_1.png</filename>
+            <filename>../sprites/player/pistol/reload_west_2.png</filename>
+            <filename>../sprites/player/pistol/reload_west_3.png</filename>
+            <filename>../sprites/player/pistol/reload_west_4.png</filename>
+            <filename>../sprites/player/pistol/reload_west_5.png</filename>
+            <filename>../sprites/player/pistol/reload_west_6.png</filename>
+            <filename>../sprites/player/pistol/reload_west_7.png</filename>
+            <filename>../sprites/player/pistol/reload_west_8.png</filename>
+            <filename>../sprites/player/pistol/reload_west_9.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

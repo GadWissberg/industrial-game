@@ -16,7 +16,7 @@
       "symbol_height": 2,
       "symbol": "weapon_colt",
       "declaration": "glc",
-      "related_atlas": "player_colt",
+      "related_atlas": "player_glock",
       "mask": [
         1,
         1,
