@@ -69,7 +69,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		InputSystemEventsSubscriber {
 	public static final float LOS_MAX = 24F;
 	public static final int LOS_CHECK_DELTA = 5;
-	public static final int PICKUP_WEAPON_AMMO_AMOUNT = 1;
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Vector2 auxVector2_3 = new Vector2();
@@ -373,7 +372,8 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			PlayerWeaponDeclaration declaration = (PlayerWeaponDeclaration) item.getDeclaration();
 			if (ammo.containsKey(declaration)) {
 				WeaponAmmo weaponAmmo = ammo.get(declaration);
-				weaponAmmo.setLoaded(PICKUP_WEAPON_AMMO_AMOUNT);
+				weaponAmmo.setLoaded(declaration.magazineSize());
+				weaponAmmo.setTotal(declaration.magazineSize());
 				weaponAmmo.setPlayerWeaponDeclaration(declaration);
 			}
 		}

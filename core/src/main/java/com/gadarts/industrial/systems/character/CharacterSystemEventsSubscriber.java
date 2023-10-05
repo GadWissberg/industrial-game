@@ -2,6 +2,7 @@ package com.gadarts.industrial.systems.character;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector3;
+import com.gadarts.industrial.components.player.WeaponAmmo;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.systems.SystemEventsSubscriber;
 
@@ -42,5 +43,6 @@ public interface CharacterSystemEventsSubscriber extends SystemEventsSubscriber 
 
 	}
 
-	default void onCharacterReload(Entity character){}
+	default void onCharacterReload(Entity character, WeaponAmmo weaponAmmo) {
+	}
 }

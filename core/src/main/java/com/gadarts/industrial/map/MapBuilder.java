@@ -81,7 +81,6 @@ import static com.gadarts.industrial.shared.model.characters.Direction.SOUTH;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.IDLE;
 import static com.gadarts.industrial.shared.model.env.light.LightConstants.*;
 import static com.gadarts.industrial.shared.model.map.MapNodesTypes.OBSTACLE_KEY_DIAGONAL_FORBIDDEN;
-import static com.gadarts.industrial.systems.player.PlayerSystem.PICKUP_WEAPON_AMMO_AMOUNT;
 import static com.gadarts.industrial.utils.EntityBuilder.beginBuildingEntity;
 import static java.lang.String.format;
 
@@ -731,7 +730,7 @@ public class MapBuilder implements Disposable {
 				weaponDec.declaration());
 		var player = builder.finishAndAddToEngine();
 		if (!weaponDec.id().equals("pnc")) {
-			WeaponAmmo weaponAmmo = new WeaponAmmo(PICKUP_WEAPON_AMMO_AMOUNT, 0, weaponDec);
+			WeaponAmmo weaponAmmo = new WeaponAmmo(weaponDec.magazineSize(), weaponDec.magazineSize(), weaponDec);
 			ComponentsMapper.player.get(player).getAmmo().put(weaponDec, weaponAmmo);
 		}
 	}

@@ -192,6 +192,13 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	}
 
 	@Override
+	public void onCharacterReload(Entity character, WeaponAmmo weaponAmmo) {
+		if (ComponentsMapper.player.has(character)) {
+			getSystemsCommonData().getAmmoIndicator().setValues(weaponAmmo);
+		}
+	}
+
+	@Override
 	public void onPlayerConsumedAmmo(WeaponAmmo weaponAmmo) {
 		getSystemsCommonData().getAmmoIndicator().setValues(weaponAmmo);
 	}
