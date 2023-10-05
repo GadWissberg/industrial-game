@@ -13,7 +13,7 @@ import lombok.val;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PickupItemCharacterCommand extends CharacterCommand {
+public class PickupItemCommand extends CharacterCommand {
 
 	private static final List<Entity> auxEntityList = new ArrayList<>();
 	private static final int PICKUP_ACTION_POINT_CONSUME = 1;

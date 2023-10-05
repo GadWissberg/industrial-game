@@ -24,7 +24,7 @@ import java.util.List;
 
 import static com.gadarts.industrial.map.MapGraphConnectionCosts.CLEAN;
 
-public class RunCharacterCommand extends CharacterCommand {
+public class RunCommand extends CharacterCommand {
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final Vector2 auxVector2_2 = new Vector2();
 	private static final Vector2 auxVector2_3 = new Vector2();
@@ -32,7 +32,7 @@ public class RunCharacterCommand extends CharacterCommand {
 	private final static Vector3 auxVector3_1 = new Vector3();
 	private final static Vector3 auxVector3_2 = new Vector3();
 	private static final float MOVEMENT_EPSILON = 0.02F;
-	private static final float OPEN_DOOR_TIME_CONSUME = 1F;
+	public static final int STEP_POINTS_CONSUMPTION = 1;
 	private SystemsCommonData systemsCommonData;
 	private MapGraphNode prevNode;
 	private boolean consumeActionPoints;
@@ -70,7 +70,6 @@ public class RunCharacterCommand extends CharacterCommand {
 		if (doorComponent.getState() == DoorStates.CLOSED) {
 			ComponentsMapper.character.get(character).getCharacterSpriteData().setSpriteType(SpriteType.IDLE);
 			doorComponent.requestToOpen(character);
-			consumeTurnTime(character, OPEN_DOOR_TIME_CONSUME);
 		}
 	}
 
@@ -143,7 +142,7 @@ public class RunCharacterCommand extends CharacterCommand {
 			subscriber.onCharacterNodeChanged(character, prevNode, path.nodes.get(getNextNodeIndex()));
 		}
 		if (consumeActionPoints) {
-			consumeActionPoints(character, 1, subscribers);
+			consumeActionPoints(character, STEP_POINTS_CONSUMPTION, subscribers);
 		}
 		prevNode = path.get(getNextNodeIndex());
 		setNextNodeIndex(getNextNodeIndex() + 1);

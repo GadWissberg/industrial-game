@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Pool;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.character.CharacterAttributes;
-import com.gadarts.industrial.components.character.CharacterComponent;
 import com.gadarts.industrial.map.MapGraphPath;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
@@ -65,8 +64,4 @@ public abstract class CharacterCommand implements Pool.Poolable {
 		return definition.name();
 	}
 
-	void consumeTurnTime(Entity character, float consume) {
-		CharacterComponent characterComp = ComponentsMapper.character.get(character);
-		characterComp.setTurnTimeLeft(characterComp.getTurnTimeLeft() - consume);
-	}
 }

@@ -7,10 +7,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum CharacterCommandsDefinitions {
-	RUN(RunCharacterCommand.class, SpriteType.RUN),
-	DODGE(RunCharacterCommand.class, SpriteType.RUN, true),
-	PICKUP(PickupItemCharacterCommand.class, SpriteType.PICKUP, false, false),
-	ATTACK_PRIMARY(AttackPrimaryCharacterCommand.class, SpriteType.ATTACK_PRIMARY);
+	RUN(RunCommand.class, SpriteType.RUN),
+	DODGE(RunCommand.class, SpriteType.RUN, true),
+	PICKUP(PickupItemCommand.class, SpriteType.PICKUP, false, false),
+	RELOAD(ReloadCommand.class, SpriteType.RELOAD, false, false),
+	ATTACK_PRIMARY(AttackPrimaryCommand.class, SpriteType.ATTACK_PRIMARY);
 
 	private final Class<? extends CharacterCommand> characterCommandImplementation;
 	private final SpriteType spriteType;

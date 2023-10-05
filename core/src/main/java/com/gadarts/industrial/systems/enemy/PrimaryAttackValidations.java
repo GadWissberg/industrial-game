@@ -8,7 +8,8 @@ import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.List;
 
-import static com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus.*;
+import static com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus.DODGING;
+import static com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus.RUNNING_TO_LAST_SEEN_POSITION;
 
 final public class PrimaryAttackValidations {
 	public final static List<PrimaryAttackValidation> primaryAttackValidations = List.of(
@@ -23,11 +24,7 @@ final public class PrimaryAttackValidations {
 						enemySystem.invokeEnemyTurn(entity);
 					}),
 			new PrimaryAttackValidation(
-					(entity, enemySystem) -> {
-						EnemyDeclaration enemyDefinition = ComponentsMapper.enemy.get(entity).getEnemyDeclaration();
-						WeaponDeclaration primaryAttack = enemyDefinition.attackPrimary();
-						return ComponentsMapper.character.get(entity).getTurnTimeLeft() >= primaryAttack.duration();
-					},
+					(entity, enemySystem) -> true,
 					null),
 			new PrimaryAttackValidation(
 					(entity, enemySystem) -> {

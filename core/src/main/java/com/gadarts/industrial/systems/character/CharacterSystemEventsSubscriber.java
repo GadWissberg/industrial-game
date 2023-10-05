@@ -41,4 +41,6 @@ public interface CharacterSystemEventsSubscriber extends SystemEventsSubscriber 
 	default void onCharacterConsumedActionPoint(Entity character, int newValue) {
 
 	}
+
+	default void onCharacterReload(Entity character){}
 }

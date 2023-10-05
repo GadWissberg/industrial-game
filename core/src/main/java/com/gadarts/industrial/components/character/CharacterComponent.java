@@ -15,7 +15,6 @@ import lombok.Setter;
 @Setter
 public class CharacterComponent implements GameComponent {
 	public final static float CHAR_RAD = 0.3f;
-	public static final float TURN_DURATION = 1F;
 	public static final float PASSABLE_MAX_HEIGHT_DIFF = 0.3f;
 	private static final Vector2 auxVector = new Vector2();
 	@Setter(AccessLevel.NONE)
@@ -28,7 +27,6 @@ public class CharacterComponent implements GameComponent {
 	@Setter(AccessLevel.NONE)
 	private OnGoingAttack onGoingAttack = new OnGoingAttack();
 	private WeaponDeclaration primaryAttack;
-	private float turnTimeLeft;
 	private Direction facingDirection;
 
 	@Override
@@ -47,7 +45,6 @@ public class CharacterComponent implements GameComponent {
 		this.attributes.applyParameters(skills);
 		this.soundData.set(soundData);
 		this.primaryAttack = primaryAttack;
-		this.turnTimeLeft = TURN_DURATION;
 		this.facingDirection = direction;
 	}
 

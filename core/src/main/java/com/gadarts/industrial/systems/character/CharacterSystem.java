@@ -33,6 +33,7 @@ import com.gadarts.industrial.shared.model.characters.SpriteType;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.commands.CharacterCommand;
+import com.gadarts.industrial.systems.character.commands.CharacterCommandsDefinitions;
 import com.gadarts.industrial.systems.character.commands.CommandStates;
 import com.gadarts.industrial.systems.enemy.EnemySystemEventsSubscriber;
 import com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus;
@@ -323,6 +324,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 			}
 		} else {
 			animation.setPlayMode(Animation.PlayMode.NORMAL);
+			ComponentsMapper.character.get(character).getCommands().first().setState(CommandStates.ENDED);
 			commandDone(character);
 		}
 	}
@@ -361,7 +363,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 				beginProcessingCommand(character, currentCommand);
 			} else if (currentCommand.getState() == CommandStates.RUNNING) {
 				SpriteType spriteType = characterComponent.getCharacterSpriteData().getSpriteType();
-				if (spriteType == PICKUP || spriteType == ATTACK_PRIMARY) {
+				if (spriteType == PICKUP || spriteType == ATTACK_PRIMARY || spriteType == RELOAD) {
 					handleModeWithNonLoopingAnimation(character);
 				} else {
 					handleRotation(currentCommand, character);
@@ -407,9 +409,12 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		Vector3 characterPosition = ComponentsMapper.characterDecal.get(character).getDecal().getPosition();
 		MapGraphPath commandPath = currentCommand.getPath();
 		MapGraphNode characterNode = getSystemsCommonData().getMap().getNode(characterPosition);
-		if (!currentCommand.getDefinition().isRotationForbidden() && !characterNode.equals(commandPath.nodes.get(commandPath.getCount() - 1))) {
-			if (rotData.isRotating() && TimeUtils.timeSinceMillis(rotData.getLastRotation()) > CHARACTER_ROTATION_INTERVAL) {
-				rotate(charComp, rotData, currentCommand);
+		CharacterCommandsDefinitions definition = currentCommand.getDefinition();
+		if (!definition.isRotationForbidden() && definition.isRequiresMovement()) {
+			if (!characterNode.equals(commandPath.nodes.get(commandPath.getCount() - 1))) {
+				if (rotData.isRotating() && TimeUtils.timeSinceMillis(rotData.getLastRotation()) > CHARACTER_ROTATION_INTERVAL) {
+					rotate(charComp, rotData, currentCommand);
+				}
 			}
 		} else {
 			if (charComp.getTarget() != null) {

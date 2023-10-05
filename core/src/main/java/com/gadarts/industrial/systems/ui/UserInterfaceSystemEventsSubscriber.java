@@ -24,4 +24,8 @@ public interface UserInterfaceSystemEventsSubscriber extends SystemEventsSubscri
 	default void onUserLeftClickedThePlayer(MapGraphNode protagonistNode) {
 
 	}
+
+	default void onUserRequestsToReload( ) {
+
+	}
 }

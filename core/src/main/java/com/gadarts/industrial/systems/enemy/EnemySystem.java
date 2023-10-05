@@ -39,7 +39,6 @@ import com.gadarts.industrial.utils.GameUtils;
 import java.util.LinkedHashSet;
 
 import static com.gadarts.industrial.DebugSettings.PARALYZED_ENEMIES;
-import static com.gadarts.industrial.components.character.CharacterComponent.TURN_DURATION;
 import static com.gadarts.industrial.systems.enemy.ai.EnemyAiStatus.*;
 
 public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> implements
@@ -241,7 +240,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 	}
 
 	private void enemyFinishedTurn( ) {
-		ComponentsMapper.character.get(getSystemsCommonData().getTurnsQueue().first()).setTurnTimeLeft(TURN_DURATION);
 		for (EnemySystemEventsSubscriber subscriber : subscribers) {
 			subscriber.onEnemyFinishedTurn();
 		}

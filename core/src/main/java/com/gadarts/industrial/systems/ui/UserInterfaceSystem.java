@@ -181,6 +181,13 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		ammoIndicator.setVisible(false);
 		getSystemsCommonData().setAmmoIndicator(ammoIndicator);
 		armsIndicatorsTable.add(ammoIndicator).right().bottom().pad(0F, PADDING, 0F, PADDING).row();
+		ammoIndicator.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				super.clicked(event, x, y);
+				subscribers.forEach(UserInterfaceSystemEventsSubscriber::onUserRequestsToReload);
+			}
+		});
 		return ammoIndicator;
 	}
 

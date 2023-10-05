@@ -19,7 +19,7 @@ import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.List;
 
-public class AttackPrimaryCharacterCommand extends CharacterCommand {
+public class AttackPrimaryCommand extends CharacterCommand {
 	private final static Vector3 auxVector3_1 = new Vector3();
 
 	private final static Vector2 auxVector2 = new Vector2();
