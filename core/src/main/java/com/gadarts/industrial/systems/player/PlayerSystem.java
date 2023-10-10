@@ -372,7 +372,8 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			PlayerWeaponDeclaration declaration = (PlayerWeaponDeclaration) item.getDeclaration();
 			if (ammo.containsKey(declaration)) {
 				WeaponAmmo weaponAmmo = ammo.get(declaration);
-				weaponAmmo.setLoaded(declaration.magazineSize());
+				//noinspection ConstantValue
+				weaponAmmo.setLoaded(DebugSettings.FORCE_LOADED_AMMO < 0 ? declaration.magazineSize() : DebugSettings.FORCE_LOADED_AMMO);
 				weaponAmmo.setTotal(declaration.magazineSize());
 				weaponAmmo.setPlayerWeaponDeclaration(declaration);
 			}

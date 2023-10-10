@@ -12,6 +12,7 @@ import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 
 import java.util.List;
 
+import static com.gadarts.industrial.DebugSettings.FORCE_LOADED_AMMO;
 import static com.gadarts.industrial.components.ComponentsMapper.player;
 
 public class ReloadCommand extends CharacterCommand {
@@ -46,7 +47,8 @@ public class ReloadCommand extends CharacterCommand {
 			PlayerWeaponDeclaration selectedWeapon = (PlayerWeaponDeclaration) weapon.getDeclaration();
 			WeaponAmmo weaponAmmo = player.get(character).getAmmo().get(selectedWeapon);
 			int loadedIntoGun = Math.min(selectedWeapon.magazineSize() - weaponAmmo.getLoaded(), weaponAmmo.getTotal());
-			weaponAmmo.setLoaded(weaponAmmo.getLoaded() + loadedIntoGun);
+			//noinspection ConstantValue
+			weaponAmmo.setLoaded(FORCE_LOADED_AMMO < 0 ? weaponAmmo.getLoaded() + loadedIntoGun : FORCE_LOADED_AMMO);
 			weaponAmmo.setTotal(weaponAmmo.getTotal() - loadedIntoGun);
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onCharacterReload(character, weaponAmmo);

@@ -22,7 +22,6 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Pools;
-import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.TriggerComponent;
@@ -68,6 +67,7 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
+import static com.gadarts.industrial.DebugSettings.*;
 import static com.gadarts.industrial.components.ComponentsMapper.*;
 import static com.gadarts.industrial.shared.assets.Assets.*;
 import static com.gadarts.industrial.shared.assets.Assets.Atlases.GUARD_BOT;
@@ -710,27 +710,26 @@ public class MapBuilder implements Disposable {
 	private void inflatePlayer(final JsonObject characterJsonObject, final MapGraph mapGraph) {
 		EntityBuilder builder = beginBuildingEntity(engine).addPlayerComponent(assetsManager.get(PLAYER_GENERIC.name()));
 		auxCharacterSoundData.set(Sounds.PLAYER_PAIN, Sounds.PLAYER_DEATH);
-		CharacterSkillsParameters skills = new CharacterSkillsParameters(
-				!DebugSettings.LOW_HP_FOR_PLAYER ? PLAYER_HEALTH : 1,
-				PlayerComponent.PLAYER_AGILITY,
-				Accuracy.LOW);
-		CharacterData data = new CharacterData(
-				inflateCharacterPosition(characterJsonObject, mapGraph),
-				Direction.values()[characterJsonObject.get(DIRECTION).getAsInt()],
-				skills,
-				auxCharacterSoundData);
 		PlayerWeaponDeclaration weaponDec = ((PlayerWeaponsDeclarations) assetsManager.getDeclaration(PLAYER_WEAPONS))
-				.parse(DebugSettings.STARTING_WEAPON);
+				.parse(STARTING_WEAPON);
 		Atlases atlas = weaponDec.relatedAtlas();
 		addCharBaseComponents(
 				builder,
-				data,
+				new CharacterData(
+						inflateCharacterPosition(characterJsonObject, mapGraph),
+						Direction.values()[characterJsonObject.get(DIRECTION).getAsInt()],
+						new CharacterSkillsParameters(
+								!LOW_HP_FOR_PLAYER ? PLAYER_HEALTH : 1,
+								PlayerComponent.PLAYER_AGILITY,
+								Accuracy.LOW),
+						auxCharacterSoundData),
 				PlayerDeclaration.getInstance(),
 				atlas,
 				weaponDec.declaration());
 		var player = builder.finishAndAddToEngine();
 		if (!weaponDec.id().equals("pnc")) {
-			WeaponAmmo weaponAmmo = new WeaponAmmo(weaponDec.magazineSize(), weaponDec.magazineSize(), weaponDec);
+			int loaded = FORCE_LOADED_AMMO < 0 ? weaponDec.magazineSize() : FORCE_LOADED_AMMO;
+			WeaponAmmo weaponAmmo = new WeaponAmmo(loaded, weaponDec.magazineSize(), weaponDec);
 			ComponentsMapper.player.get(player).getAmmo().put(weaponDec, weaponAmmo);
 		}
 	}
@@ -773,7 +772,7 @@ public class MapBuilder implements Disposable {
 	private CharacterData inflateEnemyCharData(JsonObject characterJsonObject, EnemyDeclaration type, Vector3 pos) {
 		auxCharacterSoundData.set(type.soundPain(), type.soundDeath());
 		CharacterSkillsParameters skills = new CharacterSkillsParameters(
-				!DebugSettings.LOW_HP_FOR_ENEMIES ? type.health() : 1,
+				!LOW_HP_FOR_ENEMIES ? type.health() : 1,
 				type.agility(),
 				type.accuracy() != null ? type.accuracy() : null);
 		Direction direction = Direction.values()[characterJsonObject.get(DIRECTION).getAsInt()];
