@@ -449,7 +449,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		PlayerComponent playerComponent = ComponentsMapper.player.get(player);
 		Weapon selectedWeapon = getSystemsCommonData().getStorage().getSelectedWeapon();
 		PlayerWeaponDeclaration declaration = (PlayerWeaponDeclaration) selectedWeapon.getDeclaration();
-		if (playerComponent.getAmmo().get(declaration).getLoaded() > 0) {
+		if (selectedWeapon.isMelee() || playerComponent.getAmmo().get(declaration).getLoaded() > 0) {
 			CharacterComponent characterComponent = ComponentsMapper.character.get(player);
 			characterComponent.setTarget(enemyAtNode);
 			addCommand(plannedPath, ATTACK_PRIMARY);
