@@ -307,7 +307,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		OnGoingAttack onGoingAttack = characterComp.getOnGoingAttack();
 		if (spriteType.isAddReverse()) {
 			handleAnimationReverse(character, animationComponent, animation, spriteType);
-		} else if (onGoingAttack.getType() != null) {
+		} else if (onGoingAttack.getType() != null && characterComp.getCharacterSpriteData().getSpriteType() == ATTACK_PRIMARY) {
 			SystemsCommonData commonData = getSystemsCommonData();
 			int primaryAttackHitFrameIndex = GameUtils.getPrimaryAttackHitFrameIndexForCharacter(character, commonData);
 			if (onGoingAttack.isDone()) {
