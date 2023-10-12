@@ -147,6 +147,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		}
 		hudTable.add(rightSideIndicatorsTable).expand().bottom().right();
 		addTurnsIndicator();
+		hudTable.setVisible(!DebugSettings.HIDE_HUD);
 	}
 
 	@Override

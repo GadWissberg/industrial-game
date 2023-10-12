@@ -14,6 +14,7 @@ public final class DebugSettings {
 	public static final boolean DISPLAY_CURSOR_POSITION = true;
 	public static final boolean SHOW_GL_PROFILING = true;
 	public static final boolean DISPLAY_HUD_OUTLINES = false;
+	public static final boolean HIDE_HUD = false;
 	public static final boolean MELODY_ENABLED = false;
 	public static final boolean SFX_ENABLED = false;
 	public static final boolean FULL_SCREEN = false;
@@ -28,7 +29,7 @@ public final class DebugSettings {
 	public static final boolean GOD_MODE = false;
 	public static final boolean ENEMY_INVULNERABLE = false;
 	public static final boolean SPACE_BAR_SKIPS_PLAYER = false;
-	public static final String TEST_LEVEL = "enemy_test";
+	public static final String TEST_LEVEL = "office";
 	public static final boolean ALLOW_SCREEN_SHOT_OF_DEPTH_MAP = true;
 	public static final boolean DISABLE_BULLET_COLLISION_WITH_CHARACTERS = false;
 	public static final int FORCE_LOADED_AMMO = -1;
