@@ -65,9 +65,11 @@ public class RunCommand extends CharacterCommand {
 		return updateCommand(systemsCommonData, character, subscribers);
 	}
 
-	private void handleDoor(Entity character, Entity door) {
+	private void handleDoor(Entity character, Entity door, List<CharacterSystemEventsSubscriber> subscribers) {
 		DoorComponent doorComponent = ComponentsMapper.door.get(door);
-		if (doorComponent.getState() == DoorStates.CLOSED) {
+		int actionPoints = ComponentsMapper.character.get(getCharacter()).getAttributes().getActionPoints();
+		if (doorComponent.getState() == DoorStates.CLOSED && actionPoints > 0) {
+			consumeActionPoints(character, STEP_POINTS_CONSUMPTION, subscribers);
 			ComponentsMapper.character.get(character).getCharacterSpriteData().setSpriteType(SpriteType.IDLE);
 			doorComponent.requestToOpen(character);
 		}
@@ -85,7 +87,7 @@ public class RunCommand extends CharacterCommand {
 			done = reachedNodeOfPath(subscribers, character);
 		}
 		if (!done) {
-			done = applyMovementToNextNode(systemsCommonData, character);
+			done = applyMovementToNextNode(systemsCommonData, character, subscribers);
 		}
 		return done;
 	}
@@ -98,7 +100,9 @@ public class RunCommand extends CharacterCommand {
 		}
 	}
 
-	private boolean applyMovementToNextNode(SystemsCommonData systemsCommonData, Entity character) {
+	private boolean applyMovementToNextNode(SystemsCommonData systemsCommonData,
+											Entity character,
+											List<CharacterSystemEventsSubscriber> subscribers) {
 		boolean commandDone = false;
 		int nextNodeIndex = getNextNodeIndex();
 		MapGraphNode nextNode = path.get(nextNodeIndex);
@@ -108,7 +112,7 @@ public class RunCommand extends CharacterCommand {
 			Vector2 centerPosition = nextNode.getCenterPosition(auxVector2_2);
 			Direction direction = Direction.findDirection(centerPosition.sub(currentNode.getCenterPosition(auxVector2_1)).nor());
 			ComponentsMapper.character.get(character).setFacingDirection(direction);
-			handleDoor(character, nextNode.getDoor());
+			handleDoor(character, nextNode.getDoor(), subscribers);
 			commandDone = true;
 		} else {
 			takeStep(character, systemsCommonData);
