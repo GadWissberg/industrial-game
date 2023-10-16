@@ -17,7 +17,11 @@ import static com.gadarts.industrial.systems.SystemsCommonData.MELEE_ATTACK_MAX_
 
 public class AiStatusAttackingLogic extends AiStatusLogic {
 	@Override
-	public boolean run(Entity enemy, MapGraph map, PathPlanHandler pathPlanner, long currentTurnId, List<EnemySystemEventsSubscriber> subscribers) {
+	public boolean run(Entity enemy,
+					   MapGraph map,
+					   PathPlanHandler pathPlanner,
+					   long currentTurnId,
+					   List<EnemySystemEventsSubscriber> subscribers) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
 		boolean finishedTurn = false;
 		if (characterComponent.getPrimaryAttack().melee()) {
@@ -42,7 +46,7 @@ public class AiStatusAttackingLogic extends AiStatusLogic {
 			if (enemyComponent.getEngineEnergy() >= characterComponent.getPrimaryAttack().engineConsumption()) {
 				addCommand(enemy, CharacterCommandsDefinitions.ATTACK_PRIMARY);
 			} else {
-				updateEnemyAiStatus(enemy,EnemyAiStatus.DODGING,subscribers);
+				updateEnemyAiStatus(enemy, EnemyAiStatus.DODGING, subscribers);
 			}
 		}
 		return finishedTurn;

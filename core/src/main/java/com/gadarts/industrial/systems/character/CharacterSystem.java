@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.Queue;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
+import com.gadarts.industrial.components.BulletComponent;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.animation.AnimationComponent;
 import com.gadarts.industrial.components.character.*;
@@ -72,6 +73,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private ImmutableArray<Entity> characters;
 	private ParticleEffect smallExpEffect;
 	private Map<SurfaceType, Sounds> surfaceTypeToStepSound;
+	private ImmutableArray<Entity> livingBullets;
 
 	public CharacterSystem(GameAssetManager assetsManager,
 						   GameLifeCycleHandler lifeCycleHandler) {
@@ -103,6 +105,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	public void initializeData( ) {
 		bloodSplatterEffect = getAssetsManager().getParticleEffect(Assets.ParticleEffects.BLOOD_SPLATTER);
 		smallExpEffect = getAssetsManager().getParticleEffect(Assets.ParticleEffects.SMALL_EXP);
+		livingBullets = getEngine().getEntitiesFor(Family.all(BulletComponent.class).get());
 	}
 
 	@Override
@@ -369,8 +372,10 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 					handleRotation(currentCommand, character);
 				}
 			} else if (currentCommand.getState() == CommandStates.ENDED) {
-				Pools.free(characterComponent.getCommands().removeFirst());
-				commandDone(character);
+				if (livingBullets.size() == 0) {
+					Pools.free(characterComponent.getCommands().removeFirst());
+					commandDone(character);
+				}
 			}
 		} else if (ComponentsMapper.enemy.has(character)) {
 			commandDone(character);
