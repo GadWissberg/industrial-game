@@ -12,12 +12,11 @@ buildscript {
 }
 if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
     apply plugin: 'org.beryx.runtime'
-}
-else {
+} else {
     apply plugin: 'application'
 }
 
-sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
+sourceSets.main.resources.srcDirs += [rootProject.file('assets').path]
 mainClassName = 'com.gadarts.industrial.lwjgl3.Lwjgl3Launcher'
 eclipse.project.name = appName + '-lwjgl3'
 sourceCompatibility = 1.17
@@ -90,6 +89,9 @@ if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
 // this may need to be set to a different path if your JAVA_HOME points to a low JDK version.
             jpackageHome = javaHome.getOrElse("")
             mainJar = jar.archiveFileName.get()
+            if (os.contains('win')) {
+                imageOptions += ['--win-console']
+            }
 //            if (os.contains('win')) {
 //                imageOptions = ["--icon", "icons/logo.ico"]
 //            } else if (os.contains('nix') || os.contains('nux') || os.contains('bsd')) {
