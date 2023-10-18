@@ -67,7 +67,11 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 
 	@Override
 	public void onCharacterDies(Entity character) {
-		getSystemsCommonData().getTurnsQueue().removeValue(character, true);
+		Queue<Entity> turnsQueue = getSystemsCommonData().getTurnsQueue();
+		turnsQueue.removeValue(character, true);
+		if (turnsQueue.size <= 1) {
+			setGameMode(GameMode.EXPLORE);
+		}
 	}
 
 	@Override
