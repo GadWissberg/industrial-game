@@ -1,60 +1,60 @@
 package com.gadarts.industrial.console;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction;
-import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.StringBuilder;
-
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Scaling;
-import com.gadarts.industrial.shared.assets.GameAssetManager;
+import com.badlogic.gdx.utils.Disposable;
 import com.gadarts.industrial.console.commands.*;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.systems.SystemsCommonData;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.util.stream.Collectors.toList;
-
 
 public class ConsoleImpl extends Table implements Console, InputProcessor, Disposable {
 	public static final String NAME = "console";
-	public static final String INPUT_SIGN = ">";
 	public static final char GRAVE_ASCII = '`';
-	public static final String OPTIONS_DELIMITER = " | ";
 	public static final Interpolation.Pow INTERPOLATION = Interpolation.pow2;
-	private static final float PADDING = 10f;
-	private static final float INPUT_HEIGHT = 20f;
 	private static final float TRANSITION_DURATION = 0.5f;
 	private final ConsoleTextures consoleTextures = new ConsoleTextures();
-	private final StringBuilder stringBuilder = new StringBuilder();
+	private final ConsoleComponents consoleComponents = new ConsoleComponents(this, consoleTextures);
 	private final Set<ConsoleEventsSubscriber> subscribers = new HashSet<>();
 	private final ConsoleCommandResult consoleCommandResult = new ConsoleCommandResult();
 	private ConsoleTextData consoleTextData;
 	private ConsoleInputHistoryHandler consoleInputHistoryHandler;
-	private ScrollPane scrollPane;
-	private Image arrow;
-	private TextField input;
 	private boolean active;
-	private boolean scrollToEnd = true;
 
 	@Override
 	public void dispose( ) {
 		consoleTextData.dispose();
 		consoleTextures.dispose();
+	}
+
+	private TextField.TextFieldListener createTextFieldListener(SystemsCommonData systemsCommonData) {
+		return (textField, c) -> {
+			if (c == GRAVE_ASCII) {
+				textField.setText(null);
+				if (!ConsoleImpl.this.hasActions()) {
+					if (isActive()) {
+						deactivate();
+					}
+				}
+			}
+			if (active) {
+				if (c == '\r' || c == '\n') {
+					applyInput(consoleComponents.getInput(), systemsCommonData);
+				}
+			}
+		};
 	}
 
 	@Override
@@ -118,8 +118,8 @@ public class ConsoleImpl extends Table implements Console, InputProcessor, Dispo
 	public void insertNewLog(String text, boolean logTime, String color) {
 		if (text == null) return;
 		consoleTextData.insertNewLog(text, logTime, color);
-		scrollToEnd = true;
-		arrow.setVisible(false);
+		consoleComponents.setScrollToEnd(true);
+		consoleComponents.showArrow(false);
 	}
 
 	@Override
@@ -182,46 +182,9 @@ public class ConsoleImpl extends Table implements Console, InputProcessor, Dispo
 	public void act(float delta) {
 		super.act(delta);
 		if (!active) return;
-		if (scrollToEnd || scrollPane.isBottomEdge()) {
-			scrollToEnd = true;
-			scrollPane.setScrollPercentY(1);
-			arrow.setVisible(false);
-		} else if (!arrow.isVisible()) {
-			arrow.setVisible(true);
-		}
+		consoleComponents.update();
 	}
 
-	private void addTextView(final TextureRegionDrawable textBackgroundTexture, final int consoleHeight) {
-		Label.LabelStyle textStyle = consoleTextData.getTextStyle();
-		textStyle.background = textBackgroundTexture;
-		float width = Gdx.graphics.getWidth() - PADDING * 2;
-		float height = consoleHeight - (INPUT_HEIGHT);
-		Label textView = new Label(consoleTextData.getStringBuilder(), textStyle);
-		textView.setAlignment(Align.bottomLeft);
-		textView.setName(TEXT_VIEW_NAME);
-		textView.setWrap(true);
-		scrollPane = new ScrollPane(textView);
-		scrollPane.setTouchable(Touchable.disabled);
-		Stack textWindowStack = new Stack(scrollPane);
-		arrow = new Image(consoleTextures.getArrowTexture());
-		arrow.setAlign(Align.bottomRight);
-		textWindowStack.add(arrow);
-		arrow.setScaling(Scaling.none);
-		arrow.setFillParent(false);
-		arrow.setVisible(false);
-		add(textWindowStack).colspan(2).size(width, height).align(Align.bottomLeft).padRight(PADDING).padLeft(PADDING).row();
-	}
-
-	private void addInputField(final TextureRegionDrawable textBackgroundTexture) {
-		TextField.TextFieldStyle style = new TextField.TextFieldStyle(consoleTextData.getFont(), Color.YELLOW, new TextureRegionDrawable(consoleTextures.getCursorTexture()),
-				null, textBackgroundTexture);
-		input = new TextField("", style);
-		input.setName(INPUT_FIELD_NAME);
-		Label arrow = new Label(INPUT_SIGN, consoleTextData.getTextStyle());
-		add(arrow).padBottom(PADDING).padLeft(PADDING).size(10f, INPUT_HEIGHT);
-		add(input).size(Gdx.graphics.getWidth() - PADDING * 3, INPUT_HEIGHT).padBottom(PADDING).padRight(PADDING).align(Align.left).row();
-		input.setFocusTraversal(false);
-	}
 
 	private void applyInput(final TextField textField, SystemsCommonData systemsCommonData) {
 		insertNewLog(textField.getText(), true, INPUT_COLOR);
@@ -262,9 +225,9 @@ public class ConsoleImpl extends Table implements Console, InputProcessor, Dispo
 		}
 	}
 
-	private void applyFoundCommandByTab(final java.util.List<ConsoleCommandsList> options) {
-		input.setText(options.get(0).name().toLowerCase());
-		input.setCursorPosition(input.getText().length());
+	public void applyFoundCommandByTab(final java.util.List<ConsoleCommandsList> options) {
+		consoleComponents.applyFoundCommandByTab(options);
+
 	}
 
 	@Override
@@ -276,78 +239,14 @@ public class ConsoleImpl extends Table implements Console, InputProcessor, Dispo
 		setVisible(false);
 		setPosition(0, screenHeight);
 		consoleTextures.init((int) height);
-		TextureRegionDrawable textBackgroundTextureRegionDrawable = new TextureRegionDrawable(consoleTextures.getTextBackgroundTexture());
-		addTextView(textBackgroundTextureRegionDrawable, (int) height);
-		addInputField(textBackgroundTextureRegionDrawable);
+		TextField.TextFieldListener textFieldListener = createTextFieldListener(systemsCommonData);
+		consoleInputHistoryHandler = new ConsoleInputHistoryHandler();
+		consoleComponents.init(height, textFieldListener, consoleTextData, consoleInputHistoryHandler, this);
 		setBackground(new TextureRegionDrawable(consoleTextures.getBackgroundTexture()));
 		setSize(Gdx.graphics.getWidth(), consoleTextures.getBackgroundTexture().getHeight());
-		consoleInputHistoryHandler = new ConsoleInputHistoryHandler();
-		input.setTextFieldFilter((textField, c) -> c != '\t');
-		input.setTextFieldListener((textField, c) -> {
-			if (c == GRAVE_ASCII) {
-				textField.setText(null);
-				if (!ConsoleImpl.this.hasActions()) {
-					if (isActive()) {
-						deactivate();
-					}
-				}
-			}
-			if (active) {
-				if (c == '\r' || c == '\n') {
-					applyInput(input, systemsCommonData);
-				}
-			}
-		});
-		input.addCaptureListener(new InputListener() {
-			@Override
-			public boolean keyDown(final InputEvent event, final int keycode) {
-				boolean result = false;
-				if (active) {
-					result = true;
-					if (keycode == Input.Keys.PAGE_UP) {
-						scroll(-consoleTextData.getFontHeight() * 2);
-					} else if (keycode == Input.Keys.PAGE_DOWN) {
-						scroll(consoleTextData.getFontHeight() * 2);
-					} else if (keycode == Input.Keys.TAB) {
-						tryFindingCommand();
-					} else if (keycode == Input.Keys.ESCAPE) {
-						deactivate();
-					} else {
-						consoleInputHistoryHandler.onKeyDown(keycode);
-					}
-				}
-				return result;
-			}
-
-			private void tryFindingCommand( ) {
-				if (input.getText().isEmpty()) return;
-				java.util.List<ConsoleCommandsList> options = Arrays.stream(ConsoleCommandsList.values())
-						.filter(command -> {
-							String p = input.getText().toUpperCase();
-							String alias = command.getAlias();
-							return command.name().startsWith(p) || ((alias != null && alias.startsWith(p.toLowerCase())));
-						})
-						.collect(toList());
-				if (options.size() == 1) {
-					applyFoundCommandByTab(options);
-				} else if (options.size() > 1) {
-					logSuggestedCommands(options);
-				}
-			}
-
-			private void logSuggestedCommands(final java.util.List<ConsoleCommandsList> options) {
-				stringBuilder.clear();
-				options.forEach(command -> stringBuilder.append(command.name().toLowerCase()).append(OPTIONS_DELIMITER));
-				insertNewLog(String.format("Possible options:\n%s", stringBuilder), false);
-			}
-
-			private void scroll(final float step) {
-				scrollPane.setScrollY(scrollPane.getScrollY() + step);
-				scrollToEnd = false;
-			}
-		});
 		subscribers.forEach(sub -> sub.onConsoleInitialized(this));
 	}
+
 
 	@Override
 	public void subscribeForEvents(ConsoleEventsSubscriber sub) {

@@ -36,15 +36,6 @@ public class CharacterDecalComponent implements GameComponent {
 		createCharacterDecal(animations, type, direction, position);
 	}
 
-	private void createCharacterDecal(final CharacterAnimations animations,
-									  final SpriteType type,
-									  final Direction direction,
-									  final Vector3 position) {
-		decal = Decal.newDecal(animations.get(type, direction).getKeyFrames()[0], true);//Optimize this - it creates an object each time.
-		decal.setScale(BILLBOARD_SCALE);
-		decal.setPosition(position);
-	}
-
 	public void initializeSprite(final SpriteType type, final Direction direction) {
 		this.spriteType = type;
 		this.direction = direction;
@@ -60,5 +51,14 @@ public class CharacterDecalComponent implements GameComponent {
 		Vector3 position = decal.getPosition();
 		Vector3 decalPosition = auxVector3.set(position.x, 0, position.z);
 		return output.set(decalPosition.set(MathUtils.floor(auxVector3.x), 0, MathUtils.floor(auxVector3.z)));
+	}
+
+	private void createCharacterDecal(final CharacterAnimations animations,
+									  final SpriteType type,
+									  final Direction direction,
+									  final Vector3 position) {
+		decal = Decal.newDecal(animations.get(type, direction).getKeyFrames()[0], true);//Optimize this - it creates an object each time.
+		decal.setScale(BILLBOARD_SCALE);
+		decal.setPosition(position);
 	}
 }

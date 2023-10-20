@@ -11,11 +11,6 @@ public class GameFrameBuffer extends FrameBuffer {
 	}
 
 	@Override
-	public void bind( ) {
-		Gdx.gl20.glBindFramebuffer(GL20.GL_FRAMEBUFFER, framebufferHandle);
-	}
-
-	@Override
 	public void end(int x, int y, int width, int height) {
 		Gdx.gl20.glBindFramebuffer(GL20.GL_FRAMEBUFFER, defaultFramebufferHandle);
 		Gdx.gl20.glViewport(x, y, width, height);

@@ -1,16 +1,18 @@
 package com.gadarts.industrial.console;
 
-import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.console.commands.ConsoleCommandParameter;
 import com.gadarts.industrial.console.commands.ConsoleCommandResult;
 import com.gadarts.industrial.console.commands.ConsoleCommands;
+import com.gadarts.industrial.console.commands.ConsoleCommandsList;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.systems.EventsNotifier;
 import com.gadarts.industrial.systems.SystemsCommonData;
+
+import java.util.List;
 
 public interface Console extends EventsNotifier<ConsoleEventsSubscriber> {
 	String TEXT_VIEW_NAME = "text";
 
-	String ERROR_COLOR = "[RED]";
 	String INPUT_FIELD_NAME = "input";
 	String OUTPUT_COLOR = "[LIGHT_GRAY]";
 	String INPUT_COLOR = "[YELLOW]";
@@ -32,4 +34,7 @@ public interface Console extends EventsNotifier<ConsoleEventsSubscriber> {
 	void init(GameAssetManager assetsManager, SystemsCommonData systemsCommonData);
 
 	void dispose( );
+
+	void applyFoundCommandByTab(List<ConsoleCommandsList> options);
+
 }

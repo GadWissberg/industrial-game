@@ -34,7 +34,7 @@ public class AnimationComponent implements GameComponent {
 		long now = TimeUtils.millis();
 		if (now - lastFrameChange >= frameDuration * 1000.0) {
 			lastFrameChange = now;
-			stateTime += frameDuration;
+			stateTime += (float) frameDuration;
 		}
 		return result;
 	}

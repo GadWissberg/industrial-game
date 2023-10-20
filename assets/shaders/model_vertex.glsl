@@ -111,12 +111,6 @@ uniform mat4 u_bones[numBones];
 #endif //numBones
 #endif
 
-#ifdef shininessFlag
-uniform float u_shininess;
-#else
-const float u_shininess = 20.0;
-#endif // shininessFlag
-
 #ifdef blendedFlag
 uniform float u_opacity;
 varying float v_opacity;
