@@ -4,15 +4,18 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.sll.ShadowlessLightComponent;
 import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.AdditionalRenderData;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
+import com.gadarts.industrial.components.player.PlayerComponent;
+import com.gadarts.industrial.components.sll.ShadowlessLightComponent;
 
 import java.util.List;
 
@@ -24,20 +27,37 @@ public class ModelsShader extends DefaultShader {
 	private static final int MAX_LIGHTS = 16;
 	private static final int LIGHT_EXTRA_DATA_SIZE = 3;
 	private static final int MAX_NEARBY_CHARACTERS = 2;
-	private static final Vector3 auxVector = new Vector3();
+	private static final Vector3 auxVector3_1 = new Vector3();
+	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final Color auxColor = new Color();
 	private static final BoundingBox auxBoundingBox = new BoundingBox();
-
+	private static final Vector2 auxVector2 = new Vector2();
+	private static final float X_RAY_DISTANCE_CHECK_BIAS = -0.5F;
 	private final float[] lightsPositions = new float[MAX_LIGHTS * 3];
 	private final float[] shadowlessLightsExtraData = new float[MAX_LIGHTS * LIGHT_EXTRA_DATA_SIZE];
 	private final float[] lightsColors = new float[MAX_LIGHTS * 3];
 	private final float[] nearbySimpleShadowsData = new float[MAX_NEARBY_CHARACTERS * NEARBY_SIMPLE_SHADOW_VECTOR_SIZE];
 	private final FrameBuffer shadowFrameBuffer;
 	private final ModelsShaderUniformsLocations locations = new ModelsShaderUniformsLocations();
+	private final Decal playerDecal;
 
-	public ModelsShader(Renderable renderable, Config mainShaderConfig, FrameBuffer shadowFrameBuffer) {
+	public ModelsShader(Renderable renderable,
+						Config mainShaderConfig,
+						FrameBuffer shadowFrameBuffer,
+						Decal playerDecal) {
 		super(renderable, mainShaderConfig);
 		this.shadowFrameBuffer = shadowFrameBuffer;
+		this.playerDecal = playerDecal;
+	}
+
+	private static Vector3 getNearbySimpleShadowPosition(Entity nearby) {
+		Vector3 pos;
+		if (ComponentsMapper.characterDecal.has(nearby)) {
+			pos = ComponentsMapper.characterDecal.get(nearby).getDecal().getPosition();
+		} else {
+			pos = ComponentsMapper.modelInstance.get(nearby).getModelInstance().transform.getTranslation(auxVector3_1);
+		}
+		return pos;
 	}
 
 	@Override
@@ -53,22 +73,12 @@ public class ModelsShader extends DefaultShader {
 	public void render(Renderable renderable) {
 		int textureNum = context.textureBinder.bind(shadowFrameBuffer.getColorBufferTexture());
 		program.bind();
-		program.setUniformi("u_shadows", textureNum);
-		program.setUniformf("u_screenWidth", Gdx.graphics.getWidth());
-		program.setUniformf("u_screenHeight", Gdx.graphics.getHeight());
+		program.setUniformi(locations.getUniformLocShadows(), textureNum);
+		program.setUniformf(locations.getUniformLocScreenWidth(), Gdx.graphics.getWidth());
+		program.setUniformf(locations.getUniformLocScreenHeight(), Gdx.graphics.getHeight());
 		Entity entity = (Entity) renderable.userData;
 		insertAdditionalRenderData(renderable, entity);
 		super.render(renderable);
-	}
-
-	private static Vector3 getNearbySimpleShadowPosition(Entity nearby) {
-		Vector3 pos;
-		if (ComponentsMapper.characterDecal.has(nearby)) {
-			pos = ComponentsMapper.characterDecal.get(nearby).getDecal().getPosition();
-		} else {
-			pos = ComponentsMapper.modelInstance.get(nearby).getModelInstance().transform.getTranslation(auxVector);
-		}
-		return pos;
 	}
 
 	private void applyLights(final AdditionalRenderData renderData) {
@@ -94,7 +104,7 @@ public class ModelsShader extends DefaultShader {
 
 	private void insertLightPositionToArray(final List<Entity> nearbyLights, final int i) {
 		ShadowlessLightComponent lightComponent = shadowlessLight.get(nearbyLights.get(i));
-		Vector3 position = lightComponent.getPosition(auxVector);
+		Vector3 position = lightComponent.getPosition(auxVector3_1);
 		int positionIndex = i * 3;
 		lightsPositions[positionIndex] = position.x;
 		lightsPositions[positionIndex + 1] = position.y;
@@ -132,23 +142,39 @@ public class ModelsShader extends DefaultShader {
 	}
 
 	private void insertAdditionalRenderData(Renderable renderable,
-											Entity entity) {
-		ModelInstanceComponent modelInstanceComponent = modelInstance.get(entity);
+											Entity renderedEntity) {
+		ModelInstanceComponent modelInstanceComponent = modelInstance.get(renderedEntity);
 		AdditionalRenderData additionalRenderData = modelInstanceComponent.getModelInstance().getAdditionalRenderData();
 		applyLights(additionalRenderData);
 		program.setUniformf(locations.getUniformLocAffectedByLight(), additionalRenderData.isAffectedByLight() ? 1F : 0F);
-		insertModelDimensions(additionalRenderData, entity);
+		insertModelDimensions(additionalRenderData, renderedEntity);
 		insertDataForSpecificModels(renderable);
 		insertFlatColor(modelInstanceComponent);
+		applyXRay(renderedEntity);
+	}
+
+	private void applyXRay(Entity renderedEntity) {
+		Vector3 renderedEntityPos = modelInstance.get(renderedEntity).getModelInstance().transform.getTranslation(auxVector3_2);
+		Vector3 playerPos = playerDecal.getPosition();
+		float playerToCameraDistance = auxVector3_1.set(playerPos.x, 0F, playerPos.z).dst2(camera.position);
+		boolean floorCheck = !floor.has(renderedEntity) || renderedEntityPos.y > playerPos.y + PlayerComponent.PLAYER_HEIGHT / 2F;
+		renderedEntityPos.y = 0F;
+		float renderedEntityToCameraDistance = renderedEntityPos.dst2(camera.position) + X_RAY_DISTANCE_CHECK_BIAS;
+		if (renderedEntityToCameraDistance < playerToCameraDistance && floorCheck) {
+			Vector3 project = camera.project(auxVector3_1.set(playerPos));
+			program.setUniformf(locations.getUniformLocPlayerScreenCoords(), auxVector2.set(project.x, project.y));
+		} else {
+			program.setUniformf(locations.getUniformLocPlayerScreenCoords(), auxVector2.setZero());
+		}
 	}
 
 	private void insertFlatColor(ModelInstanceComponent modelInstanceComponent) {
 		Color flatColor = modelInstanceComponent.getFlatColor();
 		Vector3 flatColorVector;
 		if (flatColor != null) {
-			flatColorVector = auxVector.set(flatColor.r, flatColor.g, flatColor.b);
+			flatColorVector = auxVector3_1.set(flatColor.r, flatColor.g, flatColor.b);
 		} else {
-			flatColorVector = auxVector.set(-1F, -1F, -1F);
+			flatColorVector = auxVector3_1.set(-1F, -1F, -1F);
 		}
 		program.setUniformf(locations.getUniformLocFlatColor(), flatColorVector);
 	}
@@ -181,7 +207,7 @@ public class ModelsShader extends DefaultShader {
 		program.setUniformf(locations.getUniformLocModelWidth(), width);
 		program.setUniformf(locations.getUniformLocModelHeight(), height);
 		program.setUniformf(locations.getUniformLocModelDepth(), depth);
-		Vector3 translation = modelInstance.get(entity).getModelInstance().transform.getTranslation(auxVector);
+		Vector3 translation = modelInstance.get(entity).getModelInstance().transform.getTranslation(auxVector3_1);
 		insertModelPosition(entity, translation);
 	}
 

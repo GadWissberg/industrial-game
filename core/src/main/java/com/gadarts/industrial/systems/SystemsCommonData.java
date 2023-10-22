@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.systems.player.PlayerStorage;
-import com.gadarts.industrial.systems.render.DrawFlags;
+import com.gadarts.industrial.systems.render.flags.DrawFlags;
 import com.gadarts.industrial.systems.turns.GameMode;
 import com.gadarts.industrial.systems.ui.*;
 import com.gadarts.industrial.systems.ui.indicators.AmmoIndicator;

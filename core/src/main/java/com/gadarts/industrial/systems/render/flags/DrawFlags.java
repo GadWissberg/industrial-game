@@ -1,4 +1,4 @@
-package com.gadarts.industrial.systems.render;
+package com.gadarts.industrial.systems.render.flags;
 
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.console.commands.ConsoleCommandParameter;
@@ -18,7 +18,7 @@ public class DrawFlags {
 	private boolean drawEnv = !DebugSettings.HIDE_ENVIRONMENT_OBJECTS;
 	private boolean drawCursor = !DebugSettings.HIDE_CURSOR;
 
-	void applySkipRenderCommand(final ConsoleCommandParameter parameter) {
+	public void applySkipRenderCommand(final ConsoleCommandParameter parameter) {
 		String alias = parameter.getAlias();
 		boolean value = !parameter.getParameterValue();
 		Map<String, DrawFlagSet> map = SkipRenderCommand.getMap();

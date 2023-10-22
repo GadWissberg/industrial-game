@@ -51,6 +51,7 @@ import com.gadarts.industrial.shared.utils.CharacterUtils;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
+import com.gadarts.industrial.systems.render.flags.DrawFlags;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -161,7 +162,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	public void initializeData( ) {
 		GameAssetManager assetsManager = getAssetsManager();
 		staticShadowsData.init(assetsManager, families.getStaticLightsEntities());
-		renderBatches.createShaderProvider(assetsManager, staticShadowsData.getShadowFrameBuffer());
+		CharacterDecalComponent playerCharacterDecalComponent = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer());
+		renderBatches.createShaderProvider(assetsManager, staticShadowsData.getShadowFrameBuffer(), playerCharacterDecalComponent.getDecal());
 		strategies.createDecalGroupStrategies(getSystemsCommonData().getCamera(), assetsManager);
 		renderBatches.createBatches(
 				staticShadowsData, families.getStaticLightsEntities(),
@@ -265,6 +267,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 									  ModelInstanceComponent modelInstanceComponent,
 									  boolean considerFow) {
 		if (shouldSkipRenderModel(camera, entity, modelInstanceComponent, considerFow)) return false;
+
 		renderModel(modelBatch, entity, renderLight, modelInstanceComponent);
 		return true;
 	}

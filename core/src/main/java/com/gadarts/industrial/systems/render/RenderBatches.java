@@ -5,6 +5,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
+import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -58,7 +59,9 @@ public class RenderBatches implements Disposable {
 		}
 	}
 
-	public void createShaderProvider(GameAssetManager assetsManager, GameFrameBuffer shadowFrameBuffer) {
-		modelsShaderProvider = new ModelsShaderProvider(assetsManager, shadowFrameBuffer);
+	public void createShaderProvider(GameAssetManager assetsManager,
+									 GameFrameBuffer shadowFrameBuffer,
+									 Decal playerDecal) {
+		modelsShaderProvider = new ModelsShaderProvider(assetsManager, shadowFrameBuffer, playerDecal);
 	}
 }

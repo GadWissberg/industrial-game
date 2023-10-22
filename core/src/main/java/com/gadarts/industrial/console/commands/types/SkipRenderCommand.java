@@ -4,19 +4,17 @@ import com.gadarts.industrial.console.Console;
 import com.gadarts.industrial.console.commands.ConsoleCommand;
 import com.gadarts.industrial.console.commands.ConsoleCommandParameter;
 import com.gadarts.industrial.console.commands.ConsoleCommandsList;
-import com.gadarts.industrial.systems.render.DrawFlagSet;
-import com.gadarts.industrial.systems.render.DrawFlags;
+import com.gadarts.industrial.systems.render.flags.DrawFlagSet;
+import com.gadarts.industrial.systems.render.flags.DrawFlags;
+import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class SkipRenderCommand extends ConsoleCommand {
+	@Getter
 	private static final Map<String, DrawFlagSet> map = new HashMap<>();
-
-	public static Map<String, DrawFlagSet> getMap( ) {
-		return map;
-	}
 
 	@Override
 	protected ConsoleCommandsList getCommandEnumValue( ) {
