@@ -2,7 +2,7 @@ package com.gadarts.industrial.components;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector3;
-import com.gadarts.industrial.systems.render.GameFrameBufferCubeMap;
+import com.gadarts.industrial.systems.render.fb.GameFrameBufferCubeMap;
 import lombok.Getter;
 import lombok.Setter;
 

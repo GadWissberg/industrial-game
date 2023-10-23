@@ -172,7 +172,7 @@ void main() {
     gl_FragColor.rgb = vec3(0.0);
     vec3 finalColor = vec3(0.0);
     if (!gl_FrontFacing || (u_playerScreenCoords != vec2(0.0) && length(u_playerScreenCoords.xy - gl_FragCoord.xy) < 50.0)){
-        return;
+        discard;
     }
     if (u_flatColor.x < 0.0){
         if (u_affectedByLight != 0.0){

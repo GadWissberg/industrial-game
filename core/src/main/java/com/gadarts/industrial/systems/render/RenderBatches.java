@@ -12,19 +12,24 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
+import com.gadarts.industrial.systems.render.fb.GameFrameBuffer;
 import com.gadarts.industrial.systems.render.shaders.models.ModelsShaderProvider;
 import com.gadarts.industrial.systems.render.shaders.shadow.ShadowMapDepthMapShader;
 import com.gadarts.industrial.systems.render.shaders.shadow.ShadowMapShader;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
+@RequiredArgsConstructor
 public class RenderBatches implements Disposable {
 	private static final int DECALS_POOL_SIZE = 200;
+	private final Decal playerDecal;
 	private ModelsShaderProvider modelsShaderProvider;
 	private ModelBatch depthModelBatch;
 	private ModelBatch modelBatchShadows;
 	private ModelBatch modelBatch;
 	private DecalBatch decalBatch;
+
 
 	void createBatches(StaticShadowsData staticShadowsData,
 					   ImmutableArray<Entity> staticLightsEntities,
@@ -41,7 +46,7 @@ public class RenderBatches implements Disposable {
 				@Override
 				protected Shader createShader(final Renderable renderable) {
 					ShaderProgram shadowsShaderProgram = staticShadowsData.getShadowsShaderProgram();
-					return new ShadowMapShader(renderable, shadowsShaderProgram, staticLightsEntities);
+					return new ShadowMapShader(renderable, shadowsShaderProgram, staticLightsEntities, playerDecal);
 				}
 			});
 		}
@@ -60,8 +65,7 @@ public class RenderBatches implements Disposable {
 	}
 
 	public void createShaderProvider(GameAssetManager assetsManager,
-									 GameFrameBuffer shadowFrameBuffer,
-									 Decal playerDecal) {
+									 GameFrameBuffer shadowFrameBuffer) {
 		modelsShaderProvider = new ModelsShaderProvider(assetsManager, shadowFrameBuffer, playerDecal);
 	}
 }

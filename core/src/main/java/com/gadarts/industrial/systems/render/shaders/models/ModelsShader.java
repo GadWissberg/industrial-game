@@ -14,8 +14,8 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.AdditionalRenderData;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
-import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.components.sll.ShadowlessLightComponent;
+import com.gadarts.industrial.systems.render.shaders.ShaderUtils;
 
 import java.util.List;
 
@@ -28,11 +28,9 @@ public class ModelsShader extends DefaultShader {
 	private static final int LIGHT_EXTRA_DATA_SIZE = 3;
 	private static final int MAX_NEARBY_CHARACTERS = 2;
 	private static final Vector3 auxVector3_1 = new Vector3();
-	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final Color auxColor = new Color();
 	private static final BoundingBox auxBoundingBox = new BoundingBox();
 	private static final Vector2 auxVector2 = new Vector2();
-	private static final float X_RAY_DISTANCE_CHECK_BIAS = -0.5F;
 	private final float[] lightsPositions = new float[MAX_LIGHTS * 3];
 	private final float[] shadowlessLightsExtraData = new float[MAX_LIGHTS * LIGHT_EXTRA_DATA_SIZE];
 	private final float[] lightsColors = new float[MAX_LIGHTS * 3];
@@ -150,22 +148,8 @@ public class ModelsShader extends DefaultShader {
 		insertModelDimensions(additionalRenderData, renderedEntity);
 		insertDataForSpecificModels(renderable);
 		insertFlatColor(modelInstanceComponent);
-		applyXRay(renderedEntity);
-	}
-
-	private void applyXRay(Entity renderedEntity) {
-		Vector3 renderedEntityPos = modelInstance.get(renderedEntity).getModelInstance().transform.getTranslation(auxVector3_2);
-		Vector3 playerPos = playerDecal.getPosition();
-		float playerToCameraDistance = auxVector3_1.set(playerPos.x, 0F, playerPos.z).dst2(camera.position);
-		boolean floorCheck = !floor.has(renderedEntity) || renderedEntityPos.y > playerPos.y + PlayerComponent.PLAYER_HEIGHT / 2F;
-		renderedEntityPos.y = 0F;
-		float renderedEntityToCameraDistance = renderedEntityPos.dst2(camera.position) + X_RAY_DISTANCE_CHECK_BIAS;
-		if (renderedEntityToCameraDistance < playerToCameraDistance && floorCheck) {
-			Vector3 project = camera.project(auxVector3_1.set(playerPos));
-			program.setUniformf(locations.getUniformLocPlayerScreenCoords(), auxVector2.set(project.x, project.y));
-		} else {
-			program.setUniformf(locations.getUniformLocPlayerScreenCoords(), auxVector2.setZero());
-		}
+		int uniformLocPlayerScreenCoords = locations.getUniformLocPlayerScreenCoords();
+		program.setUniformf(uniformLocPlayerScreenCoords, ShaderUtils.calculateXRay(renderedEntity, playerDecal, camera, auxVector2));
 	}
 
 	private void insertFlatColor(ModelInstanceComponent modelInstanceComponent) {

@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
+import com.gadarts.industrial.systems.render.fb.GameFrameBuffer;
 import lombok.Getter;
 import lombok.Setter;
 

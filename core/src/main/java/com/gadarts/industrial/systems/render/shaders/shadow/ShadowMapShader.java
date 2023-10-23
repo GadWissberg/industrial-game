@@ -8,15 +8,18 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Attributes;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
+import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.StaticLightComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.systems.render.RenderSystem;
+import com.gadarts.industrial.systems.render.shaders.ShaderUtils;
 
 import static com.gadarts.industrial.systems.SystemsCommonData.CAMERA_LIGHT_FAR;
 
@@ -25,22 +28,26 @@ public class ShadowMapShader extends BaseShader {
 	public static final float BIAS_MAX_WALL = 0.0022F;
 	public static final float BIAS_MAX_GENERAL = 0.0018F;
 	public static final float BIAS_MIN_GENERAL = 0F;
-	private static final Vector3 auxVector1 = new Vector3();
-	private static final Vector3 auxVector2 = new Vector3();
+	private static final Vector3 auxVector3_1 = new Vector3();
+	private static final Vector3 auxVector3_2 = new Vector3();
+	private static final Vector2 auxVector2_1 = new Vector2();
 	private static final int CUBE_MAP_TEXTURE_NUMBER = 8;
 	private static final float BIAS_MAX_FLOOR = 0.00185F;
 	private static final Color auxColor = new Color();
 	private final ImmutableArray<Entity> lights;
 	private final float[] lightColor = new float[3];
 	private final ShadowMapShaderUniforms uniforms = new ShadowMapShaderUniforms();
+	private final Decal playerDecal;
 	public Renderable renderable;
 
-	public ShadowMapShader(final Renderable renderable,
-						   final ShaderProgram shaderProgramModelBorder,
-						   final ImmutableArray<Entity> staticLights) {
+	public ShadowMapShader(Renderable renderable,
+						   ShaderProgram shaderProgramModelBorder,
+						   ImmutableArray<Entity> staticLights,
+						   Decal playerDecal) {
 		this.lights = staticLights;
 		this.renderable = renderable;
 		this.program = shaderProgramModelBorder;
+		this.playerDecal = playerDecal;
 		register(DefaultShader.Inputs.worldTrans, DefaultShader.Setters.worldTrans);
 		register(DefaultShader.Inputs.projViewTrans, DefaultShader.Setters.projViewTrans);
 		register(DefaultShader.Inputs.normalMatrix, DefaultShader.Setters.normalMatrix);
@@ -81,13 +88,15 @@ public class ShadowMapShader extends BaseShader {
 
 	@Override
 	public void render(final Renderable renderable, final Attributes combinedAttributes) {
-		boolean firstCall = true;
 		Entity entity = (Entity) renderable.userData;
+		program.setUniformf(uniforms.getUniformPlayerScreenCoords(), ShaderUtils.calculateXRay(entity, playerDecal, camera, auxVector2_1));
+
+		boolean firstCall = true;
 		for (int i = 0; i < lights.size(); i++) {
 			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(entity).getModelInstance();
-			Vector3 position = modelInstance.transform.getTranslation(auxVector1);
+			Vector3 position = modelInstance.transform.getTranslation(auxVector3_1);
 			StaticLightComponent lightComponent = ComponentsMapper.staticLight.get(lights.get(i));
-			if (position.dst2(lightComponent.getPosition(auxVector2)) <= lightComponent.getRadius() * 5) {
+			if (position.dst2(lightComponent.getPosition(auxVector3_2)) <= lightComponent.getRadius() * 5) {
 				renderLightForShadow(renderable, combinedAttributes, firstCall, i);
 				firstCall = false;
 			}
@@ -132,7 +141,7 @@ public class ShadowMapShader extends BaseShader {
 	private void setUniforms(StaticLightComponent lightComponent) {
 		program.setUniformi(uniforms.getUniformLocDepthMapCube(), CUBE_MAP_TEXTURE_NUMBER);
 		program.setUniformf(uniforms.getUniformLocCameraFar(), CAMERA_LIGHT_FAR);
-		program.setUniformf(uniforms.getUniformLocLightPosition(), lightComponent.getPosition(auxVector1));
+		program.setUniformf(uniforms.getUniformLocLightPosition(), lightComponent.getPosition(auxVector3_1));
 		program.setUniformf(uniforms.getUniformLocRadius(), lightComponent.getRadius());
 		program.setUniform3fv(uniforms.getUniformLocLightColor(), lightColor, 0, 3);
 		program.setUniformf(uniforms.getUniformLocIntensity(), lightComponent.getIntensity());

@@ -19,6 +19,7 @@ uniform float u_maxBias;
 uniform float u_minBias;
 uniform vec3 u_lightColor;
 uniform float u_intensity;
+uniform vec2 u_playerScreenCoords;
 
 varying vec3 v_normal;
 varying vec4 v_position;
@@ -30,6 +31,10 @@ bool fragmentExposedToLight(vec3 lightDirection, vec3 offset, float lenToLight, 
 
 void main()
 {
+    if (u_playerScreenCoords != vec2(0.0) && length(u_playerScreenCoords.xy - gl_FragCoord.xy) < 50.0){
+        discard;
+    }
+
     float final_intensity=0.00;
     vec3 lightDirection=v_position.xyz-u_lightPosition;
     float lenToLight=length(lightDirection)/u_cameraFar;

@@ -1,4 +1,4 @@
-package com.gadarts.industrial.systems.render;
+package com.gadarts.industrial.systems.render.fb;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;

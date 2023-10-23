@@ -51,6 +51,8 @@ import com.gadarts.industrial.shared.utils.CharacterUtils;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
+import com.gadarts.industrial.systems.render.fb.GameFrameBuffer;
+import com.gadarts.industrial.systems.render.fb.GameFrameBufferCubeMap;
 import com.gadarts.industrial.systems.render.flags.DrawFlags;
 
 import java.util.ArrayList;
@@ -83,7 +85,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private static final Color PLAYER_OUTLINE_COLOR = Color.valueOf("#177331");
 	private static final Color ENEMY_OUTLINE_COLOR = Color.valueOf("#731717");
 	private static final int MAX_SIMPLE_SHADOWS_PER_NODE = 2;
-	private final RenderBatches renderBatches = new RenderBatches();
+	private RenderBatches renderBatches;
 	private final RenderSystemRelevantFamilies families = new RenderSystemRelevantFamilies();
 	private final StaticShadowsData staticShadowsData = new StaticShadowsData();
 	private final DecalsGroupStrategies strategies = new DecalsGroupStrategies();
@@ -160,10 +162,11 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	@Override
 	public void initializeData( ) {
+		CharacterDecalComponent playerCharacterDecalComponent = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer());
+		renderBatches = new RenderBatches(playerCharacterDecalComponent.getDecal());
 		GameAssetManager assetsManager = getAssetsManager();
 		staticShadowsData.init(assetsManager, families.getStaticLightsEntities());
-		CharacterDecalComponent playerCharacterDecalComponent = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer());
-		renderBatches.createShaderProvider(assetsManager, staticShadowsData.getShadowFrameBuffer(), playerCharacterDecalComponent.getDecal());
+		renderBatches.createShaderProvider(assetsManager, staticShadowsData.getShadowFrameBuffer());
 		strategies.createDecalGroupStrategies(getSystemsCommonData().getCamera(), assetsManager);
 		renderBatches.createBatches(
 				staticShadowsData, families.getStaticLightsEntities(),
@@ -209,9 +212,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private void renderModels(ModelBatch modelBatch,
 							  ImmutableArray<Entity> entitiesToRender,
-							  boolean renderLight,
 							  Camera camera) {
-		renderModels(modelBatch, entitiesToRender, renderLight, camera, true);
+		renderModels(modelBatch, entitiesToRender, true, camera, true);
 	}
 
 	private void renderModels(ModelBatch modelBatch,
@@ -380,11 +382,17 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private void renderShadows( ) {
 		if (!DebugSettings.ALLOW_STATIC_SHADOWS) return;
+
 		GameFrameBuffer shadowFrameBuffer = staticShadowsData.getShadowFrameBuffer();
 		shadowFrameBuffer.begin();
 		resetDisplay(0F);
 		Camera cam = getSystemsCommonData().getCamera();
-		renderModels(renderBatches.getModelBatchShadows(), families.getModelEntitiesWithShadows(), false, cam, true);
+		renderModels(
+				renderBatches.getModelBatchShadows(),
+				families.getModelEntitiesWithShadows(),
+				false,
+				cam,
+				true);
 		if (DebugSettings.ALLOW_SCREEN_SHOT_OF_DEPTH_MAP) {
 			staticShadowsData.handleScreenshot(shadowFrameBuffer);
 		}
@@ -395,7 +403,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		getSystemsCommonData().setNumberOfVisible(0);
 		renderShadows();
 		resetDisplay();
-		renderModels(renderBatches.getModelBatch(), families.getModelEntities(), true, getSystemsCommonData().getCamera());
+		renderModels(renderBatches.getModelBatch(), families.getModelEntities(), getSystemsCommonData().getCamera());
 		renderDecals();
 		renderParticleEffects();
 		getSystemsCommonData().getUiStage().draw();

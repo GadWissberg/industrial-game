@@ -11,6 +11,7 @@ public class ShadowMapShaderUniforms {
 	private static final String UNIFORM_LIGHTS_COLORS = "u_lightColor";
 	private static final String UNIFORM_RADIUS = "u_radius";
 	private static final String UNIFORM_DEPTH_MAP_SIZE = "u_depthMapSize";
+	private static final String UNIFORM_PLAYER_SCREEN_COORDS = "u_playerScreenCoords";
 	private static final String UNIFORM_INTENSITY = "u_intensity";
 	private static final String UNIFORM_MAX_BIAS = "u_maxBias";
 	private static final String UNIFORM_MIN_BIAS = "u_minBias";
@@ -23,6 +24,7 @@ public class ShadowMapShaderUniforms {
 	private int uniformLocRadius;
 	private int uniformLocIntensity;
 	private int uniformLocDepthMapSize;
+	private int uniformPlayerScreenCoords;
 
 	void fetchUniformsLocations(ShaderProgram program) {
 		uniformLocMaxBias = program.getUniformLocation(UNIFORM_MAX_BIAS);
@@ -34,5 +36,6 @@ public class ShadowMapShaderUniforms {
 		uniformLocRadius = program.getUniformLocation(UNIFORM_RADIUS);
 		uniformLocIntensity = program.getUniformLocation(UNIFORM_INTENSITY);
 		uniformLocDepthMapSize = program.getUniformLocation(UNIFORM_DEPTH_MAP_SIZE);
+		uniformPlayerScreenCoords = program.getUniformLocation(UNIFORM_PLAYER_SCREEN_COORDS);
 	}
 }
