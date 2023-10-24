@@ -28,6 +28,7 @@ public class ModelsShaderUniformsLocations {
 	private static final String UNIFORM_SCREEN_WIDTH = "u_screenWidth";
 	private static final String UNIFORM_SCREEN_HEIGHT = "u_screenHeight";
 	private static final String UNIFORM_PLAYER_SCREEN_COORDS = "u_playerScreenCoords";
+	private static final String UNIFORM_MOUSE_SCREEN_COORDS = "u_mouseScreenCoords";
 
 	private int uniformLocAffectedByLight;
 	private int uniformLocNumberOfNearbySimpleShadows;
@@ -52,6 +53,7 @@ public class ModelsShaderUniformsLocations {
 	private int uniformLocScreenWidth;
 	private int uniformLocScreenHeight;
 	private int uniformLocPlayerScreenCoords;
+	private int uniformLocMouseScreenCoords;
 
 	public void init(ShaderProgram program) {
 		uniformLocAffectedByLight = program.getUniformLocation(UNIFORM_AFFECTED_BY_LIGHT);
@@ -77,5 +79,6 @@ public class ModelsShaderUniformsLocations {
 		uniformLocScreenWidth = program.getUniformLocation(UNIFORM_SCREEN_WIDTH);
 		uniformLocScreenHeight = program.getUniformLocation(UNIFORM_SCREEN_HEIGHT);
 		uniformLocPlayerScreenCoords = program.getUniformLocation(UNIFORM_PLAYER_SCREEN_COORDS);
+		uniformLocMouseScreenCoords = program.getUniformLocation(UNIFORM_MOUSE_SCREEN_COORDS);
 	}
 }

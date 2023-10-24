@@ -100,6 +100,7 @@ uniform float u_modelX;
 uniform float u_modelY;
 uniform float u_modelZ;
 uniform vec2 u_playerScreenCoords;
+uniform vec2 u_mouseScreenCoords;
 uniform int u_numberOfNearbySimpleShadows;
 uniform int u_floorAmbientOcclusion;
 uniform int u_entityType;
@@ -140,6 +141,14 @@ vec4 grayFadeDiagonal(vec2 cornerCoord, vec2 fragCoord){
     return color;
 }
 
+bool shouldDiscardFragment(){
+    const float RADIUS = 50.0;
+
+    return !gl_FrontFacing
+    || (u_playerScreenCoords != vec2(0.0) && length(u_playerScreenCoords.xy - gl_FragCoord.xy) < RADIUS)
+    || (u_mouseScreenCoords != vec2(0.0) && length(u_mouseScreenCoords.xy - gl_FragCoord.xy) < RADIUS);
+}
+
 void main() {
     #if defined(diffuseTextureFlag) && defined(diffuseColorFlag)
     vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV) * u_diffuseColor;
@@ -171,7 +180,7 @@ void main() {
     #else
     gl_FragColor.rgb = vec3(0.0);
     vec3 finalColor = vec3(0.0);
-    if (!gl_FrontFacing || (u_playerScreenCoords != vec2(0.0) && length(u_playerScreenCoords.xy - gl_FragCoord.xy) < 50.0)){
+    if (shouldDiscardFragment()){
         discard;
     }
     if (u_flatColor.x < 0.0){

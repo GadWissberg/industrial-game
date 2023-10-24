@@ -318,6 +318,13 @@ public class EntityBuilder {
 		return instance;
 	}
 
+	public EntityBuilder addCursorComponent( ) {
+		if (currentEntity == null) throw new RuntimeException(MSG_FAIL_CALL_BEGIN_BUILDING_ENTITY_FIRST);
+		CursorComponent component = engine.createComponent(CursorComponent.class);
+		currentEntity.add(component);
+		return instance;
+	}
+
 	private void init(final PooledEngine engine) {
 		this.engine = engine;
 		this.currentEntity = engine.createEntity();
@@ -363,4 +370,6 @@ public class EntityBuilder {
 			particleComponentParent.getChildren().add(currentEntity);
 		}
 	}
+
+
 }

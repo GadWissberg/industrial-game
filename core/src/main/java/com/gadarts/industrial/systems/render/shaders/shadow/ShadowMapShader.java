@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Attributes;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
@@ -38,16 +39,19 @@ public class ShadowMapShader extends BaseShader {
 	private final float[] lightColor = new float[3];
 	private final ShadowMapShaderUniforms uniforms = new ShadowMapShaderUniforms();
 	private final Decal playerDecal;
+	private final ModelInstance cursorModelInstance;
 	public Renderable renderable;
 
 	public ShadowMapShader(Renderable renderable,
 						   ShaderProgram shaderProgramModelBorder,
 						   ImmutableArray<Entity> staticLights,
-						   Decal playerDecal) {
+						   Decal playerDecal,
+						   ModelInstance cursorModelInstance) {
 		this.lights = staticLights;
 		this.renderable = renderable;
 		this.program = shaderProgramModelBorder;
 		this.playerDecal = playerDecal;
+		this.cursorModelInstance = cursorModelInstance;
 		register(DefaultShader.Inputs.worldTrans, DefaultShader.Setters.worldTrans);
 		register(DefaultShader.Inputs.projViewTrans, DefaultShader.Setters.projViewTrans);
 		register(DefaultShader.Inputs.normalMatrix, DefaultShader.Setters.normalMatrix);
@@ -89,7 +93,7 @@ public class ShadowMapShader extends BaseShader {
 	@Override
 	public void render(final Renderable renderable, final Attributes combinedAttributes) {
 		Entity entity = (Entity) renderable.userData;
-		program.setUniformf(uniforms.getUniformPlayerScreenCoords(), ShaderUtils.calculateXRay(entity, playerDecal, camera, auxVector2_1));
+		applyXRay(entity);
 
 		boolean firstCall = true;
 		for (int i = 0; i < lights.size(); i++) {
@@ -101,6 +105,23 @@ public class ShadowMapShader extends BaseShader {
 				firstCall = false;
 			}
 		}
+	}
+
+	private void applyXRay(Entity entity) {
+		Vector2 playerXRay = ShaderUtils.calculateXRay(
+				entity,
+				playerDecal.getPosition(),
+				camera,
+				auxVector2_1,
+				ShaderUtils.X_RAY_PLAYER_DISTANCE_CHECK_BIAS);
+		program.setUniformf(uniforms.getUniformPlayerScreenCoords(), playerXRay);
+		Vector2 mouseXRay = ShaderUtils.calculateXRay(
+				entity,
+				cursorModelInstance.transform.getTranslation(auxVector3_1),
+				camera,
+				auxVector2_1,
+				0F);
+		program.setUniformf(uniforms.getUniformMouseScreenCoords(), mouseXRay);
 	}
 
 	private void renderLightForShadow(Renderable renderable,

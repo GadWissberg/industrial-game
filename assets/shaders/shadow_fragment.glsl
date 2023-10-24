@@ -20,6 +20,7 @@ uniform float u_minBias;
 uniform vec3 u_lightColor;
 uniform float u_intensity;
 uniform vec2 u_playerScreenCoords;
+uniform vec2 u_mouseScreenCoords;
 
 varying vec3 v_normal;
 varying vec4 v_position;
@@ -29,9 +30,17 @@ bool fragmentExposedToLight(vec3 lightDirection, vec3 offset, float lenToLight, 
     return (textureCube(u_depthMapCube, lightDirection + offset).a)>lenToLight - bias;
 }
 
+bool shouldDiscardFragment(){
+    const float RADIUS = 50.0;
+
+    return !gl_FrontFacing
+    || (u_playerScreenCoords != vec2(0.0) && length(u_playerScreenCoords.xy - gl_FragCoord.xy) < RADIUS)
+    || (u_mouseScreenCoords != vec2(0.0) && length(u_mouseScreenCoords.xy - gl_FragCoord.xy) < RADIUS);
+}
+
 void main()
 {
-    if (u_playerScreenCoords != vec2(0.0) && length(u_playerScreenCoords.xy - gl_FragCoord.xy) < 50.0){
+    if (shouldDiscardFragment()){
         discard;
     }
 

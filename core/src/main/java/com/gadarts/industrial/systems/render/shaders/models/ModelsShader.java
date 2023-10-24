@@ -3,6 +3,7 @@ package com.gadarts.industrial.systems.render.shaders.models;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
@@ -20,9 +21,9 @@ import com.gadarts.industrial.systems.render.shaders.ShaderUtils;
 import java.util.List;
 
 import static com.gadarts.industrial.components.ComponentsMapper.*;
+import static com.gadarts.industrial.systems.render.shaders.ShaderUtils.X_RAY_PLAYER_DISTANCE_CHECK_BIAS;
 
 public class ModelsShader extends DefaultShader {
-
 	public static final int NEARBY_SIMPLE_SHADOW_VECTOR_SIZE = 3;
 	private static final int MAX_LIGHTS = 16;
 	private static final int LIGHT_EXTRA_DATA_SIZE = 3;
@@ -38,14 +39,17 @@ public class ModelsShader extends DefaultShader {
 	private final FrameBuffer shadowFrameBuffer;
 	private final ModelsShaderUniformsLocations locations = new ModelsShaderUniformsLocations();
 	private final Decal playerDecal;
+	private final ModelInstance cursorModelInstance;
 
 	public ModelsShader(Renderable renderable,
 						Config mainShaderConfig,
 						FrameBuffer shadowFrameBuffer,
-						Decal playerDecal) {
+						Decal playerDecal,
+						ModelInstance cursorModelInstance) {
 		super(renderable, mainShaderConfig);
 		this.shadowFrameBuffer = shadowFrameBuffer;
 		this.playerDecal = playerDecal;
+		this.cursorModelInstance = cursorModelInstance;
 	}
 
 	private static Vector3 getNearbySimpleShadowPosition(Entity nearby) {
@@ -149,7 +153,13 @@ public class ModelsShader extends DefaultShader {
 		insertDataForSpecificModels(renderable);
 		insertFlatColor(modelInstanceComponent);
 		int uniformLocPlayerScreenCoords = locations.getUniformLocPlayerScreenCoords();
-		program.setUniformf(uniformLocPlayerScreenCoords, ShaderUtils.calculateXRay(renderedEntity, playerDecal, camera, auxVector2));
+		Vector3 position = playerDecal.getPosition();
+		Vector2 playerXray = ShaderUtils.calculateXRay(renderedEntity, position, camera, auxVector2, X_RAY_PLAYER_DISTANCE_CHECK_BIAS);
+		program.setUniformf(uniformLocPlayerScreenCoords, playerXray);
+		int uniformLocMouseScreenCoords = locations.getUniformLocMouseScreenCoords();
+		Vector3 cursorPosition = cursorModelInstance.transform.getTranslation(auxVector3_1);
+		Vector2 mouseXray = ShaderUtils.calculateXRay(renderedEntity, cursorPosition, camera, auxVector2, 0F);
+		program.setUniformf(uniformLocMouseScreenCoords, mouseXray);
 	}
 
 	private void insertFlatColor(ModelInstanceComponent modelInstanceComponent) {

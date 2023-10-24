@@ -454,6 +454,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		model.calculateBoundingBox(auxBoundingBox);
 		return EntityBuilder.beginBuildingEntity((PooledEngine) getEngine())
 				.addModelInstanceComponent(new GameModelInstance(model, auxBoundingBox, false), true)
+				.addCursorComponent()
 				.finishAndAddToEngine();
 	}
 

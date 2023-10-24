@@ -162,15 +162,16 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	@Override
 	public void initializeData( ) {
-		CharacterDecalComponent playerCharacterDecalComponent = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer());
-		renderBatches = new RenderBatches(playerCharacterDecalComponent.getDecal());
 		GameAssetManager assetsManager = getAssetsManager();
 		staticShadowsData.init(assetsManager, families.getStaticLightsEntities());
+		CharacterDecalComponent playerCharacterDecalComponent = ComponentsMapper.characterDecal.get(getSystemsCommonData().getPlayer());
+		Decal decal = playerCharacterDecalComponent.getDecal();
+		renderBatches = new RenderBatches(decal, ComponentsMapper.modelInstance.get(getSystemsCommonData().getCursor()).getModelInstance());
 		renderBatches.createShaderProvider(assetsManager, staticShadowsData.getShadowFrameBuffer());
-		strategies.createDecalGroupStrategies(getSystemsCommonData().getCamera(), assetsManager);
 		renderBatches.createBatches(
 				staticShadowsData, families.getStaticLightsEntities(),
 				strategies.getRegularDecalGroupStrategy());
+		strategies.createDecalGroupStrategies(getSystemsCommonData().getCamera(), assetsManager);
 		if (DebugSettings.ALLOW_STATIC_SHADOWS) {
 			createShadowMaps();
 		}

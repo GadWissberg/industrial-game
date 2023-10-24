@@ -36,5 +36,6 @@ public class ComponentsMapper {
 	public static final ComponentMapper<DoorComponent> door = ComponentMapper.getFor(DoorComponent.class);
 	public static final ComponentMapper<FlyingParticleComponent> flyingParticles = ComponentMapper.getFor(FlyingParticleComponent.class);
 	public static final ComponentMapper<TriggerComponent> trigger = ComponentMapper.getFor(TriggerComponent.class);
+	public static final ComponentMapper<CursorComponent> cursor = ComponentMapper.getFor(CursorComponent.class);
 }
 

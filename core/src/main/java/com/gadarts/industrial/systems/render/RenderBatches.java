@@ -3,6 +3,7 @@ package com.gadarts.industrial.systems.render;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class RenderBatches implements Disposable {
 	private static final int DECALS_POOL_SIZE = 200;
 	private final Decal playerDecal;
+	private final ModelInstance cursorModelInstance;
 	private ModelsShaderProvider modelsShaderProvider;
 	private ModelBatch depthModelBatch;
 	private ModelBatch modelBatchShadows;
@@ -46,7 +48,7 @@ public class RenderBatches implements Disposable {
 				@Override
 				protected Shader createShader(final Renderable renderable) {
 					ShaderProgram shadowsShaderProgram = staticShadowsData.getShadowsShaderProgram();
-					return new ShadowMapShader(renderable, shadowsShaderProgram, staticLightsEntities, playerDecal);
+					return new ShadowMapShader(renderable, shadowsShaderProgram, staticLightsEntities, playerDecal, cursorModelInstance);
 				}
 			});
 		}
@@ -66,6 +68,6 @@ public class RenderBatches implements Disposable {
 
 	public void createShaderProvider(GameAssetManager assetsManager,
 									 GameFrameBuffer shadowFrameBuffer) {
-		modelsShaderProvider = new ModelsShaderProvider(assetsManager, shadowFrameBuffer, playerDecal);
+		modelsShaderProvider = new ModelsShaderProvider(assetsManager, shadowFrameBuffer, playerDecal, cursorModelInstance);
 	}
 }
