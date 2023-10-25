@@ -26,16 +26,25 @@ varying vec3 v_normal;
 varying vec4 v_position;
 varying vec4 v_positionLightTrans;
 
+const float X_RAY_RADIUS = 50.0;
+
 bool fragmentExposedToLight(vec3 lightDirection, vec3 offset, float lenToLight, float bias){
     return (textureCube(u_depthMapCube, lightDirection + offset).a)>lenToLight - bias;
 }
 
 bool shouldDiscardFragment(){
-    const float RADIUS = 50.0;
-
     return !gl_FrontFacing
-    || (u_playerScreenCoords != vec2(0.0) && length(u_playerScreenCoords.xy - gl_FragCoord.xy) < RADIUS)
-    || (u_mouseScreenCoords != vec2(0.0) && length(u_mouseScreenCoords.xy - gl_FragCoord.xy) < RADIUS);
+    || (u_playerScreenCoords != vec2(0.0) && length(u_playerScreenCoords.xy - gl_FragCoord.xy) < X_RAY_RADIUS)
+    || (u_mouseScreenCoords != vec2(0.0) && length(u_mouseScreenCoords.xy - gl_FragCoord.xy) < X_RAY_RADIUS);
+}
+
+float applyXRayFading(vec2 coords){
+    float distance = length(coords.xy - gl_FragCoord.xy);
+    float minDistance = X_RAY_RADIUS;
+    float maxDistance = 75.0;
+    float alpha = smoothstep(minDistance, maxDistance, distance);
+    alpha = mix(1.0, alpha, float(length(coords) > 0.0));
+    return alpha;
 }
 
 void main()
@@ -71,5 +80,8 @@ void main()
     final_intensity=(u_intensity)*(1.0-((lenToLight)/(u_radius/u_cameraFar)))*((pcfSum)/9.0);
     color = u_lightColor;
     gl_FragColor = vec4(color.r*final_intensity, color.g*final_intensity, color.b*final_intensity, final_intensity);
+
+    gl_FragColor.rgba *= applyXRayFading(u_playerScreenCoords);
+    gl_FragColor.rgba *= applyXRayFading(u_mouseScreenCoords);
 }
 

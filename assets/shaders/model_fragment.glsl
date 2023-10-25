@@ -110,6 +110,7 @@ uniform int u_fowSignature;
 uniform int u_graySignature;
 uniform int u_grayScale;
 
+const float X_RAY_RADIUS = 50.0;
 //
 
 float map(float value, float min1, float max1, float min2, float max2) {
@@ -142,11 +143,18 @@ vec4 grayFadeDiagonal(vec2 cornerCoord, vec2 fragCoord){
 }
 
 bool shouldDiscardFragment(){
-    const float RADIUS = 50.0;
-
     return !gl_FrontFacing
-    || (u_playerScreenCoords != vec2(0.0) && length(u_playerScreenCoords.xy - gl_FragCoord.xy) < RADIUS)
-    || (u_mouseScreenCoords != vec2(0.0) && length(u_mouseScreenCoords.xy - gl_FragCoord.xy) < RADIUS);
+    || (u_playerScreenCoords != vec2(0.0) && length(u_playerScreenCoords.xy - gl_FragCoord.xy) < X_RAY_RADIUS)
+    || (u_mouseScreenCoords != vec2(0.0) && length(u_mouseScreenCoords.xy - gl_FragCoord.xy) < X_RAY_RADIUS);
+}
+
+float applyXRayFading(vec2 coords){
+    float distance = length(coords.xy - gl_FragCoord.xy);
+    float minDistance = X_RAY_RADIUS;
+    float maxDistance = 75.0;
+    float alpha = smoothstep(minDistance, maxDistance, distance);
+    alpha = mix(1.0, alpha, float(length(coords) > 0.0));
+    return alpha;
 }
 
 void main() {
@@ -180,9 +188,11 @@ void main() {
     #else
     gl_FragColor.rgb = vec3(0.0);
     vec3 finalColor = vec3(0.0);
+
     if (shouldDiscardFragment()){
         discard;
     }
+
     if (u_flatColor.x < 0.0){
         if (u_affectedByLight != 0.0){
             if (u_numberOfShadowlessLights > 0) {
@@ -342,6 +352,7 @@ void main() {
     } else {
         gl_FragColor.rgb = u_flatColor;
     }
+
     #endif
     #else
     #if defined(specularTextureFlag) && defined(specularColorFlag)
@@ -379,4 +390,6 @@ void main() {
     gl_FragColor.a = 1.0;
     #endif
 
+    gl_FragColor.rgba *= applyXRayFading(u_playerScreenCoords);
+    gl_FragColor.rgba *= applyXRayFading(u_mouseScreenCoords);
 }
