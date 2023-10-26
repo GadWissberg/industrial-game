@@ -1,7 +1,7 @@
 {
   "weapons_declarations": [
     {
-      "id": "pnc",
+      "id": "punch",
       "display_name": "Punch",
       "action_points_consumption": 1,
       "frame_duration": 0.1,
@@ -10,7 +10,7 @@
       "duration": 1.0
     },
     {
-      "id": "ctr",
+      "id": "cutter",
       "display_name": "Cutter",
       "frame_duration": 0.1,
       "damage": 2,
@@ -21,7 +21,7 @@
       "sound_engage": "weapon_cutter"
     },
     {
-      "id": "rlc",
+      "id": "rapid_laser_cannon",
       "display_name": "Rapid Laser Cannon",
       "frame_duration": 0.1,
       "damage": 2,
@@ -37,7 +37,7 @@
       "bullet_explosion": "laser_exp"
     },
     {
-      "id": "glc",
+      "id": "glock",
       "display_name": "Glock",
       "frame_duration": 0.1,
       "damage": 1,

@@ -1,21 +1,21 @@
 {
   "player_weapons_declarations": [
     {
-      "id": "pnc",
+      "id": "punch",
       "hit_frame_index": 3,
       "melee": true,
       "hidden_from_map": true,
-      "declaration": "pnc",
+      "declaration": "punch",
       "related_atlas": "player_melee",
       "hud_icon": "hud_weapon_icon_fist"
     },
     {
-      "id": "glc",
+      "id": "glock",
       "hit_frame_index": 3,
       "symbol_width": 2,
       "symbol_height": 2,
       "symbol": "weapon_colt",
-      "declaration": "glc",
+      "declaration": "glock",
       "related_atlas": "player_glock",
       "mask": [
         1,

@@ -783,7 +783,7 @@ public class MapBuilder implements Disposable {
 		Animation<TextureAtlas.AtlasRegion> bulletAnimation = enemyBulletsTextureRegions.get(type);
 		if (type.attackPrimary() != null && !enemyBulletsTextureRegions.containsKey(type)) {
 			WeaponsDeclarations weapons = (WeaponsDeclarations) assetsManager.getDeclaration(WEAPONS);
-			String name = weapons.parse("rlc").name();
+			String name = weapons.parse("rapid_laser_cannon").name();
 			Array<TextureAtlas.AtlasRegion> regions = assetsManager.getAtlas(GUARD_BOT).findRegions(name);
 			bulletAnimation = new Animation<>(type.attackPrimary().frameDuration(), regions);
 			enemyBulletsTextureRegions.put(type, bulletAnimation);

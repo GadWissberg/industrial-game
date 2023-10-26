@@ -142,7 +142,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		if (ComponentsMapper.enemy.has(entity)) {
 			EnemyComponent enemyComponent = ComponentsMapper.enemy.get(entity);
 			if (enemyComponent.getAiStatus() != ATTACKING) {
-				awakeEnemy(entity);
+				awakeEnemy(entity, false);
 			}
 			if (!enemyComponent.getEnemyDeclaration().human()) {
 				createFlyingMetalParts(entity);
@@ -283,7 +283,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		if (!checkIfFloorNodesBlockSightToTarget(enemy, nodes)) {
 			boolean targetIsClose = isTargetCloseEnough(enemy);
 			if (targetIsClose) {
-				awakeEnemy(enemy);
+				awakeEnemy(enemy, true);
 			}
 		}
 	}
@@ -297,7 +297,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 		return enemyPos.dst2(targetPos) <= Math.pow(maxDistance, 2);
 	}
 
-	private void awakeEnemy(final Entity enemy) {
+	private void awakeEnemy(final Entity enemy, boolean wokeBySpottingPlayer) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(enemy);
 		if (PARALYZED_ENEMIES || characterComponent.getAttributes().getHealthData().getHp() <= 0) return;
 
@@ -309,7 +309,7 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 			getSystemsCommonData().getSoundPlayer().playSound(awakeSound);
 		}
 		for (EnemySystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onEnemyAwaken(enemy, prevAiStatus, true);
+			subscriber.onEnemyAwaken(enemy, prevAiStatus, wokeBySpottingPlayer);
 		}
 	}
 
