@@ -46,7 +46,7 @@ public class AiStatusAttackingLogic extends AiStatusLogic {
 			if (enemyComponent.getEngineEnergy() >= characterComponent.getPrimaryAttack().engineConsumption()) {
 				addCommand(enemy, CharacterCommandsDefinitions.ATTACK_PRIMARY);
 			} else {
-				updateEnemyAiStatus(enemy, EnemyAiStatus.DODGING, subscribers);
+				updateEnemyAiStatus(enemy, EnemyAiStatus.RUNNING_TO_LAST_SEEN_POSITION, subscribers);
 			}
 		}
 		return finishedTurn;

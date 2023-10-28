@@ -145,11 +145,13 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private void beginProcessingCommand(Entity character,
 										CharacterCommand currentCommand) {
 		currentCommand.setState(CommandStates.RUNNING);
-		ComponentsMapper.character.get(character).getRotationData().setRotating(true);
+		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
+		characterComponent.getRotationData().setRotating(true);
 		SystemsCommonData data = getSystemsCommonData();
 		boolean alreadyDone = currentCommand.initialize(character, data);
 		if (alreadyDone) {
 			currentCommand.setState(CommandStates.ENDED);
+			characterComponent.getAttributes().setActionPoints(0);
 		}
 	}
 
