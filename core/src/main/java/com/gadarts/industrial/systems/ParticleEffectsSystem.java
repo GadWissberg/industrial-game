@@ -7,6 +7,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleController;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
+import com.badlogic.gdx.graphics.g3d.particles.batches.BillboardParticleBatch;
 import com.badlogic.gdx.graphics.g3d.particles.batches.PointSpriteParticleBatch;
 import com.badlogic.gdx.graphics.g3d.particles.emitters.RegularEmitter;
 import com.badlogic.gdx.math.Matrix4;
@@ -35,6 +36,7 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 	private final ArrayList<Entity> particleEntitiesToRemove = new ArrayList<>();
 	private final ArrayList<ParticleEffect> particleEffectsToFollow = new ArrayList<>();
 	private final PointSpriteParticleBatch pointSpriteBatch;
+	private final BillboardParticleBatch billboardParticleBatch;
 	private ImmutableArray<Entity> particleEffectsEntities;
 	private ImmutableArray<Entity> flyingParticlesEntities;
 
@@ -42,6 +44,7 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 								 GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
 		pointSpriteBatch = new PointSpriteParticleBatch();
+		billboardParticleBatch = new BillboardParticleBatch();
 		getAssetsManager().loadParticleEffects(pointSpriteBatch);
 	}
 
@@ -102,6 +105,7 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 		getSystemsCommonData().setParticleSystem(particleSystem);
 		particleSystem.add(pointSpriteBatch);
 		pointSpriteBatch.setCamera(getSystemsCommonData().getCamera());
+//		getAssetsManager().getParticleEffect(Assets.ParticleEffects.BLOOD_SPLATTER).getControllers().get(0).emitter.
 	}
 
 	@Override
