@@ -145,6 +145,8 @@ public class ModelsShader extends DefaultShader {
 
 	private void insertAdditionalRenderData(Renderable renderable,
 											Entity renderedEntity) {
+		if (renderedEntity == null) return;
+
 		ModelInstanceComponent modelInstanceComponent = modelInstance.get(renderedEntity);
 		AdditionalRenderData additionalRenderData = modelInstanceComponent.getModelInstance().getAdditionalRenderData();
 		applyLights(additionalRenderData);

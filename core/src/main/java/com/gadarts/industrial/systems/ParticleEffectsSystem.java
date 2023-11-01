@@ -4,6 +4,8 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleController;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
@@ -25,6 +27,7 @@ import com.gadarts.industrial.shared.assets.GameAssetManager;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("ALL")
 public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 	public static final float GRAVITY_COEFF = 1.05F;
 	private static final int BULLET_JACKET_TIME_TO_LEAVE = 5000;
@@ -45,7 +48,8 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 		super(assetsManager, lifeCycleHandler);
 		pointSpriteBatch = new PointSpriteParticleBatch();
 		billboardParticleBatch = new BillboardParticleBatch();
-		getAssetsManager().loadParticleEffects(pointSpriteBatch);
+		billboardParticleBatch.getBlendingAttribute().sourceFunction = GL20.GL_SRC_ALPHA;
+		getAssetsManager().loadParticleEffects(pointSpriteBatch, billboardParticleBatch);
 	}
 
 	@Override
@@ -104,8 +108,10 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 		ParticleSystem particleSystem = new ParticleSystem();
 		getSystemsCommonData().setParticleSystem(particleSystem);
 		particleSystem.add(pointSpriteBatch);
-		pointSpriteBatch.setCamera(getSystemsCommonData().getCamera());
-//		getAssetsManager().getParticleEffect(Assets.ParticleEffects.BLOOD_SPLATTER).getControllers().get(0).emitter.
+		particleSystem.add(billboardParticleBatch);
+		Camera camera = getSystemsCommonData().getCamera();
+		pointSpriteBatch.setCamera(camera);
+		billboardParticleBatch.setCamera(camera);
 	}
 
 	@Override
