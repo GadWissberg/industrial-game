@@ -162,7 +162,6 @@ public class ConsoleImpl extends Table implements Console, InputProcessor, Dispo
 		float amountY = Gdx.graphics.getHeight() / 3f;
 		MoveByAction move = Actions.moveBy(0, amountY, TRANSITION_DURATION, Interpolation.pow2);
 		addAction(Actions.sequence(move, Actions.visible(false)));
-		subscribers.forEach(ConsoleEventsSubscriber::onConsoleDeactivated);
 		getStage().unfocusAll();
 	}
 

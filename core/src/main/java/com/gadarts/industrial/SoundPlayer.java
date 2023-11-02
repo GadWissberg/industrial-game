@@ -124,9 +124,5 @@ public class SoundPlayer implements ConsoleEventsSubscriber {
 	public boolean onCommandRun(ConsoleCommands command, ConsoleCommandResult consoleCommandResult, ConsoleCommandParameter parameter) {
 		return ConsoleEventsSubscriber.super.onCommandRun(command, consoleCommandResult, parameter);
 	}
-
-	@Override
-	public void onConsoleDeactivated( ) {
-		ConsoleEventsSubscriber.super.onConsoleDeactivated();
-	}
+	
 }

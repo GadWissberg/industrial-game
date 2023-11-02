@@ -20,9 +20,6 @@ public interface ConsoleEventsSubscriber extends EventsSubscriber {
 		return false;
 	}
 
-	default void onConsoleDeactivated( ) {
-
-	}
 
 	default void onConsoleInitialized(Console console){
 

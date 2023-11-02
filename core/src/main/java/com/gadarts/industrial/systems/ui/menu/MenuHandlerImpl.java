@@ -44,7 +44,7 @@ public class MenuHandlerImpl implements MenuHandler {
 	public void applyMenuOptions(MenuOptionDefinition[] options) {
 		Table menuTable = systemsCommonData.getMenuTable();
 		menuTable.clear();
-		BitmapFont smallFont = assetsManager.getFont(Assets.Fonts.CHUBGOTHIC_SMALL);
+		BitmapFont smallFont = assetsManager.getFont(Assets.Fonts.ARIAL_MT_BOLD_SMALL);
 		Label.LabelStyle style = new Label.LabelStyle(smallFont, MenuOption.FONT_COLOR_REGULAR);
 		Arrays.stream(options).forEach(o -> {
 			if (o.getValidation().validate(systemsCommonData.getPlayer())) {
@@ -75,7 +75,7 @@ public class MenuHandlerImpl implements MenuHandler {
 	public void applyMenuOptions(MenuOptionDefinition[] options,
 								 GameAssetManager assetsManager,
 								 SystemsCommonData commonData) {
-		BitmapFont smallFont = assetsManager.getFont(Assets.Fonts.CHUBGOTHIC_SMALL);
+		BitmapFont smallFont = assetsManager.getFont(Assets.Fonts.ARIAL_MT_BOLD_SMALL);
 		Label.LabelStyle style = new Label.LabelStyle(smallFont, MenuOption.FONT_COLOR_REGULAR);
 		Arrays.stream(options).forEach(o -> {
 			if (o.getValidation().validate(commonData.getPlayer())) {

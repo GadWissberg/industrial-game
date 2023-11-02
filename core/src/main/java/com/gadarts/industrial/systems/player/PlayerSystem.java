@@ -85,13 +85,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		super(assetsManager, lifeCycleHandler);
 	}
 
-	private static int flipOffDiagonal(int total, int mask, int firstDirMask, int secondDirMask) {
-		if ((total & mask) == mask && ((total & firstDirMask) == firstDirMask || (total & secondDirMask) == secondDirMask)) {
-			total = total & ~mask;
-		}
-		return total;
-	}
-
 	@Override
 	public void onUserRequestsToReload( ) {
 		addCommand(RELOAD);
@@ -118,11 +111,30 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	}
 
 	@Override
-	public void onDoorStateChanged(Entity doorEntity,
-								   DoorComponent.DoorStates oldState,
-								   DoorComponent.DoorStates newState) {
+	public void onDoorStateChanged(Entity doorEntity, DoorComponent.DoorStates newState) {
 		if (newState == DoorComponent.DoorStates.OPENING || newState == DoorComponent.DoorStates.CLOSED) {
 			refreshFogOfWar();
+		}
+	}
+
+	@Override
+	public void onCombatModeEngaged( ) {
+		ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).getCommands().clear();
+	}
+
+	@Override
+	public void onSelectedWeaponChanged(Weapon selectedWeapon) {
+		PlayerWeaponDeclaration definition = (PlayerWeaponDeclaration) selectedWeapon.getDeclaration();
+		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		Entity player = systemsCommonData.getPlayer();
+		CharacterDecalComponent cdc = ComponentsMapper.characterDecal.get(player);
+		CharacterAnimations animations = getAssetsManager().get(definition.relatedAtlas().name());
+		cdc.init(animations, cdc.getSpriteType(), cdc.getDirection(), auxVector3_1.set(cdc.getDecal().getPosition()));
+		CharacterAnimation animation = animations.get(cdc.getSpriteType(), cdc.getDirection());
+		ComponentsMapper.animation.get(player).init(cdc.getSpriteType().getFrameDuration(), animation);
+		ComponentsMapper.character.get(player).setPrimaryAttack(definition.declaration());
+		if (selectedWeapon != systemsCommonData.getStorage().getSelectedWeapon()) {
+			systemsCommonData.getStorage().setSelectedWeapon(selectedWeapon);
 		}
 	}
 
@@ -158,6 +170,13 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		}
 		calculateFogOfWarEdgesForFloor(playerNode, map);
 		calculateGraySignatures(playerNode, map);
+	}
+
+	private int flipOffDiagonal(int total, int mask, int firstDirMask, int secondDirMask) {
+		if ((total & mask) == mask && ((total & firstDirMask) == firstDirMask || (total & secondDirMask) == secondDirMask)) {
+			total = total & ~mask;
+		}
+		return total;
 	}
 
 	private void clearFlatColorAndFowSignatureForRegionOfNodes(MapGraphNode playerNode) {
@@ -269,11 +288,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		return total;
 	}
 
-	@Override
-	public void onCombatModeEngaged( ) {
-		ComponentsMapper.character.get(getSystemsCommonData().getPlayer()).getCommands().clear();
-	}
-
 	private void revealNodes(MapGraph map, Vector3 src, MapGraphNode playerNode, int dir) {
 		Vector2 maxSight = auxVector2_2.set(src.x, src.z)
 				.add(auxVector2_3.set(1, 0)
@@ -295,19 +309,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			FloorComponent floorComponent = ComponentsMapper.floor.get(currentNode.getEntity());
 			ModelInstanceComponent modelInstanceComp = ComponentsMapper.modelInstance.get(currentNode.getEntity());
 			if (!floorComponent.isRevealCalculated()) {
-				if (modelInstanceComp != null) {
-					Color flatColor = null;
-					if (!DebugSettings.DISABLE_FOW && blocked && !floorComponent.isDiscovered()) {
-						flatColor = Color.BLACK;
-					}
-					modelInstanceComp.setFlatColor(flatColor);
-					modelInstanceComp.setGraySignature(blocked ? 16 : 0);
-				}
-				floorComponent.setFogOfWarSignature(blocked ? 16 : 0);
-				floorComponent.setRevealCalculated(true);
-				if (!blocked) {
-					floorComponent.setDiscovered(true);
-				}
+				calculateFloorReveal(blocked, modelInstanceComp, floorComponent);
 			}
 			if (!blocked) {
 				if (checkIfNodeBlocks(playerNode, currentNode) || checkIfAnyEnvironmentObjectBlocks(playerNode, currentNode)) {
@@ -316,6 +318,22 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			}
 		}
 		return blocked;
+	}
+
+	private void calculateFloorReveal(boolean blocked, ModelInstanceComponent modelInstanceComp, FloorComponent floorComponent) {
+		if (modelInstanceComp != null) {
+			Color flatColor = null;
+			if (!DebugSettings.DISABLE_FOW && blocked && !floorComponent.isDiscovered()) {
+				flatColor = Color.BLACK;
+			}
+			modelInstanceComp.setFlatColor(flatColor);
+			modelInstanceComp.setGraySignature(blocked ? 16 : 0);
+		}
+		floorComponent.setFogOfWarSignature(blocked ? 16 : 0);
+		floorComponent.setRevealCalculated(true);
+		if (!blocked) {
+			floorComponent.setDiscovered(true);
+		}
 	}
 
 	private boolean checkIfAnyEnvironmentObjectBlocks(MapGraphNode playerNode, MapGraphNode currentNode) {
@@ -341,22 +359,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			return thingTopSide >= playerNode.getHeight() + PlayerComponent.PLAYER_HEIGHT && currentNode.equals(node);
 		}
 		return false;
-	}
-
-	@Override
-	public void onSelectedWeaponChanged(Weapon selectedWeapon) {
-		PlayerWeaponDeclaration definition = (PlayerWeaponDeclaration) selectedWeapon.getDeclaration();
-		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		Entity player = systemsCommonData.getPlayer();
-		CharacterDecalComponent cdc = ComponentsMapper.characterDecal.get(player);
-		CharacterAnimations animations = getAssetsManager().get(definition.relatedAtlas().name());
-		cdc.init(animations, cdc.getSpriteType(), cdc.getDirection(), auxVector3_1.set(cdc.getDecal().getPosition()));
-		CharacterAnimation animation = animations.get(cdc.getSpriteType(), cdc.getDirection());
-		ComponentsMapper.animation.get(player).init(cdc.getSpriteType().getFrameDuration(), animation);
-		ComponentsMapper.character.get(player).setPrimaryAttack(definition.declaration());
-		if (selectedWeapon != systemsCommonData.getStorage().getSelectedWeapon()) {
-			systemsCommonData.getStorage().setSelectedWeapon(selectedWeapon);
-		}
 	}
 
 	@Override
@@ -386,16 +388,16 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		systemsCommonData.getSoundPlayer().playSound(Assets.Sounds.PICKUP);
 	}
 
-	private boolean checkIfNodeBlocks(MapGraphNode playerNode, MapGraphNode currentNode) {
-		Entity door = currentNode.getDoor();
-		return playerNode.getHeight() + PlayerComponent.PLAYER_HEIGHT < currentNode.getHeight()
-				|| (door != null && ComponentsMapper.door.get(door).getState() == DoorComponent.DoorStates.CLOSED);
+	@Override
+	public Class<PlayerSystemEventsSubscriber> getEventsSubscriberClass( ) {
+		return PlayerSystemEventsSubscriber.class;
 	}
 
-	private void notifyPlayerFinishedTurn( ) {
-		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
-			subscriber.onPlayerFinishedTurn();
-		}
+	@Override
+	public void initializeData( ) {
+		playerPathPlanner = new PathPlanHandler(getSystemsCommonData().getMap());
+		changePlayerStatus(!getLifeCycleHandler().isInGame());
+		refreshFogOfWar();
 	}
 
 	@Override
@@ -405,6 +407,29 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				subscribers.forEach(PlayerSystemEventsSubscriber::onPlayerFinishedTurn);
 			}
 		}
+	}
+
+	@Override
+	public void onGameModeSet( ) {
+		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		if (systemsCommonData.getCurrentGameMode() == GameMode.EXPLORE) {
+			ComponentsMapper.character.get(systemsCommonData.getPlayer()).getAttributes().resetActionPoints();
+		}
+	}
+
+	@Override
+	public void onSystemReset(SystemsCommonData systemsCommonData) {
+		super.onSystemReset(systemsCommonData);
+		getSystemsCommonData().setPlayer(getEngine().getEntitiesFor(Family.all(PlayerComponent.class).get()).first());
+		Weapon weapon = initializeStartingWeapon();
+		getSystemsCommonData().setStorage(new PlayerStorage(getAssetsManager()));
+		getSystemsCommonData().getStorage().setSelectedWeapon(weapon);
+		ambObjects = getEngine().getEntitiesFor(Family.all(EnvironmentObjectComponent.class).exclude(DoorComponent.class).get());
+	}
+
+	@Override
+	public void dispose( ) {
+		getSystemsCommonData().getStorage().clear();
 	}
 
 	@Override
@@ -421,6 +446,18 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 			}
 		} else {
 			applyPrimaryAttack(enemyAtNode);
+		}
+	}
+
+	private boolean checkIfNodeBlocks(MapGraphNode playerNode, MapGraphNode currentNode) {
+		Entity door = currentNode.getDoor();
+		return playerNode.getHeight() + PlayerComponent.PLAYER_HEIGHT < currentNode.getHeight()
+				|| (door != null && ComponentsMapper.door.get(door).getState() == DoorComponent.DoorStates.CLOSED);
+	}
+
+	private void notifyPlayerFinishedTurn( ) {
+		for (PlayerSystemEventsSubscriber subscriber : subscribers) {
+			subscriber.onPlayerFinishedTurn();
 		}
 	}
 
@@ -458,14 +495,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		}
 	}
 
-	@Override
-	public void onGameModeSet( ) {
-		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		if (systemsCommonData.getCurrentGameMode() == GameMode.EXPLORE) {
-			ComponentsMapper.character.get(systemsCommonData.getPlayer()).getAttributes().resetActionPoints();
-		}
-	}
-
 	private void addCommand(CharacterCommandsDefinitions characterCommandDefinition) {
 		addCommand(null, characterCommandDefinition);
 	}
@@ -499,34 +528,12 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				plannedPath);
 	}
 
-	@Override
-	public Class<PlayerSystemEventsSubscriber> getEventsSubscriberClass( ) {
-		return PlayerSystemEventsSubscriber.class;
-	}
-
-	@Override
-	public void initializeData( ) {
-		playerPathPlanner = new PathPlanHandler(getSystemsCommonData().getMap());
-		changePlayerStatus(!getLifeCycleHandler().isInGame());
-		refreshFogOfWar();
-	}
-
 	private void changePlayerStatus(final boolean disabled) {
 		PlayerComponent playerComponent = ComponentsMapper.player.get(getSystemsCommonData().getPlayer());
 		playerComponent.setDisabled(disabled);
 		subscribers.forEach(PlayerSystemEventsSubscriber::onPlayerStatusChanged);
 	}
 
-
-	@Override
-	public void onSystemReset(SystemsCommonData systemsCommonData) {
-		super.onSystemReset(systemsCommonData);
-		getSystemsCommonData().setPlayer(getEngine().getEntitiesFor(Family.all(PlayerComponent.class).get()).first());
-		Weapon weapon = initializeStartingWeapon();
-		getSystemsCommonData().setStorage(new PlayerStorage(getAssetsManager()));
-		getSystemsCommonData().getStorage().setSelectedWeapon(weapon);
-		ambObjects = getEngine().getEntitiesFor(Family.all(EnvironmentObjectComponent.class).exclude(DoorComponent.class).get());
-	}
 
 	private Weapon initializeStartingWeapon( ) {
 		Weapon weapon = Pools.obtain(Weapon.class);
@@ -538,10 +545,5 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		Texture image = symbol != null ? am.getTexture(symbol) : null;
 		weapon.init(playerWeaponDeclaration, 0, 0, image);
 		return weapon;
-	}
-
-	@Override
-	public void dispose( ) {
-		getSystemsCommonData().getStorage().clear();
 	}
 }

@@ -11,7 +11,6 @@ public interface AmbSystemEventsSubscriber extends SystemEventsSubscriber {
 	}
 
 	default void onDoorStateChanged(Entity doorEntity,
-									DoorComponent.DoorStates oldState,
 									DoorComponent.DoorStates newState) {
 
 	}

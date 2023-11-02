@@ -89,7 +89,7 @@ public class AmbSystem extends GameSystem<AmbSystemEventsSubscriber> implements
 
 		playDoorSound(doorComponent, newState);
 		doorComponent.setState(newState);
-		subscribers.forEach(s -> s.onDoorStateChanged(doorEntity, oldState, newState));
+		subscribers.forEach(s -> s.onDoorStateChanged(doorEntity, newState));
 	}
 
 	private void playDoorSound(DoorComponent doorComponent, DoorStates newState) {

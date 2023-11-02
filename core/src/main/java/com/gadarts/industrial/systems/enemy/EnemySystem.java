@@ -370,7 +370,6 @@ public class EnemySystem extends GameSystem<EnemySystemEventsSubscriber> impleme
 
 	@Override
 	public void onDoorStateChanged(Entity doorEntity,
-								   DoorComponent.DoorStates oldState,
 								   DoorComponent.DoorStates newState) {
 		if (newState == DoorComponent.DoorStates.OPEN) {
 			for (Entity enemy : enemies) {

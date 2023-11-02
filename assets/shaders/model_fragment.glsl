@@ -157,7 +157,36 @@ float applyXRayFading(vec2 coords){
     return alpha;
 }
 
+vec3 applyLight(int i, vec4 diffuse){
+    vec3 light = u_shadowlessLightsPositions[i];
+    vec3 sub = light.xyz - v_frag_pos.xyz;
+    vec3 lightDir = normalize(sub);
+    float distance = length(sub);
+    vec3 extra = u_shadowlessLightsExtraData[i];
+    vec3 valueToAdd = vec3(0.0);
+    if (distance <= extra.y){
+        int lightColorIndex = int(extra.z);
+        vec3 lightColor;
+        if (lightColorIndex > -1){
+            lightColor = vec3(u_shadowlessLightsColors[lightColorIndex]);
+        } else {
+            lightColor = vec3(0.0);
+        }
+        float attenuation = 4.0 * extra.x / (1.0 + (0.01*distance) + (0.9*distance*distance));
+        float dotValue = dot(v_normal, lightDir);
+        float intensity = max(dotValue, 0.0);
+        valueToAdd = (diffuse.rgb *lightColor.rgb* (attenuation * intensity));
+        valueToAdd *= distance > (extra.y*5.0/6.0) ? 0.5 : 1.0;
+    }
+    return valueToAdd;
+}
+
 void main() {
+
+    if (shouldDiscardFragment()){
+        discard;
+    }
+
     #if defined(diffuseTextureFlag) && defined(diffuseColorFlag)
     vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV) * u_diffuseColor;
     #elif defined(diffuseTextureFlag) && defined(colorFlag)
@@ -189,34 +218,11 @@ void main() {
     gl_FragColor.rgb = vec3(0.0);
     vec3 finalColor = vec3(0.0);
 
-    if (shouldDiscardFragment()){
-        discard;
-    }
-
     if (u_flatColor.x < 0.0){
         if (u_affectedByLight != 0.0){
             if (u_numberOfShadowlessLights > 0) {
                 for (int i = 0; i< u_numberOfShadowlessLights; i++){
-                    vec3 light = u_shadowlessLightsPositions[i];
-                    vec3 sub = light.xyz - v_frag_pos.xyz;
-                    vec3 lightDir = normalize(sub);
-                    float distance = length(sub);
-                    vec3 extra = u_shadowlessLightsExtraData[i];
-                    if (distance <= extra.y){
-                        int light_color_index = int(extra.z);
-                        vec3 light_color;
-                        if (light_color_index > -1){
-                            light_color = vec3(u_shadowlessLightsColors[light_color_index]);
-                        } else {
-                            light_color = vec3(0.0);
-                        }
-                        float attenuation = 4.0 * extra.x / (1.0 + (0.01*distance) + (0.9*distance*distance));
-                        float dot_value = dot(v_normal, lightDir);
-                        float intensity = max(dot_value, 0.0);
-                        vec3 value_to_add = (diffuse.rgb *light_color.rgb* (attenuation * intensity));
-                        value_to_add *= distance > (extra.y*5.0/6.0) ? 0.5 : 1.0;
-                        finalColor += value_to_add;
-                    }
+                    finalColor += applyLight(i, diffuse);
                 }
                 finalColor += emissive.rgb;
             }

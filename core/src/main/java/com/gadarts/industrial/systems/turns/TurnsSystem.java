@@ -75,7 +75,7 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 	}
 
 	@Override
-	public void onDoorStateChanged(Entity doorEntity, DoorStates oldState, DoorStates newState) {
+	public void onDoorStateChanged(Entity doorEntity, DoorStates newState) {
 		if (newState == DoorStates.OPENING) {
 			getSystemsCommonData().getTurnsQueue().addLast(doorEntity);
 			GameMode currentGameMode = getSystemsCommonData().getCurrentGameMode();
