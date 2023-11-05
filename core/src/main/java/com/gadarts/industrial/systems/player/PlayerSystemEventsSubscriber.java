@@ -16,9 +16,6 @@ public interface PlayerSystemEventsSubscriber extends SystemEventsSubscriber {
 
 	}
 
-	default void onPlayerStatusChanged() {
-
-	}
 
 	default void onPlayerConsumedAmmo(WeaponAmmo weaponAmmo){
 

@@ -55,7 +55,7 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 	public void update(float deltaTime) {
 		super.update(deltaTime);
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		if (shouldCameraFollow()) {
+		if (!getSystemsCommonData().getUiStage().hasOpenWindows() && !getSystemsCommonData().isCameraIsRotating()) {
 			handleCameraFollow();
 		}
 		handleMenuRotation();
@@ -65,16 +65,8 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 	private void handleMenuRotation( ) {
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		Entity player = systemsCommonData.getPlayer();
-		if (ComponentsMapper.player.get(player).isDisabled()) {
-			Decal decal = ComponentsMapper.characterDecal.get(player).getDecal();
-			systemsCommonData.getCamera().rotateAround(decal.getPosition(), Vector3.Y, MENU_CAMERA_ROTATION);
-		}
-	}
-
-	private boolean shouldCameraFollow( ) {
-		return !getSystemsCommonData().getUiStage().hasOpenWindows()
-				&& !getSystemsCommonData().isCameraIsRotating()
-				&& !getSystemsCommonData().getMenuTable().isVisible();
+		Decal decal = ComponentsMapper.characterDecal.get(player).getDecal();
+		systemsCommonData.getCamera().rotateAround(decal.getPosition(), Vector3.Y, MENU_CAMERA_ROTATION);
 	}
 
 	private void handleCameraFollow( ) {
@@ -90,7 +82,7 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 
 	@Override
 	public void touchDragged(final int screenX, final int screenY) {
-		if (getSystemsCommonData().isCameraIsRotating() && !getSystemsCommonData().getMenuTable().isVisible()) {
+		if (getSystemsCommonData().isCameraIsRotating()) {
 			Entity player = getSystemsCommonData().getPlayer();
 			Vector3 rotationPoint = ComponentsMapper.characterDecal.get(player).getDecal().getPosition();
 			Camera camera = getSystemsCommonData().getCamera();
@@ -102,7 +94,7 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 
 	@Override
 	public void touchDown(final int screenX, final int screenY, final int button) {
-		if (button == Input.Buttons.RIGHT && !getSystemsCommonData().getMenuTable().isVisible()) {
+		if (button == Input.Buttons.RIGHT) {
 			getSystemsCommonData().setCameraIsRotating(true);
 			lastRightPressMousePosition.set(screenX, screenY);
 		}

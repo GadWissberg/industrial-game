@@ -7,9 +7,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
-
-import java.util.List;
 
 public class MenuOption extends Label {
 	static final Color FONT_COLOR_REGULAR = Color.RED;
@@ -18,8 +15,7 @@ public class MenuOption extends Label {
 	public MenuOption(MenuOptionDefinition option,
 					  LabelStyle optionStyle,
 					  SoundPlayer soundPlayer,
-					  MenuHandler menuHandler,
-					  List<UserInterfaceSystemEventsSubscriber> subscribers) {
+					  MenuHandler menuHandler) {
 		super(option.getLabel(), new LabelStyle(optionStyle));
 		addListener(new ClickListener() {
 			@Override
@@ -36,7 +32,7 @@ public class MenuOption extends Label {
 			public void clicked(final InputEvent event, final float x, final float y) {
 				super.clicked(event, x, y);
 				if (option.getAction() != null) {
-					option.getAction().run(menuHandler, subscribers);
+					option.getAction().run(menuHandler);
 				} else {
 					MenuOptionDefinition[] subOptions = option.getSubOptions();
 					if (subOptions != null) {

@@ -5,7 +5,6 @@ import com.gadarts.industrial.components.character.CharacterAnimations;
 import com.gadarts.industrial.shared.assets.declarations.Agility;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponDeclaration;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,9 +15,6 @@ public class PlayerComponent implements GameComponent {
 	public static final Agility PLAYER_AGILITY = new Agility(4, 5);
 	private CharacterAnimations generalAnimations;
 	private final Map<PlayerWeaponDeclaration, WeaponAmmo> ammo = new HashMap<>();
-
-	@Setter
-	private boolean disabled;
 
 	@Override
 	public void reset( ) {

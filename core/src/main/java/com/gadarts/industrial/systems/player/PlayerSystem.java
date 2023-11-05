@@ -396,7 +396,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	@Override
 	public void initializeData( ) {
 		playerPathPlanner = new PathPlanHandler(getSystemsCommonData().getMap());
-		changePlayerStatus(!getLifeCycleHandler().isInGame());
 		refreshFogOfWar();
 	}
 
@@ -527,13 +526,6 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				CLEAN,
 				plannedPath);
 	}
-
-	private void changePlayerStatus(final boolean disabled) {
-		PlayerComponent playerComponent = ComponentsMapper.player.get(getSystemsCommonData().getPlayer());
-		playerComponent.setDisabled(disabled);
-		subscribers.forEach(PlayerSystemEventsSubscriber::onPlayerStatusChanged);
-	}
-
 
 	private Weapon initializeStartingWeapon( ) {
 		Weapon weapon = Pools.obtain(Weapon.class);

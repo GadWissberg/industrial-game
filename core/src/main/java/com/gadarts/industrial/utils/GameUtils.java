@@ -1,6 +1,8 @@
 package com.gadarts.industrial.utils;
 
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -171,5 +173,12 @@ public class GameUtils {
 		float longAxis = Math.max(xAxis, zAxis);
 		float shortAxis = Math.min(xAxis, zAxis);
 		return (int) (longAxis + shortAxis / 2F);
+	}
+
+	public static void clearDisplay(float alpha) {
+		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		int sam = Gdx.graphics.getBufferFormat().coverageSampling ? GL20.GL_COVERAGE_BUFFER_BIT_NV : 0;
+		Gdx.gl.glClearColor(0, 0, 0, alpha);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | sam);
 	}
 }

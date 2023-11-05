@@ -8,6 +8,7 @@ public class InGameScreen implements Screen {
 
 	public InGameScreen(GeneralHandler generalHandler) {
 		this.generalHandler = generalHandler;
+		generalHandler.init();
 	}
 
 	@Override
@@ -42,5 +43,6 @@ public class InGameScreen implements Screen {
 
 	@Override
 	public void dispose( ) {
+		generalHandler.dispose();
 	}
 }

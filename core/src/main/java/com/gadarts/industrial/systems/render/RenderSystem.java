@@ -18,7 +18,6 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.AppendixModelInstanceComponent;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -54,11 +53,13 @@ import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
 import com.gadarts.industrial.systems.render.fb.GameFrameBuffer;
 import com.gadarts.industrial.systems.render.fb.GameFrameBufferCubeMap;
 import com.gadarts.industrial.systems.render.flags.DrawFlags;
+import com.gadarts.industrial.utils.GameUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import static com.gadarts.industrial.DebugSettings.*;
 import static com.gadarts.industrial.shared.model.characters.SpriteType.*;
 import static com.gadarts.industrial.systems.SystemsCommonData.CAMERA_LIGHT_FAR;
 import static java.lang.Math.max;
@@ -90,7 +91,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private final StaticShadowsData staticShadowsData = new StaticShadowsData();
 	private final DecalsGroupStrategies strategies = new DecalsGroupStrategies();
 	private GameEnvironment environment;
-	private boolean frustumCull = !DebugSettings.DISABLE_FRUSTUM_CULLING;
+	private boolean frustumCull = !DISABLE_FRUSTUM_CULLING;
 
 	public RenderSystem(GameAssetManager assetsManager, GameLifeCycleHandler lifeCycleHandler) {
 		super(assetsManager, lifeCycleHandler);
@@ -172,24 +173,13 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 				staticShadowsData, families.getStaticLightsEntities(),
 				strategies.getRegularDecalGroupStrategy());
 		strategies.createDecalGroupStrategies(getSystemsCommonData().getCamera(), assetsManager);
-		if (DebugSettings.ALLOW_STATIC_SHADOWS) {
+		if (ALLOW_STATIC_SHADOWS) {
 			createShadowMaps();
 		}
 	}
 
-	private void resetDisplay( ) {
-		resetDisplay(1F);
-	}
-
-	private void resetDisplay(float alpha) {
-		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		int sam = Gdx.graphics.getBufferFormat().coverageSampling ? GL20.GL_COVERAGE_BUFFER_BIT_NV : 0;
-		Gdx.gl.glClearColor(0, 0, 0, alpha);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | sam);
-	}
-
 	private boolean isInFrustum(final Camera camera, ModelInstanceComponent modelInstanceComponent) {
-		if (!DebugSettings.DISABLE_FRUSTUM_CULLING) return true;
+		if (!DISABLE_FRUSTUM_CULLING) return true;
 		Vector3 position = modelInstanceComponent.getModelInstance().transform.getTranslation(auxVector3_1);
 		AdditionalRenderData additionalRenderData = modelInstanceComponent.getModelInstance().getAdditionalRenderData();
 		BoundingBox boundingBox = additionalRenderData.getBoundingBox(auxBoundingBox);
@@ -242,7 +232,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private void applyShadowlessLightsOnModel(final ModelInstanceComponent mic) {
 		List<Entity> nearbyLights = mic.getModelInstance().getAdditionalRenderData().getNearbyLights();
 		nearbyLights.clear();
-		if (!DebugSettings.DISABLE_LIGHTS) {
+		if (!DISABLE_LIGHTS) {
 			if (mic.getModelInstance().getAdditionalRenderData().isAffectedByLight()) {
 				for (Entity light : families.getShadowlessLightsEntities()) {
 					addLightIfClose(mic.getModelInstance(), nearbyLights, light);
@@ -382,11 +372,11 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private void renderShadows( ) {
-		if (!DebugSettings.ALLOW_STATIC_SHADOWS) return;
+		if (!ALLOW_STATIC_SHADOWS) return;
 
 		GameFrameBuffer shadowFrameBuffer = staticShadowsData.getShadowFrameBuffer();
 		shadowFrameBuffer.begin();
-		resetDisplay(0F);
+		GameUtils.clearDisplay(0F);
 		Camera cam = getSystemsCommonData().getCamera();
 		renderModels(
 				renderBatches.getModelBatchShadows(),
@@ -394,7 +384,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 				false,
 				cam,
 				true);
-		if (DebugSettings.ALLOW_SCREEN_SHOT_OF_DEPTH_MAP) {
+		if (ALLOW_SCREEN_SHOT_OF_DEPTH_MAP) {
 			staticShadowsData.handleScreenshot(shadowFrameBuffer);
 		}
 		shadowFrameBuffer.end();
@@ -403,7 +393,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private void render( ) {
 		getSystemsCommonData().setNumberOfVisible(0);
 		renderShadows();
-		resetDisplay();
+		GameUtils.clearDisplay(1F);
 		renderModels(renderBatches.getModelBatch(), families.getModelEntities(), getSystemsCommonData().getCamera());
 		renderDecals();
 		renderParticleEffects();
@@ -491,7 +481,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 			if (updateCharacterDecal) {
 				updateCharacterDecal(entity);
 			}
-			if ((DebugSettings.DISABLE_FOW || isNodeRevealed(floorEntity)) && (shouldRenderPlayer(entity) || shouldRenderEnemy(entity))) {
+			if ((DISABLE_FOW || isNodeRevealed(floorEntity)) && (ComponentsMapper.player.has(entity) || shouldRenderEnemy(entity))) {
 				renderCharacterDecal(entity, color, alpha);
 			}
 		}
@@ -505,10 +495,6 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 
 	private boolean shouldRenderEnemy(Entity entity) {
 		return ComponentsMapper.enemy.has(entity) && getSystemsCommonData().getDrawFlags().isDrawEnemy();
-	}
-
-	private boolean shouldRenderPlayer(Entity entity) {
-		return ComponentsMapper.player.has(entity) && !ComponentsMapper.player.get(entity).isDisabled();
 	}
 
 	private boolean shouldApplyLightsOnCharacterDecal(final Entity entity,
@@ -588,7 +574,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		cameraLight.rotate(Vector3.Y, 0);
 		cameraLight.update();
 		StaticLightComponent lightComponent = ComponentsMapper.staticLight.get(light);
-		resetDisplay();
+		GameUtils.clearDisplay(1F);
 		ShaderProgram depthShaderProgram = staticShadowsData.getDepthShaderProgram();
 		depthShaderProgram.bind();
 		depthShaderProgram.setUniformf("u_cameraFar", cameraLight.far);
@@ -631,7 +617,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	}
 
 	private void renderCharacterDecal(Entity entity, Color color, float alpha) {
-		if (DebugSettings.HIDE_CHARACTERS) return;
+		if (HIDE_CHARACTERS) return;
 
 		Decal decal = ComponentsMapper.characterDecal.get(entity).getDecal();
 		Vector3 decalPosition = decal.getPosition();
@@ -703,7 +689,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		AnimationComponent aniComp = ComponentsMapper.animation.get(entity);
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		Animation<AtlasRegion> anim = aniComp.getAnimation();
-		if (!systemsCommonData.getMenuTable().isVisible() && ComponentsMapper.animation.has(entity) && anim != null) {
+		if (ComponentsMapper.animation.has(entity) && anim != null) {
 			if (spriteType == IDLE && anim.isAnimationFinished(aniComp.getStateTime())) {
 				if (anim.getPlayMode() == Animation.PlayMode.NORMAL) {
 					anim.setPlayMode(Animation.PlayMode.REVERSED);

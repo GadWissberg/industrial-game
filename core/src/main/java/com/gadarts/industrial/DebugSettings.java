@@ -9,11 +9,10 @@ public final class DebugSettings {
 	public static final boolean HIDE_CHARACTERS = false;
 	public static final boolean HIDE_ENVIRONMENT_OBJECTS = false;
 	public static final boolean HIDE_CURSOR = false;
-	public static final boolean MENU_ON_STARTUP = true;
 	public static final boolean DISABLE_LIGHTS = true;
 	public static final boolean DISPLAY_CURSOR_POSITION = true;
 	public static final boolean SHOW_GL_PROFILING = true;
-	public static final boolean DISPLAY_HUD_OUTLINES = false;
+	public static final boolean DISPLAY_USER_INTERFACE_OUTLINES = false;
 	public static final boolean HIDE_HUD = false;
 	public static final boolean MELODY_ENABLED = false;
 	public static final boolean SFX_ENABLED = false;

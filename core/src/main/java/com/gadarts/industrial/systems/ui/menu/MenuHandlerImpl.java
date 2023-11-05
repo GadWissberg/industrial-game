@@ -1,92 +1,63 @@
 package com.gadarts.industrial.systems.ui.menu;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.gadarts.industrial.shared.assets.Assets;
-import com.gadarts.industrial.shared.assets.GameAssetManager;
+import com.badlogic.gdx.utils.Disposable;
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.SoundPlayer;
-import com.gadarts.industrial.systems.SystemsCommonData;
-import com.gadarts.industrial.systems.ui.GameStage;
-import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
+import com.gadarts.industrial.shared.assets.Assets;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 
 import java.util.Arrays;
-import java.util.List;
-
-import static com.gadarts.industrial.systems.SystemsCommonData.TABLE_NAME_HUD;
 
 
-public class MenuHandlerImpl implements MenuHandler {
-	private static final String TABLE_NAME_MENU = "menu";
+public class MenuHandlerImpl implements MenuHandler, Disposable {
 
-	private final SystemsCommonData systemsCommonData;
-
-	private final List<UserInterfaceSystemEventsSubscriber> subscribers;
 	private final GameAssetManager assetsManager;
+	private final Table menuTable;
+	private final SoundPlayer soundPlayer;
+	private final Stage stage;
 
-	public MenuHandlerImpl(SystemsCommonData systemsCommonData,
-						   List<UserInterfaceSystemEventsSubscriber> subscribers,
-						   GameAssetManager assetsManager) {
-		this.systemsCommonData = systemsCommonData;
-		this.subscribers = subscribers;
+	public MenuHandlerImpl(GameAssetManager assetsManager, SoundPlayer soundPlayer) {
 		this.assetsManager = assetsManager;
-	}
-
-	public void toggleMenu(final boolean active) {
-		toggleMenu(active, systemsCommonData.getUiStage());
-		subscribers.forEach(subscriber -> subscriber.onMenuToggled(active));
+		this.soundPlayer = soundPlayer;
+		stage = new Stage();
+		stage.setDebugAll(DebugSettings.DISPLAY_USER_INTERFACE_OUTLINES);
+		Image logo = new Image(assetsManager.getTexture(Assets.UiTextures.LOGO));
+		menuTable = new Table();
+		menuTable.add(logo).row();
+		menuTable.setSize(stage.getWidth(), stage.getHeight());
+		applyMenuOptions(MainMenuOptions.values(), assetsManager);
+		stage.addActor(menuTable);
+//		menuTable.setPosition(stage.getWidth() / 2F, stage.getHeight() / 2F);
 	}
 
 	@Override
 	public void applyMenuOptions(MenuOptionDefinition[] options) {
-		Table menuTable = systemsCommonData.getMenuTable();
 		menuTable.clear();
 		BitmapFont smallFont = assetsManager.getFont(Assets.Fonts.ARIAL_MT_BOLD_SMALL);
 		Label.LabelStyle style = new Label.LabelStyle(smallFont, MenuOption.FONT_COLOR_REGULAR);
-		Arrays.stream(options).forEach(o -> {
-			if (o.getValidation().validate(systemsCommonData.getPlayer())) {
-				SoundPlayer soundPlayer = systemsCommonData.getSoundPlayer();
-				menuTable.add(new MenuOption(o, style, soundPlayer, this, subscribers)).row();
-			}
-		});
+		Arrays.stream(options).forEach(o -> menuTable.add(new MenuOption(o, style, soundPlayer, this)).row());
 	}
 
 	@Override
-	public void init(Table table,
-					 GameAssetManager assetsManager,
-					 SystemsCommonData systemsCommonData) {
-		addMenuTable(table, assetsManager, systemsCommonData);
+	public void render(float delta) {
+		stage.act(delta);
+		stage.draw();
 	}
 
-	private void addMenuTable(Table table,
-							  GameAssetManager assetsManager,
-							  SystemsCommonData systemsCommonData) {
-		systemsCommonData.setMenuTable(table);
-		table.setName(TABLE_NAME_MENU);
-		table.add(new Image(assetsManager.getTexture(Assets.UiTextures.LOGO))).row();
-		applyMenuOptions(MainMenuOptions.values(), assetsManager, systemsCommonData);
-		table.toFront();
-		toggleMenu(DebugSettings.MENU_ON_STARTUP);
-	}
-
-	public void applyMenuOptions(MenuOptionDefinition[] options,
-								 GameAssetManager assetsManager,
-								 SystemsCommonData commonData) {
+	private void applyMenuOptions(MenuOptionDefinition[] options,
+								  GameAssetManager assetsManager) {
 		BitmapFont smallFont = assetsManager.getFont(Assets.Fonts.ARIAL_MT_BOLD_SMALL);
 		Label.LabelStyle style = new Label.LabelStyle(smallFont, MenuOption.FONT_COLOR_REGULAR);
-		Arrays.stream(options).forEach(o -> {
-			if (o.getValidation().validate(commonData.getPlayer())) {
-				SoundPlayer soundPlayer = systemsCommonData.getSoundPlayer();
-				commonData.getMenuTable().add(new MenuOption(o, style, soundPlayer, this, subscribers)).row();
-			}
-		});
+		Arrays.stream(options).forEach(o -> menuTable.add(new MenuOption(o, style, soundPlayer, this)).row());
 	}
 
-	public void toggleMenu(final boolean active, final GameStage stage) {
-		systemsCommonData.getMenuTable().setVisible(active);
-		stage.getRoot().findActor(TABLE_NAME_HUD).setTouchable(active ? Touchable.disabled : Touchable.enabled);
+	@Override
+	public void dispose( ) {
+		stage.dispose();
 	}
 }

@@ -56,8 +56,6 @@ import com.gadarts.industrial.systems.ui.indicators.DamageIndicator;
 import com.gadarts.industrial.systems.ui.indicators.WeaponIndicator;
 import com.gadarts.industrial.systems.ui.indicators.health.HealthIndicator;
 import com.gadarts.industrial.systems.ui.indicators.turns.TurnsIndicatorsHandler;
-import com.gadarts.industrial.systems.ui.menu.MenuHandler;
-import com.gadarts.industrial.systems.ui.menu.MenuHandlerImpl;
 import com.gadarts.industrial.utils.EntityBuilder;
 import lombok.Getter;
 import squidpony.squidmath.Coord3D;
@@ -70,7 +68,6 @@ import static com.gadarts.industrial.DebugSettings.FULL_SCREEN;
 import static com.gadarts.industrial.TerrorEffector.*;
 import static com.gadarts.industrial.shared.assets.Assets.Declarations.ENEMIES;
 import static com.gadarts.industrial.shared.assets.Assets.Declarations.PLAYER_WEAPONS;
-import static com.gadarts.industrial.systems.SystemsCommonData.TABLE_NAME_HUD;
 
 public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSubscriber> implements
 		InputSystemEventsSubscriber,
@@ -82,9 +79,8 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final float PADDING = 20;
 	private static final float PADDING_BOTTOM_INVENTORY_BUTTON = 10;
-	private boolean showBorders = DebugSettings.DISPLAY_HUD_OUTLINES;
+	private boolean showBorders = DebugSettings.DISPLAY_USER_INTERFACE_OUTLINES;
 	@Getter
-	private MenuHandler menuHandler;
 	private CursorHandler cursorHandler;
 	private ToolTipHandler toolTipHandler;
 	private TurnsIndicatorsHandler turnsIndicatorsHandler;
@@ -130,7 +126,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		GameStage stage = addUiStage();
 		systemsCommonData.setDamageIndicator(new DamageIndicator(stage, assetsManager));
 		Table hudTable = addTable();
-		hudTable.setName(TABLE_NAME_HUD);
 		var leftSideIndicatorsTable = new Table();
 		addInventoryButton(leftSideIndicatorsTable);
 		addHealthIndicator(leftSideIndicatorsTable);
@@ -326,13 +321,12 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		GameStage stage;
 		stage = new GameStage(new FitViewport(width, height), getSystemsCommonData().getSoundPlayer());
 		getSystemsCommonData().setUiStage(stage);
-		stage.setDebugAll(DebugSettings.DISPLAY_HUD_OUTLINES);
+		stage.setDebugAll(DebugSettings.DISPLAY_USER_INTERFACE_OUTLINES);
 		return stage;
 	}
 
 	@Override
 	public void mouseMoved(final int screenX, final int screenY) {
-		if (getSystemsCommonData().getMenuTable().isVisible()) return;
 		MapGraph map = getSystemsCommonData().getMap();
 		MapGraphNode newNode = calculateNewNode(screenX, screenY);
 		ModelInstance cursorModelInstance = cursorHandler.getCursorModelInstance();
@@ -371,7 +365,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	public void update(float deltaTime) {
 		super.update(deltaTime);
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		systemsCommonData.getUiStage().act();
+		systemsCommonData.getUiStage().act(deltaTime);
 		cursorHandler.handleCursorFlicker(deltaTime);
 		toolTipHandler.handleToolTip(systemsCommonData.getMap(), cursorHandler.getCursorNode());
 	}
@@ -391,8 +385,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		getSystemsCommonData().setCursor(createAndAdd3dCursor());
 		cursorHandler = new CursorHandler(getSystemsCommonData());
 		cursorHandler.init();
-		menuHandler = new MenuHandlerImpl(getSystemsCommonData(), getSubscribers(), getAssetsManager());
-		menuHandler.init(addTable(), getAssetsManager(), getSystemsCommonData());
 		toolTipHandler = new ToolTipHandler(getSystemsCommonData().getUiStage());
 		toolTipHandler.addToolTipTable();
 	}
@@ -423,19 +415,9 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		}
 	}
 
-	@Override
-	public void keyDown(int keycode) {
-		if (keycode == Input.Keys.ESCAPE) {
-			Table menuTable = getSystemsCommonData().getMenuTable();
-			menuHandler.toggleMenu(!menuTable.isVisible());
-		}
-	}
-
 	private boolean isTouchDisabled( ) {
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		return systemsCommonData.isCameraIsRotating()
-				|| systemsCommonData.getUiStage().hasOpenWindows()
-				|| systemsCommonData.getMenuTable().isVisible();
+		return systemsCommonData.isCameraIsRotating() || systemsCommonData.getUiStage().hasOpenWindows();
 	}
 
 	private void onUserSelectedNodeToApplyTurn( ) {

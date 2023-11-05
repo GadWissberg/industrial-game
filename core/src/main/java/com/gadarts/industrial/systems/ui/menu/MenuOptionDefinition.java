@@ -7,7 +7,4 @@ public interface MenuOptionDefinition {
 
 	MenuOptionDefinition[] getSubOptions();
 
-	default MenuOptionValidation getValidation() {
-		return player -> true;
-	}
 }
