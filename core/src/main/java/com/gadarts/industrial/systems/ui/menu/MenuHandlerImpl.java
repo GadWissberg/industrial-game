@@ -25,6 +25,8 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 		this.assetsManager = assetsManager;
 		this.soundPlayer = soundPlayer;
 		stage = new Stage();
+		Image backgroundImage = new Image(assetsManager.getTexture(Assets.UiTextures.MENU_BACKGROUND));
+		stage.addActor(backgroundImage);
 		stage.setDebugAll(DebugSettings.DISPLAY_USER_INTERFACE_OUTLINES);
 		Image logo = new Image(assetsManager.getTexture(Assets.UiTextures.LOGO));
 		menuTable = new Table();
@@ -32,7 +34,6 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 		menuTable.setSize(stage.getWidth(), stage.getHeight());
 		applyMenuOptions(MainMenuOptions.values(), assetsManager);
 		stage.addActor(menuTable);
-//		menuTable.setPosition(stage.getWidth() / 2F, stage.getHeight() / 2F);
 	}
 
 	@Override
