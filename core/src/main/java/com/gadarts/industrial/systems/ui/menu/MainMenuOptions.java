@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum MainMenuOptions implements MenuOptionDefinition {
-	CONTINUE("Continue", (menuHandler) -> {
-	}),
 	NEW("New Game", NewGameMenuOptions.values()),
 	LOAD("Load Game"),
 	SAVE("Save Game"),
@@ -16,6 +14,7 @@ public enum MainMenuOptions implements MenuOptionDefinition {
 	INFO("Info"),
 	QUIT("Quit", (menuHandler) -> Gdx.app.exit());
 
+	static final String MAIN_MENU_NAME = "main_menu";
 	private final String label;
 	private final MenuOptionAction action;
 	private final MenuOptionDefinition[] subOptions;
@@ -31,5 +30,10 @@ public enum MainMenuOptions implements MenuOptionDefinition {
 
 	MainMenuOptions(final String label, final NewGameMenuOptions[] subOptions) {
 		this(label, null, subOptions);
+	}
+
+	@Override
+	public String getMenuName( ) {
+		return MAIN_MENU_NAME;
 	}
 }

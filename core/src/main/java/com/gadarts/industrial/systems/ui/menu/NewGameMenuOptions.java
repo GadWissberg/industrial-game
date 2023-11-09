@@ -20,4 +20,9 @@ public enum NewGameMenuOptions implements MenuOptionDefinition {
 	public MenuOptionDefinition[] getSubOptions( ) {
 		return null;
 	}
+
+	@Override
+	public String getMenuName( ) {
+		return "new_game";
+	}
 }

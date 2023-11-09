@@ -59,11 +59,7 @@ void main()
     vec2 crtUv = crtCoords(v_texCoords, 2.);
     float s1 = scanline(crtUv, 300., -0.00000001);
     float s2 = scanline(crtUv, 400., -0.00000002);
-    vec4 textureColor = vec4(0.0);
-    textureColor.r = texture2D(u_texture, crtUv + vec2(0., 0.01)).r;
-    textureColor.g = texture2D(u_texture, crtUv).g;
-    textureColor.b = texture2D(u_texture, crtUv + vec2(0., -0.01)).b;
-    textureColor.a = texture2D(u_texture, crtUv).a;
+    vec4 textureColor=texture2D(u_texture, crtUv);
     vec4 color = mix(textureColor, vec4(s1+s2), 0.01);
     gl_FragColor = mix(color, vec4(noise(v_texCoords * 75.)), 0.02) * vignette(v_texCoords, 1.9, .6, 8.);
 }

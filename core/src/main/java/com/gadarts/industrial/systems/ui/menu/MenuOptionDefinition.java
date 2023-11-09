@@ -1,10 +1,12 @@
 package com.gadarts.industrial.systems.ui.menu;
 
 public interface MenuOptionDefinition {
-	String getLabel();
+	String getLabel( );
 
-	MenuOptionAction getAction();
+	MenuOptionAction getAction( );
 
-	MenuOptionDefinition[] getSubOptions();
+	MenuOptionDefinition[] getSubOptions( );
+
+	String getMenuName( );
 
 }

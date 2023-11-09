@@ -37,11 +37,11 @@ public class TerrorEffector extends Game {
 		this.versionNumber = versionNumber;
 	}
 
-	private static String formatNameForVariation(Direction dir,
-												 String sprTypeName,
-												 int vars,
-												 int variationIndex,
-												 boolean singleDirection) {
+	private String formatNameForVariation(Direction dir,
+										  String sprTypeName,
+										  int vars,
+										  int variationIndex,
+										  boolean singleDirection) {
 		return String.format("%s%s%s",
 				sprTypeName,
 				vars > 1 ? "_" + variationIndex : "",
@@ -50,6 +50,7 @@ public class TerrorEffector extends Game {
 
 	@Override
 	public void create( ) {
+		Gdx.input.setCursorCatched(true);
 		if (DebugSettings.FULL_SCREEN) {
 			Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 		} else {
