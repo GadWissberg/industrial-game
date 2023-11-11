@@ -247,7 +247,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 				SystemsCommonData commonData = getSystemsCommonData();
 				inventoryButton.clearActions();
 				commonData.getUiStage().openStorageWindow(assetsManager, commonData, subscribers);
-				getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.UI_CLICK);
+				getSystemsCommonData().getSoundPlayer().playSound(Assets.Sounds.MENU_CLICK);
 			}
 		});
 	}

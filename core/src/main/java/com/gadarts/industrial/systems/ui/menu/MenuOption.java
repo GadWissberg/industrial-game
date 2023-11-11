@@ -31,6 +31,7 @@ public class MenuOption extends Label {
 							  final Actor fromActor) {
 				super.enter(event, x, y, pointer, fromActor);
 				getStyle().fontColor = FONT_COLOR_HOVER;
+				soundPlayer.playSound(Assets.Sounds.MENU_HOVER);
 			}
 
 			@Override
@@ -44,7 +45,7 @@ public class MenuOption extends Label {
 						menuHandler.applyMenuOptions(subOptions, true);
 					}
 				}
-				soundPlayer.playSound(Assets.Sounds.UI_CLICK);
+				soundPlayer.playSound(Assets.Sounds.MENU_CLICK);
 			}
 
 			@Override

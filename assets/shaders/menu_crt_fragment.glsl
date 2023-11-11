@@ -5,6 +5,8 @@ precision mediump float;
 uniform sampler2D u_texture;
 uniform int u_time;
 uniform mat4 u_projTrans;
+uniform float u_crtBend;
+uniform float u_noise;
 
 varying vec2 v_texCoords;
 varying vec4 v_color;
@@ -56,10 +58,10 @@ float scanline(vec2 uv, float lines, float speed)
 
 void main()
 {
-    vec2 crtUv = crtCoords(v_texCoords, 2.);
+    vec2 crtUv = crtCoords(v_texCoords, u_crtBend);
     float s1 = scanline(crtUv, 300., -0.00000001);
     float s2 = scanline(crtUv, 400., -0.00000002);
     vec4 textureColor=texture2D(u_texture, crtUv);
     vec4 color = mix(textureColor, vec4(s1+s2), 0.01);
-    gl_FragColor = mix(color, vec4(noise(v_texCoords * 75.)), 0.02) * vignette(v_texCoords, 1.9, .6, 8.);
+    gl_FragColor = mix(color, vec4(noise(v_texCoords * 75.)), u_noise) * vignette(v_texCoords, 1.9, .6, 8.);
 }
