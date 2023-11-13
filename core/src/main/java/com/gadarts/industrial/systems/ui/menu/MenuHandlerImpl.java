@@ -42,7 +42,7 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 	private int uniformLocationNoise;
 	private float crtIntroEffectProgress;
 
-	public MenuHandlerImpl(GameAssetManager assetsManager, SoundPlayer soundPlayer) {
+	public MenuHandlerImpl(GameAssetManager assetsManager, SoundPlayer soundPlayer, String versionName) {
 		this.assetsManager = assetsManager;
 		this.soundPlayer = soundPlayer;
 		soundPlayer.playSound(Assets.Sounds.INTRO_WHITE_NOISE);
@@ -50,14 +50,14 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 		stage = new Stage();
 		stage.addActor(new Image(assetsManager.getTexture(Assets.UiTextures.MENU_BACKGROUND)));
 		stage.setDebugAll(DebugSettings.DISPLAY_USER_INTERFACE_OUTLINES);
-		createMenu();
+		createMenu(versionName);
 		createCrtEffect();
 		Gdx.input.setInputProcessor(stage);
 		stage.addListener(new InputListener() {
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
 				if (keycode == Input.Keys.ESCAPE && !currentMenu.equals(MainMenuOptions.MAIN_MENU_NAME)) {
-					createMenu();
+					createMenu(versionName);
 					return true;
 				}
 				return false;
@@ -80,7 +80,7 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 		crtEffect.flip(false, true);
 	}
 
-	private void createMenu( ) {
+	private void createMenu(String versionName) {
 		if (menuTable != null) {
 			menuTable.remove();
 		}
@@ -90,6 +90,9 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 		menuTable.setSize(stage.getWidth(), stage.getHeight());
 		this.menuTable = menuTable;
 		applyMenuOptions(MainMenuOptions.values(), false);
+		menuTable.add(new Label(versionName, new Label.LabelStyle(assetsManager.getFont(Assets.Fonts.CONSOLA), FONT_COLOR_REGULAR)))
+				.left()
+				.row();
 		stage.addActor(menuTable);
 	}
 
@@ -99,8 +102,8 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 			menuTable.clear();
 		}
 		currentMenu = options[0].getMenuName();
-		BitmapFont smallFont = assetsManager.getFont(Assets.Fonts.ARIAL_MT_BOLD_SMALL);
-		Label.LabelStyle style = new Label.LabelStyle(smallFont, MenuOption.FONT_COLOR_REGULAR);
+		BitmapFont smallFont = assetsManager.getFont(Assets.Fonts.MENU);
+		Label.LabelStyle style = new Label.LabelStyle(smallFont, FONT_COLOR_REGULAR);
 		Arrays.stream(options).forEach(o -> menuTable.add(new MenuOption(o, style, soundPlayer, this)).row());
 	}
 
@@ -125,7 +128,7 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 	private void renderCrtEffect(int fboWidth, int fboHeight) {
 		shaderProgram.bind();
 		if (crtIntroEffectProgress < 1) {
-			shaderProgram.setUniformf(uniformLocationCrtBend, Interpolation.exp10.apply(0F, 2F, crtIntroEffectProgress));
+			shaderProgram.setUniformf(uniformLocationCrtBend, Interpolation.exp10.apply(0F, 3F, crtIntroEffectProgress));
 			shaderProgram.setUniformf(uniformLocationNoise, Interpolation.exp10.apply(1F, 0.02F, crtIntroEffectProgress));
 			crtIntroEffectProgress += 0.01F;
 		}

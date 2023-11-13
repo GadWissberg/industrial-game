@@ -60,7 +60,7 @@ public class TerrorEffector extends Game {
 		Gdx.app.setLogLevel(DebugSettings.LOG_LEVEL);
 		initializeAssets();
 		soundPlayer = new SoundPlayer(assetsManager);
-		setScreen(new MenuScreen(assetsManager, soundPlayer));
+		setScreen(new MenuScreen(assetsManager, soundPlayer, versionName));
 	}
 
 	private void generateModelsBoundingBoxes( ) {

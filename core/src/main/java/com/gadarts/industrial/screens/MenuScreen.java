@@ -11,12 +11,13 @@ import lombok.RequiredArgsConstructor;
 public class MenuScreen implements Screen {
 	private final GameAssetManager assetsManager;
 	private final SoundPlayer soundPlayer;
+	private final String versionName;
 	private MenuHandler menuHandler;
 
 
 	@Override
 	public void show( ) {
-		menuHandler = new MenuHandlerImpl(assetsManager, soundPlayer);
+		menuHandler = new MenuHandlerImpl(assetsManager, soundPlayer, versionName);
 	}
 
 	@Override

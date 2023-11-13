@@ -1,6 +1,5 @@
 package com.gadarts.industrial.systems.ui.menu;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -9,9 +8,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.shared.assets.Assets;
 
+import static com.gadarts.industrial.systems.ui.menu.MenuHandler.FONT_COLOR_HOVER;
+import static com.gadarts.industrial.systems.ui.menu.MenuHandler.FONT_COLOR_REGULAR;
+
 public class MenuOption extends Label {
-	static final Color FONT_COLOR_REGULAR = Color.RED;
-	private static final Color FONT_COLOR_HOVER = Color.YELLOW;
 
 	public MenuOption(MenuOptionDefinition definition,
 					  LabelStyle optionStyle,
