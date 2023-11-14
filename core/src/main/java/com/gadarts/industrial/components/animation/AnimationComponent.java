@@ -18,7 +18,9 @@ public class AnimationComponent implements GameComponent {
 
 	@Override
 	public void reset( ) {
-		animation.setPlayMode(Animation.PlayMode.NORMAL);
+		if (animation != null) {
+			animation.setPlayMode(Animation.PlayMode.NORMAL);
+		}
 		stateTime = 0;
 	}
 

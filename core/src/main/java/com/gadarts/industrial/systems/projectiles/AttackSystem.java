@@ -13,7 +13,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gadarts.industrial.DebugSettings;
-import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.components.BulletComponent;
 import com.gadarts.industrial.components.ComponentsMapper;
@@ -26,6 +25,7 @@ import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
+import com.gadarts.industrial.screens.GameLifeCycleManager;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.characters.CharacterDeclaration;
@@ -61,9 +61,8 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 	private ImmutableArray<Entity> bullets;
 	private ImmutableArray<Entity> collidables;
 
-	public AttackSystem(GameAssetManager assetsManager,
-						GameLifeCycleHandler lifeCycleHandler) {
-		super(assetsManager, lifeCycleHandler);
+	public AttackSystem(GameAssetManager assetsManager, GameLifeCycleManager gameLifeCycleManager) {
+		super(assetsManager, gameLifeCycleManager);
 	}
 
 	private Vector3 transformBulletModel(Entity character,

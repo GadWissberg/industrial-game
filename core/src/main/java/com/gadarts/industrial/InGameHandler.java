@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.gadarts.industrial.console.Console;
 import com.gadarts.industrial.console.ConsoleImpl;
 import com.gadarts.industrial.map.MapBuilder;
+import com.gadarts.industrial.screens.GameLifeCycleManager;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.systems.*;
 import com.gadarts.industrial.systems.ui.UserInterfaceSystemEventsSubscriber;
@@ -23,10 +24,7 @@ import java.util.Optional;
 
 
 @RequiredArgsConstructor
-public class GeneralHandler implements
-		GameLifeCycleHandler,
-		Disposable,
-		UserInterfaceSystemEventsSubscriber {
+public class InGameHandler implements Disposable, UserInterfaceSystemEventsSubscriber {
 	private final Map<
 			Class<? extends SystemEventsSubscriber>,
 			GameSystem<? extends SystemEventsSubscriber>> subscribersInterfaces = new HashMap<>();
@@ -38,9 +36,7 @@ public class GeneralHandler implements
 	@Getter
 	private MapBuilder mapBuilder;
 	private SystemsCommonData systemsCommonData;
-	private boolean inGame;
 	private Console console;
-	private boolean restartGame;
 
 	public void createAndSetMap(String mapName) {
 		if (mapBuilder == null) {
@@ -51,48 +47,29 @@ public class GeneralHandler implements
 		systemsCommonData.setMap(mapBuilder.inflateTestMap(mapName));
 	}
 
-	public void resetSystems( ) {
+	public void resetSystems(GameLifeCycleManager gameLifeCycleManager) {
 		engine.getSystems().forEach(system -> ((GameSystem<? extends SystemEventsSubscriber>) system).reset());
-		initializeSystems();
+		initializeSystems(gameLifeCycleManager);
 	}
 
-	public void startNewGame(String mapName) {
+	public void startNewGame(String mapName, GameLifeCycleManager gameLifeCycleManager) {
 		createAndSetEngine();
-		inGame = true;
 		initializeSystemsCommonData(mapName);
-		resetSystems();
+		resetSystems(gameLifeCycleManager);
 		createConsole();
 	}
 
-	@Override
-	public void onNewGameSelectedInMenu( ) {
-		startNewGame(DebugSettings.TEST_LEVEL);
-	}
-
-	public void init( ) {
+	public void init(GameLifeCycleManager gameLifeCycleManager) {
 		createAndSetEngine();
 		initializeSystemsCommonData(DebugSettings.TEST_LEVEL);
-		initializeSystems();
+		initializeSystems(gameLifeCycleManager);
 		createConsole();
 	}
 
 	public void update(float delta) {
-		if (restartGame) {
-			restartGame = false;
-			onNewGameSelectedInMenu();
-		}
 		engine.update(delta);
 	}
 
-	@Override
-	public boolean isInGame( ) {
-		return inGame;
-	}
-
-	@Override
-	public void raiseFlagToRestartGame( ) {
-		restartGame = true;
-	}
 
 	@Override
 	public void dispose( ) {
@@ -102,12 +79,11 @@ public class GeneralHandler implements
 		systemsCommonData.dispose();
 	}
 
-	private void addSystems( ) {
+	@SuppressWarnings("CallToPrintStackTrace")
+	private void addSystems(GameLifeCycleManager gameLifeCycleManager) {
 		Arrays.stream(Systems.values()).forEach(systemDefinition -> {
 			try {
-				Object system = systemDefinition.getSystemClass().getConstructors()[0].newInstance(
-						assetsManager,
-						this);
+				Object system = systemDefinition.getSystemClass().getConstructors()[0].newInstance(assetsManager, gameLifeCycleManager);
 				engine.addSystem((GameSystem<? extends SystemEventsSubscriber>) system);
 			} catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
 				e.printStackTrace();
@@ -138,9 +114,9 @@ public class GeneralHandler implements
 
 
 	@SuppressWarnings("unchecked")
-	private void initializeSystems( ) {
+	private void initializeSystems(GameLifeCycleManager gameLifeCycleManager) {
 		if (engine.getSystems().size() == 0) {
-			addSystems();
+			addSystems(gameLifeCycleManager);
 		}
 		ImmutableArray<EntitySystem> systems = engine.getSystems();
 		systems.forEach(system -> ((GameSystem<? extends SystemEventsSubscriber>) system).onSystemReset(systemsCommonData));

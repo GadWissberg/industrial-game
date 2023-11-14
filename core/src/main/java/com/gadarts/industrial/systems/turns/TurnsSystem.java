@@ -2,9 +2,9 @@ package com.gadarts.industrial.systems.turns;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.utils.Queue;
-import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent.DoorStates;
+import com.gadarts.industrial.screens.GameLifeCycleManager;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
@@ -22,9 +22,8 @@ public class TurnsSystem extends GameSystem<TurnsSystemEventsSubscriber> impleme
 	private boolean currentTurnDone;
 
 
-	public TurnsSystem(GameAssetManager assetsManager,
-					   GameLifeCycleHandler lifeCycleHandler) {
-		super(assetsManager, lifeCycleHandler);
+	public TurnsSystem(GameAssetManager assetsManager, GameLifeCycleManager gameLifeCycleManager) {
+		super(assetsManager, gameLifeCycleManager);
 	}
 
 	private void decideToRemoveOrAddLast(Queue<Entity> turnsQueue, Entity entity) {

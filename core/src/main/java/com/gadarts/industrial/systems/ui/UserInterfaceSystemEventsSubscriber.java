@@ -5,10 +5,6 @@ import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.systems.SystemEventsSubscriber;
 
 public interface UserInterfaceSystemEventsSubscriber extends SystemEventsSubscriber {
-	default void onMenuToggled(boolean active) {
-
-	}
-
 	default void onSelectedWeaponChanged(Weapon selectedWeapon) {
 
 	}
@@ -17,11 +13,7 @@ public interface UserInterfaceSystemEventsSubscriber extends SystemEventsSubscri
 
 	}
 
-	default void onNewGameSelectedInMenu( ) {
-
-	}
-
-	default void onUserLeftClickedThePlayer(MapGraphNode protagonistNode) {
+	default void onUserLeftClickedThePlayer() {
 
 	}
 

@@ -2,30 +2,27 @@ package com.gadarts.industrial.systems;
 
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.utils.Disposable;
-import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.console.ConsoleEventsSubscriber;
+import com.gadarts.industrial.screens.GameLifeCycleManager;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter(AccessLevel.PROTECTED)
+@RequiredArgsConstructor
 public abstract class GameSystem<T extends SystemEventsSubscriber> extends EntitySystem implements
 		Disposable,
 		EventsNotifier<T>,
 		ConsoleEventsSubscriber {
 	protected final List<T> subscribers = new ArrayList<>();
 	private final GameAssetManager assetsManager;
-	private final GameLifeCycleHandler lifeCycleHandler;
+	private final GameLifeCycleManager gameLifeCycleManager;
 	private SystemsCommonData systemsCommonData;
 
-	protected GameSystem(GameAssetManager assetsManager,
-						 GameLifeCycleHandler lifeCycleHandler) {
-		this.assetsManager = assetsManager;
-		this.lifeCycleHandler = lifeCycleHandler;
-	}
 
 	public void reset( ) {
 

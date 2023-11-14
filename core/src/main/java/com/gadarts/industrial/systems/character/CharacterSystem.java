@@ -15,7 +15,6 @@ import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.Queue;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.DebugSettings;
-import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.BulletComponent;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.animation.AnimationComponent;
@@ -24,6 +23,7 @@ import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.map.MapGraphPath;
+import com.gadarts.industrial.screens.GameLifeCycleManager;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.Assets.Sounds;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
@@ -75,9 +75,8 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 	private Map<SurfaceType, Sounds> surfaceTypeToStepSound;
 	private ImmutableArray<Entity> livingBullets;
 
-	public CharacterSystem(GameAssetManager assetsManager,
-						   GameLifeCycleHandler lifeCycleHandler) {
-		super(assetsManager, lifeCycleHandler);
+	public CharacterSystem(GameAssetManager assetsManager, GameLifeCycleManager gameLifeCycleManager) {
+		super(assetsManager, gameLifeCycleManager);
 	}
 
 	@Override

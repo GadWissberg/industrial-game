@@ -11,7 +11,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.Queue;
 import com.gadarts.industrial.DebugSettings;
-import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
 import com.gadarts.industrial.components.EnvironmentObjectComponent;
@@ -27,6 +26,7 @@ import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.components.player.Weapon;
 import com.gadarts.industrial.components.player.WeaponAmmo;
 import com.gadarts.industrial.map.*;
+import com.gadarts.industrial.screens.GameLifeCycleManager;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponDeclaration;
@@ -80,9 +80,8 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	private PathPlanHandler playerPathPlanner;
 	private ImmutableArray<Entity> ambObjects;
 
-	public PlayerSystem(GameAssetManager assetsManager,
-						GameLifeCycleHandler lifeCycleHandler) {
-		super(assetsManager, lifeCycleHandler);
+	public PlayerSystem(GameAssetManager assetsManager, GameLifeCycleManager gameLifeCycleManager) {
+		super(assetsManager, gameLifeCycleManager);
 	}
 
 	@Override
@@ -142,7 +141,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	public void onCharacterNodeChanged(Entity entity, MapGraphNode oldNode, MapGraphNode newNode) {
 		if (ComponentsMapper.player.has(entity)) {
 			if (ComponentsMapper.trigger.has(newNode.getEntity())) {
-				getLifeCycleHandler().raiseFlagToRestartGame();
+				//getLifeCycleHandler().raiseFlagToRestartGame();
 			} else {
 				refreshFogOfWar();
 			}

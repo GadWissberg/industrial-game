@@ -11,9 +11,7 @@ public enum NewGameMenuOptions implements MenuOptionDefinition {
 
 	@Override
 	public MenuOptionAction getAction( ) {
-		return menuHandler -> {
-
-		};
+		return (menuHandler, gameLifeCycleManager) -> gameLifeCycleManager.startNewGame(name());
 	}
 
 	@Override

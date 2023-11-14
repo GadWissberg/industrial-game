@@ -7,10 +7,10 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
-import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
+import com.gadarts.industrial.screens.GameLifeCycleManager;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
 import com.gadarts.industrial.systems.input.InputSystemEventsSubscriber;
@@ -21,9 +21,8 @@ public class PickupSystem extends GameSystem<SystemEventsSubscriber> implements 
 	private final float[] hsvArray = new float[3];
 	private ImmutableArray<Entity> pickupEntities;
 
-	public PickupSystem(GameAssetManager assetsManager,
-						GameLifeCycleHandler lifeCycleHandler) {
-		super(assetsManager, lifeCycleHandler);
+	public PickupSystem(GameAssetManager assetsManager, GameLifeCycleManager gameLifeCycleManager) {
+		super(assetsManager, gameLifeCycleManager);
 	}
 
 	@Override

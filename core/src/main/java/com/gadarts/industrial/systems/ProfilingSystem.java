@@ -11,13 +11,13 @@ import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.StringBuilder;
 import com.gadarts.industrial.DebugSettings;
-import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.console.commands.ConsoleCommandParameter;
 import com.gadarts.industrial.console.commands.ConsoleCommandResult;
 import com.gadarts.industrial.console.commands.ConsoleCommands;
 import com.gadarts.industrial.console.commands.ConsoleCommandsList;
 import com.gadarts.industrial.console.commands.types.ProfilerCommand;
+import com.gadarts.industrial.screens.GameLifeCycleManager;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 
 public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
@@ -40,9 +40,8 @@ public class ProfilingSystem extends GameSystem<SystemEventsSubscriber> {
 	private ImmutableArray<Entity> modelInstanceEntities;
 	private BitmapFont font;
 
-	public ProfilingSystem(GameAssetManager assetsManager,
-						   GameLifeCycleHandler lifeCycleHandler) {
-		super(assetsManager, lifeCycleHandler);
+	public ProfilingSystem(GameAssetManager assetsManager, GameLifeCycleManager gameLifeCycleManager) {
+		super(assetsManager, gameLifeCycleManager);
 		glProfiler = new GLProfiler(Gdx.graphics);
 		stringBuilder = new StringBuilder();
 		setGlProfiler();

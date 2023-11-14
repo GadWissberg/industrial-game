@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.SoundPlayer;
+import com.gadarts.industrial.screens.GameLifeCycleManager;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 
@@ -42,7 +43,10 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 	private int uniformLocationNoise;
 	private float crtIntroEffectProgress;
 
-	public MenuHandlerImpl(GameAssetManager assetsManager, SoundPlayer soundPlayer, String versionName) {
+	public MenuHandlerImpl(GameAssetManager assetsManager,
+						   SoundPlayer soundPlayer,
+						   String versionName,
+						   GameLifeCycleManager gameLifeCycleManager) {
 		this.assetsManager = assetsManager;
 		this.soundPlayer = soundPlayer;
 		soundPlayer.playSound(Assets.Sounds.INTRO_WHITE_NOISE);
@@ -50,14 +54,14 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 		stage = new Stage();
 		stage.addActor(new Image(assetsManager.getTexture(Assets.UiTextures.MENU_BACKGROUND)));
 		stage.setDebugAll(DebugSettings.DISPLAY_USER_INTERFACE_OUTLINES);
-		createMenu(versionName);
+		createMenu(versionName, gameLifeCycleManager);
 		createCrtEffect();
 		Gdx.input.setInputProcessor(stage);
 		stage.addListener(new InputListener() {
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
 				if (keycode == Input.Keys.ESCAPE && !currentMenu.equals(MainMenuOptions.MAIN_MENU_NAME)) {
-					createMenu(versionName);
+					createMenu(versionName, gameLifeCycleManager);
 					return true;
 				}
 				return false;
@@ -80,7 +84,7 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 		crtEffect.flip(false, true);
 	}
 
-	private void createMenu(String versionName) {
+	private void createMenu(String versionName, GameLifeCycleManager gameLifeCycleManager) {
 		if (menuTable != null) {
 			menuTable.remove();
 		}
@@ -89,22 +93,28 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 		menuTable.add(new Image(assetsManager.getTexture(Assets.UiTextures.LOGO))).row();
 		menuTable.setSize(stage.getWidth(), stage.getHeight());
 		this.menuTable = menuTable;
-		applyMenuOptions(MainMenuOptions.values(), false);
+		applyMenuOptions(MainMenuOptions.values(), false, gameLifeCycleManager);
 		menuTable.add(new Label(versionName, new Label.LabelStyle(assetsManager.getFont(Assets.Fonts.CONSOLA), FONT_COLOR_REGULAR)))
 				.left()
 				.row();
 		stage.addActor(menuTable);
 	}
 
+
 	@Override
-	public void applyMenuOptions(MenuOptionDefinition[] options, boolean clearTableBefore) {
+	public void applyMenuOptions(MenuOptionDefinition[] options, boolean clearTableBefore, GameLifeCycleManager gameLifeCycleManager) {
 		if (clearTableBefore) {
 			menuTable.clear();
 		}
 		currentMenu = options[0].getMenuName();
 		BitmapFont smallFont = assetsManager.getFont(Assets.Fonts.MENU);
 		Label.LabelStyle style = new Label.LabelStyle(smallFont, FONT_COLOR_REGULAR);
-		Arrays.stream(options).forEach(o -> menuTable.add(new MenuOption(o, style, soundPlayer, this)).row());
+		Arrays.stream(options).forEach(o -> menuTable.add(new MenuOption(
+				o,
+				style,
+				soundPlayer,
+				this,
+				gameLifeCycleManager)).row());
 	}
 
 	@Override
@@ -124,6 +134,7 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 		renderCrtEffect(fboWidth, fboHeight);
 		stage.getBatch().setShader(null);
 	}
+
 
 	private void renderCrtEffect(int fboWidth, int fboHeight) {
 		shaderProgram.bind();

@@ -16,13 +16,13 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.FlyingParticleComponent;
 import com.gadarts.industrial.components.ParticleEffectComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.mi.ModelInstanceComponent;
 import com.gadarts.industrial.map.MapGraphNode;
+import com.gadarts.industrial.screens.GameLifeCycleManager;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 
 import java.util.ArrayList;
@@ -43,9 +43,8 @@ public class ParticleEffectsSystem extends GameSystem<SystemEventsSubscriber> {
 	private ImmutableArray<Entity> particleEffectsEntities;
 	private ImmutableArray<Entity> flyingParticlesEntities;
 
-	public ParticleEffectsSystem(GameAssetManager assetsManager,
-								 GameLifeCycleHandler lifeCycleHandler) {
-		super(assetsManager, lifeCycleHandler);
+	public ParticleEffectsSystem(GameAssetManager assetsManager, GameLifeCycleManager gameLifeCycleManager) {
+		super(assetsManager, gameLifeCycleManager);
 		pointSpriteBatch = new PointSpriteParticleBatch();
 		billboardParticleBatch = new BillboardParticleBatch();
 		billboardParticleBatch.getBlendingAttribute().sourceFunction = GL20.GL_SRC_ALPHA;

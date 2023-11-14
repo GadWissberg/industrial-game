@@ -18,7 +18,6 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.AppendixModelInstanceComponent;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.LightComponent;
@@ -43,6 +42,7 @@ import com.gadarts.industrial.console.commands.ConsoleCommands;
 import com.gadarts.industrial.console.commands.ConsoleCommandsList;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
+import com.gadarts.industrial.screens.GameLifeCycleManager;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
@@ -93,8 +93,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private GameEnvironment environment;
 	private boolean frustumCull = !DISABLE_FRUSTUM_CULLING;
 
-	public RenderSystem(GameAssetManager assetsManager, GameLifeCycleHandler lifeCycleHandler) {
-		super(assetsManager, lifeCycleHandler);
+	public RenderSystem(GameAssetManager assetsManager, GameLifeCycleManager gameLifeCycleManager) {
+		super(assetsManager, gameLifeCycleManager);
 	}
 
 

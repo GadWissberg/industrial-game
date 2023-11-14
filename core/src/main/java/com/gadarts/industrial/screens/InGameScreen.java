@@ -1,14 +1,15 @@
 package com.gadarts.industrial.screens;
 
 import com.badlogic.gdx.Screen;
-import com.gadarts.industrial.GeneralHandler;
+import com.gadarts.industrial.InGameHandler;
 
 public class InGameScreen implements Screen {
-	private final GeneralHandler generalHandler;
+	private final InGameHandler inGameHandler;
 
-	public InGameScreen(GeneralHandler generalHandler) {
-		this.generalHandler = generalHandler;
-		generalHandler.init();
+	public InGameScreen(InGameHandler inGameHandler, String mapName, GameLifeCycleManager gameLifeCycleManager) {
+		this.inGameHandler = inGameHandler;
+		inGameHandler.init(gameLifeCycleManager);
+		inGameHandler.startNewGame(mapName, gameLifeCycleManager);
 	}
 
 	@Override
@@ -18,7 +19,7 @@ public class InGameScreen implements Screen {
 
 	@Override
 	public void render(float delta) {
-		generalHandler.update(delta);
+		inGameHandler.update(delta);
 	}
 
 	@Override
@@ -43,6 +44,6 @@ public class InGameScreen implements Screen {
 
 	@Override
 	public void dispose( ) {
-		generalHandler.dispose();
+		inGameHandler.dispose();
 	}
 }

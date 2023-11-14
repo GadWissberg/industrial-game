@@ -12,12 +12,13 @@ public class MenuScreen implements Screen {
 	private final GameAssetManager assetsManager;
 	private final SoundPlayer soundPlayer;
 	private final String versionName;
+	private final GameLifeCycleManager gameLifeCycleManager;
 	private MenuHandler menuHandler;
 
 
 	@Override
 	public void show( ) {
-		menuHandler = new MenuHandlerImpl(assetsManager, soundPlayer, versionName);
+		menuHandler = new MenuHandlerImpl(assetsManager, soundPlayer, versionName, gameLifeCycleManager);
 	}
 
 	@Override

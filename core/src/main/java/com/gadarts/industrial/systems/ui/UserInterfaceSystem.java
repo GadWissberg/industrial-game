@@ -21,7 +21,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Queue;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.gadarts.industrial.DebugSettings;
-import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
@@ -32,6 +31,7 @@ import com.gadarts.industrial.console.commands.ConsoleCommands;
 import com.gadarts.industrial.console.commands.ConsoleCommandsList;
 import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
+import com.gadarts.industrial.screens.GameLifeCycleManager;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.Assets.Fonts;
 import com.gadarts.industrial.shared.assets.Assets.UiTextures;
@@ -64,6 +64,7 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 
 import static com.badlogic.gdx.Application.LOG_DEBUG;
+import static com.badlogic.gdx.Input.Keys.ESCAPE;
 import static com.gadarts.industrial.DebugSettings.FULL_SCREEN;
 import static com.gadarts.industrial.TerrorEffector.*;
 import static com.gadarts.industrial.shared.assets.Assets.Declarations.ENEMIES;
@@ -86,9 +87,15 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private TurnsIndicatorsHandler turnsIndicatorsHandler;
 	private NoiseEffectHandler noiseEffectHandler;
 
-	public UserInterfaceSystem(GameAssetManager assetsManager,
-							   GameLifeCycleHandler lifeCycleHandler) {
-		super(assetsManager, lifeCycleHandler);
+	public UserInterfaceSystem(GameAssetManager assetsManager, GameLifeCycleManager gameLifeCycleManager) {
+		super(assetsManager, gameLifeCycleManager);
+	}
+
+	@Override
+	public void keyDown(int keycode) {
+		if (keycode == ESCAPE) {
+			getGameLifeCycleManager().pauseGame();
+		}
 	}
 
 	@Override
@@ -401,7 +408,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 			Vector3 playerPosition = ComponentsMapper.characterDecal.get(data.getPlayer()).getDecal().getPosition();
 			if (node.equals(data.getMap().getNode(playerPosition))) {
 				for (UserInterfaceSystemEventsSubscriber sub : subscribers) {
-					sub.onUserLeftClickedThePlayer(node);
+					sub.onUserLeftClickedThePlayer();
 				}
 			} else {
 				Entity nodeEntity = node.getEntity();

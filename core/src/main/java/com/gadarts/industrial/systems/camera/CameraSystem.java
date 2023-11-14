@@ -4,14 +4,13 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.gadarts.industrial.GameLifeCycleHandler;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.map.MapGraph;
+import com.gadarts.industrial.screens.GameLifeCycleManager;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.utils.CameraUtils;
 import com.gadarts.industrial.shared.utils.GeneralUtils;
@@ -30,14 +29,12 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 	private static final Vector3 auxVector3_1 = new Vector3();
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final Vector3 auxVector3_3 = new Vector3();
-	private static final float MENU_CAMERA_ROTATION = 0.1F;
 	private static final Vector2 auxVector2_1 = new Vector2();
 	private final Vector2 lastMousePosition = new Vector2();
 	private final Vector2 lastRightPressMousePosition = new Vector2();
 
-	public CameraSystem(GameAssetManager assetsManager,
-						GameLifeCycleHandler lifeCycleHandler) {
-		super(assetsManager, lifeCycleHandler);
+	public CameraSystem(GameAssetManager assetsManager, GameLifeCycleManager gameLifeCycleManager) {
+		super(assetsManager, gameLifeCycleManager);
 	}
 
 	@Override
@@ -58,15 +55,7 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 		if (!getSystemsCommonData().getUiStage().hasOpenWindows() && !getSystemsCommonData().isCameraIsRotating()) {
 			handleCameraFollow();
 		}
-		handleMenuRotation();
 		systemsCommonData.getCamera().update();
-	}
-
-	private void handleMenuRotation( ) {
-		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		Entity player = systemsCommonData.getPlayer();
-		Decal decal = ComponentsMapper.characterDecal.get(player).getDecal();
-		systemsCommonData.getCamera().rotateAround(decal.getPosition(), Vector3.Y, MENU_CAMERA_ROTATION);
 	}
 
 	private void handleCameraFollow( ) {

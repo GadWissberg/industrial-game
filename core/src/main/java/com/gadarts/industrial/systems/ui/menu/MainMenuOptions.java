@@ -12,7 +12,7 @@ public enum MainMenuOptions implements MenuOptionDefinition {
 	SAVE("Save Game"),
 	OPTIONS("Options"),
 	INFO("Info"),
-	QUIT("Quit", (menuHandler) -> Gdx.app.exit());
+	QUIT("Quit", (menuHandler, gameLifeCycleManager) -> Gdx.app.exit());
 
 	static final String MAIN_MENU_NAME = "main_menu";
 	private final String label;

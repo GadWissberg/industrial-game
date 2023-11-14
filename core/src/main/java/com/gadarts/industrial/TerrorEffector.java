@@ -10,6 +10,8 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.gadarts.industrial.components.character.CharacterAnimation;
 import com.gadarts.industrial.components.character.CharacterAnimations;
+import com.gadarts.industrial.screens.GameLifeCycleManager;
+import com.gadarts.industrial.screens.InGameScreen;
 import com.gadarts.industrial.screens.MenuScreen;
 import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
@@ -19,7 +21,7 @@ import com.gadarts.industrial.shared.model.characters.SpriteType;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-public class TerrorEffector extends Game {
+public class TerrorEffector extends Game implements GameLifeCycleManager {
 
 	public static final int FULL_SCREEN_RESOLUTION_WIDTH = 1920;
 	public static final int FULL_SCREEN_RESOLUTION_HEIGHT = 1080;
@@ -29,7 +31,9 @@ public class TerrorEffector extends Game {
 	private final String versionName;
 	private final int versionNumber;
 	private final GameAssetManager assetsManager;
-	private SoundPlayer soundPlayer;
+	private InGameHandler inGameHandler;
+	private MenuScreen menuScreen;
+	private InGameScreen inGameScreen;
 
 	public TerrorEffector(String versionName, int versionNumber) {
 		assetsManager = new GameAssetManager();
@@ -56,11 +60,12 @@ public class TerrorEffector extends Game {
 		} else {
 			Gdx.graphics.setWindowedMode(WINDOWED_RESOLUTION_WIDTH, WINDOWED_RESOLUTION_HEIGHT);
 		}
-		GeneralHandler generalHandler = new GeneralHandler(versionName, versionNumber, assetsManager, soundPlayer);
 		Gdx.app.setLogLevel(DebugSettings.LOG_LEVEL);
 		initializeAssets();
-		soundPlayer = new SoundPlayer(assetsManager);
-		setScreen(new MenuScreen(assetsManager, soundPlayer, versionName));
+		SoundPlayer soundPlayer = new SoundPlayer(assetsManager);
+		inGameHandler = new InGameHandler(versionName, versionNumber, assetsManager, soundPlayer);
+		menuScreen = new MenuScreen(assetsManager, soundPlayer, versionName, this);
+		setScreen(menuScreen);
 	}
 
 	private void generateModelsBoundingBoxes( ) {
@@ -141,6 +146,7 @@ public class TerrorEffector extends Game {
 		assetsManager.applyRepeatWrapOnAllTextures();
 	}
 
+	@SuppressWarnings("GDXJavaUnsafeIterator")
 	private boolean checkIfAtlasContainsSpriteType(SpriteType spriteType, TextureAtlas atlas) {
 		boolean result = false;
 		for (TextureAtlas.AtlasRegion region : atlas.getRegions()) {
@@ -165,5 +171,29 @@ public class TerrorEffector extends Game {
 	@Override
 	public void dispose( ) {
 		assetsManager.dispose();
+		menuScreen.dispose();
+		if (inGameScreen != null) {
+			inGameScreen.dispose();
+		}
 	}
+
+	@Override
+	public void startNewGame(String mapName) {
+		if (screen == inGameScreen) return;
+
+		Gdx.input.setInputProcessor(null);
+		if (inGameScreen == null) {
+			inGameScreen = new InGameScreen(inGameHandler, mapName, this);
+		}
+		setScreen(inGameScreen);
+	}
+
+	@Override
+	public void pauseGame( ) {
+		if (screen == menuScreen) return;
+
+		Gdx.input.setInputProcessor(null);
+		setScreen(menuScreen);
+	}
+
 }
