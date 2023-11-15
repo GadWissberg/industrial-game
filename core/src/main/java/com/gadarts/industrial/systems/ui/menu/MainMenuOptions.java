@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum MainMenuOptions implements MenuOptionDefinition {
+	CONTINUE("Continue", (menuHandler, gameLifeCycleManager) -> gameLifeCycleManager.resumeGame()),
 	NEW("New Game", NewGameMenuOptions.values()),
 	LOAD("Load Game"),
 	SAVE("Save Game"),

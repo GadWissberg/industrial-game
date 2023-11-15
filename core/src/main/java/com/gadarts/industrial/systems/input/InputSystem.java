@@ -15,18 +15,18 @@ public class InputSystem extends GameSystem<InputSystemEventsSubscriber> impleme
 	}
 
 	@Override
-	public void reset( ) {
-		InputMultiplexer inputMultiplexer = (InputMultiplexer) Gdx.input.getInputProcessor();
-		inputMultiplexer.clear();
-	}
-
-	@Override
 	public Class<InputSystemEventsSubscriber> getEventsSubscriberClass( ) {
 		return InputSystemEventsSubscriber.class;
 	}
 
 	@Override
 	public void initializeData( ) {
+		initializeInputProcessor();
+	}
+
+	@Override
+	public void onGameResume( ) {
+		super.onGameResume();
 		initializeInputProcessor();
 	}
 

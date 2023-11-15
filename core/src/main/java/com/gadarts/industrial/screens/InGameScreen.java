@@ -2,19 +2,26 @@ package com.gadarts.industrial.screens;
 
 import com.badlogic.gdx.Screen;
 import com.gadarts.industrial.InGameHandler;
+import com.gadarts.industrial.SoundPlayer;
+import com.gadarts.industrial.shared.assets.GameAssetManager;
 
 public class InGameScreen implements Screen {
 	private final InGameHandler inGameHandler;
+	private final GameLifeCycleManager gameLifeCycleManager;
 
-	public InGameScreen(InGameHandler inGameHandler, String mapName, GameLifeCycleManager gameLifeCycleManager) {
-		this.inGameHandler = inGameHandler;
+	public InGameScreen(GameLifeCycleManager gameLifeCycleManager,
+						String versionName,
+						int versionNumber,
+						GameAssetManager assetsManager,
+						SoundPlayer soundPlayer) {
+		this.gameLifeCycleManager = gameLifeCycleManager;
+		inGameHandler = new InGameHandler(versionName, versionNumber, assetsManager, soundPlayer);
 		inGameHandler.init(gameLifeCycleManager);
-		inGameHandler.startNewGame(mapName, gameLifeCycleManager);
 	}
 
 	@Override
 	public void show( ) {
-
+		inGameHandler.onInGameScreenShow(gameLifeCycleManager);
 	}
 
 	@Override

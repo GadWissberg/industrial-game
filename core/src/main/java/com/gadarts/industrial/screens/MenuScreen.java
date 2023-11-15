@@ -5,20 +5,20 @@ import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.systems.ui.menu.MenuHandler;
 import com.gadarts.industrial.systems.ui.menu.MenuHandlerImpl;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 public class MenuScreen implements Screen {
-	private final GameAssetManager assetsManager;
-	private final SoundPlayer soundPlayer;
-	private final String versionName;
-	private final GameLifeCycleManager gameLifeCycleManager;
-	private MenuHandler menuHandler;
+	private final MenuHandler menuHandler;
 
+	public MenuScreen(GameAssetManager assetsManager,
+					  SoundPlayer soundPlayer,
+					  String versionName,
+					  GameLifeCycleManager gameLifeCycleManager) {
+		menuHandler = new MenuHandlerImpl(assetsManager, soundPlayer, versionName, gameLifeCycleManager);
+	}
 
 	@Override
 	public void show( ) {
-		menuHandler = new MenuHandlerImpl(assetsManager, soundPlayer, versionName, gameLifeCycleManager);
+		menuHandler.show();
 	}
 
 	@Override

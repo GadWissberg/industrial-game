@@ -17,6 +17,7 @@ import com.gadarts.industrial.shared.assets.Assets;
 import com.gadarts.industrial.shared.assets.GameAssetManager;
 import com.gadarts.industrial.shared.model.characters.Direction;
 import com.gadarts.industrial.shared.model.characters.SpriteType;
+import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
@@ -31,14 +32,21 @@ public class TerrorEffector extends Game implements GameLifeCycleManager {
 	private final String versionName;
 	private final int versionNumber;
 	private final GameAssetManager assetsManager;
-	private InGameHandler inGameHandler;
+
+	@Getter
+	private GameStates gameState;
 	private MenuScreen menuScreen;
 	private InGameScreen inGameScreen;
+	private SoundPlayer soundPlayer;
+
+	@Getter
+	private GameStates prevGameState;
 
 	public TerrorEffector(String versionName, int versionNumber) {
 		assetsManager = new GameAssetManager();
 		this.versionName = versionName;
 		this.versionNumber = versionNumber;
+		this.gameState = GameStates.MENU;
 	}
 
 	private String formatNameForVariation(Direction dir,
@@ -62,8 +70,7 @@ public class TerrorEffector extends Game implements GameLifeCycleManager {
 		}
 		Gdx.app.setLogLevel(DebugSettings.LOG_LEVEL);
 		initializeAssets();
-		SoundPlayer soundPlayer = new SoundPlayer(assetsManager);
-		inGameHandler = new InGameHandler(versionName, versionNumber, assetsManager, soundPlayer);
+		soundPlayer = new SoundPlayer(assetsManager);
 		menuScreen = new MenuScreen(assetsManager, soundPlayer, versionName, this);
 		setScreen(menuScreen);
 	}
@@ -179,21 +186,38 @@ public class TerrorEffector extends Game implements GameLifeCycleManager {
 
 	@Override
 	public void startNewGame(String mapName) {
-		if (screen == inGameScreen) return;
+		if (gameState == GameStates.GAME_IN_PROGRESS) return;
 
 		Gdx.input.setInputProcessor(null);
 		if (inGameScreen == null) {
-			inGameScreen = new InGameScreen(inGameHandler, mapName, this);
+			inGameScreen = new InGameScreen(this, versionName, versionNumber, assetsManager, soundPlayer);
 		}
+		applyGameState(GameStates.MENU);
+		applyGameState(GameStates.GAME_IN_PROGRESS);
 		setScreen(inGameScreen);
+	}
+
+	private void applyGameState(GameStates gameState) {
+		this.prevGameState = this.gameState;
+		this.gameState = gameState;
 	}
 
 	@Override
 	public void pauseGame( ) {
-		if (screen == menuScreen) return;
+		if (gameState != GameStates.GAME_IN_PROGRESS) return;
 
 		Gdx.input.setInputProcessor(null);
+		applyGameState(GameStates.GAME_PAUSED);
 		setScreen(menuScreen);
+	}
+
+	@Override
+	public void resumeGame( ) {
+		if (gameState != GameStates.GAME_PAUSED) return;
+
+		Gdx.input.setInputProcessor(null);
+		applyGameState(GameStates.GAME_IN_PROGRESS);
+		setScreen(inGameScreen);
 	}
 
 }

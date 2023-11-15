@@ -19,6 +19,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.DebugSettings;
+import com.gadarts.industrial.GameStates;
 import com.gadarts.industrial.SoundPlayer;
 import com.gadarts.industrial.screens.GameLifeCycleManager;
 import com.gadarts.industrial.shared.assets.Assets;
@@ -33,6 +34,7 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 	private final SoundPlayer soundPlayer;
 	private final Stage stage;
 	private final Texture cursorTexture;
+	private final GameLifeCycleManager gameLifeCycleManager;
 	private Table menuTable;
 	private ShaderProgram shaderProgram;
 	private FrameBuffer frameBuffer;
@@ -42,6 +44,8 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 	private int uniformLocationTime;
 	private int uniformLocationNoise;
 	private float crtIntroEffectProgress;
+	private Table menuOptionsTable;
+	private MenuOption continueOption;
 
 	public MenuHandlerImpl(GameAssetManager assetsManager,
 						   SoundPlayer soundPlayer,
@@ -49,19 +53,19 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 						   GameLifeCycleManager gameLifeCycleManager) {
 		this.assetsManager = assetsManager;
 		this.soundPlayer = soundPlayer;
+		this.gameLifeCycleManager = gameLifeCycleManager;
 		soundPlayer.playSound(Assets.Sounds.INTRO_WHITE_NOISE);
 		soundPlayer.playSound(Assets.Sounds.MENU_LOOP);
 		stage = new Stage();
 		stage.addActor(new Image(assetsManager.getTexture(Assets.UiTextures.MENU_BACKGROUND)));
 		stage.setDebugAll(DebugSettings.DISPLAY_USER_INTERFACE_OUTLINES);
-		createMenu(versionName, gameLifeCycleManager);
+		createMenu(versionName);
 		createCrtEffect();
-		Gdx.input.setInputProcessor(stage);
 		stage.addListener(new InputListener() {
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
 				if (keycode == Input.Keys.ESCAPE && !currentMenu.equals(MainMenuOptions.MAIN_MENU_NAME)) {
-					createMenu(versionName, gameLifeCycleManager);
+					createMenu(versionName);
 					return true;
 				}
 				return false;
@@ -84,37 +88,44 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 		crtEffect.flip(false, true);
 	}
 
-	private void createMenu(String versionName, GameLifeCycleManager gameLifeCycleManager) {
+	private void createMenu(String versionName) {
 		if (menuTable != null) {
 			menuTable.remove();
 		}
 		final Table menuTable;
 		menuTable = new Table();
 		menuTable.add(new Image(assetsManager.getTexture(Assets.UiTextures.LOGO))).row();
-		menuTable.setSize(stage.getWidth(), stage.getHeight());
-		this.menuTable = menuTable;
-		applyMenuOptions(MainMenuOptions.values(), false, gameLifeCycleManager);
 		menuTable.add(new Label(versionName, new Label.LabelStyle(assetsManager.getFont(Assets.Fonts.CONSOLA), FONT_COLOR_REGULAR)))
 				.left()
 				.row();
+		menuTable.setSize(stage.getWidth(), stage.getHeight());
+		this.menuTable = menuTable;
+		menuOptionsTable = new Table();
+		this.menuTable.add(menuOptionsTable);
 		stage.addActor(menuTable);
 	}
 
 
 	@Override
-	public void applyMenuOptions(MenuOptionDefinition[] options, boolean clearTableBefore, GameLifeCycleManager gameLifeCycleManager) {
+	public void applyMenuOptions(MenuOptionDefinition[] options, boolean clearTableBefore) {
 		if (clearTableBefore) {
-			menuTable.clear();
+			menuOptionsTable.clear();
 		}
 		currentMenu = options[0].getMenuName();
 		BitmapFont smallFont = assetsManager.getFont(Assets.Fonts.MENU);
 		Label.LabelStyle style = new Label.LabelStyle(smallFont, FONT_COLOR_REGULAR);
-		Arrays.stream(options).forEach(o -> menuTable.add(new MenuOption(
-				o,
-				style,
-				soundPlayer,
-				this,
-				gameLifeCycleManager)).row());
+		Arrays.stream(options).forEach(o -> {
+			MenuOption menuOption = new MenuOption(
+					o,
+					style,
+					soundPlayer,
+					this,
+					gameLifeCycleManager);
+			menuOptionsTable.add(menuOption).row();
+			if (o == MainMenuOptions.CONTINUE) {
+				continueOption = menuOption;
+			}
+		});
 	}
 
 	@Override
@@ -135,8 +146,16 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 		stage.getBatch().setShader(null);
 	}
 
+	@Override
+	public void show( ) {
+		applyMenuOptions(MainMenuOptions.values(), true);
+		boolean isPaused = gameLifeCycleManager.getGameState() == GameStates.GAME_PAUSED;
+		continueOption.setVisible(isPaused);
+		Gdx.input.setInputProcessor(stage);
+	}
 
 	private void renderCrtEffect(int fboWidth, int fboHeight) {
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		shaderProgram.bind();
 		if (crtIntroEffectProgress < 1) {
 			shaderProgram.setUniformf(uniformLocationCrtBend, Interpolation.exp10.apply(0F, 3F, crtIntroEffectProgress));

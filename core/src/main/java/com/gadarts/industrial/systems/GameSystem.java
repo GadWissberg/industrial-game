@@ -41,4 +41,8 @@ public abstract class GameSystem<T extends SystemEventsSubscriber> extends Entit
 	}
 
 	public abstract void initializeData( );
+
+	public void onGameResume( ) {
+
+	}
 }
