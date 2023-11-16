@@ -6,12 +6,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum NewGameMenuOptions implements MenuOptionDefinition {
-	OFFICE("Office - Test Map");
+	OFFICE("Office - Test Map",
+			(menuHandler, gameLifeCycleManager) -> gameLifeCycleManager.startNewGame("office")),
+	BACK("Back to Main Menu",
+			(menuHandler, gameLifeCycleManager) -> menuHandler.applyMenuOptions(MainMenuOptions.values()));
 	private final String label;
+	private final MenuOptionAction action;
 
 	@Override
 	public MenuOptionAction getAction( ) {
-		return (menuHandler, gameLifeCycleManager) -> gameLifeCycleManager.startNewGame(name());
+		return action;
 	}
 
 	@Override

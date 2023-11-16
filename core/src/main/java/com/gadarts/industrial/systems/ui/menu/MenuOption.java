@@ -47,7 +47,7 @@ public class MenuOption extends Label {
 				} else {
 					MenuOptionDefinition[] subOptions = definition.getSubOptions();
 					if (subOptions != null) {
-						menuHandler.applyMenuOptions(subOptions, true);
+						menuHandler.applyMenuOptions(subOptions);
 					}
 				}
 				soundPlayer.playSound(Assets.Sounds.MENU_CLICK);

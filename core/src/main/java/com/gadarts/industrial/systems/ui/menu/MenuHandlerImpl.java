@@ -46,6 +46,7 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 	private float crtIntroEffectProgress;
 	private Table menuOptionsTable;
 	private MenuOption continueOption;
+	private float menuOptionsTableHeight;
 
 	public MenuHandlerImpl(GameAssetManager assetsManager,
 						   SoundPlayer soundPlayer,
@@ -57,6 +58,9 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 		soundPlayer.playSound(Assets.Sounds.INTRO_WHITE_NOISE);
 		soundPlayer.playSound(Assets.Sounds.MENU_LOOP);
 		stage = new Stage();
+		Image uci = new Image(assetsManager.getTexture(Assets.UiTextures.UCI));
+		uci.setPosition(100, 100);
+		stage.addActor(uci);
 		stage.addActor(new Image(assetsManager.getTexture(Assets.UiTextures.MENU_BACKGROUND)));
 		stage.setDebugAll(DebugSettings.DISPLAY_USER_INTERFACE_OUTLINES);
 		createMenu(versionName);
@@ -65,7 +69,7 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
 				if (keycode == Input.Keys.ESCAPE && !currentMenu.equals(MainMenuOptions.MAIN_MENU_NAME)) {
-					createMenu(versionName);
+					applyMenuOptions(MainMenuOptions.values());
 					return true;
 				}
 				return false;
@@ -94,6 +98,7 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 		}
 		final Table menuTable;
 		menuTable = new Table();
+		menuTable.setDebug(DebugSettings.DISPLAY_USER_INTERFACE_OUTLINES);
 		menuTable.add(new Image(assetsManager.getTexture(Assets.UiTextures.LOGO))).row();
 		menuTable.add(new Label(versionName, new Label.LabelStyle(assetsManager.getFont(Assets.Fonts.CONSOLA), FONT_COLOR_REGULAR)))
 				.left()
@@ -107,10 +112,8 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 
 
 	@Override
-	public void applyMenuOptions(MenuOptionDefinition[] options, boolean clearTableBefore) {
-		if (clearTableBefore) {
-			menuOptionsTable.clear();
-		}
+	public void applyMenuOptions(MenuOptionDefinition[] options) {
+		menuOptionsTable.clear();
 		currentMenu = options[0].getMenuName();
 		BitmapFont smallFont = assetsManager.getFont(Assets.Fonts.MENU);
 		Label.LabelStyle style = new Label.LabelStyle(smallFont, FONT_COLOR_REGULAR);
@@ -126,6 +129,10 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 				continueOption = menuOption;
 			}
 		});
+		handleContinueOptionVisibility();
+		if (menuOptionsTableHeight > 0) {
+			menuTable.getCell(menuOptionsTable).height(menuOptionsTableHeight);
+		}
 	}
 
 	@Override
@@ -148,10 +155,15 @@ public class MenuHandlerImpl implements MenuHandler, Disposable {
 
 	@Override
 	public void show( ) {
-		applyMenuOptions(MainMenuOptions.values(), true);
+		applyMenuOptions(MainMenuOptions.values());
+		menuOptionsTableHeight = menuOptionsTable.getPrefHeight();
+		handleContinueOptionVisibility();
+		Gdx.input.setInputProcessor(stage);
+	}
+
+	private void handleContinueOptionVisibility( ) {
 		boolean isPaused = gameLifeCycleManager.getGameState() == GameStates.GAME_PAUSED;
 		continueOption.setVisible(isPaused);
-		Gdx.input.setInputProcessor(stage);
 	}
 
 	private void renderCrtEffect(int fboWidth, int fboHeight) {
