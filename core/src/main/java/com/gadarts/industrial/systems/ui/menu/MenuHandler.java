@@ -1,8 +1,9 @@
 package com.gadarts.industrial.systems.ui.menu;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.utils.Disposable;
 
-public interface MenuHandler {
+public interface MenuHandler extends Disposable {
 	Color FONT_COLOR_REGULAR = Color.RED;
 	Color FONT_COLOR_HOVER = Color.YELLOW;
 

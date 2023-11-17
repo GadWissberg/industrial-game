@@ -43,10 +43,10 @@ public class MenuScreen implements Screen {
 
 	@Override
 	public void hide( ) {
-
 	}
 
 	@Override
 	public void dispose( ) {
+		menuHandler.dispose();
 	}
 }

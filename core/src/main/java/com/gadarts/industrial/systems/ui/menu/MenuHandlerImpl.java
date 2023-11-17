@@ -16,7 +16,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.GameStates;
@@ -28,7 +27,7 @@ import com.gadarts.industrial.shared.assets.GameAssetManager;
 import java.util.Arrays;
 
 
-public class MenuHandlerImpl implements MenuHandler, Disposable {
+public class MenuHandlerImpl implements MenuHandler {
 
 	private final GameAssetManager assetsManager;
 	private final SoundPlayer soundPlayer;
