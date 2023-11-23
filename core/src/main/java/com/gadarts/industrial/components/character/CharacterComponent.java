@@ -48,10 +48,6 @@ public class CharacterComponent implements GameComponent {
 		this.facingDirection = direction;
 	}
 
-	public void dealDamage(final int damagePoints) {
-		attributes.getHealthData().dealDamage(damagePoints);
-	}
-
 	public enum AttackType {
 		PRIMARY, SECONDARY
 	}

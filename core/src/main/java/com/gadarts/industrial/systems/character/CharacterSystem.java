@@ -1,8 +1,6 @@
 package com.gadarts.industrial.systems.character;
 
-import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -77,6 +75,26 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	public CharacterSystem(GameAssetManager assetsManager, GameLifeCycleManager gameLifeCycleManager) {
 		super(assetsManager, gameLifeCycleManager);
+	}
+
+	@Override
+	public void addedToEngine(Engine engine) {
+		super.addedToEngine(engine);
+		engine.addEntityListener(Family.all(CharacterComponent.class).get(), new EntityListener() {
+			@Override
+			public void entityAdded(Entity entity) {
+				CharacterHealthData healthData = character.get(entity).getAttributes().getHealthData();
+				int hp = healthData.getHp();
+				if (hp <= 0) {
+					handleDeath(entity, hp);
+				}
+			}
+
+			@Override
+			public void entityRemoved(Entity entity) {
+
+			}
+		});
 	}
 
 	@Override
@@ -194,7 +212,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		int originalValue = characterComponent.getAttributes().getHealthData().getHp();
 		if ((ComponentsMapper.player.has(attacked) && !DebugSettings.GOD_MODE)
 				|| ComponentsMapper.enemy.has(attacked) && !DebugSettings.ENEMY_INVULNERABLE) {
-			characterComponent.dealDamage(damage);
+			characterComponent.getAttributes().getHealthData().dealDamage(damage);
 		}
 		handleDeath(attacked, originalValue);
 		if (ComponentsMapper.player.has(attacked) || ComponentsMapper.enemy.get(attacked).getEnemyDeclaration().human()) {

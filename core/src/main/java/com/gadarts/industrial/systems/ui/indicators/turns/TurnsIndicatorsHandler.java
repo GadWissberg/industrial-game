@@ -122,6 +122,8 @@ public class TurnsIndicatorsHandler {
 	public void removeCharacter(Entity character) {
 		Map<Entity, TurnsIndicatorIcon> iconsMap = state.getIconsMap();
 		TurnsIndicatorIcon icon = iconsMap.get(character);
+		if (icon == null) return;
+
 		icon.addAction(Actions.sequence(Actions.fadeOut(ICON_FADING_DURATION), Actions.removeActor()));
 		List<TurnsIndicatorIcon> iconsList = state.getIconsList();
 		int removedIndex = iconsList.indexOf(iconsMap.get(character));

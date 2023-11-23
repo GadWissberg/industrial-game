@@ -411,7 +411,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		DecalBatch decalBatch = renderBatches.getDecalBatch();
 		decalBatch.setGroupStrategy(strategies.getRegularDecalGroupStrategy());
 		renderSimpleDecals();
-		renderLiveCharacters(environment.getAmbientColor());
+		renderCharacters(environment.getAmbientColor(), 1F, true);
 		decalBatch.flush();
 		renderCharactersOutline();
 		Gdx.gl.glDepthMask(true);
@@ -420,7 +420,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 	private void renderCharactersOutline( ) {
 		DecalBatch decalBatch = renderBatches.getDecalBatch();
 		decalBatch.setGroupStrategy(strategies.getOutlineDecalGroupStrategy());
-		renderLiveCharacters(null, OUTLINE_ALPHA, false);
+		renderCharacters(null, OUTLINE_ALPHA, false);
 		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 		Gdx.gl.glDepthFunc(GL20.GL_GREATER);
 		decalBatch.flush();
@@ -470,11 +470,7 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		}
 	}
 
-	private void renderLiveCharacters(Color color) {
-		renderLiveCharacters(color, 1F, true);
-	}
-
-	private void renderLiveCharacters(Color color, float alpha, boolean updateCharacterDecal) {
+	private void renderCharacters(Color color, float alpha, boolean updateCharacterDecal) {
 		for (Entity entity : families.getCharacterDecalsEntities()) {
 			Vector3 position = ComponentsMapper.characterDecal.get(entity).getDecal().getPosition();
 			Entity floorEntity = getSystemsCommonData().getMap().getNode(position).getEntity();
@@ -675,7 +671,8 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		Direction direction = CharacterUtils.calculateDirectionSeenFromCamera(camera, characterComp.getFacingDirection());
 		SpriteType spriteType = charSpriteData.getSpriteType();
 		boolean sameSpriteType = spriteType.equals(ComponentsMapper.characterDecal.get(entity).getSpriteType());
-		if ((!sameSpriteType || !ComponentsMapper.characterDecal.get(entity).getDirection().equals(direction))) {
+		Direction characterFacingDirection = ComponentsMapper.characterDecal.get(entity).getDirection();
+		if ((!sameSpriteType || (!spriteType.isSingleDirection() && !characterFacingDirection.equals(direction)))) {
 			updateCharacterDecalSprite(entity, direction, spriteType, sameSpriteType);
 		} else if (spriteType != RUN || getSystemsCommonData().getTurnsQueue().first() == entity) {
 			updateCharacterDecalFrame(entity, characterComp, spriteType);
@@ -768,9 +765,12 @@ public class RenderSystem extends GameSystem<RenderSystemEventsSubscriber> imple
 		}
 	}
 
-	private static Direction forceDirectionForAnimationInitialization(Direction direction, SpriteType spriteType, AnimationComponent animationComponent) {
+	private static Direction forceDirectionForAnimationInitialization(Direction direction,
+																	  SpriteType spriteType,
+																	  AnimationComponent animationComponent) {
 		if (spriteType.isSingleDirection()) {
-			if (!animationComponent.getAnimation().isAnimationFinished(animationComponent.getStateTime())) {
+			Animation<AtlasRegion> animation = animationComponent.getAnimation();
+			if (animation == null || !animation.isAnimationFinished(animationComponent.getStateTime())) {
 				direction = Direction.SOUTH;
 			}
 		}

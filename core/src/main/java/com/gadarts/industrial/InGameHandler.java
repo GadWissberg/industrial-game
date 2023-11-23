@@ -22,8 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.gadarts.industrial.systems.ui.menu.NewGameMenuOptions.OFFICE;
-
 
 @RequiredArgsConstructor
 public class InGameHandler implements Disposable, UserInterfaceSystemEventsSubscriber {
@@ -169,7 +167,7 @@ public class InGameHandler implements Disposable, UserInterfaceSystemEventsSubsc
 	public void onInGameScreenShow(GameLifeCycleManager gameLifeCycleManager) {
 		GameStates prevGameState = gameLifeCycleManager.getPrevGameState();
 		if (prevGameState == GameStates.MENU) {
-			startNewGame(OFFICE.name().toLowerCase(), gameLifeCycleManager);
+			startNewGame(DebugSettings.TEST_LEVEL.toLowerCase(), gameLifeCycleManager);
 		} else if (prevGameState == GameStates.GAME_PAUSED) {
 			engine.getSystems().forEach(system -> ((GameSystem<? extends SystemEventsSubscriber>) system).onGameResume());
 		}

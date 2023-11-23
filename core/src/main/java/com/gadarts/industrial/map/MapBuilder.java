@@ -26,9 +26,7 @@ import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.PickUpComponent;
 import com.gadarts.industrial.components.TriggerComponent;
 import com.gadarts.industrial.components.character.CharacterData;
-import com.gadarts.industrial.components.character.CharacterSkillsParameters;
-import com.gadarts.industrial.components.character.CharacterSoundData;
-import com.gadarts.industrial.components.character.CharacterSpriteData;
+import com.gadarts.industrial.components.character.*;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.player.PlayerComponent;
 import com.gadarts.industrial.components.player.WeaponAmmo;
@@ -765,8 +763,13 @@ public class MapBuilder implements Disposable {
 		Vector3 position = inflateCharacterPosition(charJsonObject, mapGraph);
 		CharacterData data = inflateEnemyCharData(charJsonObject, type, position);
 		addCharBaseComponents(b, data, type, type.atlasDefinition(), type.attackPrimary());
-		Entity entity = b.finishAndAddToEngine();
-		character.get(entity).setTarget(engine.getEntitiesFor(Family.all(PlayerComponent.class).get()).first());
+		Entity entity = b.finish();
+		CharacterComponent characterComponent = character.get(entity);
+		characterComponent.setTarget(engine.getEntitiesFor(Family.all(PlayerComponent.class).get()).first());
+		if (ALL_ENEMIES_DEAD) {
+			characterComponent.getAttributes().getHealthData().dealDamage(Integer.MAX_VALUE);
+		}
+		engine.addEntity(entity);
 	}
 
 	private CharacterData inflateEnemyCharData(JsonObject characterJsonObject, EnemyDeclaration type, Vector3 pos) {
