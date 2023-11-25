@@ -14,10 +14,6 @@ precision mediump float;
 #define specularFlag
 #endif
 
-#ifdef normalFlag
-varying vec3 v_normal;
-#endif//normalFlag
-
 #if defined(colorFlag)
 varying vec4 v_color;
 #endif
@@ -82,8 +78,6 @@ varying vec3 v_ambientLight;
 
 #endif//lightingFlag
 
-// TerrorEffector uniforms
-
 uniform float u_affectedByLight;
 uniform vec3 u_shadowlessLightsColors[16];
 uniform vec3 u_shadowlessLightsExtraData[16];
@@ -111,7 +105,35 @@ uniform int u_graySignature;
 uniform int u_grayScale;
 
 const float X_RAY_RADIUS = 50.0;
-//
+
+#ifdef normalFlag
+varying vec3 v_normal;
+
+vec3 applyLight(int i, vec4 diffuse){
+    vec3 light = u_shadowlessLightsPositions[i];
+    vec3 sub = light.xyz - v_frag_pos.xyz;
+    vec3 lightDir = normalize(sub);
+    float distance = length(sub);
+    vec3 extra = u_shadowlessLightsExtraData[i];
+    vec3 valueToAdd = vec3(0.0);
+    if (distance <= extra.y){
+        int lightColorIndex = int(extra.z);
+        vec3 lightColor;
+        if (lightColorIndex > -1){
+            lightColor = vec3(u_shadowlessLightsColors[lightColorIndex]);
+        } else {
+            lightColor = vec3(0.0);
+        }
+        float attenuation = 4.0 * extra.x / (1.0 + (0.01*distance) + (0.9*distance*distance));
+        float dotValue = dot(v_normal, lightDir);
+        float intensity = max(dotValue, 0.0);
+        valueToAdd = (diffuse.rgb *lightColor.rgb* (attenuation * intensity));
+        valueToAdd *= distance > (extra.y*5.0/6.0) ? 0.5 : 1.0;
+    }
+    return valueToAdd;
+}
+
+#endif
 
 float map(float value, float min1, float max1, float min2, float max2) {
     return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
@@ -155,30 +177,6 @@ float applyXRayFading(vec2 coords){
     float alpha = smoothstep(minDistance, maxDistance, distance);
     alpha = mix(1.0, alpha, float(length(coords) > 0.0));
     return alpha;
-}
-
-vec3 applyLight(int i, vec4 diffuse){
-    vec3 light = u_shadowlessLightsPositions[i];
-    vec3 sub = light.xyz - v_frag_pos.xyz;
-    vec3 lightDir = normalize(sub);
-    float distance = length(sub);
-    vec3 extra = u_shadowlessLightsExtraData[i];
-    vec3 valueToAdd = vec3(0.0);
-    if (distance <= extra.y){
-        int lightColorIndex = int(extra.z);
-        vec3 lightColor;
-        if (lightColorIndex > -1){
-            lightColor = vec3(u_shadowlessLightsColors[lightColorIndex]);
-        } else {
-            lightColor = vec3(0.0);
-        }
-        float attenuation = 4.0 * extra.x / (1.0 + (0.01*distance) + (0.9*distance*distance));
-        float dotValue = dot(v_normal, lightDir);
-        float intensity = max(dotValue, 0.0);
-        valueToAdd = (diffuse.rgb *lightColor.rgb* (attenuation * intensity));
-        valueToAdd *= distance > (extra.y*5.0/6.0) ? 0.5 : 1.0;
-    }
-    return valueToAdd;
 }
 
 void main() {

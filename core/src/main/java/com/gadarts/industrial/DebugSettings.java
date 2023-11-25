@@ -32,5 +32,5 @@ public final class DebugSettings {
 	public static final boolean ALLOW_SCREEN_SHOT_OF_DEPTH_MAP = true;
 	public static final boolean DISABLE_BULLET_COLLISION_WITH_CHARACTERS = false;
 	public static final int FORCE_LOADED_AMMO = -1;
-	public static final boolean ALL_ENEMIES_DEAD = true;
+	public static final boolean ALL_ENEMIES_DEAD = false;
 }

@@ -69,8 +69,11 @@ public class AttackSystem extends GameSystem<AttackSystemEventsSubscriber> imple
 										 Vector3 position,
 										 Vector3 bulletCreationOffset,
 										 GameModelInstance modelInstance) {
-		Entity target = ComponentsMapper.character.get(character).getTarget();
+		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
+		Entity target = characterComponent.getTarget();
 		Vector3 targetPos = ComponentsMapper.characterDecal.get(target).getDecal().getPosition();
+		bulletCreationOffset = auxVector3_2.set(bulletCreationOffset);
+		bulletCreationOffset.rotate(auxVector3_1.set(0F, -1F, 0F), characterComponent.getFacingDirection().getDirection(auxVector2_1).angleDeg());
 		var biasedPosition = modelInstance.transform.setToTranslation(position).translate(bulletCreationOffset).getTranslation(auxVector3_1);
 		Vector3 bulletDirectionAfterBias = auxVector3_2.set(targetPos.x, targetPos.y, targetPos.z)
 				.sub(biasedPosition.x, biasedPosition.y, biasedPosition.z)
