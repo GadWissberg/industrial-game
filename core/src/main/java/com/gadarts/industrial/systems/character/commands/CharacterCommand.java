@@ -43,10 +43,10 @@ public abstract class CharacterCommand implements Pool.Poolable {
 	public abstract boolean initialize(Entity character,
 									   SystemsCommonData commonData);
 
-	public abstract boolean reactToFrameChange(SystemsCommonData systemsCommonData,
-											   Entity character,
-											   TextureAtlas.AtlasRegion newFrame,
-											   List<CharacterSystemEventsSubscriber> subscribers);
+	public abstract boolean update(SystemsCommonData systemsCommonData,
+								   Entity character,
+								   TextureAtlas.AtlasRegion newFrame,
+								   List<CharacterSystemEventsSubscriber> subscribers);
 
 	public CharacterCommand reset(CharacterCommandsDefinitions type,
 								  Entity character,

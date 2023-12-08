@@ -433,6 +433,9 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 	@Override
 	public void onUserSelectedNodeToApplyTurn(MapGraphNode node) {
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
+		int hp = ComponentsMapper.character.get(systemsCommonData.getPlayer()).getAttributes().getHealthData().getHp();
+		if (hp <= 0) return;
+
 		CharacterDecalComponent charDecalComp = ComponentsMapper.characterDecal.get(systemsCommonData.getPlayer());
 		Entity enemyAtNode = systemsCommonData.getMap().fetchAliveCharacterFromNode(node);
 		if (systemsCommonData.getStorage().getSelectedWeapon().isMelee() || enemyAtNode == null) {

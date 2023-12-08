@@ -55,10 +55,10 @@ public class AttackPrimaryCommand extends CharacterCommand {
 	}
 
 	@Override
-	public boolean reactToFrameChange(SystemsCommonData systemsCommonData,
-									  Entity character,
-									  TextureAtlas.AtlasRegion newFrame,
-									  List<CharacterSystemEventsSubscriber> subscribers) {
+	public boolean update(SystemsCommonData systemsCommonData,
+						  Entity character,
+						  TextureAtlas.AtlasRegion newFrame,
+						  List<CharacterSystemEventsSubscriber> subscribers) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
 		if (characterComponent.getAttributes().getActionPoints() < characterComponent.getPrimaryAttack().actionPointsConsumption())
 			return true;

@@ -19,10 +19,10 @@ public class PickupItemCommand extends CharacterCommand {
 	private static final int PICKUP_ACTION_POINT_CONSUME = 1;
 
 	@Override
-	public boolean reactToFrameChange(SystemsCommonData systemsCommonData,
-									  Entity character,
-									  TextureAtlas.AtlasRegion newFrame,
-									  List<CharacterSystemEventsSubscriber> subscribers) {
+	public boolean update(SystemsCommonData systemsCommonData,
+						  Entity character,
+						  TextureAtlas.AtlasRegion newFrame,
+						  List<CharacterSystemEventsSubscriber> subscribers) {
 		if (ComponentsMapper.animation.get(character).getAnimation().getPlayMode() != PlayMode.REVERSED) return false;
 
 		if (newFrame.index == 1) {

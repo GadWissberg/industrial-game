@@ -10,9 +10,11 @@ import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.gadarts.industrial.components.ComponentsMapper;
 import com.gadarts.industrial.components.DoorComponent;
+import com.gadarts.industrial.components.EnvironmentObjectComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.shared.model.Coords;
 import com.gadarts.industrial.shared.model.map.MapNodesTypes;
@@ -31,6 +33,7 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 	private final static Vector2 auxVector2 = new Vector2();
 	private static final List<MapGraphNode> auxNodesList_1 = new ArrayList<>();
 	private static final List<MapGraphNode> auxNodesList_2 = new ArrayList<>();
+	private final static BoundingBox auxBoundingBox = new BoundingBox();
 	@Getter
 	private final float ambient;
 	private final Dimension mapSize;
@@ -373,12 +376,20 @@ public class MapGraph implements IndexedGraph<MapGraphNode> {
 	}
 
 	public boolean checkIfNodeIsFreeOfEnvObjects(GridPoint2 destinationNode) {
+		return checkIfNodeIsFreeOfEnvObjects(destinationNode, 0F);
+	}
+
+	public boolean checkIfNodeIsFreeOfEnvObjects(GridPoint2 destinationNode, float minimumHeight) {
 		MapGraphNode node = getNode(destinationNode);
 		for (Entity entity : mapGraphRelatedEntities.getEnvironmentObjectsEntities()) {
-			MapNodesTypes nodeType = ComponentsMapper.environmentObject.get(entity).getType().getNodeType();
+			EnvironmentObjectComponent environmentObjectComponent = ComponentsMapper.environmentObject.get(entity);
+			MapNodesTypes nodeType = environmentObjectComponent.getType().getNodeType();
 			GameModelInstance modelInstance = ComponentsMapper.modelInstance.get(entity).getModelInstance();
 			Vector3 position = modelInstance.transform.getTranslation(auxVector3);
-			if (nodeType != MapNodesTypes.PASSABLE_NODE && node.equals(getNode(position))) {
+			BoundingBox boundingBox = modelInstance.getAdditionalRenderData().getBoundingBox(auxBoundingBox);
+			if (nodeType != MapNodesTypes.PASSABLE_NODE
+					&& node.equals(getNode(position))
+					&& (minimumHeight != 0 && boundingBox.getCenterY() + boundingBox.getHeight() / 2F >= minimumHeight)) {
 				return false;
 			}
 		}

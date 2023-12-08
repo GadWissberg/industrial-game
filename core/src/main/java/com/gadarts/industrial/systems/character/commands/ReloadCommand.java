@@ -37,10 +37,10 @@ public class ReloadCommand extends CharacterCommand {
 	}
 
 	@Override
-	public boolean reactToFrameChange(SystemsCommonData systemsCommonData,
-									  Entity character,
-									  TextureAtlas.AtlasRegion newFrame,
-									  List<CharacterSystemEventsSubscriber> subscribers) {
+	public boolean update(SystemsCommonData systemsCommonData,
+						  Entity character,
+						  TextureAtlas.AtlasRegion newFrame,
+						  List<CharacterSystemEventsSubscriber> subscribers) {
 		if (newFrame.index == FRAME_TO_APPLY_RESULT) {
 			consumeActionPoints(character, POINTS_CONSUME, subscribers);
 			Weapon weapon = systemsCommonData.getStorage().getSelectedWeapon();

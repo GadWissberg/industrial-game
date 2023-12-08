@@ -305,7 +305,9 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 
 	public void commandDone(Entity character) {
 		CharacterComponent characterComponent = ComponentsMapper.character.get(character);
-		characterComponent.getCharacterSpriteData().setSpriteType(IDLE);
+		if (characterComponent.getAttributes().getHealthData().getHp() > 0) {
+			characterComponent.getCharacterSpriteData().setSpriteType(IDLE);
+		}
 		if (getSystemsCommonData().getCurrentGameMode() != GameMode.EXPLORE) {
 			for (CharacterSystemEventsSubscriber subscriber : subscribers) {
 				subscriber.onCharacterCommandDone(character);
@@ -509,7 +511,7 @@ public class CharacterSystem extends GameSystem<CharacterSystemEventsSubscriber>
 		if (turn == character && !commands.isEmpty()) {
 			CharacterCommand currentCommand = commands.first();
 			if (currentCommand.getState() == CommandStates.RUNNING) {
-				boolean commandDone = currentCommand.reactToFrameChange(systemsCommonData, character, newFrame, subscribers);
+				boolean commandDone = currentCommand.update(systemsCommonData, character, newFrame, subscribers);
 				if (commandDone) {
 					currentCommand.setState(CommandStates.ENDED);
 				}

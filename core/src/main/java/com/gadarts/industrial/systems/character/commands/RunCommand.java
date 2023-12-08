@@ -55,10 +55,10 @@ public class RunCommand extends CharacterCommand {
 	}
 
 	@Override
-	public boolean reactToFrameChange(SystemsCommonData systemsCommonData,
-									  Entity character,
-									  AtlasRegion newFrame,
-									  List<CharacterSystemEventsSubscriber> subscribers) {
+	public boolean update(SystemsCommonData systemsCommonData,
+						  Entity character,
+						  AtlasRegion newFrame,
+						  List<CharacterSystemEventsSubscriber> subscribers) {
 		if (path.nodes.isEmpty() || ComponentsMapper.character.get(character).getAttributes().getActionPoints() <= 0)
 			return true;
 
