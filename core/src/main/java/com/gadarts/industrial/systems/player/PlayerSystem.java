@@ -188,7 +188,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		for (int row = (int) Math.max(playerRow - LOS_MAX, 0); row < Math.min(playerRow + LOS_MAX, depth); row++) {
 			for (int col = (int) Math.max(playerCol - LOS_MAX, 0); col < Math.min(playerCol + LOS_MAX, width); col++) {
 				Entity floorEntity = map.getNode(col, row).getEntity();
-				if (floorEntity != null) {
+				if (floorEntity != null && ComponentsMapper.modelInstance.has(floorEntity)) {
 					ComponentsMapper.floor.get(floorEntity).setRevealCalculated(false);
 					ComponentsMapper.floor.get(floorEntity).setFogOfWarSignature(16);
 					ComponentsMapper.modelInstance.get(floorEntity).setGraySignature(16);
@@ -220,7 +220,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 				MapGraphNode nearbyNode = map.getNode(col, row);
 				if (nearbyNode != null) {
 					Entity entity = nearbyNode.getEntity();
-					if (entity != null) {
+					if (entity != null && ComponentsMapper.modelInstance.has(entity)) {
 						ModelInstanceComponent modelInstanceComponent = ComponentsMapper.modelInstance.get(entity);
 						modelInstanceComponent.setGraySignature(calculateGraySignature(entity, modelInstanceComponent.getGraySignature()));
 					}
@@ -278,7 +278,7 @@ public class PlayerSystem extends GameSystem<PlayerSystemEventsSubscriber> imple
 		boolean result = true;
 		if (nearbyNode != null) {
 			Entity nearbyNodeEntity = nearbyNode.getEntity();
-			if (nearbyNodeEntity != null) {
+			if (nearbyNodeEntity != null && ComponentsMapper.modelInstance.has(nearbyNodeEntity)) {
 				result = !DebugSettings.DISABLE_FOW
 						&& ((ComponentsMapper.modelInstance.get(nearbyNodeEntity).getGraySignature() & 16) == 16);
 			}

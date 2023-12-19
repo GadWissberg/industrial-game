@@ -4,10 +4,8 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -22,14 +20,12 @@ import com.badlogic.gdx.utils.Queue;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.gadarts.industrial.DebugSettings;
 import com.gadarts.industrial.components.ComponentsMapper;
-import com.gadarts.industrial.components.floor.FloorComponent;
 import com.gadarts.industrial.components.mi.GameModelInstance;
 import com.gadarts.industrial.components.player.Item;
 import com.gadarts.industrial.components.player.WeaponAmmo;
 import com.gadarts.industrial.console.commands.ConsoleCommandResult;
 import com.gadarts.industrial.console.commands.ConsoleCommands;
 import com.gadarts.industrial.console.commands.ConsoleCommandsList;
-import com.gadarts.industrial.map.MapGraph;
 import com.gadarts.industrial.map.MapGraphNode;
 import com.gadarts.industrial.screens.GameLifeCycleManager;
 import com.gadarts.industrial.shared.assets.Assets;
@@ -40,8 +36,6 @@ import com.gadarts.industrial.shared.assets.declarations.characters.enemies.Enem
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponDeclaration;
 import com.gadarts.industrial.shared.assets.declarations.pickups.weapons.PlayerWeaponsDeclarations;
 import com.gadarts.industrial.shared.model.characters.player.PlayerDeclaration;
-import com.gadarts.industrial.shared.model.map.MapNodesTypes;
-import com.gadarts.industrial.shared.utils.CameraUtils;
 import com.gadarts.industrial.systems.GameSystem;
 import com.gadarts.industrial.systems.SystemsCommonData;
 import com.gadarts.industrial.systems.character.CharacterSystemEventsSubscriber;
@@ -58,9 +52,7 @@ import com.gadarts.industrial.systems.ui.indicators.health.HealthIndicator;
 import com.gadarts.industrial.systems.ui.indicators.turns.TurnsIndicatorsHandler;
 import com.gadarts.industrial.utils.EntityBuilder;
 import lombok.Getter;
-import squidpony.squidmath.Coord3D;
 
-import java.util.ArrayDeque;
 import java.util.HashMap;
 
 import static com.badlogic.gdx.Application.LOG_DEBUG;
@@ -83,7 +75,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	private boolean showBorders = DebugSettings.DISPLAY_USER_INTERFACE_OUTLINES;
 	@Getter
 	private CursorHandler cursorHandler;
-	private ToolTipHandler toolTipHandler;
 	private TurnsIndicatorsHandler turnsIndicatorsHandler;
 	private NoiseEffectHandler noiseEffectHandler;
 
@@ -332,41 +323,8 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		return stage;
 	}
 
-	@Override
-	public void mouseMoved(final int screenX, final int screenY) {
-		MapGraph map = getSystemsCommonData().getMap();
-		MapGraphNode newNode = calculateNewNode(screenX, screenY);
-		ModelInstance cursorModelInstance = cursorHandler.getCursorModelInstance();
-		MapGraphNode oldNode = map.getNode(cursorModelInstance.transform.getTranslation(auxVector3_2));
-		if (newNode != null && !newNode.equals(oldNode)) {
-			cursorHandler.onMouseEnteredNewNode(newNode);
-			toolTipHandler.onMouseEnteredNewNode();
-		}
-	}
-
-	private MapGraphNode calculateNewNode(int screenX, int screenY) {
-		SystemsCommonData systemsCommonData = getSystemsCommonData();
-		MapGraph map = systemsCommonData.getMap();
-		Camera camera = systemsCommonData.getCamera();
-		ArrayDeque<Coord3D> nodes = CameraUtils.findAllCoordsOnRay(screenX, screenY, camera);
-		return findNearestNodeOnCameraLineOfSight(map, nodes);
-	}
 
 
-	private MapGraphNode findNearestNodeOnCameraLineOfSight(MapGraph map,
-															ArrayDeque<Coord3D> nodes) {
-		for (Coord3D coord : nodes) {
-			MapGraphNode node = map.getNode(coord.x, coord.z);
-			if (node != null && (coord.getY() <= node.getHeight() || coord.y == 0) && node.getEntity() != null) {
-				FloorComponent floorComponent = ComponentsMapper.floor.get(node.getEntity());
-				MapNodesTypes nodeType = floorComponent.getNode().getType();
-				if (floorComponent.getNode().isReachable() && nodeType == MapNodesTypes.PASSABLE_NODE) {
-					return node;
-				}
-			}
-		}
-		return null;
-	}
 
 	@Override
 	public void update(float deltaTime) {
@@ -374,7 +332,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 		SystemsCommonData systemsCommonData = getSystemsCommonData();
 		systemsCommonData.getUiStage().act(deltaTime);
 		cursorHandler.handleCursorFlicker(deltaTime);
-		toolTipHandler.handleToolTip(systemsCommonData.getMap(), cursorHandler.getCursorNode());
 	}
 
 	@Override
@@ -391,9 +348,7 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	public void initializeData( ) {
 		getSystemsCommonData().setCursor(createAndAdd3dCursor());
 		cursorHandler = new CursorHandler(getSystemsCommonData());
-		cursorHandler.init();
-		toolTipHandler = new ToolTipHandler(getSystemsCommonData().getUiStage());
-		toolTipHandler.addToolTipTable();
+		cursorHandler.init(getAssetsManager().getTexture(UiTextures.CURSOR));
 	}
 
 	@Override
@@ -450,7 +405,6 @@ public class UserInterfaceSystem extends GameSystem<UserInterfaceSystemEventsSub
 	@Override
 	public void dispose( ) {
 		cursorHandler.dispose();
-		toolTipHandler.dispose();
 		noiseEffectHandler.dispose();
 	}
 

@@ -122,10 +122,7 @@ public class InputSystem extends GameSystem<InputSystemEventsSubscriber> impleme
 
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
-		for (InputSystemEventsSubscriber subscriber : subscribers) {
-			subscriber.mouseMoved(screenX, screenY);
-		}
-		return true;
+		return false;
 	}
 
 	@Override

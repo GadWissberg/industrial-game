@@ -30,16 +30,10 @@ public class CameraSystem extends GameSystem<CameraSystemEventsSubscriber> imple
 	private static final Vector3 auxVector3_2 = new Vector3();
 	private static final Vector3 auxVector3_3 = new Vector3();
 	private static final Vector2 auxVector2_1 = new Vector2();
-	private final Vector2 lastMousePosition = new Vector2();
 	private final Vector2 lastRightPressMousePosition = new Vector2();
 
 	public CameraSystem(GameAssetManager assetsManager, GameLifeCycleManager gameLifeCycleManager) {
 		super(assetsManager, gameLifeCycleManager);
-	}
-
-	@Override
-	public void mouseMoved(int screenX, int screenY) {
-		lastMousePosition.set(screenX, screenY);
 	}
 
 	private void clampCameraPosition(final Vector3 pos) {
